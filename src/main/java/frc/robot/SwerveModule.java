@@ -14,6 +14,7 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 
+/** From 364lib */
 public class SwerveModule {
     public int moduleNumber;
     private Rotation2d angleOffset;
