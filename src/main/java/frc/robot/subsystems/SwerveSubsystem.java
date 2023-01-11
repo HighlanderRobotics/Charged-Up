@@ -11,7 +11,11 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+import com.pathplanner.lib.PathPlannerTrajectory;
 
+import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,6 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -67,6 +72,22 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
     public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
         return new RunCommand(() -> drive(new Translation2d(x.getAsDouble(), y.getAsDouble()), theta.getAsDouble(), fieldRelative, isOpenLoop), this);
+    }
+
+    public Command followPathCommand(PathPlannerTrajectory path) {
+        return new SwerveControllerCommand(
+            path,
+            () -> getPose(), Constants.Swerve.swerveKinematics,
+            new HolonomicDriveController(
+                new PIDController(Constants.AutoConstants.kPXController, 0, 0), 
+                new PIDController(Constants.AutoConstants.kPYController, 0, 0), 
+                new ProfiledPIDController(
+                    Constants.AutoConstants.kPThetaController, 
+                    0,
+                    0, 
+                    Constants.AutoConstants.kThetaControllerConstraints)),
+            (states) -> setModuleStates(states),
+            this);
     }
 
     /* Used by SwerveControllerCommand in Auto */
