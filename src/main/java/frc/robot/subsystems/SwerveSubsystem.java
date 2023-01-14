@@ -71,7 +71,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
     public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
-        return new RunCommand(() -> drive(new Translation2d(x.getAsDouble(), y.getAsDouble()), theta.getAsDouble(), fieldRelative, isOpenLoop), this);
+        return new RunCommand(
+            () -> drive(
+                new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
+                theta.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
+                fieldRelative, 
+                isOpenLoop), 
+                this);
     }
 
     public Command followPathCommand(PathPlannerTrajectory path) {
