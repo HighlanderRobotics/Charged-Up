@@ -10,6 +10,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 import com.pathplanner.lib.PathPlanner;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -30,10 +31,10 @@ public class RobotContainer {
   public RobotContainer() {
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> controller.getLeftX(), 
-      () -> controller.getLeftY(), 
-      () -> controller.getRightX(), 
-      false, 
+      () -> -controller.getLeftY(), 
+      () -> -controller.getLeftX(), 
+      () -> -controller.getRightX(), 
+      true, 
       true));
     // Configure the trigger bindings
     configureBindings();
@@ -49,6 +50,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
   }
 
   /**
