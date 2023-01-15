@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  public SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -59,5 +59,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
     return swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints));
+  }
+
+  public void onTeleopInit() {
+    swerveSubsystem.resetAllToAbsolute();
   }
 }

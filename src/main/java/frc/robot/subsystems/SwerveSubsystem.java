@@ -148,6 +148,7 @@ public class SwerveSubsystem extends SubsystemBase {
         return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - gyro.getYaw()) : Rotation2d.fromDegrees(gyro.getYaw());
     }
 
+    /** Resets the encoders on all swerve modules to the cancoder values */
     public void resetAllToAbsolute() {
         for (SwerveModule module: mSwerveMods) {
             module.resetToAbsolute();
