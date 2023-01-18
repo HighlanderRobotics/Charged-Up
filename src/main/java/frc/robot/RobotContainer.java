@@ -63,7 +63,7 @@ public class RobotContainer {
     return swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints));
   }
 
-  public void onTeleopInit() {
+  public void disabledPeriodic() {
     swerveSubsystem.resetAllToAbsolute();
   }
 }
