@@ -25,7 +25,7 @@ import frc.lib.util.SwerveModuleConstants;
  */
 public final class Constants {
   public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
+    public static final int driverControllerPort = 0;
   }
 
   public static final class Swerve {
@@ -158,7 +158,7 @@ public final class Constants {
     public static final double kPThetaController = 1;
 
     /* Constraint for the motion profilied robot angle controller */
-    public static final TrapezoidProfile.Constraints kThetaControllerConstraints =
+    public static final TrapezoidProfile.Constraints thetaControllerConstraints =
         new TrapezoidProfile.Constraints(
             maxAngularSpeedRadiansPerSecond, maxAngularSpeedRadiansPerSecondSquared);
   }

@@ -91,7 +91,7 @@ public class SwerveSubsystem extends SubsystemBase {
                     Constants.AutoConstants.kPThetaController, 
                     0,
                     0, 
-                    Constants.AutoConstants.kThetaControllerConstraints)),
+                    Constants.AutoConstants.thetaControllerConstraints)),
             (states) -> setModuleStates(states),
             this);
     }

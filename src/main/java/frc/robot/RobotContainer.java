@@ -25,7 +25,7 @@ public class RobotContainer {
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+      new CommandXboxController(OperatorConstants.driverControllerPort);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
