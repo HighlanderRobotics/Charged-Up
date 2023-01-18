@@ -63,7 +63,7 @@ public class RobotContainer {
     return swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints));
   }
 
+  /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
-    swerveSubsystem.resetAllToAbsolute();
   }
 }

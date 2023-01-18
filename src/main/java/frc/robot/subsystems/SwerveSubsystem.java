@@ -20,6 +20,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -43,6 +45,12 @@ public class SwerveSubsystem extends SubsystemBase {
             new SwerveModule(2, Constants.Swerve.Mod2.constants),
             new SwerveModule(3, Constants.Swerve.Mod3.constants)
         };
+
+        /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
+         * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
+         */
+        Timer.delay(1.0);
+        resetModulesToAbsolute();
 
         swerveOdometry = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
     }
@@ -149,7 +157,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Resets the encoders on all swerve modules to the cancoder values */
-    public void resetAllToAbsolute() {
+    private void resetModulesToAbsolute() {
         for (SwerveModule module: mSwerveMods) {
             module.resetToAbsolute();
         }
@@ -158,6 +166,10 @@ public class SwerveSubsystem extends SubsystemBase {
     @Override
     public void periodic(){
         swerveOdometry.update(getYaw(), getModulePositions());  
+
+        if (DriverStation.isDisabled()){
+            resetModulesToAbsolute();
+        }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
