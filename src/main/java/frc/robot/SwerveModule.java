@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -23,8 +24,8 @@ public class SwerveModule {
     private TalonFX mDriveMotor;
     private CANCoder angleEncoder;
 
-    SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA);
-    SimpleMotorFeedforward angleFeedforward = new SimpleMotorFeedforward(0, 0, 0);
+    SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA);
+    ArmFeedforward angleFeedforward = new ArmFeedforward(Constants.Swerve.angleKS, 0, Constants.Swerve.angleKV, Constants.Swerve.angleKA);
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
@@ -59,7 +60,11 @@ public class SwerveModule {
         }
         else {
             double velocity = Conversions.MPSToFalcon(desiredState.speedMetersPerSecond, Constants.Swerve.wheelCircumference, Constants.Swerve.driveGearRatio);
-            mDriveMotor.set(ControlMode.Velocity, velocity, DemandType.ArbitraryFeedForward, feedforward.calculate(desiredState.speedMetersPerSecond));
+            mDriveMotor.set(
+                ControlMode.Velocity, 
+                velocity, 
+                DemandType.ArbitraryFeedForward, 
+                driveFeedforward.calculate(desiredState.speedMetersPerSecond));
         }
     }
 
@@ -72,7 +77,7 @@ public class SwerveModule {
             ControlMode.MotionMagic, 
             Conversions.degreesToFalcon(angle.getDegrees(), Constants.Swerve.angleGearRatio),
             DemandType.ArbitraryFeedForward,
-            angleFeedforward.calculate(desiredTurnSpeed)
+            angleFeedforward.calculate(angle.getDegrees(), desiredTurnSpeed)
             );
         lastAngle = angle;
     }

@@ -95,6 +95,12 @@ public final class Constants {
     public static final double angleKD = chosenModule.angleKD;
     public static final double angleKF = chosenModule.angleKF;
 
+    /* Angle Motor Characterization Values 
+     * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
+    public static final double angleKS = (0.2 / 12); //TODO: This must be tuned to specific robot
+    public static final double angleKV = (0.6 / 12);
+    public static final double angleKA = (0.0 / 12);
+
     /* Drive Motor PID Values */
     public static final double driveKP = 0.05; //TODO: This must be tuned to specific robot
     public static final double driveKI = 0.0;
