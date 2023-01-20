@@ -16,7 +16,10 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -128,6 +131,17 @@ public class SwerveSubsystem extends SubsystemBase {
                     Constants.AutoConstants.thetaControllerConstraints)),
             (states) -> setModuleStates(states),
             this);
+        
+    }
+    public PathPlannerTrajectory getPathBetweenTwoPoints (PathPoint start, PathPoint end) {
+        return getPathBetweenTwoPoints(new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared), start, end);
+        
+    }
+    public PathPlannerTrajectory getPathBetweenTwoPoints (PathConstraints constraints, PathPoint start, PathPoint end) {
+        return PathPlanner.generatePath(constraints, start, end);
+    }
+    public PathPlannerTrajectory getPathToPoint (PathPoint end) {
+        return getPathBetweenTwoPoints(new PathPoint(getPose().getTranslation(), getYaw(), getYaw()), end);
     }
 
     /* Used by SwerveControllerCommand in Auto */
