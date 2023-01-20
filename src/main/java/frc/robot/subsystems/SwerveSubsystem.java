@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.lib.util.SecondOrderSwerveModuleStates;
 import frc.robot.Constants;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -43,7 +44,7 @@ import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
     public SwerveDrivePoseEstimator poseEstimator;
-    public SwerveModule[] mSwerveMods;
+    public SwerveModule[] swerveModules;
     public Pigeon2 gyro;
 
     public Field2d field = new Field2d();
@@ -52,12 +53,18 @@ public class SwerveSubsystem extends SubsystemBase {
     private PhotonPipelineResult result;
     private AprilTagFieldLayout fieldLayout;
 
+    Timer timer = new Timer();
+    double previousTime;
+    double offT;
+
+    Rotation2d targetHeading = new Rotation2d();
+
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.configFactoryDefault();
         zeroGyro();
 
-        mSwerveMods = new SwerveModule[] {
+        swerveModules = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
             new SwerveModule(1, Constants.Swerve.Mod1.constants),
             new SwerveModule(2, Constants.Swerve.Mod2.constants),
@@ -81,25 +88,18 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
-        SwerveModuleState[] swerveModuleStates =
-            Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-                fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation, 
-                                    getYaw()
-                                )
-                                : new ChassisSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation)
-                                );
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
+    public void drive(Translation2d translation, double rotation, boolean isFieldRelative, boolean isOpenLoop) {
+        ChassisSpeeds chassisSpeeds = new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+        ChassisSpeeds correctedSpeeds = correctHeading(chassisSpeeds);
+        updateSwerveModuleStates(correctedSpeeds, isOpenLoop, isFieldRelative);
+    }
 
-        for(SwerveModule mod : mSwerveMods){
-            mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
-        }
+    public void drive(ChassisSpeeds chassisSpeeds, boolean isOpenLoop) {
+        drive(
+            new Translation2d(chassisSpeeds.vxMetersPerSecond, chassisSpeeds.vyMetersPerSecond),
+            chassisSpeeds.omegaRadiansPerSecond, 
+            false, 
+            isOpenLoop);
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
@@ -126,18 +126,93 @@ public class SwerveSubsystem extends SubsystemBase {
                     0,
                     0, 
                     Constants.AutoConstants.thetaControllerConstraints)),
-            (states) -> setModuleStates(states),
+            (states) -> {drive(Constants.Swerve.swerveKinematics.toChassisSpeeds(states), true);},
             this);
     }
 
-    /* Used by SwerveControllerCommand in Auto */
-    public void setModuleStates(SwerveModuleState[] desiredStates) {
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
-        
-        for(SwerveModule mod : mSwerveMods){
-            mod.setDesiredState(desiredStates[mod.moduleNumber], false);
+    /**
+     * This function optimizes the chassis speed that is put into the kinematics object to allow the robot to hold its heading
+     * when no angular velocity is input. The robot will therefore correct itself when it turns without us telling it to do so.
+     * Made by 4481, used to correct drift from first order kinematics
+     *
+     * @param desiredSpeed Desired chassis speed that is input by the controller
+     * @return {@code correctedChassisSpeed} which takes into account that the robot needs to have the same heading when no rotational speed is input
+     */
+    private ChassisSpeeds correctHeading(ChassisSpeeds desiredSpeed){
+
+        //Determine time interval
+        double currentTime = timer.get();
+        double dt = currentTime - previousTime;
+
+        //Get desired rotational speed in radians per second and absolute translational speed in m/s
+        double vr = desiredSpeed.omegaRadiansPerSecond;
+        double v = Math.sqrt(Math.pow(desiredSpeed.vxMetersPerSecond, 2) + Math.pow(desiredSpeed.vxMetersPerSecond, 2));
+
+        if (vr > 0.01 || vr < -0.01){
+            offT = currentTime;
+            targetHeading = getYaw();
+            return desiredSpeed;
         }
-    }    
+        if (currentTime - offT < 0.5){
+            targetHeading = getYaw();
+            return desiredSpeed;
+        }
+        if (v < 0.05){
+            targetHeading = getYaw();
+            return desiredSpeed;
+        }
+
+
+        //Determine target and current heading
+        targetHeading.plus(new Rotation2d(vr * dt));
+        Rotation2d currentHeading = getYaw();
+
+        //Calculate the change in heading that is needed to achieve the target
+        Rotation2d deltaHeading = targetHeading.minus(currentHeading);
+
+        if (Math.abs(deltaHeading.getDegrees()) < Constants.Swerve.TURNING_DEADBAND){
+            return desiredSpeed;
+        }
+        double correctedVr = deltaHeading.getRadians() / dt * Constants.AutoConstants.kPThetaController;
+
+        previousTime = currentTime;
+
+        return new ChassisSpeeds(
+                desiredSpeed.vxMetersPerSecond,
+                desiredSpeed.vyMetersPerSecond,
+                correctedVr);
+    }
+
+    /** 4481 second order swerve module updating */
+    public void updateSwerveModuleStates(ChassisSpeeds desiredSpeeds, boolean isOpenLoop, boolean isFieldRelative) {
+        // Convert robot  relative speeds to field relative speeds if desired
+        ChassisSpeeds desiredSpeedsFieldRelative = null;
+        if (isFieldRelative) {
+            desiredSpeedsFieldRelative = desiredSpeeds;
+            double xSpeed = desiredSpeeds.vxMetersPerSecond;
+            double ySpeed = desiredSpeeds.vyMetersPerSecond;
+            double rot = desiredSpeeds.omegaRadiansPerSecond;
+
+            desiredSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rot, getYaw());
+        }
+
+        // Convert chassis speeds to individual module states
+        // The second order kinematics will return swerveModuleStates and desired rotational speeds of the turn motors
+        // Both the swerveModuleStates and the desired turn velocity are saved in the secondOrderSwerveModuleState object
+        SecondOrderSwerveModuleStates secondOrderSwerveModuleStates = 
+            Constants.Swerve.secondSwerveKinematics.toSwerveModuleState(desiredSpeedsFieldRelative, getYaw());
+        SwerveModuleState[] swerveModuleStates = secondOrderSwerveModuleStates.getSwerveModuleStates();
+        double[] moduleTurnSpeeds = secondOrderSwerveModuleStates.getModuleTurnSpeeds();
+
+        //Desaturate the individual module velocity with the right max velocity
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
+
+        // Assign desired module states to modules
+        for (SwerveModule mod : swerveModules) {
+            mod.setDesiredState(swerveModuleStates[mod.moduleNumber], moduleTurnSpeeds[mod.moduleNumber], isOpenLoop);
+        }
+    }
+
 
     /** Return the pose of the drivebase, as estimated by the pose estimator. */
     public Pose2d getPose() {
@@ -224,7 +299,7 @@ public class SwerveSubsystem extends SubsystemBase {
     /** @return the current state of each of the swerve modules, including current speed */
     public SwerveModuleState[] getModuleStates(){
         SwerveModuleState[] states = new SwerveModuleState[4];
-        for(SwerveModule mod : mSwerveMods){
+        for(SwerveModule mod : swerveModules){
             states[mod.moduleNumber] = mod.getState();
         }
         return states;
@@ -233,7 +308,7 @@ public class SwerveSubsystem extends SubsystemBase {
     /** @return the state of each of the swerve modules, including total distance */
     public SwerveModulePosition[] getModulePositions(){
         SwerveModulePosition[] positions = new SwerveModulePosition[4];
-        for(SwerveModule mod : mSwerveMods){
+        for(SwerveModule mod : swerveModules){
             positions[mod.moduleNumber] = mod.getPosition();
         }
         return positions;
@@ -256,7 +331,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Resets the encoders on all swerve modules to the cancoder values */
     private void resetModulesToAbsolute() {
-        for (SwerveModule module: mSwerveMods) {
+        for (SwerveModule module: swerveModules) {
             module.resetToAbsolute();
         }
     }
@@ -273,7 +348,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
-        for(SwerveModule mod : mSwerveMods){
+        for(SwerveModule mod : swerveModules){
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    

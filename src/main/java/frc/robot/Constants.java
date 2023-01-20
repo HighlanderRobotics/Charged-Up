@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.lib.util.COTSFalconSwerveConstants;
+import frc.lib.util.SecondOrderSwerveKinematics;
 import frc.lib.util.SwerveModuleConstants;
 
 /**
@@ -37,6 +38,8 @@ public final class Constants {
     public static final int pigeonID = 1;
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
+    public static final double TURNING_DEADBAND = 0.1;
+
     public static final COTSFalconSwerveConstants chosenModule =  //TODO: This must be tuned to specific robot
         COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
@@ -47,11 +50,17 @@ public final class Constants {
 
     /* Swerve Kinematics 
      * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-     public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
+    public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
       new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
       new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
       new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
       new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
+    public static final SecondOrderSwerveKinematics secondSwerveKinematics = new SecondOrderSwerveKinematics(
+      new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+      new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+      new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+      new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0)
+    );
 
     /* Module Gear Ratios */
     public static final double driveGearRatio = chosenModule.driveGearRatio;
@@ -65,8 +74,8 @@ public final class Constants {
     public static final boolean canCoderInvert = chosenModule.canCoderInvert;
 
     /* Swerve Current Limiting */
-    public static final int angleContinuousCurrentLimit = 25;
-    public static final int anglePeakCurrentLimit = 40;
+    public static final int angleContinuousCurrentLimit = 15;
+    public static final int anglePeakCurrentLimit = 35;
     public static final double anglePeakCurrentDuration = 0.1;
     public static final boolean angleEnableCurrentLimit = true;
 
@@ -160,7 +169,7 @@ public final class Constants {
 
     public static final double kPXController = 1;
     public static final double kPYController = 1;
-    public static final double kPThetaController = 1;
+    public static final double kPThetaController = 0.04; // TODO: tune to us, stolen from 4481 for now
 
     /* Constraint for the motion profilied robot angle controller */
     public static final TrapezoidProfile.Constraints thetaControllerConstraints =

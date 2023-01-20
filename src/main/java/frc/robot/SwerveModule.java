@@ -24,6 +24,7 @@ public class SwerveModule {
     private CANCoder angleEncoder;
 
     SimpleMotorFeedforward feedforward = new SimpleMotorFeedforward(Constants.Swerve.driveKS, Constants.Swerve.driveKV, Constants.Swerve.driveKA);
+    SimpleMotorFeedforward angleFeedforward = new SimpleMotorFeedforward(0, 0, 0);
 
     public SwerveModule(int moduleNumber, SwerveModuleConstants moduleConstants){
         this.moduleNumber = moduleNumber;
@@ -44,10 +45,10 @@ public class SwerveModule {
         lastAngle = getState().angle;
     }
 
-    public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop){
+    public void setDesiredState(SwerveModuleState desiredState, double desiredTurnSpeed, boolean isOpenLoop){
         /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
         desiredState = CTREModuleState.optimize(desiredState, getState().angle); 
-        setAngle(desiredState);
+        setAngle(desiredState, desiredTurnSpeed);
         setSpeed(desiredState, isOpenLoop);
     }
 
@@ -62,10 +63,17 @@ public class SwerveModule {
         }
     }
 
-    private void setAngle(SwerveModuleState desiredState){
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.Swerve.maxSpeed * 0.01)) ? lastAngle : desiredState.angle; //Prevent rotating module if speed is less then 1%. Prevents Jittering.
+    private void setAngle(SwerveModuleState desiredState, double desiredTurnSpeed){
+        //Prevent rotating module if speed is less then 1%. Prevents Jittering.
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) 
+            <= (Constants.Swerve.maxSpeed * 0.01)) ? lastAngle : desiredState.angle;
         
-        mAngleMotor.set(ControlMode.Position, Conversions.degreesToFalcon(angle.getDegrees(), Constants.Swerve.angleGearRatio));
+        mAngleMotor.set(
+            ControlMode.MotionMagic, 
+            Conversions.degreesToFalcon(angle.getDegrees(), Constants.Swerve.angleGearRatio),
+            DemandType.ArbitraryFeedForward,
+            angleFeedforward.calculate(desiredTurnSpeed)
+            );
         lastAngle = angle;
     }
 
