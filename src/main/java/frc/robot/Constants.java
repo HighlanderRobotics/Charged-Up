@@ -4,8 +4,11 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPoint;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -166,5 +169,20 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints thetaControllerConstraints =
         new TrapezoidProfile.Constraints(
             maxAngularSpeedRadiansPerSecond, maxAngularSpeedRadiansPerSecondSquared);
+  }
+
+  public static final class ScoringPositions {
+    public static final HashMap<String, PathPoint> positions = new HashMap<>();
+    static {
+      positions.put("blue0", new PathPoint(new Translation2d(1.74, 0.43), Rotation2d.fromDegrees(0)));
+      positions.put("blue1", new PathPoint(new Translation2d(1.74, 1.03), Rotation2d.fromDegrees(0)));
+      positions.put("blue2", new PathPoint(new Translation2d(1.74, 1.63), Rotation2d.fromDegrees(0)));
+      positions.put("blue3", new PathPoint(new Translation2d(1.74, 2.23), Rotation2d.fromDegrees(0)));
+      positions.put("blue4", new PathPoint(new Translation2d(1.74, 2.83), Rotation2d.fromDegrees(0)));
+      positions.put("blue5", new PathPoint(new Translation2d(1.74, 3.43), Rotation2d.fromDegrees(0)));
+      positions.put("blue6", new PathPoint(new Translation2d(1.74, 4.03), Rotation2d.fromDegrees(0)));
+      positions.put("blue7", new PathPoint(new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0)));
+      positions.put("blue8", new PathPoint(new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0)));
+    }
   }
 }

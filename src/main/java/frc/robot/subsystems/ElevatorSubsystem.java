@@ -12,7 +12,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void extend() {}
   public void place() {}
   public void retract() {}
-  
+  public boolean isAtSetpoint() { return false; }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

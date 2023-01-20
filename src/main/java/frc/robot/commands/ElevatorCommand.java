@@ -4,14 +4,10 @@
 
 package frc.robot.commands;
 
-import java.time.Instant;
-
-import com.pathplanner.lib.PathPoint;
-
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -23,10 +19,14 @@ public class ElevatorCommand extends SequentialCommandGroup {
   public ElevatorCommand(ElevatorSubsystem elevatorSubsystem, SwerveSubsystem swerveSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands(swerveSubsystem.followPathCommand(swerveSubsystem.getPathToPoint(new PathPoint(new Translation2d(1.72, 2.72), 
-    Rotation2d.fromDegrees(-4.40), Rotation2d.fromDegrees(180)))), 
-    new InstantCommand(() -> elevatorSubsystem.extend(), elevatorSubsystem), 
-    new InstantCommand(() -> elevatorSubsystem.place(), elevatorSubsystem), 
-    new InstantCommand(() -> elevatorSubsystem.retract(), elevatorSubsystem));
+    addCommands(
+      swerveSubsystem.followPathCommand(
+        swerveSubsystem.getPathToPoint(
+          Constants.ScoringPositions.positions.get("blue0"))),
+      new InstantCommand(() -> elevatorSubsystem.extend(), elevatorSubsystem), 
+      new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()),
+      new InstantCommand(() -> elevatorSubsystem.place(), elevatorSubsystem), 
+      new InstantCommand(() -> elevatorSubsystem.retract(), elevatorSubsystem));
+  
   }
 }
