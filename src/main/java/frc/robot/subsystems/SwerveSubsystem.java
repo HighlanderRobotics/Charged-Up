@@ -64,7 +64,7 @@ public class SwerveSubsystem extends SubsystemBase {
         gyro.configFactoryDefault();
         zeroGyro();
 
-        camera = new PhotonCamera("limelight");
+        camera = new PhotonCamera("OV5647");
 
         swerveModules = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -91,8 +91,17 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
     public void drive(Translation2d translation, double rotation, boolean isFieldRelative, boolean isOpenLoop) {
+        SmartDashboard.putNumber("translation x", translation.getX());
+        SmartDashboard.putNumber("translation y", translation.getY());
+        SmartDashboard.putNumber("rotation", rotation);
         ChassisSpeeds chassisSpeeds = new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+        SmartDashboard.putNumber("chassispeeds x", chassisSpeeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("chassispeeds y", chassisSpeeds.vyMetersPerSecond);
+        SmartDashboard.putNumber("chassispeeds rotation", chassisSpeeds.omegaRadiansPerSecond);
         ChassisSpeeds correctedSpeeds = correctHeading(chassisSpeeds);
+        SmartDashboard.putNumber("corrected chassispeeds x", correctedSpeeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("corrected chassispeeds y", correctedSpeeds.vyMetersPerSecond);
+        SmartDashboard.putNumber("corrected chassispeeds rotation", correctedSpeeds.omegaRadiansPerSecond);
         updateSwerveModuleStates(correctedSpeeds, isOpenLoop, isFieldRelative);
     }
 
@@ -211,6 +220,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
         // Assign desired module states to modules
         for (SwerveModule mod : swerveModules) {
+            SmartDashboard.putNumber(mod.moduleNumber + " turn speed", moduleTurnSpeeds[mod.moduleNumber]);
+            SmartDashboard.putNumber(mod.moduleNumber + " desired rotation", swerveModuleStates[mod.moduleNumber].angle.getDegrees());
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], moduleTurnSpeeds[mod.moduleNumber], isOpenLoop);
         }
     }

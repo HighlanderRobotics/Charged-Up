@@ -90,16 +90,16 @@ public final class Constants {
     public static final double closedLoopRamp = 0.0;
 
     /* Angle Motor PID Values */
-    public static final double angleKP = chosenModule.angleKP;
+    public static final double angleKP = 3.2054 / 12.0;//chosenModule.angleKP;
     public static final double angleKI = chosenModule.angleKI;
-    public static final double angleKD = chosenModule.angleKD;
+    public static final double angleKD = 0.2361 / 12.0;//chosenModule.angleKD;
     public static final double angleKF = chosenModule.angleKF;
 
     /* Angle Motor Characterization Values 
      * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
-    public static final double angleKS = (0.2 / 12); //TODO: This must be tuned to specific robot
-    public static final double angleKV = (0.6 / 12);
-    public static final double angleKA = (0.0 / 12);
+    public static final double angleKS = (0.16417 / 12); //TODO: This must be tuned to specific robot
+    public static final double angleKV = (2.306 / 12);
+    public static final double angleKA = (0.061892 / 12);
 
     /* Drive Motor PID Values */
     public static final double driveKP = 0.05; //TODO: This must be tuned to specific robot
@@ -115,7 +115,7 @@ public final class Constants {
 
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 0.1;//4.5; //TODO: This must be tuned to specific robot
+    public static final double maxSpeed = 4.5; //TODO: This must be tuned to specific robot
     /** Radians per Second */
     public static final double maxAngularVelocity = 2.0; //10.0; //TODO: This must be tuned to specific robot
 
