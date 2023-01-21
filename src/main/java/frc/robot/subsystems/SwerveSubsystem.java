@@ -64,6 +64,8 @@ public class SwerveSubsystem extends SubsystemBase {
         gyro.configFactoryDefault();
         zeroGyro();
 
+        camera = new PhotonCamera("limelight");
+
         swerveModules = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
             new SwerveModule(1, Constants.Swerve.Mod1.constants),
