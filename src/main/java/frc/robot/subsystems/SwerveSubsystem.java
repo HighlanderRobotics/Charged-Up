@@ -265,7 +265,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        result = camera.getLatestResult();
+        // result = camera.getLatestResult();
 
         if (DriverStation.isDisabled()){
             resetModulesToAbsolute();
