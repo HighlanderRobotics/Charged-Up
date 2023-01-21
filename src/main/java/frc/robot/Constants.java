@@ -97,7 +97,7 @@ public final class Constants {
 
     /* Angle Motor Characterization Values 
      * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
-    public static final double angleKS = (0.16417 / 12); //TODO: This must be tuned to specific robot
+    public static final double angleKS = (0.16417 / 12); 
     public static final double angleKV = (2.306 / 12);
     public static final double angleKA = (0.061892 / 12);
 
@@ -117,7 +117,7 @@ public final class Constants {
     /** Meters per Second */
     public static final double maxSpeed = 4.5; //TODO: This must be tuned to specific robot
     /** Radians per Second */
-    public static final double maxAngularVelocity = 2.0; //10.0; //TODO: This must be tuned to specific robot
+    public static final double maxAngularVelocity = 10.0; //TODO: This must be tuned to specific robot
 
     /* Neutral Modes */
     public static final NeutralMode angleNeutralMode = NeutralMode.Coast;
@@ -175,7 +175,7 @@ public final class Constants {
 
     public static final double kPXController = 1;
     public static final double kPYController = 1;
-    public static final double kPThetaController = 0.04; // TODO: tune to us, stolen from 4481 for now
+    public static final double kPThetaController = 0.4; // TODO: tune to us, stolen from 4481 for now
 
     /* Constraint for the motion profilied robot angle controller */
     public static final TrapezoidProfile.Constraints thetaControllerConstraints =

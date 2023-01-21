@@ -90,7 +90,7 @@ public class SwerveModule {
     }
 
     public void resetToAbsolute(){
-        double absolutePosition = Conversions.degreesToFalcon(getCanCoder().getDegrees() - angleOffset.getDegrees(), Constants.Swerve.angleGearRatio);
+        double absolutePosition = Conversions.degreesToFalcon((getCanCoder().getDegrees() % 360) - angleOffset.getDegrees(), Constants.Swerve.angleGearRatio);
         mAngleMotor.setSelectedSensorPosition(absolutePosition);
     }
 

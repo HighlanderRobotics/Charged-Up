@@ -51,6 +51,12 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    controller.a().whileTrue(swerveSubsystem.drivePIDHeadingCommand(
+      () -> -controller.getLeftY(), 
+      () -> -controller.getLeftX(), 
+      () -> -controller.getRightX() * Math.PI, 
+      true, 
+      true));
   }
 
   /**

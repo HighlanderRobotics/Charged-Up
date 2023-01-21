@@ -59,6 +59,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Rotation2d targetHeading = new Rotation2d();
 
+    ProfiledPIDController headingPID = new ProfiledPIDController(
+        Constants.AutoConstants.kPThetaController, 
+        0.0, 
+        0.0,
+        Constants.AutoConstants.thetaControllerConstraints);
+
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.configFactoryDefault();
@@ -110,6 +116,16 @@ public class SwerveSubsystem extends SubsystemBase {
             () -> drive(
                 new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
                 theta.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
+                fieldRelative, 
+                isOpenLoop), 
+                this);
+    }
+
+    public Command drivePIDHeadingCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier targetTheta, boolean fieldRelative, boolean isOpenLoop) {
+        return new RunCommand(
+            () -> drive(
+                new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
+                headingPID.calculate(getYaw().getRadians(), targetTheta.getAsDouble()), 
                 fieldRelative, 
                 isOpenLoop), 
                 this);
@@ -347,6 +363,8 @@ public class SwerveSubsystem extends SubsystemBase {
         if (DriverStation.isDisabled()){
             resetModulesToAbsolute();
         }
+
+        SmartDashboard.putNumber("Heading PID target", headingPID.getSetpoint().position);
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
