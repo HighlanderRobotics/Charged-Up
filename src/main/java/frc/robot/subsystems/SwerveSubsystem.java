@@ -109,7 +109,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
         return new RunCommand(
             () -> drive(
-                new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
+                new Translation2d(x.getAsDouble() * x.getAsDouble() * Math.signum(x.getAsDouble()), y.getAsDouble() * y.getAsDouble() * Math.signum(y.getAsDouble())).times(Constants.Swerve.maxSpeed), 
                 theta.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
                 fieldRelative, 
                 isOpenLoop), 
