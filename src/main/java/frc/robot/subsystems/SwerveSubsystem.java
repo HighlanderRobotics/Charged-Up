@@ -9,6 +9,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
@@ -17,6 +18,8 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.auto.PIDConstants;
+import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -36,12 +39,15 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
+    //degrees in radians 
+    public PIDController ballanceController = new PIDController(1.5, 0, 0.5);
     public SwerveDrivePoseEstimator poseEstimator;
     public SwerveModule[] mSwerveMods;
     public Pigeon2 gyro;
@@ -130,6 +136,30 @@ public class SwerveSubsystem extends SubsystemBase {
             this);
     }
 
+
+    public SwerveAutoBuilder autoBuilder(Map<String, Command> eventMap){
+        return
+            new SwerveAutoBuilder(
+                () -> getPose(), // Pose2d supplier
+                (Pose2d pose) -> resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+                Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
+                new PIDConstants(Constants.AutoConstants.kPXController, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
+                new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
+                this::setModuleStates, // Module states consumer used to output to the drive subsystem
+                eventMap,
+                true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+                this // The drive subsystem. Used to properly set the requirements of path following commands
+                );
+    }
+    public CommandBase autoBalance(){
+        return new RunCommand(
+            () -> drive(
+                new Translation2d(0, ballanceController.calculate(gyro.getPitch())),
+                0,
+                false,
+                false),
+             this);
+    }
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
@@ -279,5 +309,6 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         }
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
+        SmartDashboard.putNumber("Pitch", gyro.getPitch());
     }
 }

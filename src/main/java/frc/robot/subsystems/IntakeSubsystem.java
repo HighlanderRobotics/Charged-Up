@@ -14,6 +14,7 @@ public class IntakeSubsystem extends SubsystemBase{
         //intakeMotor.config_kP(0, 0.15, 20);
         //intakeMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 20.0, 40.0, 0.5));
 
+        
     }
 
     public void activate(){
