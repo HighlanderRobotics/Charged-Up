@@ -1,14 +1,35 @@
 package frc.robot.commands;
 
-public class TwoConeAuto {
-    DrivetrainSubsystem drivetrainSystem,
-    LimeLightSubsystem LimeLightSubsystem,
+import com.pathplanner.lib.PathPlanner;
+
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.subsystems.SwerveSubsystem;
+
+public class TwoConeAuto extends SequentialCommandGroup {
+    
+    public TwoConeAuto(SwerveSubsystem swerveSubsystem,
     IntakeSubsystem intakeSubsystem,
-    ElevatorSubsystem elevatorSubsystem,
+    PlacingSubsystem placingSubsytem){
 
     addCommands(
-        new RunCommand(() -> {intakeSubsystem.activate();}, intakeSubsystem),
         
-    )
+        
+        new RunCommand(() -> {placingSubsytem.activate();}, placingSubsystem),
+                
+        //max velo = 2; max acceleration = 1;
+        swerveSubsystem.followPathCommand(PathPlanner.loadPath("firstcone", 2.0, 1.0)),
 
+        new RunCommand(() -> {intakeSubsystem.activate();}, intakeSubsystem),
+
+        swerveSubsystem.followPathCommand(PathPlanner.loadPath("secondpart", 2.0, 1.0)),
+
+        new RunCommand(() -> {placingSubsystem.activate();}, placingSubsystem)
+
+        
+    );
+
+        
+    
+    }
 }
