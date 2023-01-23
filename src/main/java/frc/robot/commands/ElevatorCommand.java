@@ -23,10 +23,11 @@ public class ElevatorCommand extends SequentialCommandGroup {
       swerveSubsystem.followPathCommand(
         swerveSubsystem.getPathToPoint(
           Constants.ScoringPositions.positions.get("blue0"))),
-      new InstantCommand(() -> elevatorSubsystem.extend(), elevatorSubsystem), 
+      new InstantCommand(() -> elevatorSubsystem.extendElevator(), elevatorSubsystem), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()),
-      new InstantCommand(() -> elevatorSubsystem.place(), elevatorSubsystem), 
-      new InstantCommand(() -> elevatorSubsystem.retract(), elevatorSubsystem));
+      new InstantCommand(() -> elevatorSubsystem.releaseElevator(), elevatorSubsystem), 
+      new InstantCommand(() -> elevatorSubsystem.retractElevator(), elevatorSubsystem));
+      
   
   }
 }
