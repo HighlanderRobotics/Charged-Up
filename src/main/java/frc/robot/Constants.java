@@ -40,12 +40,12 @@ public final class Constants {
 
     public static final double TURNING_DEADBAND = 0.1;
 
-    public static final COTSFalconSwerveConstants chosenModule =  //TODO: This must be tuned to specific robot
+    public static final COTSFalconSwerveConstants chosenModule =
         COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
     /* Drivetrain Constants */
-    public static final double trackWidth = Units.inchesToMeters(21.73); //TODO: This must be tuned to specific robot
-    public static final double wheelBase = Units.inchesToMeters(21.73); //TODO: This must be tuned to specific robot
+    public static final double trackWidth = Units.inchesToMeters(23); 
+    public static final double wheelBase = Units.inchesToMeters(23); 
     public static final double wheelCircumference = chosenModule.wheelCircumference;
 
     /* Swerve Kinematics 
@@ -97,9 +97,9 @@ public final class Constants {
 
     /* Angle Motor Characterization Values 
      * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
-    public static final double angleKS = (0.16417 / 12); 
-    public static final double angleKV = (2.306 / 12);
-    public static final double angleKA = (0.061892 / 12);
+    public static final double angleKS = (0.16417); 
+    public static final double angleKV = 1.0;//(2.306);
+    public static final double angleKA = (0.061892);
 
     /* Drive Motor PID Values */
     public static final double driveKP = 0.05; //TODO: This must be tuned to specific robot

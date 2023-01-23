@@ -5,6 +5,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.math.Conversions;
 import frc.lib.util.CTREModuleState;
 import frc.lib.util.SwerveModuleConstants;
@@ -47,9 +48,9 @@ public class SwerveModule {
 
     public void setDesiredState(SwerveModuleState desiredState, double desiredTurnSpeed, boolean isOpenLoop){
         /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
-        desiredState = CTREModuleState.optimize(desiredState, getState().angle); 
-        setAngle(desiredState, desiredTurnSpeed);
-        setSpeed(desiredState, isOpenLoop);
+        var optimizedState = CTREModuleState.optimize(desiredState, getAngle()); 
+        setAngle(optimizedState, desiredTurnSpeed);
+        setSpeed(optimizedState, isOpenLoop);
     }
 
     private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
@@ -71,18 +72,19 @@ public class SwerveModule {
         //Prevent rotating module if speed is less then 1%. Prevents Jittering.
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) 
             <= (Constants.Swerve.maxSpeed * 0.01)) ? lastAngle : desiredState.angle;
+        SmartDashboard.putNumber(moduleNumber + " desired turn speed", desiredTurnSpeed);
         double ff = angleFeedforward.calculate(angle.getRadians(), desiredTurnSpeed);
         mAngleMotor.set(
             ControlMode.Position, 
             Conversions.degreesToFalcon(angle.getDegrees(), Constants.Swerve.angleGearRatio),
             DemandType.ArbitraryFeedForward,
-            ff
+            ff / 12
             );
         lastAngle = angle;
     }
 
     private Rotation2d getAngle(){
-        return Rotation2d.fromDegrees(Conversions.falconToDegrees(mAngleMotor.getSelectedSensorPosition(), Constants.Swerve.angleGearRatio));
+        return Rotation2d.fromDegrees(Conversions.falconToDegrees(mAngleMotor.getSelectedSensorPosition(), Constants.Swerve.angleGearRatio) % 360);
     }
 
     public Rotation2d getCanCoder(){
