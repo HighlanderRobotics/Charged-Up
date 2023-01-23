@@ -184,16 +184,8 @@ public final class Constants {
       positions.put("blue7", new PathPoint(new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0)));
       positions.put("blue8", new PathPoint(new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0)));
       
-      positions.put("red0", new PathPoint(new Translation2d(, 0.43), Rotation2d.fromDegrees(0)));
-      positions.put("red1", new PathPoint(new Translation2d(, 1.03), Rotation2d.fromDegrees(0)));
-      positions.put("red2", new PathPoint(new Translation2d(, 1.63), Rotation2d.fromDegrees(0)));
-      positions.put("red3", new PathPoint(new Translation2d(, 2.23), Rotation2d.fromDegrees(0)));
-      positions.put("red4", new PathPoint(new Translation2d(, 2.83), Rotation2d.fromDegrees(0)));
-      positions.put("red5", new PathPoint(new Translation2d(, 3.43), Rotation2d.fromDegrees(0)));
-      positions.put("red6", new PathPoint(new Translation2d(, 4.03), Rotation2d.fromDegrees(0)));
-      positions.put("red7", new PathPoint(new Translation2d(, 4.63), Rotation2d.fromDegrees(0)));
-      positions.put("red8", new PathPoint(new Translation2d(, 5.23), Rotation2d.fromDegrees(0)));
     }
 
   }
+  public static final double elevatorMargin = 10; //i have no idea what the actual number is
 }
