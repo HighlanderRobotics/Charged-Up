@@ -9,6 +9,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 import com.pathplanner.lib.PathPlanner;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -51,6 +52,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    new Trigger(() -> DriverStation.isEnabled()).onTrue(new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
   }
 
   /**

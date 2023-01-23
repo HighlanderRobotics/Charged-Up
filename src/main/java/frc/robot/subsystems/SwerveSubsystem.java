@@ -31,7 +31,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -258,7 +257,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Resets the encoders on all swerve modules to the cancoder values */
-    private void resetModulesToAbsolute() {
+    public void resetModulesToAbsolute() {
         for (SwerveModule module: mSwerveMods) {
             module.resetToAbsolute();
         }
@@ -271,10 +270,6 @@ public class SwerveSubsystem extends SubsystemBase {
         result = camera.getLatestResult();
         if (result.hasTargets()) {
             updateOdometry(getEstimatedPose());
-        }
-
-        if (DriverStation.isDisabled()){
-            resetModulesToAbsolute();
         }
 
         // Log swerve module information
