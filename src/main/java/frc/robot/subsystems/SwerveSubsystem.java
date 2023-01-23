@@ -57,6 +57,8 @@ public class SwerveSubsystem extends SubsystemBase {
         gyro.configFactoryDefault();
         zeroGyro();
 
+        camera = new PhotonCamera("OV5647");
+
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
             new SwerveModule(1, Constants.Swerve.Mod1.constants),
@@ -153,8 +155,6 @@ public class SwerveSubsystem extends SubsystemBase {
      * Input is in the form of a list of pose2ds and a latency measurement
      */
     public void updateOdometry(Pair<List<Pose2d>, Double> data){
-        System.out.println(data.getFirst());
-
         if (data != null) {
         field.getObject("Latest Vision Pose").setPoses(data.getFirst());
         SmartDashboard.putNumber("Latency", data.getSecond());
@@ -197,6 +197,9 @@ public class SwerveSubsystem extends SubsystemBase {
           poses.add(getFieldToRobot(targetPose3d, Constants.CAMERA_TO_ROBOT, target.getBestCameraToTarget()).toPose2d());
         }
         // Return the list of poses and the latency
+        if (poses == null) {
+            return null;
+        }
         return new Pair<>(poses, result.getLatencyMillis());
       }
     }
@@ -266,6 +269,9 @@ public class SwerveSubsystem extends SubsystemBase {
         poseEstimator.update(getYaw(), getModulePositions());  
         
         result = camera.getLatestResult();
+        if (result.hasTargets()) {
+            updateOdometry(getEstimatedPose());
+        }
 
         if (DriverStation.isDisabled()){
             resetModulesToAbsolute();
@@ -279,5 +285,6 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         }
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
+        SmartDashboard.putData(field);
     }
 }
