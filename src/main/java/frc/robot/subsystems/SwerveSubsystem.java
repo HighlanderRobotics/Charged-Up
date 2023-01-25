@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -21,6 +22,8 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -31,10 +34,13 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -51,12 +57,15 @@ public class SwerveSubsystem extends SubsystemBase {
     private PhotonPipelineResult result;
     private AprilTagFieldLayout fieldLayout;
 
+    public boolean hasResetOdometry = false;
+
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.configFactoryDefault();
         zeroGyro();
 
         camera = new PhotonCamera("OV5647");
+        camera.setLED(VisionLEDMode.kOn);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -71,9 +80,17 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        // TODO: Add stddev matrices
-        poseEstimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions(), new Pose2d());
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.0, 0.0, 0.0);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
 
+        poseEstimator = new SwerveDrivePoseEstimator(
+            Constants.Swerve.swerveKinematics, 
+            getYaw(), 
+            getModulePositions(), 
+            new Pose2d(),
+            odoStdDevs,
+            visStdDevs);
+        
         try {
             fieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
         } catch (Exception e) {
@@ -155,13 +172,13 @@ public class SwerveSubsystem extends SubsystemBase {
      */
     public void updateOdometry(Pair<List<Pose2d>, Double> data){
         if (data != null) {
-        field.getObject("Latest Vision Pose").setPoses(data.getFirst());
-        SmartDashboard.putNumber("Latency", data.getSecond());
-        for (Pose2d pose : data.getFirst()){
-            // Data is in milliseconds, need to convert to seconds
-            poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp() - (data.getSecond() / 1000));
-            zeroGyro(pose.getRotation().getDegrees());
-        }
+            field.getObject("Latest Vision Pose").setPoses(data.getFirst());
+            SmartDashboard.putNumber("Latency", data.getSecond());
+            for (Pose2d pose : data.getFirst()){
+                // Data is in milliseconds, need to convert to seconds
+                poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp() - (data.getSecond() / 1000));
+                zeroGyro(pose.getRotation().getDegrees());
+            }
         }
     }
 
@@ -196,7 +213,7 @@ public class SwerveSubsystem extends SubsystemBase {
           poses.add(getFieldToRobot(targetPose3d, Constants.CAMERA_TO_ROBOT, target.getBestCameraToTarget()).toPose2d());
         }
         // Return the list of poses and the latency
-        if (poses == null) {
+        if (poses == null || poses.isEmpty()) {
             return null;
         }
         return new Pair<>(poses, result.getLatencyMillis());
@@ -204,6 +221,25 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     // Returns null if no targets are found
     return null;
+  }
+
+  public boolean hasTargets() {
+    if (result != null) {
+        return result.hasTargets();
+    }
+    return false;
+  }
+
+  public Command resetIfTargets() {
+    return new InstantCommand(() -> {
+        try {
+            resetOdometry(getEstimatedPose().getFirst().get(0));
+            hasResetOdometry = true;
+        } catch (Exception e) {
+            // error handling is for nerds
+            // Also if we get an error we just try again next loop
+        }
+    });
   }
 
     /**
@@ -280,6 +316,12 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         }
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
+        field.setRobotPose(getPose());
         SmartDashboard.putData(field);
+        SmartDashboard.putBoolean("Has reset", hasResetOdometry);
+
+        if (DriverStation.isDisabled()) {
+            hasResetOdometry = false;
+        }
     }
 }

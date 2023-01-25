@@ -52,7 +52,9 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
-    new Trigger(() -> DriverStation.isEnabled()).onTrue(new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    new Trigger(() -> DriverStation.isEnabled()).onTrue(
+      new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
   }
 
   /**

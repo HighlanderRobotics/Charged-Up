@@ -31,13 +31,15 @@ public final class Constants {
     public static final int driverControllerPort = 0;
   }
 
-  public static final Transform3d CAMERA_TO_ROBOT = new Transform3d(new Translation3d(0, 0, 0), new Rotation3d());
+  public static final Transform3d CAMERA_TO_ROBOT = new Transform3d(
+    new Translation3d(0, Units.inchesToMeters(13.5), 0),
+    new Rotation3d(0, 0, -Math.PI / 2));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
     public static final boolean invertGyro = false; // Always ensure Gyro is CCW+ CW-
 
-    public static final COTSFalconSwerveConstants chosenModule =  //TODO: This must be tuned to specific robot
+    public static final COTSFalconSwerveConstants chosenModule =
         COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
     /* Drivetrain Constants */
