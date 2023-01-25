@@ -74,6 +74,9 @@ public class SwerveModule {
             <= (Constants.Swerve.maxSpeed * 0.01)) ? lastAngle : desiredState.angle;
         SmartDashboard.putNumber(moduleNumber + " desired turn speed", desiredTurnSpeed);
         double ff = angleFeedforward.calculate(angle.getRadians(), desiredTurnSpeed);
+        SmartDashboard.putNumber(moduleNumber + " ff", ff);
+        SmartDashboard.putNumber(moduleNumber + " desired angle", desiredState.angle.getDegrees());
+
         mAngleMotor.set(
             ControlMode.Position, 
             Conversions.degreesToFalcon(angle.getDegrees(), Constants.Swerve.angleGearRatio),
