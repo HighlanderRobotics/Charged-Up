@@ -9,6 +9,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 import com.pathplanner.lib.PathPlanner;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,11 +32,11 @@ public class RobotContainer {
   public RobotContainer() {
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -controller.getLeftY(), 
-      () -> -controller.getLeftX(), 
-      () -> -controller.getRightX(), 
+      () -> -Math.abs(Math.pow(controller.getLeftY(), 2)) * Math.signum(controller.getLeftY()), 
+      () -> -Math.abs(Math.pow(controller.getLeftX(), 2)) * Math.signum(controller.getLeftX()), 
+      () -> -Math.abs(Math.pow(controller.getRightX(), 2)) * Math.signum(controller.getRightX()), 
       true, 
-      true));
+      false));
     // Configure the trigger bindings
     configureBindings();
   }
@@ -51,12 +52,9 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
-    controller.a().whileTrue(swerveSubsystem.drivePIDHeadingCommand(
-      () -> -controller.getLeftY(), 
-      () -> -controller.getLeftX(), 
-      () -> -controller.getRightX() * Math.PI, 
-      true, 
-      true));
+    new Trigger(() -> DriverStation.isEnabled()).onTrue(
+      new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
   }
 
   /**

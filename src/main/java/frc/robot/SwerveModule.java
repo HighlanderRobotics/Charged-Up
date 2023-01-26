@@ -18,7 +18,6 @@ import com.ctre.phoenix.sensors.CANCoder;
 public class SwerveModule {
     public int moduleNumber;
     private Rotation2d angleOffset;
-    private Rotation2d lastAngle;
 
     private TalonFX mAngleMotor;
     private TalonFX mDriveMotor;
@@ -42,8 +41,6 @@ public class SwerveModule {
         /* Drive Motor Config */
         mDriveMotor = new TalonFX(moduleConstants.driveMotorID);
         configDriveMotor();
-
-        lastAngle = getState().angle;
     }
 
     public void setDesiredState(SwerveModuleState desiredState, double desiredTurnSpeed, boolean isOpenLoop){
@@ -71,7 +68,7 @@ public class SwerveModule {
     private void setAngle(SwerveModuleState desiredState, double desiredTurnSpeed){
         //Prevent rotating module if speed is less then 1%. Prevents Jittering.
         Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) 
-            <= (Constants.Swerve.maxSpeed * 0.01)) ? lastAngle : desiredState.angle;
+            <= (Constants.Swerve.maxSpeed * 0.01)) ? getAngle() : desiredState.angle;
         SmartDashboard.putNumber(moduleNumber + " desired turn speed", desiredTurnSpeed);
         double ff = angleFeedforward.calculate(angle.getRadians(), desiredTurnSpeed);
         SmartDashboard.putNumber(moduleNumber + " ff", ff);
@@ -83,7 +80,6 @@ public class SwerveModule {
             DemandType.ArbitraryFeedForward,
             ff / 12
             );
-        lastAngle = angle;
     }
 
     private Rotation2d getAngle(){
