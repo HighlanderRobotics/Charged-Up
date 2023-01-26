@@ -63,7 +63,7 @@ public class SwerveModule {
 
     private void setAngle(SwerveModuleState desiredState){
         //Prevent rotating module if speed is less then 1%. Prevents Jittering.
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.Swerve.maxSpeed * 0.1)) ? getAngle() : desiredState.angle; 
+        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.Swerve.maxSpeed * 0.01)) ? getAngle() : desiredState.angle; 
         
         mAngleMotor.set(ControlMode.Position, Conversions.degreesToFalcon(angle.getDegrees(), Constants.Swerve.angleGearRatio));
     }

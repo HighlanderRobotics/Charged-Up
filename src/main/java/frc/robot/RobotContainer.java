@@ -32,9 +32,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -controller.getLeftY(), 
-      () -> -controller.getLeftX(), 
-      () -> -controller.getRightX(), 
+      () -> -Math.abs(Math.pow(controller.getLeftY(), 2)) * Math.signum(controller.getLeftY()), 
+      () -> -Math.abs(Math.pow(controller.getLeftX(), 2)) * Math.signum(controller.getLeftX()), 
+      () -> -Math.abs(Math.pow(controller.getRightX(), 2)) * Math.signum(controller.getRightX()), 
       true, 
       false));
     // Configure the trigger bindings
