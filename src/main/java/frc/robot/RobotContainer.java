@@ -36,7 +36,7 @@ public class RobotContainer {
       () -> -controller.getLeftX(), 
       () -> -controller.getRightX(), 
       true, 
-      true));
+      false));
     // Configure the trigger bindings
     configureBindings();
   }
