@@ -53,8 +53,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Field2d field = new Field2d();
 
-    private PhotonCamera camera;
-    private PhotonPipelineResult result;
+    private PhotonCamera camera = null;
+    private PhotonPipelineResult result = null;
     private AprilTagFieldLayout fieldLayout;
 
     public boolean hasResetOdometry = false;
@@ -303,7 +303,9 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        result = camera.getLatestResult();
+        if (camera != null) {
+            result = camera.getLatestResult();
+        }
         if (result.hasTargets()) {
             updateOdometry(getEstimatedPose());
         }
