@@ -1,8 +1,9 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants;
-
+import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -142,6 +143,22 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     public PathPlannerTrajectory getPathToPoint (PathPoint end) {
         return getPathBetweenTwoPoints(new PathPoint(getPose().getTranslation(), getYaw(), getYaw()), end);
+    }
+    public PathPointOpen getNearestGoal () {
+        return getNearestGoal(getPose());
+    }
+    public PathPointOpen getNearestGoal (Pose2d pose) {
+        PathPointOpen output = null;
+        double distance = Double.MAX_VALUE;
+        for (PathPointOpen point : ScoringPositions.bluePositionsList) {
+            double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
+                Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+            if (currentDistance < distance) {
+                distance = currentDistance;
+                output = point;
+            }
+        }
+        return output;
     }
 
     /* Used by SwerveControllerCommand in Auto */

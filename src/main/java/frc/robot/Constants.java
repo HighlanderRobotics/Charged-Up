@@ -4,11 +4,13 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
-import com.pathplanner.lib.PathPoint;
+import frc.robot.PathPointOpen;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -171,21 +173,43 @@ public final class Constants {
             maxAngularSpeedRadiansPerSecond, maxAngularSpeedRadiansPerSecondSquared);
   }
 
+  public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.74, 0.43), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.74, 1.03), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.74, 1.63), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.74, 2.23), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.74, 2.83), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.74, 3.43), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.74, 4.03), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0));  
+  
   public static final class ScoringPositions {
-    public static final HashMap<String, PathPoint> positions = new HashMap<>();
+    public static final HashMap<String, PathPointOpen > positions = new HashMap<>();
     static {
-      positions.put("blue0", new PathPoint(new Translation2d(1.74, 0.43), Rotation2d.fromDegrees(0)));
-      positions.put("blue1", new PathPoint(new Translation2d(1.74, 1.03), Rotation2d.fromDegrees(0)));
-      positions.put("blue2", new PathPoint(new Translation2d(1.74, 1.63), Rotation2d.fromDegrees(0)));
-      positions.put("blue3", new PathPoint(new Translation2d(1.74, 2.23), Rotation2d.fromDegrees(0)));
-      positions.put("blue4", new PathPoint(new Translation2d(1.74, 2.83), Rotation2d.fromDegrees(0)));
-      positions.put("blue5", new PathPoint(new Translation2d(1.74, 3.43), Rotation2d.fromDegrees(0)));
-      positions.put("blue6", new PathPoint(new Translation2d(1.74, 4.03), Rotation2d.fromDegrees(0)));
-      positions.put("blue7", new PathPoint(new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0)));
-      positions.put("blue8", new PathPoint(new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0)));
+      positions.put("blue0", blue0);
+      positions.put("blue1", blue1);
+      positions.put("blue2", blue2);
+      positions.put("blue3", blue3);
+      positions.put("blue4", blue4);
+      positions.put("blue5", blue5);
+      positions.put("blue6", blue6);
+      positions.put("blue7", blue7);
+      positions.put("blue8", blue8);
       
     }
-
+    public static final List<PathPointOpen > bluePositionsList = new ArrayList<>();
+    static {
+      bluePositionsList.add(blue0);
+      bluePositionsList.add(blue1);
+      bluePositionsList.add(blue2);
+      bluePositionsList.add(blue3);
+      bluePositionsList.add(blue4);
+      bluePositionsList.add(blue5);
+      bluePositionsList.add(blue6);
+      bluePositionsList.add(blue7);
+      bluePositionsList.add(blue8);
+    }
   }
+  
   public static final double elevatorMargin = 10; //i have no idea what the actual number is
 }
