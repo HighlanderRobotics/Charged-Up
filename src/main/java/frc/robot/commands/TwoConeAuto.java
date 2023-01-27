@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import com.pathplanner.lib.PathPlanner;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -15,7 +16,10 @@ public class TwoConeAuto extends SequentialCommandGroup {
     PlacingSubsystem placingSubsystem){
 
     addCommands(
-        new RunCommand(() -> {placingSubsystem.activate();}, placingSubsystem),
+        new InstantCommand(() ->  swerveSubsystem.zeroGyro 
+            (PathPlanner.loadPath("firstcone", 2.0, 1.0).
+            getInitialPose().getRotation().getDegrees())),
+        new RunCommand(() -> {placingSubsystem.activate();}, placingSubsystem).withTimeout(2.74),
         //max velo = 2; max acceleration = 1;
         swerveSubsystem.followPathCommand(PathPlanner.loadPath("firstcone", 2.0, 1.0))
             .alongWith(new RunCommand(() -> {intakeSubsystem.activate();}, intakeSubsystem)),

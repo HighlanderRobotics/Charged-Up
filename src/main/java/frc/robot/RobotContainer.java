@@ -5,7 +5,12 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.TwoConeAuto;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.PlacingSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+
+import java.nio.file.Path;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
@@ -14,6 +19,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -64,7 +70,15 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
-    return swerveSubsystem.followPathCommand(PathPlanner.loadPath("two cones21.path", Constants.AutoConstants.autoConstraints));
+
+   return new SequentialCommandGroup(
+    new InstantCommand( () -> {
+      swerveSubsystem.zeroGyro(PathPlanner.loadPath("Test Path", 3, 3)
+        .getInitialPose().getRotation().getDegrees());
+      swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", 3, 3)
+        .getInitialPose());
+      }, swerveSubsystem),
+    swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", 50, 3)));
   }
 
   /** Hopefully only need to use for LEDS */
