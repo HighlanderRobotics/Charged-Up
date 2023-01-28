@@ -324,16 +324,20 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        if (camera != null) {
-            try {
-                result = camera.getLatestResult();
-            } catch (Error e) {
-                System.out.print("Error in camera processing " + e.getMessage());
-            }
-        }
-        if (result.hasTargets()) {
-            updateOdometry(getEstimatedPose());
-        }
+        // if (camera != null) {
+        //     try {
+        //         result = camera.getLatestResult();
+        //     } catch (Error e) {
+        //         System.out.print("Error in camera processing " + e.getMessage());
+        //     }
+        // }
+        // if (result.hasTargets()) {
+        //     try {
+        //         updateOdometry(getEstimatedPose());
+        //     } catch (Error e) {
+        //         System.out.print("Error in pose estimation " + e.getMessage());
+        //     }
+        // }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
