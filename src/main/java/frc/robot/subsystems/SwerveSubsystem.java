@@ -27,6 +27,7 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -69,6 +70,8 @@ public class SwerveSubsystem extends SubsystemBase {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.configFactoryDefault();
         zeroGyro();
+
+        headingController.enableContinuousInput(0, Math.PI * 2);
 
         camera = new PhotonCamera("OV5647");
         camera.setLED(VisionLEDMode.kOn);
@@ -138,7 +141,12 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public Command headingLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
-        return driveCommand(x, y, () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), fieldRelative, isOpenLoop);
+        return driveCommand(
+            x, 
+            y, 
+            () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), 
+            fieldRelative, 
+            isOpenLoop);
     }
 
     /** Generates a Command that consumes a PathPlanner path and follows it */

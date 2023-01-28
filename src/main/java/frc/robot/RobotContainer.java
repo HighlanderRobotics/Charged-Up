@@ -58,10 +58,10 @@ public class RobotContainer {
     // Reset odometry to vision measurement when we first see a vision target
     new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
 
-    controller.a().whileTrue(swerveSubsystem.headingLockDriveCommand(
+    new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
       () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
       () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()),  
-      () -> 0, 
+      () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
       true, 
       true));
   }
