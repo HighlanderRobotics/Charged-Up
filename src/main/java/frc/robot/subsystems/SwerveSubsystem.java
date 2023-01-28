@@ -27,6 +27,7 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -60,10 +61,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public boolean hasResetOdometry = false;
 
+    private ProfiledPIDController headingController = new ProfiledPIDController(
+        Constants.AutoConstants.kPThetaController, 
+        0, 
+        Constants.AutoConstants.kDThetaController,
+        Constants.AutoConstants.thetaControllerConstraints);
+
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.configFactoryDefault();
         zeroGyro();
+
+        headingController.enableContinuousInput(0, Math.PI * 2);
 
         camera = new PhotonCamera("OV5647");
         camera.setLED(VisionLEDMode.kOn);
@@ -124,14 +133,23 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
-    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
+    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop) {
         return new RunCommand(
             () -> drive(
-                new Translation2d(x.getAsDouble() * x.getAsDouble() * Math.signum(x.getAsDouble()), y.getAsDouble() * y.getAsDouble() * Math.signum(y.getAsDouble())).times(Constants.Swerve.maxSpeed), 
-                theta.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
+                new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
+                omega.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
                 fieldRelative, 
                 isOpenLoop), 
                 this);
+    }
+
+    public Command headingLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
+        return driveCommand(
+            x, 
+            y, 
+            () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), 
+            fieldRelative, 
+            isOpenLoop);
     }
 
     /** Generates a Command that consumes a PathPlanner path and follows it */
@@ -307,7 +325,11 @@ public class SwerveSubsystem extends SubsystemBase {
         poseEstimator.update(getYaw(), getModulePositions());  
         
         if (camera != null) {
-            result = camera.getLatestResult();
+            try {
+                result = camera.getLatestResult();
+            } catch (Error e) {
+                System.out.print("Error in camera processing " + e.getMessage());
+            }
         }
         if (result.hasTargets()) {
             updateOdometry(getEstimatedPose());
