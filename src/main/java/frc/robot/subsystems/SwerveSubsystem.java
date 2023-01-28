@@ -33,6 +33,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -100,18 +101,20 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+        Pose2d velPose = new Pose2d(translation.times(0.02), new Rotation2d(rotation * 0.02));
+        Twist2d velTwist = new Pose2d().log(velPose);
         SwerveModuleState[] swerveModuleStates =
             Constants.Swerve.swerveKinematics.toSwerveModuleStates(
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation, 
+                                    velTwist.dx / 0.02, 
+                                    velTwist.dy / 0.02, 
+                                    velTwist.dtheta /0.02, 
                                     getYaw()
                                 )
                                 : new ChassisSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation)
+                                    velTwist.dx / 0.02, 
+                                    velTwist.dy / 0.02, 
+                                    velTwist.dtheta /0.02)
                                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
