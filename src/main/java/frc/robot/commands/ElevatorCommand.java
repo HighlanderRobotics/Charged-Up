@@ -27,18 +27,12 @@ public class ElevatorCommand extends SequentialCommandGroup {
     addCommands(
       swerveSubsystem.followPathCommand(
         swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal(new Pose2d()))),
+      new InstantCommand(() -> swerveSubsystem.alignWithGoal()), swerveSubsystem),
       new InstantCommand(() -> elevatorSubsystem.extendElevator(), elevatorSubsystem), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()),
       new InstantCommand(() -> elevatorSubsystem.releaseElevator(), elevatorSubsystem), 
       new InstantCommand(() -> elevatorSubsystem.retractElevator(), elevatorSubsystem));
       
   
-  }
-  
-  public static void main (String[] args) { //trying to test this but it's asking for the c++ runtime lol
-    SwerveSubsystem test = new SwerveSubsystem();
-    PathPoint output = test.getNearestGoal(new Pose2d(new Translation2d(2, 2), Rotation2d.fromDegrees(0)));
-    System.out.println(output);
-    
   }
 }

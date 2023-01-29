@@ -160,6 +160,9 @@ public class SwerveSubsystem extends SubsystemBase {
         }
         return output;
     }
+    public void alignWithGoal(Pose2d goal) {
+        
+    }
 
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
@@ -296,7 +299,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        result = camera.getLatestResult();
+       result = camera.getLatestResult();
 
         if (DriverStation.isDisabled()){
             resetModulesToAbsolute();
