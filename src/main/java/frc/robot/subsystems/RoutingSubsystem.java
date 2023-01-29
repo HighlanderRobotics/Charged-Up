@@ -30,6 +30,7 @@ public class RoutingSubsystem extends SubsystemBase {
     try {
       vertices = result.getBestTarget().getDetectedCorners();
       System.out.print(vertices.toString());
+      
     } catch (NullPointerException e) {
       return null;
     }
@@ -41,7 +42,7 @@ public class RoutingSubsystem extends SubsystemBase {
     int maxSlopeVertex = 0;
     for (int i = 0; i < vertices.size(); i++) {
       System.out.print(vertices.get(i).x + ", " + vertices.get(i).y);
-      double slope = getSlope(vertices.get(i), getMidpoint(vertices.get((i + 1) % vertices.size()), vertices.get((i + 2) % vertices.size())));
+      double slope = Math.abs(getSlope(vertices.get(i), getMidpoint(vertices.get((i + 1) % vertices.size()), vertices.get((i + 2) % vertices.size()))));
       if (slope > maxSlope) {
         maxSlope = slope;
         maxSlopeVertex = i;

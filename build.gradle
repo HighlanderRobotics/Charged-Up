@@ -3,6 +3,10 @@ plugins {
     id "edu.wpi.first.GradleRIO" version "2023.2.1"
 }
 
+repositories {
+    mavenLocal()
+}
+
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
 
