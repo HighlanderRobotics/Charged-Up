@@ -16,6 +16,7 @@ import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PIDCommand;
@@ -41,9 +42,9 @@ public class RobotContainer {
       SmartDashboard.putData("autoBalance", swerveSubsystem.autoBalance());
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -controller.getLeftY(), 
-      () -> -controller.getLeftX(), 
-      () -> -controller.getRightX(), 
+      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
+      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()), 
+      () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()), 
       true, 
       true));
     // Configure the trigger bindings
@@ -61,6 +62,9 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    new Trigger(() -> DriverStation.isEnabled()).onTrue(
+      new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
   }
 
   /**
@@ -71,14 +75,15 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
 
-   return new SequentialCommandGroup(
-    new InstantCommand( () -> {
-      swerveSubsystem.zeroGyro(PathPlanner.loadPath("Test Path", 3, 3)
-        .getInitialPose().getRotation().getDegrees());
-      swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", 3, 3)
-        .getInitialPose());
-      }, swerveSubsystem),
-    swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", 50, 3)));
+      return new TwoConeAuto(swerveSubsystem, new IntakeSubsystem(), new PlacingSubsystem());
+  //  return new SequentialCommandGroup(
+  //   new InstantCommand( () -> {
+  //     swerveSubsystem.zeroGyro(PathPlanner.loadPath("Test Path", 3, 3)
+  //       .getInitialPose().getRotation().getDegrees());
+  //     swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", 3, 3)
+  //       .getInitialPose());
+  //     }, swerveSubsystem),
+  //   swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", 50, 3)));
   }
 
   /** Hopefully only need to use for LEDS */
