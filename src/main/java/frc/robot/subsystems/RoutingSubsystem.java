@@ -28,28 +28,32 @@ public class RoutingSubsystem extends SubsystemBase {
       return null;
     }
     try {
-      vertices = result.getBestTarget().getDetectedCorners();
-      System.out.print(vertices.toString());
-      
+      vertices = result.getBestTarget().getDetectedCorners();      
     } catch (NullPointerException e) {
       return null;
     }
+    return isFlipped(vertices);
+  }
+
+  public Boolean isFlipped(List<TargetCorner> vertices) {
     if (vertices.size() == 0) {
       System.out.print("\nNo vertices");
       return null;
     }
     double maxSlope = 0;
     int maxSlopeVertex = 0;
+    String verticesDashboard = "[";
     for (int i = 0; i < vertices.size(); i++) {
-      System.out.print(vertices.get(i).x + ", " + vertices.get(i).y);
+      verticesDashboard += "(" + vertices.get(i).x + ", " + vertices.get(i).y + "), ";
       double slope = Math.abs(getSlope(vertices.get(i), getMidpoint(vertices.get((i + 1) % vertices.size()), vertices.get((i + 2) % vertices.size()))));
       if (slope > maxSlope) {
         maxSlope = slope;
         maxSlopeVertex = i;
       }
     }
-    // System.out.print("Max slope vertex " + maxSlopeVertex);
-    // System.out.print("vertices " + vertices.size());
+    SmartDashboard.putString("Vertices", verticesDashboard + "]");
+    SmartDashboard.putNumber("Max slope vertex ", maxSlopeVertex);
+    SmartDashboard.putNumber("vertices ", vertices.size());
     return vertices.get(maxSlopeVertex).y > 
       getMidpoint(vertices.get((maxSlopeVertex + 1) % vertices.size()), vertices.get((maxSlopeVertex + 2) % vertices.size())).y;
   }
