@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.photonvision.PhotonCamera;
@@ -37,7 +38,7 @@ public class RoutingSubsystem extends SubsystemBase {
 
   public Boolean isFlipped(List<TargetCorner> vertices) {
     if (vertices.size() == 0) {
-      System.out.print("\nNo vertices");
+      System.out.print("\nNo vertices\n" + "| || \n|| _|");
       return null;
     }
     double maxSlope = 0;
@@ -64,6 +65,37 @@ public class RoutingSubsystem extends SubsystemBase {
 
   private double getSlope(TargetCorner a, TargetCorner b) {
     return (a.y - b.y) / (a.x - b.x);
+  }
+
+  public List<TargetCorner> mergePoints(List<TargetCorner> list) {
+    List<TargetCorner> result = new ArrayList<>();
+    for (TargetCorner current : list) {
+      for (TargetCorner other : list) {
+        if (other == current) {
+          // System.out.print("Did not add " + current.toString());
+          continue;
+        }
+
+        if (distance(other, current) < 100) {
+          if (!result.contains(current) && !result.contains(other)) {
+            // System.out.print("Added " + current.toString());
+            result.add(current);
+          }
+        } else {
+          if (!result.contains(current)) {
+            // System.out.print("Added " + current.toString());
+            result.add(current);
+          }
+        }
+      }
+    }
+    SmartDashboard.putNumber("Parsed vertices ", result.size());
+    // System.out.print("\nParsed " + result);
+    return result;
+  }
+
+  private double distance(TargetCorner a, TargetCorner b) {
+    return Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
   }
 
   public Command updateDashboardCommand() {

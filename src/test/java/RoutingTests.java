@@ -27,21 +27,33 @@ public class RoutingTests {
     @Test
     void uprightTest() {
         assertEquals(false, routingSubsystem.isFlipped(
-            List.of(new TargetCorner(10, 10), new TargetCorner(20, 10), new TargetCorner(14, 5))
+            List.of(new TargetCorner(100, 100), new TargetCorner(200, 100), new TargetCorner(140, 50))
         ));
     }
 
     @Test
     void upsidedownTest() {
         assertEquals(true, routingSubsystem.isFlipped(
-            List.of(new TargetCorner(10, 10), new TargetCorner(20, 10), new TargetCorner(14, 15))
+            List.of(new TargetCorner(100, 100), new TargetCorner(200, 100), new TargetCorner(140, 150))
         ));
     }
 
     @Test
     void skewedTest() {
         assertEquals(true, routingSubsystem.isFlipped(
-            List.of(new TargetCorner(10, 10), new TargetCorner(20, 14), new TargetCorner(21, 15))
+            List.of(new TargetCorner(100, 100), new TargetCorner(200, 140), new TargetCorner(210, 150))
         ));
+    }
+
+    @Test
+    void distanceTest(){
+        assertEquals(
+            List.of(new TargetCorner(100, 100), new TargetCorner(200, 100), new TargetCorner(210, 150)), 
+            routingSubsystem.mergePoints(
+                List.of(
+                    new TargetCorner(100, 100), 
+                    new TargetCorner(200, 100), 
+                    new TargetCorner(210, 150), 
+                    new TargetCorner(210, 150))));
     }
 }

@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  // private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
@@ -33,12 +33,12 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Set default commands here
-    swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()), 
-      () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()), 
-      true, 
-      true));
+    // swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
+    //   () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
+    //   () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()), 
+    //   () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()), 
+    //   true, 
+    //   true));
     routingSubsystem.setDefaultCommand(routingSubsystem.updateDashboardCommand());
     // Configure the trigger bindings
     configureBindings();
@@ -54,19 +54,19 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
-    // Reset modules to absolute on enable
-    new Trigger(() -> DriverStation.isEnabled()).onTrue(
-      new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
-    // Reset odometry to vision measurement when we first see a vision target
-    new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
+    // controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    // // Reset modules to absolute on enable
+    // new Trigger(() -> DriverStation.isEnabled()).onTrue(
+    //   new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    // // Reset odometry to vision measurement when we first see a vision target
+    // new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
 
-    new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()),  
-      () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
-      true, 
-      true));
+    // new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
+    //   () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
+    //   () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()),  
+    //   () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
+    //   true, 
+    //   true));
   }
 
   /**
@@ -76,7 +76,8 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
-    return swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints));
+    return new InstantCommand(() -> {});
+    // return swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints));
   }
 
   /** Hopefully only need to use for LEDS */
