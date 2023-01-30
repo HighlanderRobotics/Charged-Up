@@ -19,4 +19,7 @@ public class PathPointOpen extends PathPoint {
     public Translation2d getTranslation2d () {
         return position;
     }
+    public Rotation2d getRotation2d() {
+        return heading;
+    }
 }

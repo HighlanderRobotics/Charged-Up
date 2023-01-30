@@ -4,8 +4,11 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import com.pathplanner.lib.PathPoint;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -21,18 +24,22 @@ import frc.robot.subsystems.SwerveSubsystem;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ElevatorCommand extends SequentialCommandGroup {
   /** Creates a new ElevatorCommand. */
-  public ElevatorCommand(ElevatorSubsystem elevatorSubsystem, SwerveSubsystem swerveSubsystem) {
+  public ElevatorCommand(ElevatorSubsystem elevatorSubsystem, SwerveSubsystem swerveSubsystem, 
+  ProfiledPIDController headingController) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       swerveSubsystem.followPathCommand(
         swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal(new Pose2d()))),
-      new InstantCommand(() -> swerveSubsystem.alignWithGoal()), swerveSubsystem),
+      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal()), //ignore the fact that this method doesnt actually exist yet
+      new InstantCommand(() -> swerveSubsystem.headingLockDriveCommand(
+        () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
+        false, false)), // should hopefully rotate to the goal thru the magic of pid
       new InstantCommand(() -> elevatorSubsystem.extendElevator(), elevatorSubsystem), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()),
       new InstantCommand(() -> elevatorSubsystem.releaseElevator(), elevatorSubsystem), 
-      new InstantCommand(() -> elevatorSubsystem.retractElevator(), elevatorSubsystem));
-      
+      new InstantCommand(() -> elevatorSubsystem.retractElevator(), elevatorSubsystem)
+    );
   
   }
 }

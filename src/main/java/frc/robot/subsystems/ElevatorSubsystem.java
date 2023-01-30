@@ -46,6 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void releaseElevator() {
 
     }
+    
     public boolean isAtSetpoint(){
         if (Math.abs(pidController.getGoal().position - elevatorMotor.getSelectedSensorPosition()) < Constants.elevatorMargin) {
             return true;
@@ -54,6 +55,9 @@ public class ElevatorSubsystem extends SubsystemBase {
             return false;
         }
         
+    }
+    public boolean isAtGoal(){
+        return true;
     }
 
     @Override
