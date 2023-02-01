@@ -61,6 +61,51 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
         return Optional.of(new Pair<Double,Double>(r1, theta));
     }
+
+    /**
+     * Runs inverse kinematics for the arm and elevator system, taking the solution where the arm faces down.
+     * @param x coordinate of the target position, in inches in front of the elevator base
+     * @param y coordinate of the target position, in inches above the elevator base
+     * @return a pair containing the elevator extension in inches and arm angle in radians from the elevator, in that order.
+     * Returns an empty optional if theta is not a number.
+     */
+    public static Optional<Pair<Double, Double>> solveAlternativeInverseKinematics(double x, double y) {
+        double xPrime = (x * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
+            - (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
+        double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
+            + (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
+        double theta = Math.PI + Math.asin(yPrime/Constants.RotatingArmConstants.rotatingArmLengthInches);
+        if (theta == Double.NaN) {
+            return Optional.empty();
+        }
+        double r1 = xPrime - (Constants.RotatingArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        if (r1 == Double.NaN) {
+            return Optional.empty();
+        }
+        return Optional.of(new Pair<Double,Double>(r1, theta));
+    }
+
+    /** Solves for the "best" solution for inverse kinematics to try and keep the arm level without going past hardstops. */
+    public static Optional<Pair<Double, Double>> solveBestInverseKinematics(double x, double y) {
+        var s1 = solveInverseKinematics(x, y);
+        var s2 = solveAlternativeInverseKinematics(x, y);
+        if (s1.isEmpty()) {
+            return s2;
+        } else if (s2.isPresent()) {
+            if (isValid(s1.get())) {
+                return s1;
+            }
+            if (isValid(s2.get())) {
+                return s2;
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public static boolean isValid(Pair<Double, Double> positions) {
+        return !(positions.getFirst() < 0 || positions.getFirst() > Constants.ElevatorConstants.maxExtensionInches);
+    }
     
     @Override
     public void periodic() {

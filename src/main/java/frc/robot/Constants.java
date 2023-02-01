@@ -179,6 +179,7 @@ public final class Constants {
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
 
     public static final double elevatorAngleRad = Math.toRadians(44);
+    public static final double maxExtensionInches = 48;
   }
 
   public static final class RotatingArmConstants {
