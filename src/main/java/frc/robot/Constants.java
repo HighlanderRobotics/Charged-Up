@@ -177,6 +177,8 @@ public final class Constants {
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
+
+    public static final double elevatorAngleRad = Math.toRadians(44);
   }
 
   public static final class RotatingArmConstants {
@@ -185,5 +187,7 @@ public final class Constants {
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
+
+    public static final double rotatingArmLengthInches = 12.5;
   }
 }
