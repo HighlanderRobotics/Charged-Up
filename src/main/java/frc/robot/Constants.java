@@ -17,6 +17,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
@@ -180,6 +181,8 @@ public final class Constants {
 
     public static final double elevatorAngleRad = Math.toRadians(44);
     public static final double maxExtensionInches = 48;
+
+    public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
   }
 
   public static final class RotatingArmConstants {

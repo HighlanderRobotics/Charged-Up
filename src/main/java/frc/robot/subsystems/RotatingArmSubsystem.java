@@ -28,6 +28,15 @@ public class RotatingArmSubsystem extends SubsystemBase{
     public static double convertInchesToTicks (double inches) {
         return inches / Constants.RotatingArmConstants.rotatingArmGearRatio * 2048;
     }
+    
+    public void enable() {
+        enabled = true;
+    }
+
+    public void disable() {
+        enabled = false;
+    }
+
     @Override
     public void periodic () {
         if (enabled) {
