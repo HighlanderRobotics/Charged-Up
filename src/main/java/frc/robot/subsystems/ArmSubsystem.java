@@ -7,10 +7,10 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class RotatingArmSubsystem extends SubsystemBase{
+public class ArmSubsystem extends SubsystemBase{
     WPI_TalonFX rotatingArmMotor;
     boolean enabled = true;
-    public RotatingArmSubsystem () {
+    public ArmSubsystem () {
         rotatingArmMotor = new WPI_TalonFX(Constants.RotatingArmConstants.rotatingArmMotorID);
     }
     private void useOutput(double output, TrapezoidProfile.State state) {

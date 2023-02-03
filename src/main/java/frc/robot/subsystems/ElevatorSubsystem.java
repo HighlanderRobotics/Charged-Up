@@ -1,11 +1,14 @@
 package frc.robot.subsystems;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj.Timer;
@@ -19,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
@@ -26,7 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     WPI_TalonFX elevatorMotor;
     boolean enabled = true;
     Mechanism2d mech2d = new Mechanism2d(48, 48);
-    MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 0);
+    MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
         "Elevator",
         20, 
@@ -163,7 +167,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     /**Generates and follows a motion profile over a line for the elevator and arm */
     public static CommandBase followLineCommand(
             ElevatorSubsystem elevatorSubsystem, 
-            RotatingArmSubsystem rotatingArmSubsystem, 
+            ArmSubsystem armSubsystem, 
             double xStart, 
             double yStart, 
             double xEnd, 
@@ -192,7 +196,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                     yState.position);
                 if (setpoint.isPresent()) {
                     elevatorSubsystem.setGoal(setpoint.get().getFirst());
-                    rotatingArmSubsystem.setGoal(setpoint.get().getSecond());
+                    armSubsystem.setGoal(setpoint.get().getSecond());
                     elevatorSubsystem.updateMech2d(setpoint.get());
                     SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
                     SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
@@ -203,8 +207,67 @@ public class ElevatorSubsystem extends SubsystemBase {
                 SmartDashboard.putNumber("t", timer.get());
             },
             elevatorSubsystem, 
-            rotatingArmSubsystem));
-            // .until(() -> elevatorSubsystem.isAtSetpoint());
+            armSubsystem))
+            .until(() -> timer.get() > xProfile.totalTime() && timer.get() > yProfile.totalTime());
+    }
+
+    public static CommandBase followSplineCommand(
+        ElevatorSubsystem elevatorSubsystem,
+        ArmSubsystem armSubsystem,
+        Spline[] splines
+    ) {
+        Timer timer = new Timer();
+        var sequence = new SequentialCommandGroup();
+        for (Spline spline : splines) {
+            if (spline == splines[splines.length - 1]) {
+                continue;
+            }
+            sequence.addCommands(new RunCommand(() -> {
+                var state = spline.getPoint(timer.get());
+                var xState = state.poseMeters.getX();
+                var yState = state.poseMeters.getY();
+                var setpoint = solveBestInverseKinematics(
+                    xState, 
+                    yState);
+                if (setpoint.isPresent()) {
+                    elevatorSubsystem.setGoal(setpoint.get().getFirst());
+                    armSubsystem.setGoal(setpoint.get().getSecond());
+                    elevatorSubsystem.updateMech2d(setpoint.get());
+                    SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
+                    SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
+                } else {
+                    SmartDashboard.putNumber("Elevator setpoint", -1);
+                    SmartDashboard.putNumber("Arm setpoint", -1);
+                }
+                SmartDashboard.putNumber("X target", xState);
+                SmartDashboard.putNumber("Y target", yState);
+                SmartDashboard.putNumber("t", timer.get());
+            }, elevatorSubsystem, armSubsystem));
+        }
+        return new InstantCommand(() -> {
+            timer.reset();
+            timer.start();    
+        }).andThen(sequence)
+        .until(() -> timer.get() > splines.length - 1);
+    }
+
+    public static CommandBase followLinearTrajectoryCommand(
+        ElevatorSubsystem elevatorSubsystem, 
+        ArmSubsystem armSubsystem, 
+        List<Pair<Translation2d, Double>> p) {
+        var sequence = new SequentialCommandGroup();
+        for (int i = 0; i < p.size() - 1; i++) {
+            sequence.addCommands(followLineCommand(
+                elevatorSubsystem, 
+                armSubsystem, 
+                p.get(i).getFirst().getX(), 
+                p.get(i).getFirst().getY(), 
+                p.get(i + 1).getFirst().getX(), 
+                p.get(i + 1).getFirst().getY(), 
+                p.get(i).getSecond()));
+            System.out.print("Added command " + i);
+        }
+        return sequence;
     }
     
     @Override
