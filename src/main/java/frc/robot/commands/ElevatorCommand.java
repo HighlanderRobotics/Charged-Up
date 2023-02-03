@@ -12,6 +12,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -24,17 +25,17 @@ import frc.robot.subsystems.SwerveSubsystem;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ElevatorCommand extends SequentialCommandGroup {
   /** Creates a new ElevatorCommand. */
-  public ElevatorCommand(ElevatorSubsystem elevatorSubsystem, SwerveSubsystem swerveSubsystem, 
-  ProfiledPIDController headingController) {
+  public ElevatorCommand(ElevatorSubsystem elevatorSubsystem, SwerveSubsystem swerveSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       swerveSubsystem.followPathCommand(
         swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal(new Pose2d()))),
-      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal()), //ignore the fact that this method doesnt actually exist yet
+      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal()),
       new InstantCommand(() -> swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false)), // should hopefully rotate to the goal thru the magic of pid
+      
       new InstantCommand(() -> elevatorSubsystem.extendElevator(), elevatorSubsystem), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()),
       new InstantCommand(() -> elevatorSubsystem.releaseElevator(), elevatorSubsystem), 

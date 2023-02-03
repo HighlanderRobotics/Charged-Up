@@ -5,13 +5,17 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.ElevatorCommand;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 import com.pathplanner.lib.PathPlanner;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -24,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -39,6 +44,7 @@ public class RobotContainer {
       true));
     // Configure the trigger bindings
     configureBindings();
+    SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(elevatorSubsystem, swerveSubsystem));
   }
 
   /**
@@ -64,6 +70,10 @@ public class RobotContainer {
       () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
       true, 
       true));
+
+    controller.y().onTrue(new InstantCommand(() -> elevatorSubsystem.pickTopLevel()));
+    controller.b().onTrue(new InstantCommand(() -> elevatorSubsystem.pickMidLevel()));
+    controller.x().onTrue(new InstantCommand(() -> elevatorSubsystem.pickBottomLevel()));
   }
 
   /**
@@ -79,6 +89,8 @@ public class RobotContainer {
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
   }
+
+
   
   
 }

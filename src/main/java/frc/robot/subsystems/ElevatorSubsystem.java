@@ -15,6 +15,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     WPI_TalonFX elevatorMotor;
     boolean enabled = true;
     
+    
     public ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
     ProfiledPIDController pidController = new ProfiledPIDController(0.0, 0.0, 0.0, 
     new TrapezoidProfile.Constraints(0.0,0.0));
@@ -57,7 +58,19 @@ public class ElevatorSubsystem extends SubsystemBase {
         
     }
     public boolean isAtGoal(){
-        return true;
+        return true; //fix later
+    }
+    public void pickGoal(){
+
+    }
+    public void pickTopLevel(){
+        
+    }
+    public void pickMidLevel(){
+
+    }
+    public void pickBottomLevel(){
+
     }
 
     @Override

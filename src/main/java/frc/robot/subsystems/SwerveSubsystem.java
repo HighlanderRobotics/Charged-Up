@@ -199,9 +199,6 @@ public class SwerveSubsystem extends SubsystemBase {
         }
         return output;
     }
-    public void alignWithGoal(Pose2d goal) {
-        
-    }
 
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {

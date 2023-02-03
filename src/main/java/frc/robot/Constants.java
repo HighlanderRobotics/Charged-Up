@@ -214,5 +214,8 @@ public final class Constants {
     }
   }
   
-  public static final double elevatorMargin = 10; //i have no idea what the actual number is
+  public static final float elevatorMargin = 10; //i have no idea what the actual number is
+  public static final float topCubeGoal = 90;
+  public static final float midCubeGoal = 60;
+  public static final float bottomGoal = 0;
 }
