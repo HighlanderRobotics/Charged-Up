@@ -4,19 +4,9 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import com.pathplanner.lib.PathPoint;
-
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -30,12 +20,10 @@ public class ElevatorCommand extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
       swerveSubsystem.followPathCommand(
-        swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal(new Pose2d()))),
-      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal()),
+        swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())),
       new InstantCommand(() -> swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false)), // should hopefully rotate to the goal thru the magic of pid
-      
       new InstantCommand(() -> elevatorSubsystem.extendElevator(), elevatorSubsystem), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()),
       new InstantCommand(() -> elevatorSubsystem.releaseElevator(), elevatorSubsystem), 
