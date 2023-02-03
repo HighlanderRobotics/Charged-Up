@@ -55,7 +55,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
         
     }
-    
+    /*goal is referring to the column of 3 scoring spots, which all have the same corresponding point on the map and for path related things, while 
+    level refers to the top/mid/bottom levels of positions */
+
     public void pickGoal(){
 
     }
