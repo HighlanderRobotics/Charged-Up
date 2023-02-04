@@ -181,6 +181,7 @@ public final class Constants {
 
     public static final double elevatorAngleRad = Math.toRadians(44);
     public static final double maxExtensionInches = 48;
+    public static final Translation2d elevatorOffset = new Translation2d(9, -5); // TODO: find actual numbers for this
 
     public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
   }
@@ -193,5 +194,6 @@ public final class Constants {
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
 
     public static final double rotatingArmLengthInches = 12.5;
+    public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
   }
 }

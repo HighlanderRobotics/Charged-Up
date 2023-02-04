@@ -160,6 +160,16 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Optional.empty();
     }
 
+    public static Optional<Pair<Double, Double>> solveOffsetIK(double x, double y) {
+        var rotated = solveBestInverseKinematics(
+            x - Constants.ElevatorConstants.elevatorOffset.getX(), 
+            y - Constants.ElevatorConstants.elevatorOffset.getY());
+        if (rotated.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(Pair.of(rotated.get().getFirst(), rotated.get().getSecond() + Constants.RotatingArmConstants.armOffset));
+    }
+
     public static boolean isValid(Pair<Double, Double> positions) {
         return !(positions.getFirst() < 0 || positions.getFirst() > Constants.ElevatorConstants.maxExtensionInches);
     }
