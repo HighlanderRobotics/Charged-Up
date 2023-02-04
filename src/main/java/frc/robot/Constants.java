@@ -170,4 +170,11 @@ public final class Constants {
         new TrapezoidProfile.Constraints(
             maxAngularSpeedRadiansPerSecond, maxAngularSpeedRadiansPerSecondSquared);
   }
+
+  /** Constants for simple mechanisms like intake, routing, grabber */
+  public static final class MechanismConstants {
+    public static final int intakeID = 20;
+    public static final int intakeSolenoidForwardID = 0;
+    public static final int intakeSolenoidBackwardID = 1;
+  }
 }
