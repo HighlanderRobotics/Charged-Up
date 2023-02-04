@@ -34,13 +34,13 @@ public class RoutingSubsystem extends SubsystemBase {
   /** Creates a new RoutingSubsystem. */
   public RoutingSubsystem() {}
 
-  public void run() {
+  private void run() {
     routingLeft.setTargetRPM(200); // TODO: find right rpm
     routingRight.setTargetRPM(200); // TODO: find right rpm
     routingConveyer.setTargetRPM(200); // TODO: find right rpm
   }
 
-  public void stop() {
+  private void stop() {
     routingLeft.setTargetRPM(0);
     routingRight.setTargetRPM(0);
     routingConveyer.setTargetRPM(0);

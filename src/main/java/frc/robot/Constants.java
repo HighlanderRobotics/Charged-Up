@@ -185,5 +185,14 @@ public final class Constants {
 
     public static final int routingLimitSwitch = 2;
     public static final boolean isRoutingSwitchReversed = false; 
+
+    public static final int grabberID = 24;
+    public static final int grabberSolenoidTopFrontID = 2;
+    public static final int grabberSolenoidTopBackID = 3;
+    public static final int grabberSolenoidBottomFrontID = 4;
+    public static final int grabberSolenoidBottomBackID = 5;
+
+    public static final int grabberLimitSwitch = 3;
+    public static final boolean isGrabberSwitchReversed = false; 
   }
 }

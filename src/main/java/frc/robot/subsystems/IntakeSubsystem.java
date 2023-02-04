@@ -22,19 +22,19 @@ public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {}
 
-  public void run() {
+  private void run() {
     intake.setPercentOut(0.5);
   }
 
-  public void stop() {
+  private void stop() {
     intake.setPercentOut(0);
   }
 
-  public void extend() {
+  private void extend() {
     solenoid.set(Value.kForward);
   }
 
-  public void retract() {
+  private void retract() {
     solenoid.set(Value.kReverse);
   }
 
