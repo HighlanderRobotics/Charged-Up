@@ -176,5 +176,14 @@ public final class Constants {
     public static final int intakeID = 20;
     public static final int intakeSolenoidForwardID = 0;
     public static final int intakeSolenoidBackwardID = 1;
+
+    public static final int routingLeftID = 21;
+    public static final int routingRightID = 22;
+    public static final int routingConveyerID = 23;
+    public static final double routingKP = 1; // TODO: tune
+    public static final double conveyerKP = 1; // TODO: tune
+
+    public static final int routingLimitSwitch = 2;
+    public static final boolean isRoutingSwitchReversed = false; 
   }
 }
