@@ -72,7 +72,7 @@ public class RobotContainer {
 
     controller.y().onTrue(new InstantCommand(() -> elevatorSubsystem.pickTopLevel()));
     controller.b().onTrue(new InstantCommand(() -> elevatorSubsystem.pickMidLevel()));
-    controller.x().onTrue(new InstantCommand(() -> elevatorSubsystem.pickBottomLevel()));
+    controller.a().onTrue(new InstantCommand(() -> elevatorSubsystem.pickBottomLevel()));
   }
 
   /**

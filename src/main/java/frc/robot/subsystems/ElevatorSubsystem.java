@@ -12,6 +12,7 @@ import frc.robot.Constants;
 public class ElevatorSubsystem extends SubsystemBase {
     WPI_TalonFX elevatorMotor;
     boolean enabled = true;
+    String level = null; //may or may not ultimately be a string
     
     
     public ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
@@ -56,19 +57,16 @@ public class ElevatorSubsystem extends SubsystemBase {
         
     }
     /*goal is referring to the column of 3 scoring spots, which all have the same corresponding point on the map and for path related things, while 
-    level refers to the top/mid/bottom levels of positions */
+    level refers to the top/mid/bottom levels of scoring positions */
 
-    public void pickGoal(){
-
-    }
     public void pickTopLevel(){
-        
+        level = "Top";
     }
     public void pickMidLevel(){
-
+        level = "Mid";
     }
     public void pickBottomLevel(){
-
+        level = "Bottom";
     }
 
     @Override
