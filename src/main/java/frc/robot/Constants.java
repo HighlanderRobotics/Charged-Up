@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.HashMap;
+
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
 
@@ -15,6 +17,8 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
 
@@ -169,4 +173,12 @@ public final class Constants {
         new TrapezoidProfile.Constraints(
             maxAngularSpeedRadiansPerSecond, maxAngularSpeedRadiansPerSecondSquared);
   }
+  
+  public static final HashMap<String, Command> eventMap = new HashMap<>();
+  static {
+    eventMap.put("Place", new PrintCommand("uwu"));
+    eventMap.put("Intake", new PrintCommand("vaughn works at femboy hooters"));
+    eventMap.put("Score", new PrintCommand("owo"));  
+  }
+  
 }
