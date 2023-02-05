@@ -7,6 +7,8 @@ public class PlacingSubsystem extends SubsystemBase {
 
     }
 
-    public void activate(){}
+    public void activate(){
+        System.out.print("Placed");
+    }
 
 }

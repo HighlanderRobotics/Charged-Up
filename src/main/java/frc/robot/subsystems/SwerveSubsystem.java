@@ -70,8 +70,8 @@ public class SwerveSubsystem extends SubsystemBase {
         gyro.configFactoryDefault();
         zeroGyro();
 
-        camera = new PhotonCamera("OV5647");
-        camera.setLED(VisionLEDMode.kOn);
+        // camera = new PhotonCamera("OV5647");
+        // camera.setLED(VisionLEDMode.kOn);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -168,7 +168,11 @@ public class SwerveSubsystem extends SubsystemBase {
                 true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
+    
+
     }
+
+    
     public CommandBase autoBalance(){
         return new RunCommand(
             () -> drive(
@@ -333,12 +337,12 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        if (camera != null) {
-            result = camera.getLatestResult();
-        }
-        if (result.hasTargets()) {
-            updateOdometry(getEstimatedPose());
-        }
+        // if (camera != null) {
+        //     result = camera.getLatestResult();
+        // }
+        // if (result.hasTargets()) {
+        //     updateOdometry(getEstimatedPose());
+        // }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth

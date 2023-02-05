@@ -26,40 +26,44 @@ import frc.robot.subsystems.SwerveSubsystem;
 public class AutoChooser {
 
     
-    List<PathPlannerTrajectory> twoConeGroup = PathPlanner.loadPathGroup
-    ("TwoCone", new PathConstraints(4, 3));
-    HashMap<String, Command> eventMap = new HashMap<>();
-    
     
 
     SendableChooser<Command> chooser = new SendableChooser<Command>();
     SwerveSubsystem swerveSubsystem;
     IntakeSubsystem intakeSubsystem;
     PlacingSubsystem placingSubsystem;  
+    HashMap<String, Command> eventMap = new HashMap<>();
+    
     public AutoChooser(SwerveSubsystem swerveSubsystem,
     IntakeSubsystem intakeSubsystem,
     PlacingSubsystem placingSubsystem){
+      eventMap.put("Place", new PrintCommand("uwu"));
+      eventMap.put("Intake", new PrintCommand("vaughn works at femboy hooters"));
+      eventMap.put("Score", new PrintCommand("owo"));  
         this.intakeSubsystem = intakeSubsystem;
         this.swerveSubsystem = swerveSubsystem; 
-        chooser.setDefaultOption("First cone", new TwoConeAuto
-            (swerveSubsystem, intakeSubsystem, placingSubsystem));
+        chooser.setDefaultOption(
+            "Two Cone Auto", 
+            new TwoConeAuto(swerveSubsystem, intakeSubsystem, placingSubsystem));
+        chooser.addOption("2 + Park Middle Blue", parkMiddleBlue());
         chooser.addOption("NONE", new PrintCommand("owo"));
 
-        SmartDashboard.putData(chooser);
+        SmartDashboard.putData("autotester", chooser);
 
-        for (int x=0; x<2; x++) {
-            eventMap.put("Place", new InstantCommand(()-> placingSubsystem.activate()));
-            eventMap.put("Intake", new InstantCommand(()-> intakeSubsystem.activate()));
-        }
+        //List<PathPlannerTrajectory> twoConeGroup = PathPlanner.loadPathGroup
+    //("TwoCone", new PathConstraints(4, 3));
+    //HashMap<String, Command> eventMap = new HashMap<>();
     
     
-        swerveSubsystem.autoBuilder(eventMap);
+      
     }
     
     
     
 
-    
+    public Command getAutoCommand(){
+      return chooser.getSelected();
+    }
 
     private Command runIntake() {
         return new ParallelCommandGroup(
@@ -73,18 +77,19 @@ public class AutoChooser {
       private Command runPlacer() {
         return new InstantCommand(() -> placingSubsystem.activate());
       }
-
-      private Command twoConeAuto(){
-        return new SequentialCommandGroup(
-        runPlacer(),
-        new InstantCommand(() -> swerveSubsystem.zeroGyro(0)),  
-        new InstantCommand(() -> swerveSubsystem.resetOdometry(PathPlanner.loadPath("firstcone",
-             8.0, 5.0).getInitialPose())),
-        runIntake(),
-        new InstantCommand(() -> swerveSubsystem.resetOdometry(PathPlanner.loadPath("secondpart",
-        8.0, 5.0).getInitialPose())),
-        runPlacer()
-
-        );
+      //change to put in constructor
+      private Command parkMiddleBlue(){
+        List<PathPlannerTrajectory> parkMiddleBlueGroup = PathPlanner.loadPathGroup
+        ("2 + Park Middle Blue", new PathConstraints(4, 3));
+        
+        return new PrintCommand(eventMap.toString()).andThen(swerveSubsystem.autoBuilder(eventMap).fullAuto(parkMiddleBlueGroup));
       }
+      //change to put in constuctor
+      private Command twoConeAuto(){
+        List<PathPlannerTrajectory> pathGroup = 
+            PathPlanner.loadPathGroup(
+                "twoConeAuto", new PathConstraints(4, 3));
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(pathGroup);
+      }
+      
 }

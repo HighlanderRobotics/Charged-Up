@@ -16,7 +16,8 @@ public class TwoConeAuto extends SequentialCommandGroup {
     public TwoConeAuto(SwerveSubsystem swerveSubsystem,
     IntakeSubsystem intakeSubsystem,
     PlacingSubsystem placingSubsystem){
-        SmartDashboard.putNumber("start heading", PathPlanner.loadPath("firstcone", 3, 3).getInitialPose().getRotation().getDegrees());
+        SmartDashboard.putNumber("start heading", 
+            PathPlanner.loadPath("firstcone", 3, 3).getInitialPose().getRotation().getDegrees());
     addCommands(
         new InstantCommand( () -> {
                 swerveSubsystem.zeroGyro(0);

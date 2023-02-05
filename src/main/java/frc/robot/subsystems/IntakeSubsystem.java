@@ -18,6 +18,10 @@ public class IntakeSubsystem extends SubsystemBase{
     }
 
     public void activate(){
+        System.out.print("Intake");
+    }
+
+    public void setIntakeRPM() {
 
     }
 
