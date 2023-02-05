@@ -73,6 +73,8 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> elevatorSubsystem.pickTopLevel()));
     controller.b().onTrue(new InstantCommand(() -> elevatorSubsystem.pickMidLevel()));
     controller.a().onTrue(new InstantCommand(() -> elevatorSubsystem.pickBottomLevel()));
+    controller.x().onTrue(new InstantCommand(() ->swerveSubsystem.followPathCommand(
+      swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal()))));
   }
 
   /**
