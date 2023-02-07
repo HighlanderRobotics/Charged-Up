@@ -11,6 +11,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.TargetCorner;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -67,30 +68,33 @@ public class RoutingSubsystem extends SubsystemBase {
     return (a.y - b.y) / (a.x - b.x);
   }
 
-  public List<TargetCorner> mergePoints(List<TargetCorner> list) {
-    List<TargetCorner> result = new ArrayList<>();
-    for (TargetCorner current : list) {
-      for (TargetCorner other : list) {
-        if (other == current) {
-          // System.out.print("Did not add " + current.toString());
-          continue;
-        }
+  public List<TargetCorner> mergePoints(ArrayList<TargetCorner> list) {
+  
+    while (list.size() > 3) {
+      Pair<TargetCorner, TargetCorner> closestCorners = getClosestCorners(list);
+      TargetCorner pointA = closestCorners.getFirst();
+      list.remove(pointA);
+      System.out.println("removed " + pointA.toString());
+    }
+    SmartDashboard.putNumber("Parsed vertices ", list.size());
+    // System.out.print("\nParsed " + result);
+    return list;
+  }
 
-        if (distance(other, current) < 100) {
-          if (!result.contains(current) && !result.contains(other)) {
-            // System.out.print("Added " + current.toString());
-            result.add(current);
-          }
-        } else {
-          if (!result.contains(current)) {
-            // System.out.print("Added " + current.toString());
-            result.add(current);
-          }
+  private Pair<TargetCorner, TargetCorner> getClosestCorners(ArrayList<TargetCorner> list) {
+    Pair<TargetCorner, TargetCorner> result = Pair.of(list.get(0), list.get(1));
+    double minDist = Double.MAX_VALUE;
+    for (TargetCorner cornerA : list) {
+      for (TargetCorner cornerB : list) {
+        if (distance(cornerA, cornerB) < minDist && cornerA != cornerB) {
+          result = Pair.of(cornerA, cornerB);
+          minDist = distance(cornerA, cornerB);
+
+          System.out.println(result.getFirst() + ", " + result.getSecond());
+          System.out.println(minDist);
         }
       }
     }
-    SmartDashboard.putNumber("Parsed vertices ", result.size());
-    // System.out.print("\nParsed " + result);
     return result;
   }
 

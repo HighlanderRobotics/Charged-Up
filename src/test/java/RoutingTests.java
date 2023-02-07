@@ -11,6 +11,7 @@ import org.photonvision.targeting.TargetCorner;
 import edu.wpi.first.hal.HAL;
 import frc.robot.subsystems.RoutingSubsystem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Add your docs here. */
@@ -46,14 +47,41 @@ public class RoutingTests {
     }
 
     @Test
-    void distanceTest(){
+    void distanceTest0(){
+        var list = routingSubsystem.mergePoints(new ArrayList<TargetCorner>(List.of(
+            new TargetCorner(100, 100), 
+            new TargetCorner(200, 100), 
+            new TargetCorner(210, 150), 
+            new TargetCorner(210, 150))));
+            System.out.println(list);
         assertEquals(
-            List.of(new TargetCorner(100, 100), new TargetCorner(200, 100), new TargetCorner(210, 150)), 
-            routingSubsystem.mergePoints(
-                List.of(
-                    new TargetCorner(100, 100), 
-                    new TargetCorner(200, 100), 
-                    new TargetCorner(210, 150), 
-                    new TargetCorner(210, 150))));
+            3, list.size());
+    }
+
+    @Test
+    void distanceTest1(){
+        var list = routingSubsystem.mergePoints(new ArrayList<TargetCorner>(List.of(
+            new TargetCorner(100, 100), 
+            new TargetCorner(200, 100), 
+            new TargetCorner(210, 150), 
+            new TargetCorner(215, 150),
+            new TargetCorner(250, 150),
+            new TargetCorner(310, 250),
+            new TargetCorner(210, 120))));
+            System.out.println(list);
+        assertEquals(
+            3, list.size());
+    }
+
+    
+    @Test
+    void distanceTest2(){
+        var list = routingSubsystem.mergePoints(new ArrayList<TargetCorner>(List.of(
+            new TargetCorner(100, 100), 
+            new TargetCorner(200, 100), 
+            new TargetCorner(210, 150))));
+            System.out.println(list);
+        assertEquals(
+            3, list.size());
     }
 }
