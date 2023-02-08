@@ -25,39 +25,32 @@ public class RoutingSubsystem extends SubsystemBase {
   public RoutingSubsystem() {}
 
   public Boolean isFlipped() {
-    List<TargetCorner> vertices = null;
+    ArrayList<TargetCorner> vertices = null;
     if (!result.hasTargets()) {
       return null;
     }
     try {
-      vertices = result.getBestTarget().getDetectedCorners();      
+      vertices = new ArrayList<TargetCorner>(result.getBestTarget().getDetectedCorners());      
     } catch (NullPointerException e) {
       return null;
     }
-    return isFlipped(vertices);
+    return isFlipped(mergePoints(vertices));
   }
 
-  public Boolean isFlipped(List<TargetCorner> vertices) {
+  public Boolean isFlipped(ArrayList<TargetCorner> vertices) {
     if (vertices.size() == 0) {
       System.out.print("\nNo vertices\n" + "| || \n|| _|");
       return null;
     }
-    double maxSlope = 0;
-    int maxSlopeVertex = 0;
+    sortCorners(vertices);
     String verticesDashboard = "[";
     for (int i = 0; i < vertices.size(); i++) {
       verticesDashboard += "(" + vertices.get(i).x + ", " + vertices.get(i).y + "), ";
-      double slope = Math.abs(getSlope(vertices.get(i), getMidpoint(vertices.get((i + 1) % vertices.size()), vertices.get((i + 2) % vertices.size()))));
-      if (slope > maxSlope) {
-        maxSlope = slope;
-        maxSlopeVertex = i;
-      }
     }
+    System.out.println("vertices dashboard " + verticesDashboard);
     SmartDashboard.putString("Vertices", verticesDashboard + "]");
-    SmartDashboard.putNumber("Max slope vertex ", maxSlopeVertex);
     SmartDashboard.putNumber("vertices ", vertices.size());
-    return vertices.get(maxSlopeVertex).y > 
-      getMidpoint(vertices.get((maxSlopeVertex + 1) % vertices.size()), vertices.get((maxSlopeVertex + 2) % vertices.size())).y;
+    return vertices.get(vertices.size() - 1).y > getMidpoint(vertices.get(0), vertices.get(1)).y;
   }
 
   private TargetCorner getMidpoint(TargetCorner a, TargetCorner b) {
@@ -68,13 +61,24 @@ public class RoutingSubsystem extends SubsystemBase {
     return (a.y - b.y) / (a.x - b.x);
   }
 
-  public List<TargetCorner> mergePoints(ArrayList<TargetCorner> list) {
+  public ArrayList<TargetCorner> sortCorners(ArrayList<TargetCorner> list) {
+    int n = list.size();
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n - i; j++)
+                if (distance(list.get(j), list.get((j + 1) % n)) > distance(list.get((j + 1) % n), list.get((j + 2) % n))) {
+                    var temp = list.get(j);
+                    list.set(j, list.get((j + 1) % n));
+                    list.set((j + 1) % n, temp);
+                }
+    return list;
+  }
+
+  public ArrayList<TargetCorner> mergePoints(ArrayList<TargetCorner> list) {
   
     while (list.size() > 3) {
       Pair<TargetCorner, TargetCorner> closestCorners = getClosestCorners(list);
       TargetCorner pointA = closestCorners.getFirst();
       list.remove(pointA);
-      System.out.println("removed " + pointA.toString());
     }
     SmartDashboard.putNumber("Parsed vertices ", list.size());
     // System.out.print("\nParsed " + result);
