@@ -19,7 +19,8 @@ public class ElevatorCommand extends SequentialCommandGroup {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      
+      new InstantCommand(() ->swerveSubsystem.followPathCommand(
+        swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal()))),
       new InstantCommand(() -> swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false)), // should hopefully rotate to the goal thru the magic of pid

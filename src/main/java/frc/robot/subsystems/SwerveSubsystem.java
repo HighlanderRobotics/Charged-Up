@@ -216,6 +216,7 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
+        System.out.println("odometry reset");
     }
 
     /** Updates the pose estimator from a (presumably vision) measurement

@@ -11,10 +11,12 @@ import frc.robot.subsystems.SwerveSubsystem;
 
 import com.pathplanner.lib.PathPlanner;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -44,6 +46,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(elevatorSubsystem, swerveSubsystem));
+    SmartDashboard.putData("Odometry Reset",  new InstantCommand (() -> swerveSubsystem.resetOdometry(new Pose2d())));
   }
 
   /**
@@ -73,8 +76,7 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> elevatorSubsystem.pickTopLevel()));
     controller.b().onTrue(new InstantCommand(() -> elevatorSubsystem.pickMidLevel()));
     controller.a().onTrue(new InstantCommand(() -> elevatorSubsystem.pickBottomLevel()));
-    controller.x().onTrue(new InstantCommand(() ->swerveSubsystem.followPathCommand(
-      swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal()))));
+    
   }
 
   /**
