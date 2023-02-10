@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
-    WPI_TalonFX elevatorMotor;
+   // WPI_TalonFX elevatorMotor;
     boolean enabled = true;
     String level = null; //may or may not ultimately be a string
     
@@ -21,21 +21,22 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     public ElevatorSubsystem() {
         
-        elevatorMotor = new WPI_TalonFX(0);
+        // elevatorMotor = new WPI_TalonFX(0);
 
-        elevatorMotor.config_kP(0, 0.0);
-        elevatorMotor.config_kI(0, 0.0);
-        elevatorMotor.config_kD(0, 0.0);
-        elevatorMotor.config_kF(0, 0.0); // fill in these values later
+        // elevatorMotor.config_kP(0, 0.0);
+        // elevatorMotor.config_kI(0, 0.0);
+        // elevatorMotor.config_kD(0, 0.0);
+        // elevatorMotor.config_kF(0, 0.0); // fill in these values later
     }
     private void useOutput(double output, TrapezoidProfile.State state) {
-        elevatorMotor.set(ControlMode.PercentOutput, output + feedforward.calculate(state.velocity));
+       // elevatorMotor.set(ControlMode.PercentOutput, output + feedforward.calculate(state.velocity));
     }
     public void setGoal(double position) {
         pidController.setGoal(position);
     }
     private double getMeasurement() {
-        return elevatorMotor.getSelectedSensorPosition();
+       // return elevatorMotor.getSelectedSensorPosition();
+       return 0;
     }
     public void extendElevator() {
         
@@ -48,12 +49,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     
     public boolean isAtSetpoint(){
-        if (Math.abs(pidController.getGoal().position - elevatorMotor.getSelectedSensorPosition()) < Constants.elevatorMargin) {
-            return true;
-        }
-        else {
+      //  if (Math.abs(pidController.getGoal().position - elevatorMotor.getSelectedSensorPosition()) < Constants.elevatorMargin) {
+    //   //      return true;
+    //     }
+    //     else {
             return false;
-        }
+      //  }
         
     }
     /*goal is referring to the column of 3 scoring spots, which all have the same corresponding point on the map and for path related things, while 

@@ -47,6 +47,7 @@ public class RobotContainer {
     configureBindings();
     SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(elevatorSubsystem, swerveSubsystem));
     SmartDashboard.putData("Odometry Reset",  new InstantCommand (() -> swerveSubsystem.resetOdometry(new Pose2d())));
+    SmartDashboard.putData("testpath reset odometry", new InstantCommand (() -> swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints).getInitialHolonomicPose()), swerveSubsystem));
   }
 
   /**
@@ -76,6 +77,8 @@ public class RobotContainer {
     controller.y().onTrue(new InstantCommand(() -> elevatorSubsystem.pickTopLevel()));
     controller.b().onTrue(new InstantCommand(() -> elevatorSubsystem.pickMidLevel()));
     controller.a().onTrue(new InstantCommand(() -> elevatorSubsystem.pickBottomLevel()));
+
+    controller.rightBumper().whileTrue(new ElevatorCommand(elevatorSubsystem, swerveSubsystem));
     
   }
 
