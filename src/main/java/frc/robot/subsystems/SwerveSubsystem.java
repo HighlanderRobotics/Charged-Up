@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -21,6 +22,8 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -30,12 +33,15 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -48,14 +54,27 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Field2d field = new Field2d();
 
-    private PhotonCamera camera;
-    private PhotonPipelineResult result;
+    private PhotonCamera camera = null;
+    private PhotonPipelineResult result = null;
     private AprilTagFieldLayout fieldLayout;
+
+    public boolean hasResetOdometry = false;
+
+    private ProfiledPIDController headingController = new ProfiledPIDController(
+        Constants.AutoConstants.kPThetaController, 
+        0, 
+        Constants.AutoConstants.kDThetaController,
+        Constants.AutoConstants.thetaControllerConstraints);
 
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.configFactoryDefault();
         zeroGyro();
+
+        headingController.enableContinuousInput(0, Math.PI * 2);
+
+        camera = new PhotonCamera("OV5647");
+        camera.setLED(VisionLEDMode.kOn);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -70,9 +89,17 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        // TODO: Add stddev matrices
-        poseEstimator = new SwerveDrivePoseEstimator(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions(), new Pose2d());
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.0, 0.0, 0.0);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
 
+        poseEstimator = new SwerveDrivePoseEstimator(
+            Constants.Swerve.swerveKinematics, 
+            getYaw(), 
+            getModulePositions(), 
+            new Pose2d(),
+            odoStdDevs,
+            visStdDevs);
+        
         try {
             fieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
         } catch (Exception e) {
@@ -82,18 +109,20 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
     public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+        Pose2d velPose = new Pose2d(translation.times(0.02), new Rotation2d(rotation * 0.02));
+        Twist2d velTwist = new Pose2d().log(velPose);
         SwerveModuleState[] swerveModuleStates =
             Constants.Swerve.swerveKinematics.toSwerveModuleStates(
                 fieldRelative ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation, 
+                                    velTwist.dx / 0.02, 
+                                    velTwist.dy / 0.02, 
+                                    velTwist.dtheta /0.02, 
                                     getYaw()
                                 )
                                 : new ChassisSpeeds(
-                                    translation.getX(), 
-                                    translation.getY(), 
-                                    rotation)
+                                    velTwist.dx / 0.02, 
+                                    velTwist.dy / 0.02, 
+                                    velTwist.dtheta /0.02)
                                 );
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
@@ -103,14 +132,23 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
-    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
+    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop) {
         return new RunCommand(
             () -> drive(
-                new Translation2d(x.getAsDouble() * x.getAsDouble() * Math.signum(x.getAsDouble()), y.getAsDouble() * y.getAsDouble() * Math.signum(y.getAsDouble())).times(Constants.Swerve.maxSpeed), 
-                theta.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
+                new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
+                omega.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
                 fieldRelative, 
                 isOpenLoop), 
                 this);
+    }
+
+    public Command headingLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
+        return driveCommand(
+            x, 
+            y, 
+            () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), 
+            fieldRelative, 
+            isOpenLoop);
     }
 
     /** Generates a Command that consumes a PathPlanner path and follows it */
@@ -153,16 +191,14 @@ public class SwerveSubsystem extends SubsystemBase {
      * Input is in the form of a list of pose2ds and a latency measurement
      */
     public void updateOdometry(Pair<List<Pose2d>, Double> data){
-        System.out.println(data.getFirst());
-
         if (data != null) {
-        field.getObject("Latest Vision Pose").setPoses(data.getFirst());
-        SmartDashboard.putNumber("Latency", data.getSecond());
-        for (Pose2d pose : data.getFirst()){
-            // Data is in milliseconds, need to convert to seconds
-            poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp() - (data.getSecond() / 1000));
-            zeroGyro(pose.getRotation().getDegrees());
-        }
+            field.getObject("Latest Vision Pose").setPoses(data.getFirst());
+            SmartDashboard.putNumber("Latency", data.getSecond());
+            for (Pose2d pose : data.getFirst()){
+                // Data is in milliseconds, need to convert to seconds
+                poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp() - (data.getSecond() / 1000));
+                zeroGyro(pose.getRotation().getDegrees());
+            }
         }
     }
 
@@ -197,11 +233,33 @@ public class SwerveSubsystem extends SubsystemBase {
           poses.add(getFieldToRobot(targetPose3d, Constants.CAMERA_TO_ROBOT, target.getBestCameraToTarget()).toPose2d());
         }
         // Return the list of poses and the latency
+        if (poses == null || poses.isEmpty()) {
+            return null;
+        }
         return new Pair<>(poses, result.getLatencyMillis());
       }
     }
     // Returns null if no targets are found
     return null;
+  }
+
+  public boolean hasTargets() {
+    if (result != null) {
+        return result.hasTargets();
+    }
+    return false;
+  }
+
+  public Command resetIfTargets() {
+    return new InstantCommand(() -> {
+        try {
+            resetOdometry(getEstimatedPose().getFirst().get(0));
+            hasResetOdometry = true;
+        } catch (Exception e) {
+            // error handling is for nerds
+            // Also if we get an error we just try again next loop
+        }
+    });
   }
 
     /**
@@ -255,7 +313,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Resets the encoders on all swerve modules to the cancoder values */
-    private void resetModulesToAbsolute() {
+    public void resetModulesToAbsolute() {
         for (SwerveModule module: mSwerveMods) {
             module.resetToAbsolute();
         }
@@ -270,6 +328,17 @@ public class SwerveSubsystem extends SubsystemBase {
         if (DriverStation.isDisabled()){
             resetModulesToAbsolute();
         }
+        
+        if (camera != null) {
+            try {
+                result = camera.getLatestResult();
+            } catch (Error e) {
+                System.out.print("Error in camera processing " + e.getMessage());
+            }
+        }
+        if (result.hasTargets()) {
+            updateOdometry(getEstimatedPose());
+        }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
@@ -279,5 +348,12 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         }
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
+        field.setRobotPose(getPose());
+        SmartDashboard.putData(field);
+        SmartDashboard.putBoolean("Has reset", hasResetOdometry);
+
+        if (DriverStation.isDisabled()) {
+            hasResetOdometry = false;
+        }
     }
 }
