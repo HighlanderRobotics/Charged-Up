@@ -141,7 +141,8 @@ public class SwerveSubsystem extends SubsystemBase {
     public Command followPathCommand(PathPlannerTrajectory path) {
         return new SwerveControllerCommand(
             path,
-            () -> getPose(), Constants.Swerve.swerveKinematics,
+            () -> getPose(), 
+            Constants.Swerve.swerveKinematics,
             new HolonomicDriveController(
                 new PIDController(Constants.AutoConstants.kPXController, 0, 0), 
                 new PIDController(Constants.AutoConstants.kPYController, 0, 0), 
@@ -165,7 +166,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
                 this::setModuleStates, // Module states consumer used to output to the drive subsystem
                 eventMap,
-                true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+                false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
     }
@@ -333,12 +334,12 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        if (camera != null) {
-            result = camera.getLatestResult();
-        }
-        if (result.hasTargets()) {
-            updateOdometry(getEstimatedPose());
-        }
+        // if (camera != null) {
+        //     result = camera.getLatestResult();
+        // }
+        // if (result.hasTargets()) {
+        //     updateOdometry(getEstimatedPose());
+        // }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth

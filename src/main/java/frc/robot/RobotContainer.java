@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AutoChooser;
 import frc.robot.commands.TwoConeAuto;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PlacingSubsystem;
@@ -33,6 +34,9 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private PlacingSubsystem placingSubsystem = new PlacingSubsystem();
+  private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, placingSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -74,16 +78,8 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
-
-      return new TwoConeAuto(swerveSubsystem, new IntakeSubsystem(), new PlacingSubsystem());
-  //  return new SequentialCommandGroup(
-  //   new InstantCommand( () -> {
-  //     swerveSubsystem.zeroGyro(PathPlanner.loadPath("Test Path", 3, 3)
-  //       .getInitialPose().getRotation().getDegrees());
-  //     swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", 3, 3)
-  //       .getInitialPose());
-  //     }, swerveSubsystem),
-  //   swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", 50, 3)));
+      return autoChooser.getAutoCommand();
+      
   }
 
   /** Hopefully only need to use for LEDS */
