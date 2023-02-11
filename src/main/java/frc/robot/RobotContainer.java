@@ -101,8 +101,7 @@ public class RobotContainer {
       10, 
       10, 
       30, 
-      15, 
-      2));
+      15));
 
     SmartDashboard.putData("Path 2", ElevatorSubsystem.followLineCommand(
       elevatorSubsystem, 
@@ -110,8 +109,7 @@ public class RobotContainer {
       30, 
       15, 
       10, 
-      10, 
-      2));
+      10));
 
     SmartDashboard.putData("Sequence", ElevatorSubsystem.followLinearTrajectoryCommand(
       elevatorSubsystem, 

@@ -21,6 +21,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
+import static frc.robot.subsystems.ElevatorSubsystem.Level;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -177,7 +178,8 @@ public final class Constants {
   
   public static final class ElevatorConstants {
     public static final int elevatorMotorID = 0;
-    public static final double elevatorGearRatio = 0.0;
+    // TODO: check this
+    public static final double elevatorGearRatio = 5.0;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
@@ -185,13 +187,46 @@ public final class Constants {
     public static final double elevatorAngleRad = Math.toRadians(44);
     public static final double maxExtensionInches = 48;
     public static final Translation2d elevatorOffset = new Translation2d(9, -5); // TODO: find actual numbers for this
+    // Positions that the end effector needs to be in to score
+    // TODO: find
+    public static final Translation2d l1Translation = new Translation2d();
+
+    public static final Translation2d l2TranslationCones = new Translation2d();
+    public static final Translation2d l3TranslationCones = new Translation2d();
+    
+    public static final Translation2d l2TranslationCubes = new Translation2d();
+    public static final Translation2d l3TranslationCubes = new Translation2d();
+
+    public static Translation2d getGoalTranslationCones(Level level) {
+      switch (level) {
+        case L2:
+          return l2TranslationCones;
+        case L3:
+          return l3TranslationCones;
+        default:
+          return l1Translation;
+      }
+    }
+    
+    public static Translation2d getGoalTranslationCubes(Level level) {
+      switch (level) {
+        case L2:
+          return l2TranslationCubes;
+        case L3:
+          return l3TranslationCubes;
+        default:
+          return l1Translation;
+      }
+    }
 
     public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
+    public static double elevatorSpoolCircumference = 1.751 * Math.PI;
   }
 
   public static final class RotatingArmConstants {
     public static final int rotatingArmMotorID = 0;
-    public static final double rotatingArmGearRatio = 0.0;
+    // TODO: Check with actual robot
+    public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);

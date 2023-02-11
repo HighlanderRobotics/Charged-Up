@@ -3,30 +3,33 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class ArmSubsystem extends SubsystemBase{
-    WPI_TalonFX rotatingArmMotor;
+    HighlanderFalcon armMotor;
     boolean enabled = true;
     public ArmSubsystem () {
-        rotatingArmMotor = new WPI_TalonFX(Constants.RotatingArmConstants.rotatingArmMotorID);
+        armMotor = new HighlanderFalcon(Constants.RotatingArmConstants.rotatingArmMotorID);
     }
+
     private void useOutput(double output, TrapezoidProfile.State state) {
-        rotatingArmMotor.set(ControlMode.PercentOutput, output + Constants.RotatingArmConstants.feedforward.calculate(state.position, state.velocity));
+        armMotor.set(ControlMode.PercentOutput, output + Constants.RotatingArmConstants.feedforward.calculate(state.position, state.velocity));
     }
+
     public void setGoal(double position) {
         Constants.RotatingArmConstants.PIDController.setGoal(position);
     }
+
     private double getMeasurement() {
-        return rotatingArmMotor.getSelectedSensorPosition();
+        return armMotor.getSelectedSensorPosition();
     }
-    public static double convertTicksToInches (double ticks) {
-        return ticks / 2048 * Constants.RotatingArmConstants.rotatingArmGearRatio;
-    }
-    public static double convertInchesToTicks (double inches) {
-        return inches / Constants.RotatingArmConstants.rotatingArmGearRatio * 2048;
+
+    public Rotation2d getRotation() {
+        return new Rotation2d(armMotor.getRadians());
     }
     
     public void enable() {
