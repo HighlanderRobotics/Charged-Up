@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.components.HighlanderFalcon;
@@ -41,6 +42,12 @@ public class IntakeSubsystem extends SubsystemBase {
   public CommandBase runCommand() {
     return new StartEndCommand(
       () -> {this.run(); this.extend();}, 
+      () -> {this.stop(); this.retract();}, 
+      this);
+  }
+
+  public CommandBase stopCommand() {
+    return new RunCommand(
       () -> {this.stop(); this.retract();}, 
       this);
   }

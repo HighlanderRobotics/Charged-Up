@@ -197,6 +197,8 @@ public final class Constants {
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
 
+    public static final Translation2d defaultPosition = new Translation2d(5, -5); //TODO: Find
+
     public static Translation2d getGoalTranslationCones(Level level) {
       switch (level) {
         case L2:

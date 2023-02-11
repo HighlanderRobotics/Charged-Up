@@ -55,6 +55,10 @@ public class HighlanderFalcon extends TalonFX {
         this.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 80, 0.5));
     }
 
+    public double getGearing() {
+        return gearRatio;
+    }
+
     /**Gets the last value sent to the motor */
     public double getLastSet() {
         return lastSet;

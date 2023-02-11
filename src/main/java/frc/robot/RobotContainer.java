@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -51,8 +52,15 @@ public class RobotContainer {
       () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()), 
       true, 
       true));
+    // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
+    elevatorSubsystem.setDefaultCommand(ElevatorSubsystem.goToPoseCommand(elevatorSubsystem, armSubsystem, Constants.ElevatorConstants.defaultPosition));
+    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.setGoal(armSubsystem.getRotation())));
+    intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
+    routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
+    grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
     // Configure the trigger bindings
-    // configureBindings();
+    configureBindings();
+    // Add testing buttons to dashboard
     addDashboardCommands();
   }
 

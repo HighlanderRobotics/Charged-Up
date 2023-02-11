@@ -300,11 +300,22 @@ public class ElevatorSubsystem extends SubsystemBase {
         return sequence;
     }
 
-    public CommandBase extendCommand(ArmSubsystem armSubsystem, Level level, boolean isCone) {
-        Translation2d startPos = solveForwardKinematics(getExtensionInches(), armSubsystem.getRotation().getRadians());
+    public static CommandBase goToPoseCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Translation2d endPose) {
+        Translation2d startPos = solveForwardKinematics(elevatorSubsystem.getExtensionInches(), armSubsystem.getRotation().getRadians());
+        return followLineCommand(
+                elevatorSubsystem, 
+                armSubsystem, 
+                startPos.getX(), 
+                startPos.getY(), 
+                endPose.getX(), 
+                endPose.getY()); 
+    }
+
+    public static CommandBase extendCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Level level, boolean isCone) {
+        Translation2d startPos = solveForwardKinematics(elevatorSubsystem.getExtensionInches(), armSubsystem.getRotation().getRadians());
         if (isCone) {
             return followLineCommand(
-                this, 
+                elevatorSubsystem, 
                 armSubsystem, 
                 startPos.getX(), 
                 startPos.getY(), 
@@ -312,7 +323,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 Constants.ElevatorConstants.getGoalTranslationCones(level).getY());
         } else {
             return followLineCommand(
-                this, 
+                elevatorSubsystem, 
                 armSubsystem, 
                 startPos.getX(), 
                 startPos.getY(), 

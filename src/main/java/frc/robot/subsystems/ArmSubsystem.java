@@ -23,6 +23,10 @@ public class ArmSubsystem extends SubsystemBase{
         Constants.RotatingArmConstants.PIDController.setGoal(position);
     }
 
+    public void setGoal(Rotation2d rotation) {
+        setGoal(HighlanderFalcon.rotToNative(rotation.getRotations()) * armMotor.getGearing());
+    }
+
     private double getMeasurement() {
         return armMotor.getSelectedSensorPosition();
     }
