@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,7 +18,6 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -178,6 +176,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
 
         return Optional.empty();
+    }
+
+    public static Optional<Pair<Double, Double>> solveBestInverseKinematics(Translation2d pose) {
+        return solveAlternativeInverseKinematics(pose.getX(), pose.getY());
     }
 
     public static Optional<Pair<Double, Double>> solveOffsetIK(double x, double y) {

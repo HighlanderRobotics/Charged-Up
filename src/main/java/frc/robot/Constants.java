@@ -186,16 +186,16 @@ public final class Constants {
 
     public static final double elevatorAngleRad = Math.toRadians(44);
     public static final double maxExtensionInches = 48;
-    public static final Translation2d elevatorOffset = new Translation2d(9, -5); // TODO: find actual numbers for this
+    public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
     // Positions that the end effector needs to be in to score
-    // TODO: find
-    public static final Translation2d l1Translation = new Translation2d();
+    // TODO: tune
+    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0);
 
-    public static final Translation2d l2TranslationCones = new Translation2d();
-    public static final Translation2d l3TranslationCones = new Translation2d();
+    public static final Translation2d l2TranslationCones = new Translation2d(34.0, 34.0);
+    public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
     
-    public static final Translation2d l2TranslationCubes = new Translation2d();
-    public static final Translation2d l3TranslationCubes = new Translation2d();
+    public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
+    public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
 
     public static Translation2d getGoalTranslationCones(Level level) {
       switch (level) {
