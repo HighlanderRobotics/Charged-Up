@@ -98,8 +98,19 @@ public class AutoChooser {
       }
       private Command ParkBottomBlue(){
         List<PathPlannerTrajectory> parkBottomGroup = PathPlanner.loadPathGroup(
-          "1 Park Bottm Blue", new PathConstraints(4, 3));
+          "1+ Park Bottom Blue", new PathConstraints(4, 3));
         return swerveSubsystem.autoBuilder(Constants.eventMap).fullAuto(parkBottomGroup);
+      }
+
+      private Command ParkTopBlue(){
+        List<PathPlannerTrajectory> parkTopGroup = PathPlanner.loadPathGroup(
+          "1+ Park Top Blue", new PathConstraints(4, 3));
+        return swerveSubsystem.autoBuilder(Constants.eventMap).fullAuto(parkTopGroup);
+      }
+      private Command twoParkTopBlue(){
+        List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
+          "2+ Park Top Blue", new PathConstraints(4, 3));
+        return swerveSubsystem.autoBuilder(Constants.eventMap).fullAuto(twoParkTopGroup);
       }
 
       
