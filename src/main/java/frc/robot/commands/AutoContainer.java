@@ -23,7 +23,7 @@ public class AutoContainer {
             PathPlanner.loadPathGroup("FullAuto", new PathConstraints(4, 3));
         HashMap<String, Command> eventMap = new HashMap<>();
         
-        eventMap.put("intake", new RunCommand(() -> intakeSubsystem.activate(), intakeSubsystem));
+        eventMap.put("intake", new RunCommand(() -> intakeSubsystem.runCommand(), intakeSubsystem));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(pathGroup);
     }
     
