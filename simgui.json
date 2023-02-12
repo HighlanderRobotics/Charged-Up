@@ -1,0 +1,49 @@
+{
+  "NTProvider": {
+    "types": {
+      "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Path 1": "Command",
+      "/SmartDashboard/Path 2": "Command",
+      "/SmartDashboard/Sequence": "Command",
+      "/SmartDashboard/Spline": "Command",
+      "/SmartDashboard/elevatorsim": "Mechanism2d"
+    },
+    "windows": {
+      "/SmartDashboard/Path 1": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Path 2": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Sequence": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Spline": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/elevatorsim": {
+        "window": {
+          "visible": true
+        }
+      }
+    }
+  },
+  "NetworkTables": {
+    "transitory": {
+      "SmartDashboard": {
+        "elevatorsim": {
+          "open": true
+        },
+        "open": true
+      }
+    }
+  }
+}

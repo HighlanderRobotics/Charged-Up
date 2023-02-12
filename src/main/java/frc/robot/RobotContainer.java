@@ -6,16 +6,24 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
-import frc.robot.commands.TwoConeAuto;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.PlacingSubsystem;
+import frc.robot.subsystems.RoutingSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 import java.nio.file.Path;
 
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,9 +42,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
+  private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private ArmSubsystem armSubsystem = new ArmSubsystem();
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-  private PlacingSubsystem placingSubsystem = new PlacingSubsystem();
-  private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, placingSubsystem);
+  private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
+  private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+  private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, null);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -52,7 +63,8 @@ public class RobotContainer {
       true, 
       true));
     // Configure the trigger bindings
-    configureBindings();
+    // configureBindings();
+    addDashboardCommands();
   }
 
   /**
@@ -66,9 +78,63 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled()).onTrue(
       new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    // Reset odometry to vision measurement when we first see a vision target
     new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
+
+    new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
+      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
+      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()),  
+      () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
+      true, 
+      true));
+
+
+    controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
+    
+  }
+
+  private void addDashboardCommands() {
+    SmartDashboard.putData("Path 1", ElevatorSubsystem.followLineCommand(
+      elevatorSubsystem, 
+      armSubsystem, 
+      10, 
+      10, 
+      30, 
+      15, 
+      2));
+
+    SmartDashboard.putData("Path 2", ElevatorSubsystem.followLineCommand(
+      elevatorSubsystem, 
+      armSubsystem, 
+      30, 
+      15, 
+      10, 
+      10, 
+      2));
+
+    SmartDashboard.putData("Sequence", ElevatorSubsystem.followLinearTrajectoryCommand(
+      elevatorSubsystem, 
+      armSubsystem, 
+      List.of(
+      Pair.of(new Translation2d(10, 10), 2.0),
+      Pair.of(new Translation2d(20, 10), 2.0),
+      Pair.of(new Translation2d(20, 15), 2.0),
+      Pair.of(new Translation2d(30, 15), 2.0))));
+
+    // var waypoints = new ArrayList<Translation2d>();
+    // waypoints.add(new Translation2d(20, 10));
+    // waypoints.add(new Translation2d(20, 20));
+    // SmartDashboard.putData("Spline", ElevatorSubsystem.followSplineCommand(
+    //   elevatorSubsystem, 
+    //   armSubsystem, 
+    //   SplineHelper.getCubicControlVectorsFromWaypoints(
+    //     new Pose2d(10, 10, new Rotation2d()),
+    //     waypoints.toArray(),
+    //     new Pose2d(40, 30, new Rotation2d())
+    //   )));
   }
 
   /**
@@ -79,10 +145,16 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
       return autoChooser.getAutoCommand();
+    
       
-  }
+    
 
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
+  }
+
+  public Command runRouting(){
+    return routingSubsystem.runCommand().andThen(grabberSubsystem.intakeCommand());
+
   }
 }

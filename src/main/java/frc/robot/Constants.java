@@ -9,6 +9,9 @@ import java.util.HashMap;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -16,6 +19,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -47,8 +51,8 @@ public final class Constants {
         COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
     /* Drivetrain Constants */
-    public static final double trackWidth = Units.inchesToMeters(21.73); //TODO: This must be tuned to specific robot
-    public static final double wheelBase = Units.inchesToMeters(21.73); //TODO: This must be tuned to specific robot
+    public static final double trackWidth = Units.inchesToMeters(22.7);
+    public static final double wheelBase = Units.inchesToMeters(24.5);
     public static final double wheelCircumference = chosenModule.wheelCircumference;
 
     /* Swerve Kinematics 
@@ -140,7 +144,7 @@ public final class Constants {
         public static final int driveMotorID = 7;
         public static final int angleMotorID = 8;
         public static final int canCoderID = 4;
-        public static final Rotation2d angleOffset = Rotation2d.fromDegrees(24.6);
+        public static final Rotation2d angleOffset = Rotation2d.fromDegrees(24.6 - 90);
         public static final SwerveModuleConstants constants = 
             new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -159,14 +163,15 @@ public final class Constants {
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 3;
     public static final double maxAccelerationMetersPerSecondSquared = 3;
-    public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI;
+    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 2;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
     public static final double kPXController = 1;
     public static final double kPYController = 1;
-    public static final double kPThetaController = 1;
+    public static final double kPThetaController = 0.5;
+    public static final double kDThetaController = 0.1;
 
     /* Constraint for the motion profilied robot angle controller */
     public static final TrapezoidProfile.Constraints thetaControllerConstraints =
@@ -174,11 +179,53 @@ public final class Constants {
             maxAngularSpeedRadiansPerSecond, maxAngularSpeedRadiansPerSecondSquared);
   }
   
-  public static final HashMap<String, Command> eventMap = new HashMap<>();
-  static {
-    eventMap.put("Place", new PrintCommand("uwu"));
-    eventMap.put("Intake", new PrintCommand("vaughn works at femboy hooters"));
-    eventMap.put("Score", new PrintCommand("owo"));  
+  public static final class ElevatorConstants {
+    public static final int elevatorMotorID = 0;
+    public static final double elevatorGearRatio = 0.0;
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
+
+    public static final double elevatorAngleRad = Math.toRadians(44);
+    public static final double maxExtensionInches = 48;
+    public static final Translation2d elevatorOffset = new Translation2d(9, -5); // TODO: find actual numbers for this
+
+    public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
+  }
+
+  public static final class RotatingArmConstants {
+    public static final int rotatingArmMotorID = 0;
+    public static final double rotatingArmGearRatio = 0.0;
+    public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
+    public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
+
+    public static final double rotatingArmLengthInches = 12.5;
+    public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
   }
   
+  /** Constants for simple mechanisms like intake, routing, grabber */
+  public static final class MechanismConstants {
+    public static final int intakeID = 20;
+    public static final int intakeSolenoidForwardID = 0;
+    public static final int intakeSolenoidBackwardID = 1;
+
+    public static final int routingLeftID = 21;
+    public static final int routingRightID = 22;
+    public static final int routingConveyerID = 23;
+    public static final double routingKP = 1; // TODO: tune
+    public static final double conveyerKP = 1; // TODO: tune
+
+    public static final int routingLimitSwitch = 2;
+    public static final boolean isRoutingSwitchReversed = false; 
+
+    public static final int grabberID = 24;
+    public static final int grabberSolenoidTopFrontID = 2;
+    public static final int grabberSolenoidTopBackID = 3;
+    public static final int grabberSolenoidBottomFrontID = 4;
+    public static final int grabberSolenoidBottomBackID = 5;
+
+    public static final int grabberLimitSwitch = 3;
+    public static final boolean isGrabberSwitchReversed = false; 
+  }
 }
