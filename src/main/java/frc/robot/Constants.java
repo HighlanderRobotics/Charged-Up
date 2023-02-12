@@ -11,6 +11,9 @@ import java.util.List;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -18,9 +21,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
+import static frc.robot.subsystems.ElevatorSubsystem.Level;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -47,8 +52,8 @@ public final class Constants {
         COTSFalconSwerveConstants.SDSMK4i(COTSFalconSwerveConstants.driveGearRatios.SDSMK4i_L2);
 
     /* Drivetrain Constants */
-    public static final double trackWidth = Units.inchesToMeters(21.73); //TODO: This must be tuned to specific robot
-    public static final double wheelBase = Units.inchesToMeters(21.73); //TODO: This must be tuned to specific robot
+    public static final double trackWidth = Units.inchesToMeters(22.7);
+    public static final double wheelBase = Units.inchesToMeters(24.5);
     public static final double wheelCircumference = chosenModule.wheelCircumference;
 
     /* Swerve Kinematics 
@@ -217,4 +222,88 @@ public final class Constants {
   public static final float topCubeGoal = 90;
   public static final float midCubeGoal = 60;
   public static final float bottomGoal = 0;
+  
+  public static final class ElevatorConstants {
+    public static final int elevatorMotorID = 0;
+    // TODO: check this
+    public static final double elevatorGearRatio = 5.0;
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
+
+    public static final double elevatorAngleRad = Math.toRadians(44);
+    public static final double maxExtensionInches = 48;
+    public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
+    // Positions that the end effector needs to be in to score
+    // TODO: tune
+    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0);
+
+    public static final Translation2d l2TranslationCones = new Translation2d(34.0, 34.0);
+    public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
+    
+    public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
+    public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
+
+    public static Translation2d getGoalTranslationCones(Level level) {
+      switch (level) {
+        case L2:
+          return l2TranslationCones;
+        case L3:
+          return l3TranslationCones;
+        default:
+          return l1Translation;
+      }
+    }
+    
+    public static Translation2d getGoalTranslationCubes(Level level) {
+      switch (level) {
+        case L2:
+          return l2TranslationCubes;
+        case L3:
+          return l3TranslationCubes;
+        default:
+          return l1Translation;
+      }
+    }
+
+    public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
+    public static double elevatorSpoolCircumference = 1.751 * Math.PI;
+  }
+
+  public static final class RotatingArmConstants {
+    public static final int rotatingArmMotorID = 0;
+    // TODO: Check with actual robot
+    public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
+    public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
+    public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
+
+    public static final double rotatingArmLengthInches = 12.5;
+    public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
+  }
+  
+  /** Constants for simple mechanisms like intake, routing, grabber */
+  public static final class MechanismConstants {
+    public static final int intakeID = 20;
+    public static final int intakeSolenoidForwardID = 0;
+    public static final int intakeSolenoidBackwardID = 1;
+
+    public static final int routingLeftID = 21;
+    public static final int routingRightID = 22;
+    public static final int routingConveyerID = 23;
+    public static final double routingKP = 1; // TODO: tune
+    public static final double conveyerKP = 1; // TODO: tune
+
+    public static final int routingLimitSwitch = 2;
+    public static final boolean isRoutingSwitchReversed = false; 
+
+    public static final int grabberID = 24;
+    public static final int grabberSolenoidTopFrontID = 2;
+    public static final int grabberSolenoidTopBackID = 3;
+    public static final int grabberSolenoidBottomFrontID = 4;
+    public static final int grabberSolenoidBottomBackID = 5;
+
+    public static final int grabberLimitSwitch = 3;
+    public static final boolean isGrabberSwitchReversed = false; 
+  }
 }

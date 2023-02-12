@@ -7,13 +7,23 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ElevatorCommand;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.RoutingSubsystem;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.Level;
+
+import java.util.List;
 
 import com.pathplanner.lib.PathPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.DriverStation;
+
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -30,6 +40,10 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
   private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private ArmSubsystem armSubsystem = new ArmSubsystem();
+  private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
+  private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -45,9 +59,7 @@ public class RobotContainer {
       true));
     // Configure the trigger bindings
     configureBindings();
-    SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(elevatorSubsystem, swerveSubsystem));
-    SmartDashboard.putData("Odometry Reset",  new InstantCommand (() -> swerveSubsystem.resetOdometry(new Pose2d())));
-    SmartDashboard.putData("testpath reset odometry", new InstantCommand (() -> swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints).getInitialHolonomicPose()), swerveSubsystem));
+    addDashboardCommands();
   }
 
   /**
@@ -74,11 +86,41 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.y().onTrue(new InstantCommand(() -> elevatorSubsystem.pickTopLevel()));
-    controller.b().onTrue(new InstantCommand(() -> elevatorSubsystem.pickMidLevel()));
-    controller.a().onTrue(new InstantCommand(() -> elevatorSubsystem.pickBottomLevel()));
+    controller.rightBumper().whileTrue(new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem));
+    
 
-    controller.rightBumper().whileTrue(new ElevatorCommand(elevatorSubsystem, swerveSubsystem));
+    controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
+    
+  }
+
+  private void addDashboardCommands() {
+    SmartDashboard.putData("Path 1", ElevatorSubsystem.followLineCommand(
+      elevatorSubsystem, 
+      armSubsystem, 
+      10, 
+      10, 
+      30, 
+      15));
+
+    SmartDashboard.putData("Path 2", ElevatorSubsystem.followLineCommand(
+      elevatorSubsystem, 
+      armSubsystem, 
+      30, 
+      15, 
+      10, 
+      10));
+
+    SmartDashboard.putData("Sequence", ElevatorSubsystem.followLinearTrajectoryCommand(
+      elevatorSubsystem, 
+      armSubsystem, 
+      List.of(
+      Pair.of(new Translation2d(10, 10), 2.0),
+      Pair.of(new Translation2d(20, 10), 2.0),
+      Pair.of(new Translation2d(20, 15), 2.0),
+      Pair.of(new Translation2d(30, 15), 2.0))));
+    SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem));
+    SmartDashboard.putData("Odometry Reset",  new InstantCommand (() -> swerveSubsystem.resetOdometry(new Pose2d())));
+    SmartDashboard.putData("testpath reset odometry", new InstantCommand (() -> swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints).getInitialHolonomicPose()), swerveSubsystem));
     
   }
 
@@ -89,14 +131,10 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
-    return swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints));
+    return new InstantCommand(() -> {});//swerveSubsystem.followPathCommand(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints));
   }
 
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
-  }
-
-
-  
-  
+  } 
 }
