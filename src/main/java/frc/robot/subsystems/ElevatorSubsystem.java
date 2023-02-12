@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -18,16 +18,16 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
-    WPI_TalonFX elevatorMotor;
+    HighlanderFalcon elevatorMotor;
     boolean enabled = true;
     Mechanism2d mech2d = new Mechanism2d(48, 48);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
@@ -39,17 +39,26 @@ public class ElevatorSubsystem extends SubsystemBase {
         new Color8Bit(Color.kPurple)));
     MechanismLigament2d armLig2d = elevatorLig2d.append(new MechanismLigament2d(
         "Arm", 
-        Constants.RotatingArmConstants.rotatingArmLengthInches,
+        Constants.ArmConstants.rotatingArmLengthInches,
         90,
         15,
         new Color8Bit(Color.kLavender)));
+
     public ElevatorSubsystem() {
-        elevatorMotor = new WPI_TalonFX(Constants.ElevatorConstants.elevatorMotorID);
+        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
         SmartDashboard.putData("elevatorsim", mech2d);
     }
+
+    public static enum Level {
+        L1,
+        L2,
+        L3
+    }
+
     private void useOutput(double output, TrapezoidProfile.State state) {
         elevatorMotor.set(ControlMode.PercentOutput, output + Constants.ElevatorConstants.feedforward.calculate(state.velocity));
     }
+
     public void setGoal(double position) {
         Constants.ElevatorConstants.PIDController.setGoal(position);
     }
@@ -59,23 +68,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     private double getMeasurement() {
-        return elevatorMotor.getSelectedSensorPosition();
+       return elevatorMotor.getSelectedSensorPosition();
     }
-    public static double convertTicksToInches (double ticks) {
-        return ticks / 2048 * Constants.ElevatorConstants.elevatorGearRatio;
-    }
-    public static double convertInchesToTicks (double inches) {
-        return inches / Constants.ElevatorConstants.elevatorGearRatio * 2048;
+
+    public double getExtensionInches() {
+        return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference;
     }
 
     public boolean isAtSetpoint() {
         return Constants.ElevatorConstants.PIDController.atGoal();
-    }
-    public void extendElevator() {
-
-    }
-    public void retractElevator() {
-
     }
 
     public void updateMech2d(Pair<Double, Double> state) {
@@ -92,6 +93,17 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     /**
+     * Computes the forward kinematics of the arm and elevator system
+     * @param theta rotation of the arm in radians ccw positive from the x axis
+     * @param r extension of the elevator in inches
+     * @return translation2d of the position of the end effector, in inches
+     */
+    public static Translation2d solveForwardKinematics (double theta, double r) {
+        Translation2d pos = new Translation2d(r, Rotation2d.fromRadians(Constants.ElevatorConstants.elevatorAngleRad));
+        return pos.plus(new Translation2d(Constants.ArmConstants.rotatingArmLengthInches, theta));
+    }
+
+    /**
      * Runs inverse kinematics for the arm and elevator system
      * @param x coordinate of the target position, in inches in front of the elevator base
      * @param y coordinate of the target position, in inches above the elevator base
@@ -103,11 +115,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = -Math.asin(yPrime/Constants.RotatingArmConstants.rotatingArmLengthInches);
+        double theta = -Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.RotatingArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -126,11 +138,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = Math.PI + Math.asin(yPrime/Constants.RotatingArmConstants.rotatingArmLengthInches);
+        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.RotatingArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -160,6 +172,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Optional.empty();
     }
 
+    public static Optional<Pair<Double, Double>> solveBestInverseKinematics(Translation2d pose) {
+        return solveAlternativeInverseKinematics(pose.getX(), pose.getY());
+    }
+
     public static Optional<Pair<Double, Double>> solveOffsetIK(double x, double y) {
         var rotated = solveBestInverseKinematics(
             x - Constants.ElevatorConstants.elevatorOffset.getX(), 
@@ -167,7 +183,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (rotated.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(Pair.of(rotated.get().getFirst(), rotated.get().getSecond() + Constants.RotatingArmConstants.armOffset));
+        return Optional.of(Pair.of(rotated.get().getFirst(), rotated.get().getSecond() + Constants.ArmConstants.armOffset));
     }
 
     public static boolean isValid(Pair<Double, Double> positions) {
@@ -181,8 +197,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             double xStart, 
             double yStart, 
             double xEnd, 
-            double yEnd, 
-            double time) {
+            double yEnd) {
         TrapezoidProfile xProfile = new TrapezoidProfile(
             Constants.ElevatorConstants.elevatorArmSystemConstraints, 
             new State(xEnd, 0.0),
@@ -273,11 +288,32 @@ public class ElevatorSubsystem extends SubsystemBase {
                 p.get(i).getFirst().getX(), 
                 p.get(i).getFirst().getY(), 
                 p.get(i + 1).getFirst().getX(), 
-                p.get(i + 1).getFirst().getY(), 
-                p.get(i).getSecond()));
+                p.get(i + 1).getFirst().getY()));
             System.out.print("Added command " + i);
         }
         return sequence;
+    }
+
+    public CommandBase extendCommand(ArmSubsystem armSubsystem, Level level, boolean isCone) {
+        Translation2d startPos = solveForwardKinematics(getExtensionInches(), armSubsystem.getRotation().getRadians());
+        if (isCone) {
+            return followLineCommand(
+                this, 
+                armSubsystem, 
+                startPos.getX(), 
+                startPos.getY(), 
+                Constants.ElevatorConstants.getGoalTranslationCones(level).getX(), 
+                Constants.ElevatorConstants.getGoalTranslationCones(level).getY());
+        } else {
+            return followLineCommand(
+                this, 
+                armSubsystem, 
+                startPos.getX(), 
+                startPos.getY(), 
+                Constants.ElevatorConstants.getGoalTranslationCubes(level).getX(), 
+                Constants.ElevatorConstants.getGoalTranslationCubes(level).getY());
+        }
+
     }
     
     @Override

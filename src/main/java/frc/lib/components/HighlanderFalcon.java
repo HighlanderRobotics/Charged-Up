@@ -16,8 +16,15 @@ public class HighlanderFalcon extends TalonFX {
     static double TICKS_TO_ROTATIONS = 1 / 2048;
     static double ROTATIONS_TO_TICKS = 2048;
 
+    private double gearRatio = 1.0;
+
     public HighlanderFalcon(int id) {
         super(id);
+    }
+
+    public HighlanderFalcon(int id, double gearing) {
+        super(id);
+        gearRatio = gearing;
     }
 
     public HighlanderFalcon(int id, String canbus) {
@@ -25,15 +32,17 @@ public class HighlanderFalcon extends TalonFX {
     }
 
     /**Makes a new HighlanderFalcon with a PID controller built in */
-    public HighlanderFalcon(int id, double p, double i, double d) {
+    public HighlanderFalcon(int id, double gearing, double p, double i, double d) {
         super(id);
+        gearRatio = gearing;
         this.config_kP(0, p);
         this.config_kI(0, i);
         this.config_kD(0, d);
     }
 
-    public HighlanderFalcon(int id, double p, double i, double d, double accelRpmSquared, double maxVelRpm) {
+    public HighlanderFalcon(int id, double gearing, double p, double i, double d, double accelRpmSquared, double maxVelRpm) {
         super(id);
+        gearRatio = gearing;
         this.config_kP(0, p);
         this.config_kI(0, i);
         this.config_kD(0, d);
@@ -63,7 +72,7 @@ public class HighlanderFalcon extends TalonFX {
 
     /**Gets the encoder position in rotations */
     public double getRotations() {
-        return super.getSelectedSensorPosition() * TICKS_TO_ROTATIONS;
+        return super.getSelectedSensorPosition() * TICKS_TO_ROTATIONS * gearRatio;
     }
 
     /**Gets the encoder position in degrees */
@@ -78,32 +87,32 @@ public class HighlanderFalcon extends TalonFX {
 
     /**Gets the encoder RPM */
     public double getRPM() {
-        return super.getSelectedSensorVelocity() * 10 * 60;
+        return super.getSelectedSensorVelocity() * 10 * 60 * gearRatio;
     }
 
     /**Gets the encoder rotations per second */
     public double getRPS() {
-        return getRPM() / 10;
+        return getRPM() / 60;
     }
 
     /**Sets the onboard velocity PID */
     public void setTargetRPM(double rpm) {
-        set(TalonFXControlMode.Velocity, rpm * ROTATIONS_TO_TICKS * 60 * 10);
+        set(TalonFXControlMode.Velocity, rpm * ROTATIONS_TO_TICKS * 60 * 10 * gearRatio);
     }
 
     /**Sets the onboard position PID, in rotations */
     public void setTargetRot(double rotations) {
-        set(TalonFXControlMode.Position, rotations * ROTATIONS_TO_TICKS);
+        set(TalonFXControlMode.Position, rotations * ROTATIONS_TO_TICKS * gearRatio);
     }
 
     /**Sets the onboard position PID, in degrees */
     public void setTargetDegrees(double degrees) {
-        setTargetRot(degrees / 360);
+        setTargetRot((degrees / 360) * gearRatio);
     }
 
     /**Sets the onboard position PID, in radians */
     public void setTargetRadians(double radians) {
-        setTargetRot(radians / (Math.PI * 2));
+        setTargetRot((radians / (Math.PI * 2)) * gearRatio);
     }
 
     /**Sets the output of the motor from -1 to 1*/
@@ -117,6 +126,10 @@ public class HighlanderFalcon extends TalonFX {
 
     public static int rotToNative(double rot) {
         return (int) (rot * 2048.0);
+    }
+
+    public static int radToNative(double rad) {
+        return rotToNative(rad / (Math.PI * 2));
     }
 
     public static int rpmToNative(double rpm) {

@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
@@ -21,10 +23,12 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
+import frc.lib.components.HighlanderFalcon;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
+import frc.robot.subsystems.ElevatorSubsystem.Level;
+
+import static frc.robot.subsystems.ElevatorSubsystem.Level;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -178,28 +182,115 @@ public final class Constants {
         new TrapezoidProfile.Constraints(
             maxAngularSpeedRadiansPerSecond, maxAngularSpeedRadiansPerSecondSquared);
   }
+
+  public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.74, 0.43), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.74, 1.03), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.74, 1.63), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.74, 2.23), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.74, 2.83), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.74, 3.43), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.74, 4.03), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0));  
+  
+  public static final class ScoringPositions {
+    public static final HashMap<String, PathPointOpen > positions = new HashMap<>();
+    static {
+      positions.put("blue0", blue0);
+      positions.put("blue1", blue1);
+      positions.put("blue2", blue2);
+      positions.put("blue3", blue3);
+      positions.put("blue4", blue4);
+      positions.put("blue5", blue5);
+      positions.put("blue6", blue6);
+      positions.put("blue7", blue7);
+      positions.put("blue8", blue8);
+      
+    }
+    public static final List<PathPointOpen > bluePositionsList = new ArrayList<>();
+    static {
+      bluePositionsList.add(blue0);
+      bluePositionsList.add(blue1);
+      bluePositionsList.add(blue2);
+      bluePositionsList.add(blue3);
+      bluePositionsList.add(blue4);
+      bluePositionsList.add(blue5);
+      bluePositionsList.add(blue6);
+      bluePositionsList.add(blue7);
+      bluePositionsList.add(blue8);
+    }
+  }
+  
+  public static final float elevatorMargin = 10; //i have no idea what the actual number is
+  public static final float topCubeGoal = 90;
+  public static final float midCubeGoal = 60;
+  public static final float bottomGoal = 0;
   
   public static final class ElevatorConstants {
     public static final int elevatorMotorID = 0;
-    public static final double elevatorGearRatio = 0.0;
+    // TODO: check this
+    public static final double elevatorGearRatio = 5.0;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
 
+    static {
+      PIDController.setTolerance(
+        HighlanderFalcon.radToNative(0.1), //TODO: is this good?
+        HighlanderFalcon.rpmToNative(1.0));
+    }
+
     public static final double elevatorAngleRad = Math.toRadians(44);
     public static final double maxExtensionInches = 48;
-    public static final Translation2d elevatorOffset = new Translation2d(9, -5); // TODO: find actual numbers for this
+    public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
+    // Positions that the end effector needs to be in to score
+    // TODO: tune
+    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0);
+
+    public static final Translation2d l2TranslationCones = new Translation2d(34.0, 34.0);
+    public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
+    
+    public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
+    public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
+
+    public static Translation2d getGoalTranslationCones(Level level) {
+      switch (level) {
+        case L2:
+          return l2TranslationCones;
+        case L3:
+          return l3TranslationCones;
+        default:
+          return l1Translation;
+      }
+    }
+    
+    public static Translation2d getGoalTranslationCubes(Level level) {
+      switch (level) {
+        case L2:
+          return l2TranslationCubes;
+        case L3:
+          return l3TranslationCubes;
+        default:
+          return l1Translation;
+      }
+    }
 
     public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
+    public static double elevatorSpoolCircumference = 1.751 * Math.PI;
   }
 
-  public static final class RotatingArmConstants {
+  public static final class ArmConstants {
     public static final int rotatingArmMotorID = 0;
-    public static final double rotatingArmGearRatio = 0.0;
+    // TODO: Check with actual robot
+    public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
-
+    static {
+      PIDController.setTolerance(
+        HighlanderFalcon.radToNative(0.1), //TODO: is this good?
+        HighlanderFalcon.rpmToNative(1.0));
+    }
     public static final double rotatingArmLengthInches = 12.5;
     public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
   }

@@ -1,7 +1,5 @@
 package frc.lib.components;
 
-import java.util.function.BooleanSupplier;
-
 import edu.wpi.first.wpilibj.DigitalInput;
 
 public class ReversibleDigitalInput {

@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Optional;
 
+import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 
 /** Add your docs here. */
@@ -29,6 +30,17 @@ public class ElevatorKinematicsTests {
     @Test
     void positionTwo() {
         assertEquals(Optional.empty(), ElevatorSubsystem.solveInverseKinematics(20.0, 0));
+    }
+
+    @Test
+    void constantsAreValid() {
+        assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.l1Translation).isPresent());
+
+        assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.l2TranslationCones).isPresent());
+        assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.l3TranslationCones).isPresent());
+
+        assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.l2TranslationCubes).isPresent());
+        assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.l3TranslationCubes).isPresent());
     }
 
 }

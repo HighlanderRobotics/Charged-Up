@@ -2,6 +2,7 @@
   "NTProvider": {
     "types": {
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Path 1": "Command",
       "/SmartDashboard/Path 2": "Command",
       "/SmartDashboard/Sequence": "Command",

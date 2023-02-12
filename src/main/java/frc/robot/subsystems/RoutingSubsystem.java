@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.components.HighlanderFalcon;
@@ -15,19 +14,22 @@ import frc.robot.Constants;
 public class RoutingSubsystem extends SubsystemBase {
   HighlanderFalcon routingLeft = new HighlanderFalcon(
     Constants.MechanismConstants.routingLeftID, 
+    1.0,
     Constants.MechanismConstants.routingKP, 
     0, 
     0);
   HighlanderFalcon routingRight = new HighlanderFalcon(
-      Constants.MechanismConstants.routingRightID, 
-      Constants.MechanismConstants.routingKP, 
-      0, 
-      0);
+    Constants.MechanismConstants.routingRightID, 
+    1.0,
+    Constants.MechanismConstants.routingKP, 
+    0, 
+    0);
   HighlanderFalcon routingConveyer = new HighlanderFalcon(
-        Constants.MechanismConstants.routingConveyerID, 
-        Constants.MechanismConstants.conveyerKP, 
-        0, 
-        0);
+    Constants.MechanismConstants.routingConveyerID, 
+    1.0,
+    Constants.MechanismConstants.conveyerKP, 
+    0, 
+    0);
   ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(
     Constants.MechanismConstants.routingLimitSwitch, 
     Constants.MechanismConstants.isRoutingSwitchReversed);
