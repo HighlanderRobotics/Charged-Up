@@ -23,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import frc.lib.components.HighlanderFalcon;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
 import static frc.robot.subsystems.ElevatorSubsystem.Level;
@@ -231,6 +232,12 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
 
+    static {
+      PIDController.setTolerance(
+        HighlanderFalcon.radToNative(0.1), //TODO: is this good?
+        HighlanderFalcon.rpmToNative(1.0));
+    }
+
     public static final double elevatorAngleRad = Math.toRadians(44);
     public static final double maxExtensionInches = 48;
     public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
@@ -270,14 +277,18 @@ public final class Constants {
     public static double elevatorSpoolCircumference = 1.751 * Math.PI;
   }
 
-  public static final class RotatingArmConstants {
+  public static final class ArmConstants {
     public static final int rotatingArmMotorID = 0;
     // TODO: Check with actual robot
     public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
-
+    static {
+      PIDController.setTolerance(
+        HighlanderFalcon.radToNative(0.1), //TODO: is this good?
+        HighlanderFalcon.rpmToNative(1.0));
+    }
     public static final double rotatingArmLengthInches = 12.5;
     public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
   }

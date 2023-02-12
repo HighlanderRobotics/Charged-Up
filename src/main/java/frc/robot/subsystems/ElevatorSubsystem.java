@@ -39,7 +39,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         new Color8Bit(Color.kPurple)));
     MechanismLigament2d armLig2d = elevatorLig2d.append(new MechanismLigament2d(
         "Arm", 
-        Constants.RotatingArmConstants.rotatingArmLengthInches,
+        Constants.ArmConstants.rotatingArmLengthInches,
         90,
         15,
         new Color8Bit(Color.kLavender)));
@@ -68,8 +68,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     private double getMeasurement() {
-       // return elevatorMotor.getSelectedSensorPosition();
-       return 0;
+       return elevatorMotor.getSelectedSensorPosition();
     }
 
     public double getExtensionInches() {
@@ -78,13 +77,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public boolean isAtSetpoint() {
         return Constants.ElevatorConstants.PIDController.atGoal();
-    }
-
-    public void extendElevator() {
-        
-    }
-    public void retractElevator() {
-
     }
 
     public void updateMech2d(Pair<Double, Double> state) {
@@ -108,7 +100,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public static Translation2d solveForwardKinematics (double theta, double r) {
         Translation2d pos = new Translation2d(r, Rotation2d.fromRadians(Constants.ElevatorConstants.elevatorAngleRad));
-        return pos.plus(new Translation2d(Constants.RotatingArmConstants.rotatingArmLengthInches, theta));
+        return pos.plus(new Translation2d(Constants.ArmConstants.rotatingArmLengthInches, theta));
     }
 
     /**
@@ -123,11 +115,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = -Math.asin(yPrime/Constants.RotatingArmConstants.rotatingArmLengthInches);
+        double theta = -Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.RotatingArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -146,11 +138,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = Math.PI + Math.asin(yPrime/Constants.RotatingArmConstants.rotatingArmLengthInches);
+        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.RotatingArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -191,7 +183,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (rotated.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(Pair.of(rotated.get().getFirst(), rotated.get().getSecond() + Constants.RotatingArmConstants.armOffset));
+        return Optional.of(Pair.of(rotated.get().getFirst(), rotated.get().getSecond() + Constants.ArmConstants.armOffset));
     }
 
     public static boolean isValid(Pair<Double, Double> positions) {

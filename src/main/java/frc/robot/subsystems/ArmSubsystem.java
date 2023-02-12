@@ -12,15 +12,15 @@ public class ArmSubsystem extends SubsystemBase{
     HighlanderFalcon armMotor;
     boolean enabled = true;
     public ArmSubsystem () {
-        armMotor = new HighlanderFalcon(Constants.RotatingArmConstants.rotatingArmMotorID);
+        armMotor = new HighlanderFalcon(Constants.ArmConstants.rotatingArmMotorID);
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
-        armMotor.set(ControlMode.PercentOutput, output + Constants.RotatingArmConstants.feedforward.calculate(state.position, state.velocity));
+        armMotor.set(ControlMode.PercentOutput, output + Constants.ArmConstants.feedforward.calculate(state.position, state.velocity));
     }
 
     public void setGoal(double position) {
-        Constants.RotatingArmConstants.PIDController.setGoal(position);
+        Constants.ArmConstants.PIDController.setGoal(position);
     }
 
     private double getMeasurement() {
@@ -29,6 +29,10 @@ public class ArmSubsystem extends SubsystemBase{
 
     public Rotation2d getRotation() {
         return new Rotation2d(armMotor.getRadians());
+    }
+
+    public boolean isAtSetpoint() {
+        return Constants.ArmConstants.PIDController.atGoal();
     }
     
     public void enable() {
@@ -42,7 +46,7 @@ public class ArmSubsystem extends SubsystemBase{
     @Override
     public void periodic () {
         if (enabled) {
-            useOutput(Constants.RotatingArmConstants.PIDController.calculate(getMeasurement()), Constants.RotatingArmConstants.PIDController.getSetpoint());
+            useOutput(Constants.ArmConstants.PIDController.calculate(getMeasurement()), Constants.ArmConstants.PIDController.getSetpoint());
         }
     }
 }

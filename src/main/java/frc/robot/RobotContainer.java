@@ -86,7 +86,7 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.rightBumper().whileTrue(new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem));
+    controller.rightBumper().whileTrue(new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
     
 
     controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
@@ -118,7 +118,7 @@ public class RobotContainer {
       Pair.of(new Translation2d(20, 10), 2.0),
       Pair.of(new Translation2d(20, 15), 2.0),
       Pair.of(new Translation2d(30, 15), 2.0))));
-    SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem));
+    SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
     SmartDashboard.putData("Odometry Reset",  new InstantCommand (() -> swerveSubsystem.resetOdometry(new Pose2d())));
     SmartDashboard.putData("testpath reset odometry", new InstantCommand (() -> swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints).getInitialHolonomicPose()), swerveSubsystem));
     

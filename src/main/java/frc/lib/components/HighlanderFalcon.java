@@ -128,6 +128,10 @@ public class HighlanderFalcon extends TalonFX {
         return (int) (rot * 2048.0);
     }
 
+    public static int radToNative(double rad) {
+        return rotToNative(rad / (Math.PI * 2));
+    }
+
     public static int rpmToNative(double rpm) {
         return (int) rotToNative(rpm / 600);
     }
