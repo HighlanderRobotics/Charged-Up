@@ -73,8 +73,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
         headingController.enableContinuousInput(0, Math.PI * 2);
 
-        camera = new PhotonCamera("OV5647");
-        camera.setLED(VisionLEDMode.kOn);
+        // camera = new PhotonCamera("OV5647");
+        // camera.setLED(VisionLEDMode.kOn);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -324,21 +324,16 @@ public class SwerveSubsystem extends SubsystemBase {
         poseEstimator.update(getYaw(), getModulePositions());  
         
         // result = camera.getLatestResult();
-
-        if (DriverStation.isDisabled()){
-            resetModulesToAbsolute();
-        }
-        
-        if (camera != null) {
-            try {
-                result = camera.getLatestResult();
-            } catch (Error e) {
-                System.out.print("Error in camera processing " + e.getMessage());
-            }
-        }
-        if (result.hasTargets()) {
-            updateOdometry(getEstimatedPose());
-        }
+        // if (camera != null) {
+        //     try {
+        //         result = camera.getLatestResult();
+        //     } catch (Error e) {
+        //         System.out.print("Error in camera processing " + e.getMessage());
+        //     }
+        // }
+        // if (result.hasTargets()) {
+        //     updateOdometry(getEstimatedPose());
+        // }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth

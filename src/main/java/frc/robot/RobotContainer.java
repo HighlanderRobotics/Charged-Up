@@ -34,11 +34,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-  private ArmSubsystem armSubsystem = new ArmSubsystem();
-  private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-  private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
-  private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+  // private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  // private ArmSubsystem armSubsystem = new ArmSubsystem();
+  // private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  // private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
+  // private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -53,11 +53,11 @@ public class RobotContainer {
       true, 
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
-    elevatorSubsystem.setDefaultCommand(ElevatorSubsystem.goToPoseCommand(elevatorSubsystem, armSubsystem, Constants.ElevatorConstants.defaultPosition));
-    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.setGoal(armSubsystem.getRotation())));
-    intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
-    routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
-    grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
+    // elevatorSubsystem.setDefaultCommand(ElevatorSubsystem.goToPoseCommand(elevatorSubsystem, armSubsystem, Constants.ElevatorConstants.defaultPosition));
+    // armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.setGoal(armSubsystem.getRotation())));
+    // intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
+    // routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
+    // grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -89,35 +89,35 @@ public class RobotContainer {
       true));
 
 
-    controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
+    // controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
     
   }
 
   private void addDashboardCommands() {
-    SmartDashboard.putData("Path 1", ElevatorSubsystem.followLineCommand(
-      elevatorSubsystem, 
-      armSubsystem, 
-      10, 
-      10, 
-      30, 
-      15));
+    // SmartDashboard.putData("Path 1", ElevatorSubsystem.followLineCommand(
+    //   elevatorSubsystem, 
+    //   armSubsystem, 
+    //   10, 
+    //   10, 
+    //   30, 
+    //   15));
 
-    SmartDashboard.putData("Path 2", ElevatorSubsystem.followLineCommand(
-      elevatorSubsystem, 
-      armSubsystem, 
-      30, 
-      15, 
-      10, 
-      10));
+    // SmartDashboard.putData("Path 2", ElevatorSubsystem.followLineCommand(
+    //   elevatorSubsystem, 
+    //   armSubsystem, 
+    //   30, 
+    //   15, 
+    //   10, 
+    //   10));
 
-    SmartDashboard.putData("Sequence", ElevatorSubsystem.followLinearTrajectoryCommand(
-      elevatorSubsystem, 
-      armSubsystem, 
-      List.of(
-      Pair.of(new Translation2d(10, 10), 2.0),
-      Pair.of(new Translation2d(20, 10), 2.0),
-      Pair.of(new Translation2d(20, 15), 2.0),
-      Pair.of(new Translation2d(30, 15), 2.0))));
+    // SmartDashboard.putData("Sequence", ElevatorSubsystem.followLinearTrajectoryCommand(
+    //   elevatorSubsystem, 
+    //   armSubsystem, 
+    //   List.of(
+    //   Pair.of(new Translation2d(10, 10), 2.0),
+    //   Pair.of(new Translation2d(20, 10), 2.0),
+    //   Pair.of(new Translation2d(20, 15), 2.0),
+    //   Pair.of(new Translation2d(30, 15), 2.0))));
 
     // var waypoints = new ArrayList<Translation2d>();
     // waypoints.add(new Translation2d(20, 10));
@@ -146,8 +146,8 @@ public class RobotContainer {
   public void disabledPeriodic() {
   }
 
-  public Command runRouting(){
-    return routingSubsystem.runCommand().andThen(grabberSubsystem.intakeCommand());
+  // public Command runRouting(){
+  //   return routingSubsystem.runCommand().andThen(grabberSubsystem.intakeCommand());
 
-  }
+  // }
 }
