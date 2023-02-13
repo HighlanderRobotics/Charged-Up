@@ -339,13 +339,13 @@ public class SwerveSubsystem extends SubsystemBase {
      * @param cameraToTarget Transform3d of the target relative to the camera, returned by PhotonVision
      * @return Pose Robot position relative to the field.
      */
-    private Pose3d getFieldToRobot(Pose3d tagPose, Transform3d robotToCamera, Transform3d cameraToTarget) {
-        return tagPose.plus(cameraToTarget.inverse()).plus(robotToCamera.inverse()); 
-    }   
+     private Pose3d getFieldToRobot(Pose3d tagPose, Transform3d robotToCamera, Transform3d cameraToTarget) {
+         return tagPose.plus(cameraToTarget.inverse()).plus(robotToCamera.inverse()); 
+     }   
 
-    public double getCameraResultLatency(){
-        return result.getLatencyMillis();
-    }
+     public double getCameraResultLatency(){
+         return result.getLatencyMillis();
+     }
 
     /** @return the current state of each of the swerve modules, including current speed */
     public SwerveModuleState[] getModuleStates(){
@@ -397,16 +397,16 @@ public class SwerveSubsystem extends SubsystemBase {
             resetModulesToAbsolute();
         }
         
-        if (camera != null) {
-            try {
-                result = camera.getLatestResult();
-            } catch (Error e) {
-                System.out.print("Error in camera processing " + e.getMessage());
-            }
-        }
-        if (result.hasTargets()) {
-            updateOdometry(getEstimatedPose());
-        }
+        // if (camera != null) {
+        //     try {
+        //         result = camera.getLatestResult();
+        //     } catch (Error e) {
+        //         System.out.print("Error in camera processing " + e.getMessage());
+        //     }
+        // }
+        //if (result.hasTargets()) {
+            //updateOdometry(getEstimatedPose());
+        //}
 
         // Log swerve module information
         // May want to disable to conserve bandwidth

@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -71,7 +71,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -132,12 +132,12 @@
     },
     {
       "anchorPoint": {
-        "x": 1.78021978021978,
-        "y": 3.8148351648351646
+        "x": 1.5742132906066761,
+        "y": 3.3432726581092975
       },
       "prevControl": {
-        "x": 2.1296703296703297,
-        "y": 4.018681318681319
+        "x": 1.9236638400572255,
+        "y": 3.5471188119554515
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -147,7 +147,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",

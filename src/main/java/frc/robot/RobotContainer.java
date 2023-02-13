@@ -50,7 +50,8 @@ public class RobotContainer {
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
   private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
-  private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, null);
+
+  private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, elevatorSubsystem, armSubsystem, grabberSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);

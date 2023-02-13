@@ -12,24 +12,24 @@ import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
 public class RoutingSubsystem extends SubsystemBase {
-  HighlanderFalcon routingLeft = new HighlanderFalcon(
-    Constants.MechanismConstants.routingLeftID, 
-    1.0,
-    Constants.MechanismConstants.routingKP, 
-    0, 
-    0);
-  HighlanderFalcon routingRight = new HighlanderFalcon(
-    Constants.MechanismConstants.routingRightID, 
-    1.0,
-    Constants.MechanismConstants.routingKP, 
-    0, 
-    0);
-  HighlanderFalcon routingConveyer = new HighlanderFalcon(
-    Constants.MechanismConstants.routingConveyerID, 
-    1.0,
-    Constants.MechanismConstants.conveyerKP, 
-    0, 
-    0);
+  // HighlanderFalcon routingLeft = new HighlanderFalcon(
+  //   Constants.MechanismConstants.routingLeftID, 
+  //   1.0,
+  //   Constants.MechanismConstants.routingKP, 
+  //   0, 
+  //   0);
+  // HighlanderFalcon routingRight = new HighlanderFalcon(
+  //   Constants.MechanismConstants.routingRightID, 
+  //   1.0,
+  //   Constants.MechanismConstants.routingKP, 
+  //   0, 
+  //   0);
+  // HighlanderFalcon routingConveyer = new HighlanderFalcon(
+  //   Constants.MechanismConstants.routingConveyerID, 
+  //   1.0,
+  //   Constants.MechanismConstants.conveyerKP, 
+  //   0, 
+  //   0);
   ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(
     Constants.MechanismConstants.routingLimitSwitch, 
     Constants.MechanismConstants.isRoutingSwitchReversed);
@@ -38,15 +38,15 @@ public class RoutingSubsystem extends SubsystemBase {
   public RoutingSubsystem() {}
 
   private void run() {
-    routingLeft.setTargetRPM(200); // TODO: find right rpm
-    routingRight.setTargetRPM(200); // TODO: find right rpm
-    routingConveyer.setTargetRPM(200); // TODO: find right rpm
+    //routingLeft.setTargetRPM(200); // TODO: find right rpm
+    //routingRight.setTargetRPM(200); // TODO: find right rpm
+    //routingConveyer.setTargetRPM(200); // TODO: find right rpm
   }
 
   private void stop() {
-    routingLeft.setTargetRPM(0);
-    routingRight.setTargetRPM(0);
-    routingConveyer.setTargetRPM(0);
+    //routingLeft.setTargetRPM(0);
+    //routingRight.setTargetRPM(0);
+    //routingConveyer.setTargetRPM(0);
   }
 
   public CommandBase runCommand() { // TODO: this is probably the wrong logic, so fix

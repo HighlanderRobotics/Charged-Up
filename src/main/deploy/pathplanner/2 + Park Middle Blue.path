@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L2"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "after",
@@ -30,12 +30,12 @@
         "y": 2.649247007895725
       },
       "prevControl": {
-        "x": 4.947278612505944,
-        "y": 2.614989503483281
+        "x": 4.912554974968726,
+        "y": 2.6790337459216453
       },
       "nextControl": {
-        "x": 5.722972010545786,
-        "y": 2.6925588432872636
+        "x": 5.72378204585469,
+        "y": 2.614989503483281
       },
       "holonomicAngle": 180.0,
       "isReversal": false,

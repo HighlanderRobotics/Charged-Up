@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -71,7 +71,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -147,7 +147,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",

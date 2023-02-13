@@ -16,9 +16,14 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
+import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.PlacingSubsystem;
+import frc.robot.subsystems.RoutingSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.Level;
 
 public class AutoChooser {
 
@@ -28,21 +33,35 @@ public class AutoChooser {
     SendableChooser<Command> chooser = new SendableChooser<Command>();
     SwerveSubsystem swerveSubsystem;
     IntakeSubsystem intakeSubsystem;
-    PlacingSubsystem placingSubsystem;
+    ElevatorSubsystem elevatorSubsystem;
+    ArmSubsystem armSubsystem;
+    GrabberSubsystem grabberSubsystem;
     HashMap<String, Command> eventMap = new HashMap<>();
     
     
     public AutoChooser(SwerveSubsystem swerveSubsystem,
-    IntakeSubsystem intakeSubsystem,
-    PlacingSubsystem placingSubsystem){
+    IntakeSubsystem intakeSubsystem, ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, GrabberSubsystem grabberSubsystem){
       
         this.intakeSubsystem = intakeSubsystem;
-        this.swerveSubsystem = swerveSubsystem; 
-        chooser.setDefaultOption(
-            "Two Cone Auto", 
-            new TwoConeAuto(swerveSubsystem, intakeSubsystem, placingSubsystem));
+        this.swerveSubsystem = swerveSubsystem;
+        this.elevatorSubsystem = elevatorSubsystem; 
+        this.armSubsystem = armSubsystem;
+        this.grabberSubsystem = grabberSubsystem;
+       
+
+
+        eventMap.put("Score", new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem)); 
+
+        //chooser.setDefaultOption(
+            //"Two Cone Auto", 
+            //new TwoConeAuto(swerveSubsystem, intakeSubsystem));
         chooser.addOption("2 + Park Middle Blue", parkMiddleBlue());
         chooser.addOption("NONE", new PrintCommand("owo"));
+        chooser.addOption("1 + Park Bottom Blue", new PrintCommand("working"));
+        chooser.addOption("2 + Park Top Blue", new PrintCommand("yes"));
+        chooser.addOption("1 + Park Top Blue", new PrintCommand("Working again"));
+        chooser.addOption("3 Piece Top Blue", new PrintCommand("Working again"));
+        chooser.addOption("3 Piece Bottom Blue", new PrintCommand("Working again"));
 
         SmartDashboard.putData("autotester", chooser);
 
@@ -70,9 +89,7 @@ public class AutoChooser {
           }, intakeSubsystem)));
       }
 
-      private Command runPlacer() {
-        return new InstantCommand(() -> placingSubsystem.activate());
-      }
+
       //change to put in constructor
       private Command parkMiddleBlue(){
         List<PathPlannerTrajectory> parkMiddleBlueGroup = PathPlanner.loadPathGroup

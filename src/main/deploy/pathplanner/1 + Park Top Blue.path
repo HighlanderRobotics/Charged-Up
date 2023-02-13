@@ -16,7 +16,9 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Score L3"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -24,24 +26,26 @@
     },
     {
       "anchorPoint": {
-        "x": 5.924266919623887,
-        "y": 4.093609419446328
+        "x": 6.798076818902454,
+        "y": 4.568506103836853
       },
       "prevControl": {
-        "x": 5.259411561477151,
-        "y": 5.0813945229786235
+        "x": 6.133221460755719,
+        "y": 5.556291207369148
       },
       "nextControl": {
-        "x": 6.205398298702749,
-        "y": 3.675928513386304
+        "x": 7.079208197981317,
+        "y": 4.150825197776829
       },
       "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false,
+      "isStopPoint": true,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Intake"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
