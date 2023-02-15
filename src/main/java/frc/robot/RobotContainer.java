@@ -8,6 +8,7 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.RoutingSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -39,6 +40,7 @@ public class RobotContainer {
   // private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   // private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
   // private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+  private LEDSubsystem ledSubsystem = new LEDSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -58,6 +60,7 @@ public class RobotContainer {
     // intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
     // routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
     // grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
+    ledSubsystem.setDefaultCommand(ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, 0.5));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -144,6 +147,7 @@ public class RobotContainer {
 
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
+    ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
   }
 
   // public Command runRouting(){

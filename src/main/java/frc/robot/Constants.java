@@ -19,6 +19,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
 import static frc.robot.subsystems.ElevatorSubsystem.Level;
@@ -265,5 +267,7 @@ public final class Constants {
   public static final class LEDConstants {
     public static final int ledPort = 0;
     public static final int ledLength = 100; //TODO: find
+
+    public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
 }

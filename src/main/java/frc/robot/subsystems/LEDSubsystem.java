@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.function.IntSupplier;
-
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
@@ -62,5 +60,6 @@ public class LEDSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    led.setData(buffer);
   }
 }
