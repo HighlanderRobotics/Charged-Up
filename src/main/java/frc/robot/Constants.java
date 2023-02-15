@@ -261,4 +261,9 @@ public final class Constants {
     public static final int grabberLimitSwitch = 3;
     public static final boolean isGrabberSwitchReversed = false; 
   }
+
+  public static final class LEDConstants {
+    public static final int ledPort = 0;
+    public static final int ledLength = 100; //TODO: find
+  }
 }
