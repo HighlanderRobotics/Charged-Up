@@ -19,7 +19,10 @@ import java.util.List;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -60,7 +63,7 @@ public class RobotContainer {
     // intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
     // routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
     // grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
-    ledSubsystem.setDefaultCommand(ledSubsystem.setNoiseCommand(Constants.LEDConstants.defaultColor));
+    ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -147,7 +150,7 @@ public class RobotContainer {
 
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
-    ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
+    ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20));
   }
 
   // public Command runRouting(){

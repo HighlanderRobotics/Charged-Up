@@ -72,8 +72,10 @@ public class LEDSubsystem extends SubsystemBase {
     try {
       var image = ImageIO.read(new File(Filesystem.getDeployDirectory() + "/ledNoise.png"));
       SmartDashboard.putNumber("huh", value);
+      SmartDashboard.putNumber("test color", image.getRGB(value, 0)&0xFF);
       for (int i = 0; i < buffer.getLength(); i++) {
-        buffer.setLED(i, dim(colorA, (image.getRGB(value, i)&0xFF / 255)));
+        double t = image.getRGB(value, i)&0xFF / 255;
+        buffer.setRGB(i, (int) (colorA.red * t), (int) (colorA.green * t), (int) (colorA.blue * t));
       }
     } catch (Exception e) {
       setSolid(new Color8Bit(Color.kRed));
