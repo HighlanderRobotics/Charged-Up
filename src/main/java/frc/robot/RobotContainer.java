@@ -60,7 +60,7 @@ public class RobotContainer {
     // intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
     // routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
     // grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
-    ledSubsystem.setDefaultCommand(ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, 0.5));
+    ledSubsystem.setDefaultCommand(ledSubsystem.setNoiseCommand(Constants.LEDConstants.defaultColor));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
