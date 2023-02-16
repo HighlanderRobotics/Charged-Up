@@ -49,7 +49,7 @@ public class RoutingSubsystem extends SubsystemBase {
     //routingConveyer.setTargetRPM(0);
   }
 
-  public CommandBase runCommand() { // TODO: this is probably the wrong logic, so fix
+  public CommandBase runCommand() { 
     
 
     return new RunCommand(() -> run()).until(limitSwitch::get);

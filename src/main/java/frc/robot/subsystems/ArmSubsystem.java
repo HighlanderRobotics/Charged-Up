@@ -9,14 +9,14 @@ import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class ArmSubsystem extends SubsystemBase{
-    HighlanderFalcon armMotor;
+    //HighlanderFalcon armMotor;
     boolean enabled = true;
     public ArmSubsystem () {
-        armMotor = new HighlanderFalcon(Constants.ArmConstants.rotatingArmMotorID);
+        //armMotor = new HighlanderFalcon(Constants.ArmConstants.rotatingArmMotorID);
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
-        armMotor.set(ControlMode.PercentOutput, output + Constants.ArmConstants.feedforward.calculate(state.position, state.velocity));
+        //armMotor.set(ControlMode.PercentOutput, output + Constants.ArmConstants.feedforward.calculate(state.position, state.velocity));
     }
 
     public void setGoal(double position) {
@@ -24,11 +24,11 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     private double getMeasurement() {
-        return armMotor.getSelectedSensorPosition();
+        return 0; //armMotor.getSelectedSensorPosition();
     }
 
     public Rotation2d getRotation() {
-        return new Rotation2d(armMotor.getRadians());
+        return new Rotation2d(); //(armMotor.getRadians());
     }
 
     public boolean isAtSetpoint() {

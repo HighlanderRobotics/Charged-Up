@@ -52,7 +52,7 @@ public class AutoChooser {
 
         eventMap.put("Score", new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem)); 
 
-        //chooser.setDefaultOption(
+        chooser.setDefaultOption("none", new InstantCommand(() -> {}));
             //"Two Cone Auto", 
             //new TwoConeAuto(swerveSubsystem, intakeSubsystem));
         chooser.addOption("2 + Park Middle Blue", parkMiddleBlue());

@@ -27,9 +27,9 @@ import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
-    HighlanderFalcon elevatorMotor;
+    // HighlanderFalcon elevatorMotor;
     boolean enabled = true;
-    Mechanism2d mech2d = new Mechanism2d(48, 48);
+    /*Mechanism2d mech2d = new Mechanism2d(48, 48);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
         "Elevator",
@@ -42,11 +42,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         Constants.ArmConstants.rotatingArmLengthInches,
         90,
         15,
-        new Color8Bit(Color.kLavender)));
+        new Color8Bit(Color.kLavender)));*/
 
     public ElevatorSubsystem() {
-        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
-        SmartDashboard.putData("elevatorsim", mech2d);
+        /*elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
+        SmartDashboard.putData("elevatorsim", mech2d);*/
     }
 
     public static enum Level {
@@ -56,23 +56,23 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
-        elevatorMotor.set(ControlMode.PercentOutput, output + Constants.ElevatorConstants.feedforward.calculate(state.velocity));
+        //elevatorMotor.set(ControlMode.PercentOutput, output + Constants.ElevatorConstants.feedforward.calculate(state.velocity));
     }
 
     public void setGoal(double position) {
-        Constants.ElevatorConstants.PIDController.setGoal(position);
+        //Constants.ElevatorConstants.PIDController.setGoal(position);
     }
 
     public void setGoal(double position, double velocity) {
-        Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
+        //Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
     private double getMeasurement() {
-       return elevatorMotor.getSelectedSensorPosition();
+       return 0; //elevatorMotor.getSelectedSensorPosition();
     }
 
     public double getExtensionInches() {
-        return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference;
+        return 0; //elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference;
     }
 
     public boolean isAtSetpoint() {
@@ -80,16 +80,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void updateMech2d(Pair<Double, Double> state) {
-        elevatorLig2d.setLength(state.getFirst());
-        armLig2d.setAngle(Math.toDegrees(state.getSecond()));
+      //  elevatorLig2d.setLength(state.getFirst());
+       // armLig2d.setAngle(Math.toDegrees(state.getSecond()));
     }
 
     public void enable() {
-        enabled = true;
+       // enabled = true;
     }
 
     public void disable() {
-        enabled = false;
+       // enabled = false;
     }
 
     /**
