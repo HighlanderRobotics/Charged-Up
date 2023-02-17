@@ -5,7 +5,8 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.ElevatorCommand;
+import frc.robot.commands.EatingCommand;
+import frc.robot.commands.ScoringCommand;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -26,7 +27,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -86,10 +86,17 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.rightBumper().whileTrue(new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
+    controller.a().whileTrue(new InstantCommand(() -> elevatorSubsystem.setLevel(Level.L3)));
+    controller.b().whileTrue(new InstantCommand(() -> elevatorSubsystem.setLevel(Level.L2)));
+    controller.y().whileTrue(new InstantCommand(() -> elevatorSubsystem.setLevel(Level.L1)));
+    controller.x().whileTrue(new EatingCommand(elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
+    
+    controller.rightBumper().whileTrue(
+      new ScoringCommand(elevatorSubsystem.getLevel(), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
     
 
     controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
+
     
   }
 
@@ -118,7 +125,7 @@ public class RobotContainer {
       Pair.of(new Translation2d(20, 10), 2.0),
       Pair.of(new Translation2d(20, 15), 2.0),
       Pair.of(new Translation2d(30, 15), 2.0))));
-    SmartDashboard.putData("Scoring Sequence", new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
+    SmartDashboard.putData("Scoring Sequence", new ScoringCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
     SmartDashboard.putData("Odometry Reset",  new InstantCommand (() -> swerveSubsystem.resetOdometry(new Pose2d())));
     SmartDashboard.putData("testpath reset odometry", new InstantCommand (() -> swerveSubsystem.resetOdometry(PathPlanner.loadPath("Test Path", Constants.AutoConstants.autoConstraints).getInitialHolonomicPose()), swerveSubsystem));
     

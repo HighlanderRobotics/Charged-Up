@@ -16,9 +16,9 @@ import frc.robot.subsystems.ElevatorSubsystem.Level;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ElevatorCommand extends SequentialCommandGroup {
-  /** Creates a new ElevatorCommand. */
-  public ElevatorCommand(
+public class ScoringCommand extends SequentialCommandGroup {
+  /** Creates a new ScoringCommand. */
+  public ScoringCommand(
     Level level, 
     ElevatorSubsystem elevatorSubsystem, 
     ArmSubsystem armSubsystem, 
@@ -35,7 +35,7 @@ public class ElevatorCommand extends SequentialCommandGroup {
         false, false), // should hopefully rotate to the goal thru the magic of pid
       elevatorSubsystem.extendCommand(armSubsystem, level, false),//TODO: find if actually is cone
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
-      grabberSubsystem.releaseCommand()
+      grabberSubsystem.openCommand()
     );
   
   }

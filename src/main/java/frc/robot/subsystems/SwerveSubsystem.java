@@ -188,7 +188,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public PathPointOpen getNearestGoal (Pose2d pose) {
         PathPointOpen output = null;
         double distance = Double.MAX_VALUE;
-        for (PathPointOpen point : ScoringPositions.bluePositionsList) {
+        for (PathPointOpen point : ScoringPositions.bluePositionsList) { //TODO: figure out red poses too
             double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
                 Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
             if (currentDistance < distance) {

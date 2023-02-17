@@ -43,6 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         90,
         15,
         new Color8Bit(Color.kLavender)));
+    private Level level;
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
@@ -50,9 +51,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public static enum Level {
-        L1,
-        L2,
-        L3
+        L1, //bottom
+        L2, //mid
+        L3, //top
+        substation
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
@@ -65,6 +67,13 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void setGoal(double position, double velocity) {
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
+    }
+
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+    public Level getLevel() {
+        return level;
     }
 
     private double getMeasurement() {

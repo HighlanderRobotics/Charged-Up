@@ -218,8 +218,10 @@ public final class Constants {
       bluePositionsList.add(blue8);
     }
   }
-  
-  public static final float elevatorMargin = 10; //i have no idea what the actual number is
+  public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(  ), Rotation2d.fromDegrees(0));  //TODO: fill in later
+  public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(  ), Rotation2d.fromDegrees(0));  //TODO: fill in later
+
+  public static final float elevatorMargin = 10; //TODO: i have no idea what the actual number is
   public static final float topCubeGoal = 90;
   public static final float midCubeGoal = 60;
   public static final float bottomGoal = 0;
@@ -243,7 +245,8 @@ public final class Constants {
     public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
     // Positions that the end effector needs to be in to score
     // TODO: tune
-    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0);
+    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0); 
+    //x is distance forward from robot center, y is distance up from floor
 
     public static final Translation2d l2TranslationCones = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
@@ -251,12 +254,16 @@ public final class Constants {
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
 
+    public static final Translation2d substationHeight = new Translation2d(30, 37.375); //TODO: find x val
+
     public static Translation2d getGoalTranslationCones(Level level) {
       switch (level) {
         case L2:
           return l2TranslationCones;
         case L3:
           return l3TranslationCones;
+        case substation:
+          return substationHeight;
         default:
           return l1Translation;
       }

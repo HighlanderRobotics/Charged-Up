@@ -67,10 +67,6 @@ public class GrabberSubsystem extends SubsystemBase {
     }, this);
   }
 
-  public CommandBase releaseCommand() {
-    return new InstantCommand(() -> open(), this);
-  }
-
   public CommandBase outakeCommand() {
     return new RunCommand(() -> outake(), this);
   }
