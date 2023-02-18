@@ -265,8 +265,8 @@ public final class Constants {
   }
 
   public static final class LEDConstants {
-    public static final int ledPort = 0;
-    public static final int ledLength = 4; //TODO: find
+    public static final int ledPort = 1;
+    public static final int ledLength = 130; //TODO: find
 
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }

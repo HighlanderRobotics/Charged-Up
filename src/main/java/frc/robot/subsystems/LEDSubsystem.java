@@ -8,6 +8,8 @@ import java.io.File;
 
 import javax.imageio.ImageIO;
 
+import edu.wpi.first.hal.simulation.RoboRioDataJNI;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -25,7 +27,7 @@ public class LEDSubsystem extends SubsystemBase {
   AddressableLED led;
   AddressableLEDBuffer buffer;
 
-  AddressableLEDSim sim;
+  // AddressableLEDSim sim;
   /** Creates a new LEDSubsystem. */
   public LEDSubsystem() {
     led = new AddressableLED(Constants.LEDConstants.ledPort);
@@ -33,12 +35,12 @@ public class LEDSubsystem extends SubsystemBase {
     led.setLength(buffer.getLength());
     led.start();
 
-    sim = new AddressableLEDSim(led);
+    // sim = new AddressableLEDSim(led);
   }
 
   public void setSolid(Color8Bit color) {
     for (int i = 0; i < buffer.getLength(); i++) {
-      buffer.setRGB(i, color.red, color.green, color.blue);
+      buffer.setLED(i, color);
     }
   }
 
@@ -72,9 +74,9 @@ public class LEDSubsystem extends SubsystemBase {
     try {
       var image = ImageIO.read(new File(Filesystem.getDeployDirectory() + "/ledNoise.png"));
       SmartDashboard.putNumber("huh", value);
-      SmartDashboard.putNumber("test color", image.getRGB(value, 0)&0xFF);
+      SmartDashboard.putNumber("test color", (image.getRGB(value, 0)&0xFF) / 255.0);
       for (int i = 0; i < buffer.getLength(); i++) {
-        double t = image.getRGB(value, i)&0xFF / 255;
+        double t = (image.getRGB(value, i)&0xFF) / 255.0;
         buffer.setRGB(i, (int) (colorA.red * t), (int) (colorA.green * t), (int) (colorA.blue * t));
       }
     } catch (Exception e) {
@@ -98,6 +100,25 @@ public class LEDSubsystem extends SubsystemBase {
   private static int interpolate(double v0, double v1, double t) {
     return (int) (v0 + (t * (v1 - v0)));
   }
+
+  public void setProgress(Color8Bit color, double progress) {
+    for (int i = 0; i < buffer.getLength(); i++) {
+      if (i < progress) {
+        buffer.setLED(i, color);
+      } else {
+        buffer.setLED(i, Color.kBlack);
+      }
+    }
+  }
+
+  // public CommandBase setBatteryStatusCommand() {
+  //   return new RunCommand(() -> {
+  //     setProgress(
+  //       interpolate(new Color8Bit(255, 0, 0), new Color8Bit(0, 255, 0), 
+  //       MathUtil.clamp((RoboRioDataJNI.getVInVoltage() - 10) / 3, 0, 4)),
+  //       4);
+  //   }, this);
+  // }
 
   @Override
   public void periodic() {

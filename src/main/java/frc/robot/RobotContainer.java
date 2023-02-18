@@ -151,6 +151,7 @@ public class RobotContainer {
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
     ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20));
+    // ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
   }
 
   // public Command runRouting(){
