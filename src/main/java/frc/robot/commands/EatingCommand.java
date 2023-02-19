@@ -45,10 +45,10 @@ public class EatingCommand extends SequentialCommandGroup {
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false), // should hopefully rotate to the goal thru the magic of pid
+        false, false), alongWith(
       elevatorSubsystem.extendCommand(armSubsystem, Level.substation, true),
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
-      grabberSubsystem.closeCommand()
+      grabberSubsystem.closeCommand())
     );
   }
 }

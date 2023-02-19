@@ -86,13 +86,13 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.a().whileTrue(new InstantCommand(() -> elevatorSubsystem.setLevel(Level.L3)));
-    controller.b().whileTrue(new InstantCommand(() -> elevatorSubsystem.setLevel(Level.L2)));
-    controller.y().whileTrue(new InstantCommand(() -> elevatorSubsystem.setLevel(Level.L1)));
+    controller.a().whileTrue(new InstantCommand(() -> elevatorSubsystem.setTargetLevel(Level.L3)));
+    controller.b().whileTrue(new InstantCommand(() -> elevatorSubsystem.setTargetLevel(Level.L2)));
+    controller.y().whileTrue(new InstantCommand(() -> elevatorSubsystem.setTargetLevel(Level.L1)));
     controller.x().whileTrue(new EatingCommand(elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
     
     controller.rightBumper().whileTrue(
-      new ScoringCommand(elevatorSubsystem.getLevel(), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
+      new ScoringCommand(elevatorSubsystem.getTargetLevel(), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
     
 
     controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
