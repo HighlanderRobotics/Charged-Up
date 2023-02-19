@@ -33,7 +33,7 @@ public class ScoringCommand extends SequentialCommandGroup {
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false), // should hopefully rotate to the goal thru the magic of pid
-      elevatorSubsystem.extendCommand(armSubsystem, level, false),//TODO: find if actually is cone
+      elevatorSubsystem.extendCommand(armSubsystem, elevatorSubsystem.getLevel(), false),//TODO: find if actually is cone
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.openCommand()
     );

@@ -221,7 +221,7 @@ public final class Constants {
   public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(  ), Rotation2d.fromDegrees(0));  //TODO: fill in later
   public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(  ), Rotation2d.fromDegrees(0));  //TODO: fill in later
 
-  public static final float elevatorMargin = 10; //TODO: i have no idea what the actual number is
+  public static final float elevatorMargin = 0; //TODO: i have no idea what the actual number is
   public static final float topCubeGoal = 90;
   public static final float midCubeGoal = 60;
   public static final float bottomGoal = 0;

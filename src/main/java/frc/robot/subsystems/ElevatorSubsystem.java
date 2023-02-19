@@ -43,7 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         90,
         15,
         new Color8Bit(Color.kLavender)));
-    private Level level;
+    private static Level level;
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
@@ -72,7 +72,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void setLevel(Level level) {
         this.level = level;
     }
-    public Level getLevel() {
+    public static Level getLevel() {
         return level;
     }
 
