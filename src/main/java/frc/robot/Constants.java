@@ -249,8 +249,8 @@ public final class Constants {
       redPositionsList.add(red8);
     }
   }
-  public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));  //TODO: fill in later
-  public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));  //TODO: fill in later
+  public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));
  
   public static final float elevatorMargin = 0; //TODO: i have no idea what the actual number is
   public static final float topCubeGoal = 90;
