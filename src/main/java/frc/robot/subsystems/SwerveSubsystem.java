@@ -212,6 +212,14 @@ public class SwerveSubsystem extends SubsystemBase {
         field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
         return output;
     }
+    public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
+        if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ){ //then its a cube goal
+            return false;
+        }
+        else { //then its a cone goal
+            return true;
+        }
+    }
 
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {

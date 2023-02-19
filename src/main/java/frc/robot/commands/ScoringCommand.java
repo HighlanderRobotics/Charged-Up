@@ -4,8 +4,6 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -35,11 +33,12 @@ public class ScoringCommand extends SequentialCommandGroup {
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false), // should hopefully rotate to the goal thru the magic of pid
-      elevatorSubsystem.extendCommand(armSubsystem, elevatorSubsystem.getLevel(), false),//TODO: find if actually is cone
+        false, false),
+      elevatorSubsystem.extendCommand(
+        armSubsystem, elevatorSubsystem.getLevel(), 
+        swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),//TODO: find if actually is cone
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.openCommand()
     );
-  
   }
 }

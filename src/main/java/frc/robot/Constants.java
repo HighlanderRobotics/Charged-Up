@@ -202,7 +202,7 @@ public final class Constants {
   public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.6, 5.23), Rotation2d.fromDegrees(0));  
 
   public static final class ScoringPositions {
-    public static final HashMap<String, PathPointOpen > positions = new HashMap<>();
+    public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
     static {
       positions.put("blue0", blue0);
       positions.put("blue1", blue1);
