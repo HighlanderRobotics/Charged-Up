@@ -40,6 +40,10 @@ public class ArmSubsystem extends SubsystemBase{
     public Rotation2d getRotation() {
         return new Rotation2d(armMotor.getRadians());
     }
+
+    public boolean isAtSetpoint() {
+        return Constants.ArmConstants.PIDController.atGoal();
+    }
     
     public void enable() {
         enabled = true;

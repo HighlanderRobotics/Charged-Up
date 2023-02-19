@@ -69,7 +69,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     private double getMeasurement() {
-        return elevatorMotor.getSelectedSensorPosition();
+       return elevatorMotor.getSelectedSensorPosition();
     }
 
     public double getExtensionInches() {

@@ -1,8 +1,9 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants;
-
+import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
@@ -17,7 +18,10 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix.sensors.Pigeon2;
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.PathPoint;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -166,6 +170,34 @@ public class SwerveSubsystem extends SubsystemBase {
                     Constants.AutoConstants.thetaControllerConstraints)),
             (states) -> setModuleStates(states),
             this);
+        
+    }
+    public PathPlannerTrajectory getPathBetweenTwoPoints (PathPoint start, PathPoint end) {
+        return getPathBetweenTwoPoints(new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared), start, end);
+        
+    }
+    public PathPlannerTrajectory getPathBetweenTwoPoints (PathConstraints constraints, PathPoint start, PathPoint end) {
+        return PathPlanner.generatePath(constraints, start, end);
+    }
+    public PathPlannerTrajectory getPathToPoint (PathPoint end) {
+        return getPathBetweenTwoPoints(new PathPoint(getPose().getTranslation(), getYaw(), getYaw()), end);
+    }
+    public PathPointOpen getNearestGoal () {
+        return getNearestGoal(getPose());
+    }
+    public PathPointOpen getNearestGoal (Pose2d pose) {
+        PathPointOpen output = null;
+        double distance = Double.MAX_VALUE;
+        for (PathPointOpen point : ScoringPositions.bluePositionsList) {
+            double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
+                Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+            if (currentDistance < distance) {
+                distance = currentDistance;
+                output = point;
+            }
+        }
+        field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
+        return output;
     }
 
     /* Used by SwerveControllerCommand in Auto */
@@ -185,6 +217,8 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
+        zeroGyro();
+        System.out.println("odometry reset");
     }
 
     /** Updates the pose estimator from a (presumably vision) measurement
@@ -349,5 +383,6 @@ public class SwerveSubsystem extends SubsystemBase {
         if (DriverStation.isDisabled()) {
             hasResetOdometry = false;
         }
+        getNearestGoal();
     }
 }
