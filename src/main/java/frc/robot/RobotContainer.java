@@ -15,7 +15,9 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -43,6 +45,8 @@ public class RobotContainer {
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
 
+  Trigger isExtended = new Trigger(() -> elevatorSubsystem.getExtensionInches() > 6 || Constants.ElevatorConstants.PIDController.getGoal().position > 6);
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Set default commands here
@@ -53,8 +57,8 @@ public class RobotContainer {
       true, 
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
-    elevatorSubsystem.setDefaultCommand(ElevatorSubsystem.goToPoseCommand(elevatorSubsystem, armSubsystem, Constants.ElevatorConstants.defaultPosition));
-    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.setGoal(armSubsystem.getRotation())));
+    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0));
+    armSubsystem.setDefaultCommand(armSubsystem.runToRotationCommand(new Rotation2d()));
     intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
     routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
     grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
@@ -88,29 +92,33 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
+    controller.a().whileTrue(intakeSubsystem.runCommand());
+    controller.b().whileTrue(elevatorSubsystem.extendToInchesCommand(30));
 
-    new Trigger(() -> grabberSubsystem.hasGamePiece())
-      .onTrue(new InstantCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)))
-      .onFalse(new InstantCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)));
-    
-    superstructureSubsystem.extendTrigger.whileTrue(intakeSubsystem.extendCommand());
+    isExtended
+      .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))
+      .whileFalse(new ConditionalCommand(
+        new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 
+        new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)), 
+        () -> grabberSubsystem.hasGamePiece()));
+
+    superstructureSubsystem.extendTrigger.whileTrue(intakeSubsystem.extendCommand().repeatedly());
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       routingSubsystem.runCommand(), 
       grabberSubsystem.intakeCommand(),
-      elevatorSubsystem.goToPositionCommand(0.0),
+      elevatorSubsystem.extendToInchesCommand(0.0),
       armSubsystem.runToRotationCommand(new Rotation2d(2)))); // TODO: Find rotation
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand(),
       grabberSubsystem.intakeCommand(),
-      elevatorSubsystem.goToPositionCommand(0.0)
+      elevatorSubsystem.extendToInchesCommand(0.0)
     ));
   }
 
   private void addDashboardCommands() {
-    
+    SmartDashboard.putBoolean("Grabber has thing", grabberSubsystem.hasGamePiece());
   }
 
   private static Command run(Command ... commands) {

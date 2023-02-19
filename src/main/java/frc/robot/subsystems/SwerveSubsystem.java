@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -72,8 +73,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
         headingController.enableContinuousInput(0, Math.PI * 2);
 
-        // camera = new PhotonCamera("OV5647");
-        // camera.setLED(VisionLEDMode.kOn);
+        camera = new PhotonCamera("OV5647");
+        camera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -322,7 +323,6 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        result = camera.getLatestResult();
         if (camera != null) {
             try {
                 result = camera.getLatestResult();

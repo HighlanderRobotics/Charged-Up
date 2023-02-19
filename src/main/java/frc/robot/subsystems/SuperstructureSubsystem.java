@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.Pair;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
@@ -43,15 +45,17 @@ public class SuperstructureSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (ElevatorSubsystem.solveForwardKinematics(
-          armSubsystem.getRotation().getRadians(), 
-          elevatorSubsystem.getExtensionInches()
-        ).getX() > 6 || ElevatorSubsystem.solveForwardKinematics(
-          Constants.RotatingArmConstants.PIDController.getGoal().position, 
-          Constants.ElevatorConstants.PIDController.getGoal().position
-        ).getX() > 6 ) { // TODO: Find good value for maximum extension before "extended"
+    if (elevatorSubsystem.getExtensionInches() > 6 || Constants.ElevatorConstants.PIDController.getGoal().position > 6 ) { // TODO: Find good value for maximum extension before "extended"
       mode = ExtensionState.EXTEND;
     }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    elevatorSubsystem.updateMech2d(new Pair<Double,Double>(
+      Constants.ElevatorConstants.PIDController.getGoal().position, 
+      Constants.ArmConstants.PIDController.getGoal().position));
+    SmartDashboard.putString("Superstructure Mode", mode.toString());
   }
 
   public static enum ExtensionState {

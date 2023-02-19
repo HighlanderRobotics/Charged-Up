@@ -235,7 +235,7 @@ public final class Constants {
     public static double elevatorSpoolCircumference = 1.751 * Math.PI;
   }
 
-  public static final class RotatingArmConstants {
+  public static final class ArmConstants {
     public static final int rotatingArmMotorID = 0;
     // TODO: Check with actual robot
     public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
