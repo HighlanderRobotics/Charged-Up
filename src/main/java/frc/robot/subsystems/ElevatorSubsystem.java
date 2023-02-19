@@ -43,7 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         90,
         15,
         new Color8Bit(Color.kLavender)));
-    private static Level level;
+    private Level targetLevel;
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
@@ -69,11 +69,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
-    public void setLevel(Level level) {
-        this.level = level;
+    public void setTargetLevel(Level level) {
+        this.targetLevel = level;
     }
-    public static Level getLevel() {
-        return level;
+    public Level getTargetLevel() {
+        return targetLevel;
     }
 
     private double getMeasurement() {

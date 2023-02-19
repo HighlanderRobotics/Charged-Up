@@ -39,7 +39,6 @@ public class EatingCommand extends SequentialCommandGroup {
     if (DriverStation.getAlliance() == Alliance.Red) {
       substationLocation = Constants.redSubstation;
     }
-
     addCommands(
       swerveSubsystem.followPathCommand(
         swerveSubsystem.getPathToPoint(substationLocation)),
@@ -47,8 +46,7 @@ public class EatingCommand extends SequentialCommandGroup {
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false), // should hopefully rotate to the goal thru the magic of pid
-      elevatorSubsystem.extendCommand(armSubsystem, Level.substation, false),
-      //TODO: find if actually is cone does this matter for eating??
+      elevatorSubsystem.extendCommand(armSubsystem, Level.substation, true),
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.closeCommand()
     );

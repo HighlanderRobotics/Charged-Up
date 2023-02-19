@@ -35,8 +35,8 @@ public class ScoringCommand extends SequentialCommandGroup {
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false),
       elevatorSubsystem.extendCommand(
-        armSubsystem, elevatorSubsystem.getLevel(), 
-        swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),//TODO: find if actually is cone
+        armSubsystem, elevatorSubsystem.getTargetLevel(), 
+        swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.openCommand()
     );
