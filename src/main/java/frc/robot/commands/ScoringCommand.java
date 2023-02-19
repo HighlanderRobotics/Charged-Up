@@ -16,9 +16,9 @@ import frc.robot.subsystems.ElevatorSubsystem.Level;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ElevatorCommand extends SequentialCommandGroup {
-  /** Creates a new ElevatorCommand. */
-  public ElevatorCommand(
+public class ScoringCommand extends SequentialCommandGroup {
+  /** Creates a new ScoringCommand. */
+  public ScoringCommand(
     Level level, 
     ElevatorSubsystem elevatorSubsystem, 
     ArmSubsystem armSubsystem, 
@@ -26,17 +26,19 @@ public class ElevatorCommand extends SequentialCommandGroup {
     GrabberSubsystem grabberSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
+    
     addCommands(
       swerveSubsystem.followPathCommand(
         swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())),
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false), // should hopefully rotate to the goal thru the magic of pid
-      ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, level, false),//TODO: find if actually is cone
+        false, false),
+      ElevatorSubsystem.extendCommand(
+        elevatorSubsystem, armSubsystem, elevatorSubsystem.getLevel(), 
+        swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),//TODO: find if actually is cone
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
-      grabberSubsystem.outakeCommand()
+      grabberSubsystem.openCommand()
     );
-  
   }
 }

@@ -191,8 +191,18 @@ public final class Constants {
   public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0));
   public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0));  
   
+  public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.6, 0.43), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.6, 1.03), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.6, 1.63), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.6, 2.23), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.6, 2.83), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.6, 3.43), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.6, 4.03), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.6, 4.63), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.6, 5.23), Rotation2d.fromDegrees(0));  
+
   public static final class ScoringPositions {
-    public static final HashMap<String, PathPointOpen > positions = new HashMap<>();
+    public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
     static {
       positions.put("blue0", blue0);
       positions.put("blue1", blue1);
@@ -203,7 +213,16 @@ public final class Constants {
       positions.put("blue6", blue6);
       positions.put("blue7", blue7);
       positions.put("blue8", blue8);
-      
+
+      positions.put("red0", red0);
+      positions.put("red1", red1);
+      positions.put("red2", red2);
+      positions.put("red3", red3);
+      positions.put("red4", red4);
+      positions.put("red5", red5);
+      positions.put("red6", red6);
+      positions.put("red7", red7);
+      positions.put("red8", red8);
     }
     public static final List<PathPointOpen > bluePositionsList = new ArrayList<>();
     static {
@@ -217,9 +236,23 @@ public final class Constants {
       bluePositionsList.add(blue7);
       bluePositionsList.add(blue8);
     }
+    public static final List<PathPointOpen > redPositionsList = new ArrayList<>();
+    static {
+      redPositionsList.add(red0);
+      redPositionsList.add(red1);
+      redPositionsList.add(red2);
+      redPositionsList.add(red3);
+      redPositionsList.add(red4);
+      redPositionsList.add(red5);
+      redPositionsList.add(red6);
+      redPositionsList.add(red7);
+      redPositionsList.add(red8);
+    }
   }
-  
-  public static final float elevatorMargin = 10; //i have no idea what the actual number is
+  public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));
+ 
+  public static final float elevatorMargin = 0; //TODO: i have no idea what the actual number is
   public static final float topCubeGoal = 90;
   public static final float midCubeGoal = 60;
   public static final float bottomGoal = 0;
@@ -243,7 +276,8 @@ public final class Constants {
     public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
     // Positions that the end effector needs to be in to score
     // TODO: tune
-    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0);
+    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0); 
+    //x is distance forward from robot center, y is distance up from floor
 
     public static final Translation2d l2TranslationCones = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
@@ -251,7 +285,7 @@ public final class Constants {
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
 
-    public static final Translation2d humanPlayerTranslation = new Translation2d(34, 34); // TODO: Find
+    public static final Translation2d humanPlayerTranslation = new Translation2d(30, 37.325); // TODO: Find
 
     public static final Translation2d defaultPosition = new Translation2d(5, -5); //TODO: Find
 

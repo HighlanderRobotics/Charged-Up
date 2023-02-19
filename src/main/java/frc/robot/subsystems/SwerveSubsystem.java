@@ -42,6 +42,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -183,21 +184,41 @@ public class SwerveSubsystem extends SubsystemBase {
         return getPathBetweenTwoPoints(new PathPoint(getPose().getTranslation(), getYaw(), getYaw()), end);
     }
     public PathPointOpen getNearestGoal () {
-        return getNearestGoal(getPose());
+        return getNearestGoal(getPose(), DriverStation.getAlliance());
     }
-    public PathPointOpen getNearestGoal (Pose2d pose) {
+    public PathPointOpen getNearestGoal (Pose2d pose, Alliance alliance) {
         PathPointOpen output = null;
         double distance = Double.MAX_VALUE;
-        for (PathPointOpen point : ScoringPositions.bluePositionsList) {
-            double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
-                Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
-            if (currentDistance < distance) {
-                distance = currentDistance;
-                output = point;
+        if (alliance == Alliance.Blue) {
+            for (PathPointOpen point : ScoringPositions.bluePositionsList) {
+                double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
+                    Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+                if (currentDistance < distance) {
+                    distance = currentDistance;
+                    output = point;
+                }
+            }
+        }
+        if (alliance == Alliance.Red) {
+            for (PathPointOpen point : ScoringPositions.redPositionsList) {
+                double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
+                    Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+                if (currentDistance < distance) {
+                    distance = currentDistance;
+                    output = point;
+                }
             }
         }
         field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
         return output;
+    }
+    public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
+        if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ){ //then its a cube goal
+            return false;
+        }
+        else { //then its a cone goal
+            return true;
+        }
     }
 
     /* Used by SwerveControllerCommand in Auto */
