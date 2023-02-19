@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
-import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -323,17 +322,17 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        // result = camera.getLatestResult();
-        // if (camera != null) {
-        //     try {
-        //         result = camera.getLatestResult();
-        //     } catch (Error e) {
-        //         System.out.print("Error in camera processing " + e.getMessage());
-        //     }
-        // }
-        // if (result.hasTargets()) {
-        //     updateOdometry(getEstimatedPose());
-        // }
+        result = camera.getLatestResult();
+        if (camera != null) {
+            try {
+                result = camera.getLatestResult();
+            } catch (Error e) {
+                System.out.print("Error in camera processing " + e.getMessage());
+            }
+        }
+        if (result != null && result.hasTargets()) {
+            updateOdometry(getEstimatedPose());
+        }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth

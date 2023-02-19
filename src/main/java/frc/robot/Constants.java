@@ -197,6 +197,8 @@ public final class Constants {
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
 
+    public static final Translation2d humanPlayerTranslation = new Translation2d(34, 34); // TODO: Find
+
     public static final Translation2d defaultPosition = new Translation2d(5, -5); //TODO: Find
 
     public static Translation2d getGoalTranslationCones(Level level) {
@@ -205,8 +207,12 @@ public final class Constants {
           return l2TranslationCones;
         case L3:
           return l3TranslationCones;
-        default:
+        case L1:
           return l1Translation;
+        case HUMAN_PLAYER:
+          return humanPlayerTranslation;
+        default:
+          return defaultPosition;
       }
     }
     
@@ -216,8 +222,12 @@ public final class Constants {
           return l2TranslationCubes;
         case L3:
           return l3TranslationCubes;
-        default:
+        case L1:
           return l1Translation;
+        case HUMAN_PLAYER:
+          return humanPlayerTranslation;
+        default:
+          return defaultPosition;
       }
     }
 
@@ -242,6 +252,7 @@ public final class Constants {
     public static final int intakeID = 20;
     public static final int intakeSolenoidForwardID = 0;
     public static final int intakeSolenoidBackwardID = 1;
+    public static final double intakeTimeToExtend = 0.3; // TODO: find
 
     public static final int routingLeftID = 21;
     public static final int routingRightID = 22;
@@ -253,10 +264,8 @@ public final class Constants {
     public static final boolean isRoutingSwitchReversed = false; 
 
     public static final int grabberID = 24;
-    public static final int grabberSolenoidTopFrontID = 2;
-    public static final int grabberSolenoidTopBackID = 3;
-    public static final int grabberSolenoidBottomFrontID = 4;
-    public static final int grabberSolenoidBottomBackID = 5;
+    public static final int grabberSolenoidFrontID = 2;
+    public static final int grabberSolenoidBackID = 3;
 
     public static final int grabberLimitSwitch = 3;
     public static final boolean isGrabberSwitchReversed = false; 

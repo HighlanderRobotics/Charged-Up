@@ -52,18 +52,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     public static enum Level {
         L1,
         L2,
-        L3
+        L3,
+        HUMAN_PLAYER
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
         elevatorMotor.set(ControlMode.PercentOutput, output + Constants.ElevatorConstants.feedforward.calculate(state.velocity));
     }
 
-    public void setGoal(double position) {
+    private void setGoal(double position) {
         Constants.ElevatorConstants.PIDController.setGoal(position);
     }
 
-    public void setGoal(double position, double velocity) {
+    private void setGoal(double position, double velocity) {
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
@@ -78,24 +79,22 @@ public class ElevatorSubsystem extends SubsystemBase {
     public boolean isAtSetpoint() {
         return Constants.ElevatorConstants.PIDController.atGoal();
     }
-    public void extendElevator() {
-
-    }
-    public void retractElevator() {
-
-    }
 
     public void updateMech2d(Pair<Double, Double> state) {
         elevatorLig2d.setLength(state.getFirst());
         armLig2d.setAngle(Math.toDegrees(state.getSecond()));
     }
 
-    public void enable() {
+    private void enable() {
         enabled = true;
     }
 
-    public void disable() {
+    private void disable() {
         enabled = false;
+    }
+
+    public CommandBase goToPositionCommand(double extensionInches) {
+        return new RunCommand(() -> setGoal(extensionInches), this);
     }
 
     /**
@@ -336,7 +335,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (enabled) {
-            useOutput(Constants.ElevatorConstants.PIDController.calculate(getMeasurement()), Constants.ElevatorConstants.PIDController.getSetpoint());
+            useOutput(Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()), Constants.ElevatorConstants.PIDController.getSetpoint());
         }
     }
 }

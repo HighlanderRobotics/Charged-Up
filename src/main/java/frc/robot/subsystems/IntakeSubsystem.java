@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -20,8 +21,12 @@ public class IntakeSubsystem extends SubsystemBase {
     PneumaticsModuleType.REVPH, 
     Constants.MechanismConstants.intakeSolenoidForwardID, 
     Constants.MechanismConstants.intakeSolenoidBackwardID);
+  // Timer to make sure that the intake has time to extend when we check if its out
+  Timer timeSinceExtended = new Timer();
   /** Creates a new IntakeSubsystem. */
-  public IntakeSubsystem() {}
+  public IntakeSubsystem() {
+    timeSinceExtended.start();
+  }
 
   private void run() {
     intake.setPercentOut(0.5);
@@ -33,6 +38,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
   private void extend() {
     solenoid.set(Value.kForward);
+    timeSinceExtended.reset();
   }
 
   private void retract() {
@@ -50,6 +56,16 @@ public class IntakeSubsystem extends SubsystemBase {
     return new RunCommand(
       () -> {this.stop(); this.retract();}, 
       this);
+  }
+
+  public CommandBase extendCommand() {
+    return new StartEndCommand(() -> this.extend(), () -> this.retract(), this);
+  }
+
+  public boolean isExtended() {
+    return 
+    timeSinceExtended.get() > Constants.MechanismConstants.intakeTimeToExtend 
+    && solenoid.get() == Value.kForward;
   }
 
   @Override

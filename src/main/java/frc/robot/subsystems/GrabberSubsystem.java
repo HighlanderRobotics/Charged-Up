@@ -19,14 +19,10 @@ import frc.robot.Constants;
 
 public class GrabberSubsystem extends SubsystemBase {
   HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID);
-  DoubleSolenoid solenoidTop = new DoubleSolenoid(
+  DoubleSolenoid solenoid = new DoubleSolenoid(
     PneumaticsModuleType.REVPH, 
-    Constants.MechanismConstants.grabberSolenoidTopFrontID, 
-    Constants.MechanismConstants.grabberSolenoidTopBackID);
-  DoubleSolenoid solenoidBottom = new DoubleSolenoid(
-    PneumaticsModuleType.REVPH, 
-    Constants.MechanismConstants.grabberSolenoidBottomFrontID, 
-    Constants.MechanismConstants.grabberSolenoidBottomBackID);
+    Constants.MechanismConstants.grabberSolenoidFrontID, 
+    Constants.MechanismConstants.grabberSolenoidBackID);
   ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(
     Constants.MechanismConstants.grabberLimitSwitch, 
     Constants.MechanismConstants.isGrabberSwitchReversed);
@@ -48,13 +44,15 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void open() {
-    solenoidTop.set(Value.kReverse);
-    solenoidBottom.set(Value.kReverse);
+    solenoid.set(Value.kReverse);
   }
 
   private void close() {
-    solenoidTop.set(Value.kForward);
-    solenoidBottom.set(Value.kForward);
+    solenoid.set(Value.kForward);
+  }
+
+  private void neutral() {
+    solenoid.set(Value.kOff);
   }
 
   public CommandBase intakeCommand() {
@@ -67,10 +65,6 @@ public class GrabberSubsystem extends SubsystemBase {
     }, this);
   }
 
-  public CommandBase releaseCommand() {
-    return new InstantCommand(() -> open(), this);
-  }
-
   public CommandBase outakeCommand() {
     return new RunCommand(() -> outake(), this);
   }
@@ -81,6 +75,14 @@ public class GrabberSubsystem extends SubsystemBase {
 
   public CommandBase closeCommand() {
     return new InstantCommand(() -> close(), this);
+  }
+
+  public CommandBase neutralCommand() {
+    return new InstantCommand(() -> neutral(), this);
+  }
+
+  public boolean hasGamePiece() {
+    return limitSwitch.get();
   }
 
   @Override

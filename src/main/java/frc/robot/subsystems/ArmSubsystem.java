@@ -4,6 +4,8 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
@@ -25,6 +27,10 @@ public class ArmSubsystem extends SubsystemBase{
 
     public void setGoal(Rotation2d rotation) {
         setGoal(HighlanderFalcon.rotToNative(rotation.getRotations()) * armMotor.getGearing());
+    }
+
+    public CommandBase runToRotationCommand(Rotation2d rotation) {
+        return new RunCommand(() -> setGoal(rotation), this);
     }
 
     private double getMeasurement() {

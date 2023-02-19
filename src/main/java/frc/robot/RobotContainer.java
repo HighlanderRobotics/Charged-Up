@@ -9,18 +9,15 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.RoutingSubsystem;
+import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
-
-import java.util.List;
-
-
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -34,11 +31,14 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  // private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
-  // private ArmSubsystem armSubsystem = new ArmSubsystem();
-  // private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-  // private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
-  // private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+  private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private ArmSubsystem armSubsystem = new ArmSubsystem();
+  private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+  private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
+  private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+
+  private SuperstructureSubsystem superstructureSubsystem = 
+    new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -53,11 +53,11 @@ public class RobotContainer {
       true, 
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
-    // elevatorSubsystem.setDefaultCommand(ElevatorSubsystem.goToPoseCommand(elevatorSubsystem, armSubsystem, Constants.ElevatorConstants.defaultPosition));
-    // armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.setGoal(armSubsystem.getRotation())));
-    // intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
-    // routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
-    // grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
+    elevatorSubsystem.setDefaultCommand(ElevatorSubsystem.goToPoseCommand(elevatorSubsystem, armSubsystem, Constants.ElevatorConstants.defaultPosition));
+    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.setGoal(armSubsystem.getRotation())));
+    intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
+    routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
+    grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -88,48 +88,33 @@ public class RobotContainer {
       true, 
       true));
 
+    controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
 
-    // controller.leftBumper().whileTrue(intakeSubsystem.runCommand());
+    new Trigger(() -> grabberSubsystem.hasGamePiece())
+      .onTrue(new InstantCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)))
+      .onFalse(new InstantCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)));
     
+    superstructureSubsystem.extendTrigger.whileTrue(intakeSubsystem.extendCommand());
+
+    superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
+      routingSubsystem.runCommand(), 
+      grabberSubsystem.intakeCommand(),
+      elevatorSubsystem.goToPositionCommand(0.0),
+      armSubsystem.runToRotationCommand(new Rotation2d(2)))); // TODO: Find rotation
+
+    superstructureSubsystem.storeTrigger.whileTrue(run(
+      routingSubsystem.stopCommand(),
+      grabberSubsystem.intakeCommand(),
+      elevatorSubsystem.goToPositionCommand(0.0)
+    ));
   }
 
   private void addDashboardCommands() {
-    // SmartDashboard.putData("Path 1", ElevatorSubsystem.followLineCommand(
-    //   elevatorSubsystem, 
-    //   armSubsystem, 
-    //   10, 
-    //   10, 
-    //   30, 
-    //   15));
+    
+  }
 
-    // SmartDashboard.putData("Path 2", ElevatorSubsystem.followLineCommand(
-    //   elevatorSubsystem, 
-    //   armSubsystem, 
-    //   30, 
-    //   15, 
-    //   10, 
-    //   10));
-
-    // SmartDashboard.putData("Sequence", ElevatorSubsystem.followLinearTrajectoryCommand(
-    //   elevatorSubsystem, 
-    //   armSubsystem, 
-    //   List.of(
-    //   Pair.of(new Translation2d(10, 10), 2.0),
-    //   Pair.of(new Translation2d(20, 10), 2.0),
-    //   Pair.of(new Translation2d(20, 15), 2.0),
-    //   Pair.of(new Translation2d(30, 15), 2.0))));
-
-    // var waypoints = new ArrayList<Translation2d>();
-    // waypoints.add(new Translation2d(20, 10));
-    // waypoints.add(new Translation2d(20, 20));
-    // SmartDashboard.putData("Spline", ElevatorSubsystem.followSplineCommand(
-    //   elevatorSubsystem, 
-    //   armSubsystem, 
-    //   SplineHelper.getCubicControlVectorsFromWaypoints(
-    //     new Pose2d(10, 10, new Rotation2d()),
-    //     waypoints.toArray(),
-    //     new Pose2d(40, 30, new Rotation2d())
-    //   )));
+  private static Command run(Command ... commands) {
+    return new ParallelCommandGroup(commands);
   }
 
   /**
@@ -145,9 +130,4 @@ public class RobotContainer {
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
   }
-
-  // public Command runRouting(){
-  //   return routingSubsystem.runCommand().andThen(grabberSubsystem.intakeCommand());
-
-  // }
 }

@@ -5,8 +5,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.components.HighlanderFalcon;
@@ -52,7 +50,11 @@ public class RoutingSubsystem extends SubsystemBase {
   }
 
   public CommandBase runCommand() { // TODO: this is probably the wrong logic, so fix
-    return new ConditionalCommand(new InstantCommand(() -> stop()), new InstantCommand(() -> run()), () -> limitSwitch.get());
+    return new RunCommand(() -> run(), this);
+  }
+
+  public CommandBase stopCommand() {
+    return new RunCommand(() -> stop(), this);
   }
 
   @Override
