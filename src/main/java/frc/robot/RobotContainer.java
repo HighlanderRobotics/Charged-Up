@@ -106,7 +106,7 @@ public class RobotContainer {
       true));
 
     controller.a().whileTrue(intakeSubsystem.runCommand());
-    controller.b().whileTrue(elevatorSubsystem.extendToInchesCommand(30));
+    controller.b().whileTrue(new ScoringCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
 
     isExtended
       .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))

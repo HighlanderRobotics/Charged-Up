@@ -271,8 +271,8 @@ public final class Constants {
         HighlanderFalcon.rpmToNative(1.0));
     }
 
-    public static final double elevatorAngleRad = Math.toRadians(44);
-    public static final double maxExtensionInches = 48;
+    public static final double elevatorAngleRad = Math.toRadians(41);
+    public static final double maxExtensionInches = 72;
     public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
     // Positions that the end effector needs to be in to score
     // TODO: tune
@@ -283,7 +283,7 @@ public final class Constants {
     public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
     
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
-    public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
+    public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 44.0);
 
     public static final Translation2d humanPlayerTranslation = new Translation2d(30, 37.325); // TODO: Find
 
@@ -337,6 +337,9 @@ public final class Constants {
     }
     public static final double rotatingArmLengthInches = 12.5;
     public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
+
+    public static final double armMinimumAngle = Math.toRadians(-20);
+    public static final double armMaximumAngle = Math.toRadians(50);
   }
   
   /** Constants for simple mechanisms like intake, routing, grabber */

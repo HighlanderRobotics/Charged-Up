@@ -29,7 +29,7 @@ import frc.robot.Constants;
 public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
     boolean enabled = true;
-    Mechanism2d mech2d = new Mechanism2d(48, 48);
+    Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
         "Elevator",
@@ -43,7 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         90,
         15,
         new Color8Bit(Color.kLavender)));
-    private static Level level;
+    private Level level = Level.L3;
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
@@ -203,7 +203,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         return !(positions.getFirst() < 0 || positions.getFirst() > Constants.ElevatorConstants.maxExtensionInches);
     }
 
-    /**Generates and follows a motion profile over a line for the elevator and arm */
+    /**Generates and follows a motion profile over a line for the elevator and arm.
+     * Suboptimal since it recalculates the motion profile of the elevator and arm each tick, and doesnt really follow a line.
+     */
     public static CommandBase followLineCommand(
             ElevatorSubsystem elevatorSubsystem, 
             ArmSubsystem armSubsystem, 
@@ -308,34 +310,32 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public static CommandBase goToPoseCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Translation2d endPose) {
-        Translation2d startPos = solveForwardKinematics(elevatorSubsystem.getExtensionInches(), armSubsystem.getRotation().getRadians());
-        return followLineCommand(
-                elevatorSubsystem, 
-                armSubsystem, 
-                startPos.getX(), 
-                startPos.getY(), 
-                endPose.getX(), 
-                endPose.getY()); 
+        SmartDashboard.putString("target pose", endPose.toString());
+        Pair<Double, Double> goal;
+        try {
+            goal = solveBestInverseKinematics(endPose.getX(), endPose.getY()).orElseThrow();
+        } catch (NullPointerException e) {
+            return new InstantCommand();
+        }
+        SmartDashboard.putNumber("goal extension", goal.getFirst());
+        SmartDashboard.putNumber("goal rotation", goal.getSecond());
+        return new RunCommand(() -> {
+            elevatorSubsystem.setGoal(goal.getFirst());
+            armSubsystem.setGoal(goal.getSecond());
+        }, elevatorSubsystem, armSubsystem);
     }
 
     public static CommandBase extendCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Level level, boolean isCone) {
-        Translation2d startPos = solveForwardKinematics(elevatorSubsystem.getExtensionInches(), armSubsystem.getRotation().getRadians());
         if (isCone) {
-            return followLineCommand(
+            return goToPoseCommand(
                 elevatorSubsystem, 
-                armSubsystem, 
-                startPos.getX(), 
-                startPos.getY(), 
-                Constants.ElevatorConstants.getGoalTranslationCones(level).getX(), 
-                Constants.ElevatorConstants.getGoalTranslationCones(level).getY());
+                armSubsystem,
+                Constants.ElevatorConstants.getGoalTranslationCones(level));
         } else {
-            return followLineCommand(
+            return goToPoseCommand(
                 elevatorSubsystem, 
                 armSubsystem, 
-                startPos.getX(), 
-                startPos.getY(), 
-                Constants.ElevatorConstants.getGoalTranslationCubes(level).getX(), 
-                Constants.ElevatorConstants.getGoalTranslationCubes(level).getY());
+                Constants.ElevatorConstants.getGoalTranslationCubes(level));
         }
 
     }

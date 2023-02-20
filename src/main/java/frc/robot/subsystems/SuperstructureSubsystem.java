@@ -53,8 +53,8 @@ public class SuperstructureSubsystem extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     elevatorSubsystem.updateMech2d(new Pair<Double,Double>(
-      Constants.ElevatorConstants.PIDController.getGoal().position, 
-      Constants.ArmConstants.PIDController.getGoal().position));
+      Constants.ElevatorConstants.PIDController.getSetpoint().position, 
+      Constants.ArmConstants.PIDController.getSetpoint().position));
     SmartDashboard.putString("Superstructure Mode", mode.toString());
   }
 

@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -15,6 +17,11 @@ public class ArmSubsystem extends SubsystemBase{
     boolean enabled = true;
     public ArmSubsystem () {
         armMotor = new HighlanderFalcon(Constants.ArmConstants.rotatingArmMotorID);
+        armMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(
+            true, 
+            30.0, 
+            15.0, 
+            0.5));
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
@@ -22,6 +29,7 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     public void setGoal(double position) {
+        position = MathUtil.clamp(position, Constants.ArmConstants.armMinimumAngle, Constants.ArmConstants.armMaximumAngle);
         Constants.ArmConstants.PIDController.setGoal(position);
     }
 

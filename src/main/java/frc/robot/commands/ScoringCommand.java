@@ -33,12 +33,12 @@ public class ScoringCommand extends SequentialCommandGroup {
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false),
+        false, false).alongWith(
       ElevatorSubsystem.extendCommand(
         elevatorSubsystem, armSubsystem, elevatorSubsystem.getLevel(), 
         swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),//TODO: find if actually is cone
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
-      grabberSubsystem.openCommand()
+      grabberSubsystem.openCommand())
     );
   }
 }
