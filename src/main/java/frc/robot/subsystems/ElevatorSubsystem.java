@@ -31,7 +31,7 @@ import frc.robot.Constants;
 public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
     HighlanderFalcon elevatorFollower;
-    boolean enabled = true;
+    boolean enabled = false;
     Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
@@ -65,8 +65,14 @@ public class ElevatorSubsystem extends SubsystemBase {
         HUMAN_PLAYER
     }
 
-    private void updatePID(double output, TrapezoidProfile.State state) {
-        elevatorMotor.set(ControlMode.PercentOutput, -output/* + Constants.ElevatorConstants.feedforward.calculate(state.velocity)*/);
+    private void updatePID() {
+        double pidOut = Constants.ElevatorConstants.PIDController.calculate(getExtensionInches());
+        var setpoint = Constants.ElevatorConstants.PIDController.getSetpoint();
+        SmartDashboard.putNumber("elevator setpoint", setpoint.position);
+        SmartDashboard.putNumber("elevator setpoint velocity", setpoint.velocity);
+        elevatorMotor.set(
+            ControlMode.PercentOutput, 
+            pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
     }
 
     private void setGoal(double position) {
@@ -358,7 +364,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (enabled) {
-            updatePID(Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()), Constants.ElevatorConstants.PIDController.getSetpoint());
+            updatePID();
+        } else {
+            elevatorMotor.setPercentOut(0);
         }
         SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
         SmartDashboard.putNumber("elevator pose inches", getExtensionInches());

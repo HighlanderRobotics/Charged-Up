@@ -33,7 +33,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void intake() {
-    grabber.setPercentOut(-0.5); // TODO: find best value
+    grabber.setPercentOut(-0.7); // TODO: find best value
   }
 
   private void outake() {
@@ -58,14 +58,12 @@ public class GrabberSubsystem extends SubsystemBase {
 
   public CommandBase intakeCommand() {
     return new RunCommand(() -> {
-      if (!limitSwitch.get()) {
         intake();
         open();
-      } else {
-        stop();
-        close();
-      }
-    }, this);
+    }, this).until(() -> limitSwitch.get())
+    .andThen(new RunCommand(() -> {
+      stop();
+    }, this)).until(() -> !limitSwitch.get()).repeatedly();
   }
 
   public CommandBase outakeCommand() {

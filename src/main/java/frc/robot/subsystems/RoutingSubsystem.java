@@ -38,8 +38,13 @@ public class RoutingSubsystem extends SubsystemBase {
   }
 
   private void run() {
-    routingLeft.setPercentOut(0.15); // TODO: find right rpm
-    routingRight.setPercentOut(-0.15); // TODO: find right rpm
+    routingLeft.setPercentOut(0.25); // TODO: find right rpm
+    routingRight.setPercentOut(-0.25); // TODO: find right rpm
+  }
+
+  private void outake() {
+    routingLeft.setPercentOut(-0.15);
+    routingRight.setPercentOut(0.15);
   }
 
   private void stop() {
@@ -49,6 +54,10 @@ public class RoutingSubsystem extends SubsystemBase {
 
   public CommandBase runCommand() { // TODO: this is probably the wrong logic, so fix
     return new RunCommand(() -> run(), this).handleInterrupt(() -> stop());
+  }
+
+  public CommandBase outakeCommand() {
+    return new RunCommand(() -> outake(), this);
   }
 
   public CommandBase stopCommand() {

@@ -33,6 +33,10 @@ public class IntakeSubsystem extends SubsystemBase {
     intake.setPercentOut(0.5);
   }
 
+  private void outake() {
+    intake.setPercentOut(-0.5);
+  }
+
   private void stop() {
     intake.setPercentOut(0);
   }
@@ -60,6 +64,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public CommandBase extendCommand() {
     return new StartEndCommand(() -> this.extend(), () -> this.retract(), this);
+  }
+
+  public CommandBase outakeCommand() {
+    return new RunCommand(() -> {outake();; extend();}, this);
   }
 
   public boolean isExtended() {
