@@ -6,6 +6,8 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,9 +16,10 @@ import frc.robot.Constants;
 
 public class ArmSubsystem extends SubsystemBase{
     HighlanderFalcon armMotor;
-    boolean enabled = true;
+    boolean enabled = false;
+    DutyCycleEncoder absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
     public ArmSubsystem () {
-        armMotor = new HighlanderFalcon(Constants.ArmConstants.rotatingArmMotorID);
+        armMotor = new HighlanderFalcon(Constants.ArmConstants.armMotorID);
         armMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(
             true, 
             30.0, 
@@ -42,11 +45,11 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     private double getMeasurement() {
-        return armMotor.getSelectedSensorPosition();
+        return absEncoder.getAbsolutePosition();
     }
 
     public Rotation2d getRotation() {
-        return new Rotation2d(armMotor.getRadians());
+        return new Rotation2d(absEncoder.get() * 2 * Math.PI);
     }
 
     public boolean isAtSetpoint() {
@@ -66,5 +69,7 @@ public class ArmSubsystem extends SubsystemBase{
         if (enabled) {
             useOutput(Constants.ArmConstants.PIDController.calculate(getMeasurement()), Constants.ArmConstants.PIDController.getSetpoint());
         }
+
+        SmartDashboard.putNumber("arm radians", absEncoder.getAbsolutePosition());
     }
 }

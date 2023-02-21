@@ -27,9 +27,6 @@ public class RoutingSubsystem extends SubsystemBase {
     Constants.MechanismConstants.routingKP, 
     0, 
     0);
-  ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(
-    Constants.MechanismConstants.routingLimitSwitch, 
-    Constants.MechanismConstants.isRoutingSwitchReversed);
   // TODO: talk to routing subteam about logic and stuff
   /** Creates a new RoutingSubsystem. */
   public RoutingSubsystem() {

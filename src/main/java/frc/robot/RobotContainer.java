@@ -34,6 +34,8 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -70,11 +72,12 @@ public class RobotContainer {
     //   true, 
     //   true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
-    elevatorSubsystem.setDefaultCommand(new InstantCommand(() -> {}, elevatorSubsystem));
+    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0.5));
     armSubsystem.setDefaultCommand(armSubsystem.runToRotationCommand(new Rotation2d()));
     intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
+    superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -105,6 +108,7 @@ public class RobotContainer {
       true, 
       true));
 
+    controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36));
     controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
     controller.b().whileTrue(new ScoringCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
     controller.a().whileTrue(run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand()));
@@ -116,7 +120,7 @@ public class RobotContainer {
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)), 
         () -> grabberSubsystem.hasGamePiece()));
 
-    isExtended.whileTrue(intakeSubsystem.extendCommand().repeatedly());
+    isExtended.whileTrue(intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),

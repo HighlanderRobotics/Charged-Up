@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 
@@ -45,6 +46,13 @@ public class SuperstructureSubsystem extends SubsystemBase {
     this.mode = mode;
   }
 
+  public CommandBase waitExtendToInches(double extensionInches){
+    return new InstantCommand(() -> mode = ExtensionState.EXTEND)
+      .andThen(new WaitCommand(0.25))
+      .andThen(elevatorSubsystem.extendToInchesCommand(extensionInches))
+      .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
@@ -53,12 +61,6 @@ public class SuperstructureSubsystem extends SubsystemBase {
     }
     SmartDashboard.putString("Superstructure Mode", mode.toString());
 
-  }
-
-  public CommandBase waitExtendToInches(double extensionInches){
-
-    return intakeSubsystem.extendCommand().andThen(new WaitCommand(0.25)).andThen(
-      elevatorSubsystem.extendToInchesCommand(extensionInches));
   }
 
   @Override

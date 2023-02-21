@@ -325,18 +325,19 @@ public final class Constants {
   }
 
   public static final class ArmConstants {
-    public static final int rotatingArmMotorID = 27;
+    public static final int armMotorID = 27;
+    public static final int armEncoderID = 0;
     // TODO: Check with actual robot
-    public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
+    public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
+    public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, armConstraints);
     static {
       PIDController.setTolerance(
         HighlanderFalcon.radToNative(0.1), //TODO: is this good?
         HighlanderFalcon.rpmToNative(1.0));
     }
-    public static final double rotatingArmLengthInches = 12.5;
+    public static final double armLengthInches = 12.5;
     public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
 
     public static final double armMinimumAngle = Math.toRadians(-20);
@@ -355,9 +356,6 @@ public final class Constants {
     public static final int routingConveyerID = 23;
     public static final double routingKP = 1; // TODO: tune
     public static final double conveyerKP = 1; // TODO: tune
-
-    public static final int routingLimitSwitch = 2;
-    public static final boolean isRoutingSwitchReversed = false; 
 
     public static final int grabberID = 24;
     public static final int grabberSolenoidFrontID = 1;

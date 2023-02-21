@@ -31,7 +31,7 @@ import frc.robot.Constants;
 public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
     HighlanderFalcon elevatorFollower;
-    boolean enabled = true;
+    boolean enabled = false;
     Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
@@ -42,7 +42,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         new Color8Bit(Color.kPurple)));
     MechanismLigament2d armLig2d = elevatorLig2d.append(new MechanismLigament2d(
         "Arm", 
-        Constants.ArmConstants.rotatingArmLengthInches,
+        Constants.ArmConstants.armLengthInches,
         90,
         15,
         new Color8Bit(Color.kLavender)));
@@ -113,11 +113,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         armLig2d.setAngle(Math.toDegrees(state.getSecond()));
     }
 
-    private void enable() {
+    public void enable() {
         enabled = true;
     }
 
-    private void disable() {
+    public void disable() {
         enabled = false;
     }
 
@@ -134,7 +134,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public static Translation2d solveForwardKinematics (double theta, double r) {
         Translation2d pos = new Translation2d(r, Rotation2d.fromRadians(Constants.ElevatorConstants.elevatorAngleRad));
-        return pos.plus(new Translation2d(Constants.ArmConstants.rotatingArmLengthInches, theta));
+        return pos.plus(new Translation2d(Constants.ArmConstants.armLengthInches, theta));
     }
 
     /**
@@ -149,11 +149,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = -Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
+        double theta = -Math.asin(yPrime/Constants.ArmConstants.armLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.armLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -172,11 +172,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
+        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.armLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.armLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -363,11 +363,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     @Override
     public void periodic() {
-        if (enabled) {
-            updatePID();
-        } else {
+        // if (enabled) {
+        //     updatePID();
+        // } else {
             elevatorMotor.setPercentOut(0);
-        }
+        // }
         SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
         SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
         SmartDashboard.putNumber("elevator native position", getMeasurement());
