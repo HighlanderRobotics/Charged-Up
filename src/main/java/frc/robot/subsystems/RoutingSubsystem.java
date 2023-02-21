@@ -4,7 +4,10 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.components.HighlanderFalcon;
@@ -24,33 +27,28 @@ public class RoutingSubsystem extends SubsystemBase {
     Constants.MechanismConstants.routingKP, 
     0, 
     0);
-  HighlanderFalcon routingConveyer = new HighlanderFalcon(
-    Constants.MechanismConstants.routingConveyerID, 
-    1.0,
-    Constants.MechanismConstants.conveyerKP, 
-    0, 
-    0);
   ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(
     Constants.MechanismConstants.routingLimitSwitch, 
     Constants.MechanismConstants.isRoutingSwitchReversed);
   // TODO: talk to routing subteam about logic and stuff
   /** Creates a new RoutingSubsystem. */
-  public RoutingSubsystem() {}
+  public RoutingSubsystem() {
+    routingLeft.setNeutralMode(NeutralMode.Brake);
+    routingRight.setNeutralMode(NeutralMode.Brake);
+  }
 
   private void run() {
-    routingLeft.setTargetRPM(200); // TODO: find right rpm
-    routingRight.setTargetRPM(200); // TODO: find right rpm
-    routingConveyer.setTargetRPM(200); // TODO: find right rpm
+    routingLeft.setPercentOut(0.15); // TODO: find right rpm
+    routingRight.setPercentOut(-0.15); // TODO: find right rpm
   }
 
   private void stop() {
-    routingLeft.setTargetRPM(0);
-    routingRight.setTargetRPM(0);
-    routingConveyer.setTargetRPM(0);
+    routingLeft.setPercentOut(0);
+    routingRight.setPercentOut(0);
   }
 
   public CommandBase runCommand() { // TODO: this is probably the wrong logic, so fix
-    return new RunCommand(() -> run(), this);
+    return new RunCommand(() -> run(), this).handleInterrupt(() -> stop());
   }
 
   public CommandBase stopCommand() {

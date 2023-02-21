@@ -258,7 +258,8 @@ public final class Constants {
   public static final float bottomGoal = 0;
   
   public static final class ElevatorConstants {
-    public static final int elevatorMotorID = 0;
+    public static final int elevatorMotorID = 25;
+    public static final int elevatorFollowerID = 26;
     // TODO: check this
     public static final double elevatorGearRatio = 5.0;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
@@ -324,7 +325,7 @@ public final class Constants {
   }
 
   public static final class ArmConstants {
-    public static final int rotatingArmMotorID = 0;
+    public static final int rotatingArmMotorID = 27;
     // TODO: Check with actual robot
     public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
@@ -345,8 +346,8 @@ public final class Constants {
   /** Constants for simple mechanisms like intake, routing, grabber */
   public static final class MechanismConstants {
     public static final int intakeID = 20;
-    public static final int intakeSolenoidForwardID = 0;
-    public static final int intakeSolenoidBackwardID = 1;
+    public static final int intakeSolenoidForwardID = 2;
+    public static final int intakeSolenoidBackwardID = 0;
     public static final double intakeTimeToExtend = 0.3; // TODO: find
 
     public static final int routingLeftID = 21;
@@ -359,10 +360,10 @@ public final class Constants {
     public static final boolean isRoutingSwitchReversed = false; 
 
     public static final int grabberID = 24;
-    public static final int grabberSolenoidFrontID = 2;
+    public static final int grabberSolenoidFrontID = 1;
     public static final int grabberSolenoidBackID = 3;
 
-    public static final int grabberLimitSwitch = 3;
-    public static final boolean isGrabberSwitchReversed = false; 
+    public static final int grabberLimitSwitch = 1;
+    public static final boolean isGrabberSwitchReversed = true; 
   }
 }

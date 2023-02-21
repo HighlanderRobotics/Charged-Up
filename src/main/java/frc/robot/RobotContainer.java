@@ -63,18 +63,18 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Set default commands here
-    swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()), 
-      () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()), 
-      true, 
-      true));
+    // swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
+    //   () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
+    //   () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()), 
+    //   () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()), 
+    //   true, 
+    //   true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0));
     armSubsystem.setDefaultCommand(armSubsystem.runToRotationCommand(new Rotation2d()));
     intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
-    routingSubsystem.setDefaultCommand(routingSubsystem.runCommand());
-    grabberSubsystem.setDefaultCommand(grabberSubsystem.intakeCommand());
+    routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
+    grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -105,7 +105,7 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.a().whileTrue(intakeSubsystem.runCommand());
+    controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
     controller.b().whileTrue(new ScoringCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem));
 
     isExtended
@@ -118,8 +118,6 @@ public class RobotContainer {
     superstructureSubsystem.extendTrigger.whileTrue(intakeSubsystem.extendCommand().repeatedly());
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
-      routingSubsystem.runCommand(), 
-      grabberSubsystem.intakeCommand(),
       elevatorSubsystem.extendToInchesCommand(0.0),
       armSubsystem.runToRotationCommand(new Rotation2d(2)))); // TODO: Find rotation
 
@@ -132,6 +130,8 @@ public class RobotContainer {
 
   private void addDashboardCommands() {
     SmartDashboard.putBoolean("Grabber has thing", grabberSubsystem.hasGamePiece());
+
+    SmartDashboard.putData("intake toggle", intakeSubsystem.extendCommand());
   }
 
   private static Command run(Command ... commands) {

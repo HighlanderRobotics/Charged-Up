@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -32,11 +33,11 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void intake() {
-    grabber.setPercentOut(0.5); // TODO: find best value
+    grabber.setPercentOut(-0.5); // TODO: find best value
   }
 
   private void outake() {
-    grabber.setPercentOut(-0.5); // TODO: find best value
+    grabber.setPercentOut(0.5); // TODO: find best value
   }
 
   private void stop() {
@@ -59,8 +60,10 @@ public class GrabberSubsystem extends SubsystemBase {
     return new RunCommand(() -> {
       if (!limitSwitch.get()) {
         intake();
+        open();
       } else {
         stop();
+        close();
       }
     }, this);
   }
@@ -81,6 +84,10 @@ public class GrabberSubsystem extends SubsystemBase {
     return new InstantCommand(() -> neutral(), this);
   }
 
+  public CommandBase stopCommand() {
+    return new RunCommand(() -> stop(), this);
+  }
+
   public boolean hasGamePiece() {
     return limitSwitch.get();
   }
@@ -88,5 +95,6 @@ public class GrabberSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putBoolean("grabber sensor", limitSwitch.get());
   }
 }

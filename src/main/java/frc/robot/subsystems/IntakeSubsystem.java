@@ -47,9 +47,8 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public CommandBase runCommand() {
-    return new StartEndCommand(
+    return new RunCommand(
       () -> {this.run(); this.extend();}, 
-      () -> {this.stop(); this.retract();}, 
       this);
   }
 

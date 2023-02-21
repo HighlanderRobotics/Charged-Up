@@ -48,6 +48,8 @@ public class SuperstructureSubsystem extends SubsystemBase {
     if (elevatorSubsystem.getExtensionInches() > 6 || Constants.ElevatorConstants.PIDController.getGoal().position > 6 ) { // TODO: Find good value for maximum extension before "extended"
       mode = ExtensionState.EXTEND;
     }
+    SmartDashboard.putString("Superstructure Mode", mode.toString());
+
   }
 
   @Override
@@ -55,7 +57,6 @@ public class SuperstructureSubsystem extends SubsystemBase {
     elevatorSubsystem.updateMech2d(new Pair<Double,Double>(
       Constants.ElevatorConstants.PIDController.getSetpoint().position, 
       Constants.ArmConstants.PIDController.getSetpoint().position));
-    SmartDashboard.putString("Superstructure Mode", mode.toString());
   }
 
   public static enum ExtensionState {
