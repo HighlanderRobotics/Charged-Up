@@ -261,10 +261,10 @@ public final class Constants {
     public static final int elevatorMotorID = 25;
     public static final int elevatorFollowerID = 26;
     // TODO: check this
-    public static final double elevatorGearRatio = 5.0;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
+    public static final double elevatorGearRatio = 5.45;
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.4887, 0.33984, 0.0053894, 0.007808);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(5.0,10.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.032409, 0.0, 0.032608, elevatorConstraints);
 
     static {
       PIDController.setTolerance(
@@ -321,7 +321,7 @@ public final class Constants {
     }
 
     public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
-    public static double elevatorSpoolCircumference = 1.751 * Math.PI;
+    public static final double elevatorSpoolCircumference = 1.751 * Math.PI;
   }
 
   public static final class ArmConstants {

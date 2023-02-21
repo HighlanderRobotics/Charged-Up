@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,11 +24,13 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
+    HighlanderFalcon elevatorFollower;
     boolean enabled = true;
     Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
@@ -46,8 +49,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     private Level level = Level.L3;
 
     public ElevatorSubsystem() {
-        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
+        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
+        elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
+        elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
+        elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
+        elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         SmartDashboard.putData("elevatorsim", mech2d);
+        zeroMotor();
     }
 
     public static enum Level {
@@ -57,15 +65,17 @@ public class ElevatorSubsystem extends SubsystemBase {
         HUMAN_PLAYER
     }
 
-    private void useOutput(double output, TrapezoidProfile.State state) {
-        elevatorMotor.set(ControlMode.PercentOutput, output + Constants.ElevatorConstants.feedforward.calculate(state.velocity));
+    private void updatePID(double output, TrapezoidProfile.State state) {
+        elevatorMotor.set(ControlMode.PercentOutput, -output/* + Constants.ElevatorConstants.feedforward.calculate(state.velocity)*/);
     }
 
     private void setGoal(double position) {
+        Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
         Constants.ElevatorConstants.PIDController.setGoal(position);
     }
 
     private void setGoal(double position, double velocity) {
+        Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
@@ -81,7 +91,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public double getExtensionInches() {
-        return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference;
+        return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5;
+    }
+
+    public void zeroMotor() {
+        elevatorMotor.setSelectedSensorPosition(0);
     }
 
     public boolean isAtSetpoint() {
@@ -102,9 +116,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public CommandBase extendToInchesCommand(double extensionInches) {
-        return new InstantCommand(() -> setGoal(extensionInches), this).andThen(new RunCommand(() -> {}, this));
+        return new InstantCommand(() -> setGoal(extensionInches), this)
+            .andThen(new WaitUntilCommand(() -> isAtSetpoint()));
     }
-
+ 
     /**
      * Computes the forward kinematics of the arm and elevator system
      * @param theta rotation of the arm in radians ccw positive from the x axis
@@ -343,7 +358,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (enabled) {
-            useOutput(Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()), Constants.ElevatorConstants.PIDController.getSetpoint());
+            updatePID(Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()), Constants.ElevatorConstants.PIDController.getSetpoint());
         }
+        SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+        SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
+        SmartDashboard.putNumber("elevator native position", getMeasurement());
+        SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
     }
 }

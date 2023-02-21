@@ -132,6 +132,13 @@ public class RobotContainer {
     SmartDashboard.putBoolean("Grabber has thing", grabberSubsystem.hasGamePiece());
 
     SmartDashboard.putData("intake toggle", intakeSubsystem.extendCommand());
+
+    SmartDashboard.putData("extend to 0", elevatorSubsystem.extendToInchesCommand(0).ignoringDisable(true));
+    SmartDashboard.putData("extend to 12", elevatorSubsystem.extendToInchesCommand(12).ignoringDisable(true));
+    SmartDashboard.putData("extend to 36", elevatorSubsystem.extendToInchesCommand(36).ignoringDisable(true));
+
+    SmartDashboard.putData("reset elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem).ignoringDisable(true));
+    
   }
 
   private static Command run(Command ... commands) {
