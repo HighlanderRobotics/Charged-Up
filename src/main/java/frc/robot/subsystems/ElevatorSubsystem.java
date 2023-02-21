@@ -31,7 +31,7 @@ import frc.robot.Constants;
 public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
     HighlanderFalcon elevatorFollower;
-    boolean enabled = false;
+    boolean enabled = true;
     Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(

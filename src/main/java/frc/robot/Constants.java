@@ -262,9 +262,9 @@ public final class Constants {
     public static final int elevatorFollowerID = 26;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.4887, 0.33984, 0.0053894, 0.007808);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(5.0,10.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.032409, 0.0, 0.032608, elevatorConstraints);
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.4887/4, 0.33984/4, 0.001);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(100.0,200.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/5, 0.0, 0.0139/4, elevatorConstraints);
 
     static {
       PIDController.setTolerance(
