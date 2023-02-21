@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -63,7 +64,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public CommandBase extendCommand() {
-    return new StartEndCommand(() -> this.extend(), () -> this.retract(), this);
+    return new InstantCommand(() -> this.extend(), this);
   }
 
   public CommandBase outakeCommand() {

@@ -70,7 +70,7 @@ public class RobotContainer {
     //   true, 
     //   true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
-    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0));
+    elevatorSubsystem.setDefaultCommand(new InstantCommand(() -> {}, elevatorSubsystem));
     armSubsystem.setDefaultCommand(armSubsystem.runToRotationCommand(new Rotation2d()));
     intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
@@ -116,16 +116,16 @@ public class RobotContainer {
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)), 
         () -> grabberSubsystem.hasGamePiece()));
 
-    superstructureSubsystem.extendTrigger.whileTrue(intakeSubsystem.extendCommand().repeatedly());
+    isExtended.whileTrue(intakeSubsystem.extendCommand().repeatedly());
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
-      elevatorSubsystem.extendToInchesCommand(0.0),
+      //elevatorSubsystem.extendToInchesCommand(0.0),
       armSubsystem.runToRotationCommand(new Rotation2d(2)))); // TODO: Find rotation
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand(),
-      grabberSubsystem.intakeCommand(),
-      elevatorSubsystem.extendToInchesCommand(0.0)
+      grabberSubsystem.intakeCommand()
+      //elevatorSubsystem.extendToInchesCommand(0.0)
     ));
   }
 
@@ -134,9 +134,9 @@ public class RobotContainer {
 
     SmartDashboard.putData("intake toggle", intakeSubsystem.extendCommand());
 
-    SmartDashboard.putData("extend to 0", elevatorSubsystem.extendToInchesCommand(0).ignoringDisable(true));
-    SmartDashboard.putData("extend to 12", elevatorSubsystem.extendToInchesCommand(12).ignoringDisable(true));
-    SmartDashboard.putData("extend to 36", elevatorSubsystem.extendToInchesCommand(36).ignoringDisable(true));
+    SmartDashboard.putData("extend to 0", superstructureSubsystem.waitExtendToInches(0));
+    SmartDashboard.putData("extend to 12", superstructureSubsystem.waitExtendToInches(12));
+    SmartDashboard.putData("extend to 36", superstructureSubsystem.waitExtendToInches(36));
 
     SmartDashboard.putData("reset elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem).ignoringDisable(true));
     
