@@ -6,6 +6,7 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -17,7 +18,8 @@ import frc.robot.Constants;
 public class ArmSubsystem extends SubsystemBase{
     HighlanderFalcon armMotor;
     boolean enabled = false;
-    DutyCycleEncoder absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
+    DutyCycleEncoder absEncoder;
+    // DigitalInput aaaaaa = new DigitalInput(Constants.ArmConstants.armEncoderID);
     public ArmSubsystem () {
         armMotor = new HighlanderFalcon(Constants.ArmConstants.armMotorID);
         armMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(
@@ -25,6 +27,7 @@ public class ArmSubsystem extends SubsystemBase{
             30.0, 
             15.0, 
             0.5));
+        absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
@@ -71,5 +74,6 @@ public class ArmSubsystem extends SubsystemBase{
         }
 
         SmartDashboard.putNumber("arm radians", absEncoder.getAbsolutePosition());
+        // SmartDashboard.putBoolean("arm is getting signal", aaaaaa.get());
     }
 }
