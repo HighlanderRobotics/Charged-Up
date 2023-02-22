@@ -49,7 +49,7 @@ public class EatingCommand extends SequentialCommandGroup {
         false, false),
         superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel), 
       // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
-      // //TODO: find if actually is cone does this matter for eating??
+      //we're only picking up cones from the substations
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.closeCommand()
     );
