@@ -47,12 +47,24 @@ public class ArmSubsystem extends SubsystemBase{
         return new RunCommand(() -> setGoal(rotation), this);
     }
 
+    public void jogUp() {
+        armMotor.setPercentOut(0.1);
+    }
+
+    public void jogDown() {
+        armMotor.setPercentOut(-0.1);
+    }
+
+    public void stop() {
+        armMotor.setPercentOut(0);
+    }
+
     private double getMeasurement() {
-        return absEncoder.getAbsolutePosition();
+        return (absEncoder.getAbsolutePosition() - Constants.ArmConstants.armOffset) % 1.0;
     }
 
     public Rotation2d getRotation() {
-        return new Rotation2d(absEncoder.get() * 2 * Math.PI);
+        return new Rotation2d((getMeasurement() - Constants.ArmConstants.armOffset) * 2 * Math.PI);
     }
 
     public boolean isAtSetpoint() {
@@ -73,6 +85,16 @@ public class ArmSubsystem extends SubsystemBase{
             useOutput(Constants.ArmConstants.PIDController.calculate(getMeasurement()), Constants.ArmConstants.PIDController.getSetpoint());
         }
 
-        SmartDashboard.putNumber("arm radians", absEncoder.get());
+        if (getMeasurement() > Constants.ArmConstants.armMaximumAngle 
+            && armMotor.getSupplyCurrent() > 0) {
+            armMotor.setPercentOut(0);
+        } else if (getMeasurement() < Constants.ArmConstants.armMinimumAngle
+            && armMotor.getSupplyCurrent() < 0) {
+            armMotor.setPercentOut(0);
+        }
+
+        SmartDashboard.putNumber("arm radians", getRotation().getRadians());
+        SmartDashboard.putNumber("arm encoder native", getMeasurement());
+        SmartDashboard.putNumber("arm current", armMotor.getSupplyCurrent());
     }
 }

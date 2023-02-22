@@ -341,10 +341,10 @@ public final class Constants {
         HighlanderFalcon.rpmToNative(1.0));
     }
     public static final double armLengthInches = 12.5;
-    public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
+    public static final double armOffset = 1.2; // encoder native
 
-    public static final double armMinimumAngle = Math.toRadians(-20);
-    public static final double armMaximumAngle = Math.toRadians(50);
+    public static final double armMinimumAngle = -0.25;
+    public static final double armMaximumAngle = 0.0;
   }
   
   /** Constants for simple mechanisms like intake, routing, grabber */

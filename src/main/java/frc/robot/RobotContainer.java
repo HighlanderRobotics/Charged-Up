@@ -73,7 +73,7 @@ public class RobotContainer {
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0.5));
-    armSubsystem.setDefaultCommand(armSubsystem.runToRotationCommand(new Rotation2d()));
+    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
     intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
@@ -144,6 +144,8 @@ public class RobotContainer {
 
     SmartDashboard.putData("reset elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem).ignoringDisable(true));
     
+    SmartDashboard.putData("jog arm up", new RunCommand(() -> armSubsystem.jogUp(), armSubsystem));
+    SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
   }
 
   private static Command run(Command ... commands) {
