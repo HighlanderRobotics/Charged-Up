@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem.Level;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -19,11 +19,12 @@ import frc.robot.subsystems.ElevatorSubsystem.Level;
 public class ScoringCommand extends SequentialCommandGroup {
   /** Creates a new ScoringCommand. */
   public ScoringCommand(
-    Level level, 
+    double level,
     ElevatorSubsystem elevatorSubsystem, 
     ArmSubsystem armSubsystem, 
     SwerveSubsystem swerveSubsystem,
-    GrabberSubsystem grabberSubsystem) {
+    GrabberSubsystem grabberSubsystem,
+    SuperstructureSubsystem superstructureSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     
@@ -34,9 +35,10 @@ public class ScoringCommand extends SequentialCommandGroup {
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false).alongWith(
-      ElevatorSubsystem.extendCommand(
-        elevatorSubsystem, armSubsystem, elevatorSubsystem.getLevel(), 
-        swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),//TODO: find if actually is cone
+      superstructureSubsystem.waitExtendToInches(level), 
+      // elevatorSubsystem.extendCommand(
+      //   swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),//TODO: find if actually is cone
+      //   elevatorSubsystem, armSubsystem, elevatorSubsystem.getLevel(), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.openCommand())
     );

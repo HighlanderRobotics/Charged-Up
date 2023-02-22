@@ -46,7 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         90,
         15,
         new Color8Bit(Color.kLavender)));
-    private Level level = Level.L3;
+    private double level = Constants.topConeLevel;
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
@@ -56,13 +56,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         SmartDashboard.putData("elevatorsim", mech2d);
         zeroMotor();
-    }
-
-    public static enum Level {
-        L1,
-        L2,
-        L3,
-        HUMAN_PLAYER
     }
 
     private void updatePID() {
@@ -85,10 +78,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
-    public void setLevel(Level level) {
+    public void setLevel(double level) {
         this.level = level;
     }
-    public Level getLevel() {
+    public double getLevel() {
         return level;
     }
 
@@ -344,21 +337,6 @@ public class ElevatorSubsystem extends SubsystemBase {
             elevatorSubsystem.setGoal(goal.getFirst());
             armSubsystem.setGoal(goal.getSecond());
         }, elevatorSubsystem, armSubsystem);
-    }
-
-    public static CommandBase extendCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Level level, boolean isCone) {
-        if (isCone) {
-            return goToPoseCommand(
-                elevatorSubsystem, 
-                armSubsystem,
-                Constants.ElevatorConstants.getGoalTranslationCones(level));
-        } else {
-            return goToPoseCommand(
-                elevatorSubsystem, 
-                armSubsystem, 
-                Constants.ElevatorConstants.getGoalTranslationCubes(level));
-        }
-
     }
     
     @Override

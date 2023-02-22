@@ -13,8 +13,8 @@ import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem.Level;
 import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
@@ -23,6 +23,7 @@ import frc.robot.subsystems.SwerveSubsystem;
 public class EatingCommand extends SequentialCommandGroup {
   /** Creates a new EatingCommand. */
   public EatingCommand(
+    SuperstructureSubsystem superstructureSubsystem,
     ElevatorSubsystem elevatorSubsystem, 
     ArmSubsystem armSubsystem, 
     SwerveSubsystem swerveSubsystem,
@@ -45,9 +46,10 @@ public class EatingCommand extends SequentialCommandGroup {
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false), // should hopefully rotate to the goal thru the magic of pid
-      ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
-      //TODO: find if actually is cone does this matter for eating??
+        false, false),
+        superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel), 
+      // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
+      // //TODO: find if actually is cone does this matter for eating??
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.closeCommand()
     );

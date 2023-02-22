@@ -26,7 +26,6 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
-import static frc.robot.subsystems.ElevatorSubsystem.Level;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -289,39 +288,9 @@ public final class Constants {
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 44.0);
 
-    public static final Translation2d humanPlayerTranslation = new Translation2d(30, 37.325); // TODO: Find
+    public static final Translation2d humanPlayerTranslation = new Translation2d(30, 37.325); // TODO: Find i dont think the yval is right??
 
     public static final Translation2d defaultPosition = new Translation2d(5, -5); //TODO: Find
-
-    public static Translation2d getGoalTranslationCones(Level level) {
-      switch (level) {
-        case L2:
-          return l2TranslationCones;
-        case L3:
-          return l3TranslationCones;
-        case L1:
-          return l1Translation;
-        case HUMAN_PLAYER:
-          return humanPlayerTranslation;
-        default:
-          return defaultPosition;
-      }
-    }
-    
-    public static Translation2d getGoalTranslationCubes(Level level) {
-      switch (level) {
-        case L2:
-          return l2TranslationCubes;
-        case L3:
-          return l3TranslationCubes;
-        case L1:
-          return l1Translation;
-        case HUMAN_PLAYER:
-          return humanPlayerTranslation;
-        default:
-          return defaultPosition;
-      }
-    }
 
     public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
     public static final double elevatorSpoolCircumference = 1.751 * Math.PI;
@@ -367,4 +336,11 @@ public final class Constants {
     public static final int grabberLimitSwitch = 1;
     public static final boolean isGrabberSwitchReversed = true; 
   }
+  public static final double topConeLevel = 46; //this is in inches
+  public static final double topCubeLevel = 35.5;
+  public static final double midConeLevel = 34;
+  public static final double midCubeLevel = 23.5;
+  public static final double bottomLevel = 0;
+
+  public static final double humanPlayerLevel = 37.375; //or substation idk what we're calling them
 }
