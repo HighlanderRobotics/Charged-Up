@@ -42,8 +42,11 @@ public final class Constants {
   }
 
   public static final Transform3d CAMERA_TO_ROBOT = new Transform3d(
-    new Translation3d(0, Units.inchesToMeters(13.5), 0),
-    new Rotation3d(0, 0, -Math.PI / 2));
+    new Translation3d(
+      Units.inchesToMeters(-5.48),
+      Units.inchesToMeters(-10.84), 
+      Units.inchesToMeters(-22.75)),
+    new Rotation3d(0, 0, 0));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
@@ -258,12 +261,13 @@ public final class Constants {
   public static final float bottomGoal = 0;
   
   public static final class ElevatorConstants {
-    public static final int elevatorMotorID = 0;
+    public static final int elevatorMotorID = 25;
+    public static final int elevatorFollowerID = 26;
     // TODO: check this
-    public static final double elevatorGearRatio = 5.0;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints); //TODO: yay pid :sparkles:
+    public static final double elevatorGearRatio = 5.45;
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.4887/4, 0.33984/4, 0.001);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(100.0,200.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/5, 0.0, 0.0139/4, elevatorConstraints);
 
     static {
       PIDController.setTolerance(
@@ -271,8 +275,8 @@ public final class Constants {
         HighlanderFalcon.rpmToNative(1.0));
     }
 
-    public static final double elevatorAngleRad = Math.toRadians(44);
-    public static final double maxExtensionInches = 48;
+    public static final double elevatorAngleRad = Math.toRadians(41);
+    public static final double maxExtensionInches = 72;
     public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
     // Positions that the end effector needs to be in to score
     // TODO: tune
@@ -283,9 +287,11 @@ public final class Constants {
     public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
     
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
-    public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 46.0);
+    public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 44.0);
 
-    public static final Translation2d substationHeight = new Translation2d(30, 37.375); //TODO: find x val
+    public static final Translation2d humanPlayerTranslation = new Translation2d(30, 37.325); // TODO: Find
+
+    public static final Translation2d defaultPosition = new Translation2d(5, -5); //TODO: Find
 
     public static Translation2d getGoalTranslationCones(Level level) {
       switch (level) {
@@ -293,10 +299,12 @@ public final class Constants {
           return l2TranslationCones;
         case L3:
           return l3TranslationCones;
-        case substation:
-          return substationHeight;
-        default:
+        case L1:
           return l1Translation;
+        case HUMAN_PLAYER:
+          return humanPlayerTranslation;
+        default:
+          return defaultPosition;
       }
     }
     
@@ -306,36 +314,45 @@ public final class Constants {
           return l2TranslationCubes;
         case L3:
           return l3TranslationCubes;
-        default:
+        case L1:
           return l1Translation;
+        case HUMAN_PLAYER:
+          return humanPlayerTranslation;
+        default:
+          return defaultPosition;
       }
     }
 
     public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
-    public static double elevatorSpoolCircumference = 1.751 * Math.PI;
+    public static final double elevatorSpoolCircumference = 1.751 * Math.PI;
   }
 
   public static final class ArmConstants {
-    public static final int rotatingArmMotorID = 0;
+    public static final int armMotorID = 27;
+    public static final int armEncoderID = 0;
     // TODO: Check with actual robot
-    public static final double rotatingArmGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
+    public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints rotatingArmConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, rotatingArmConstraints);
+    public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, armConstraints);
     static {
       PIDController.setTolerance(
         HighlanderFalcon.radToNative(0.1), //TODO: is this good?
         HighlanderFalcon.rpmToNative(1.0));
     }
-    public static final double rotatingArmLengthInches = 12.5;
-    public static final double armOffset = -ElevatorConstants.elevatorAngleRad;
+    public static final double armLengthInches = 12.5;
+    public static final double armOffset = 1.2; // encoder native
+
+    public static final double armMinimumAngle = -0.25;
+    public static final double armMaximumAngle = 0.0;
   }
   
   /** Constants for simple mechanisms like intake, routing, grabber */
   public static final class MechanismConstants {
     public static final int intakeID = 20;
-    public static final int intakeSolenoidForwardID = 0;
-    public static final int intakeSolenoidBackwardID = 1;
+    public static final int intakeSolenoidForwardID = 2;
+    public static final int intakeSolenoidBackwardID = 0;
+    public static final double intakeTimeToExtend = 0.1; // TODO: find
 
     public static final int routingLeftID = 21;
     public static final int routingRightID = 22;
@@ -343,16 +360,11 @@ public final class Constants {
     public static final double routingKP = 1; // TODO: tune
     public static final double conveyerKP = 1; // TODO: tune
 
-    public static final int routingLimitSwitch = 2;
-    public static final boolean isRoutingSwitchReversed = false; 
-
     public static final int grabberID = 24;
-    public static final int grabberSolenoidTopFrontID = 2;
-    public static final int grabberSolenoidTopBackID = 3;
-    public static final int grabberSolenoidBottomFrontID = 4;
-    public static final int grabberSolenoidBottomBackID = 5;
+    public static final int grabberSolenoidFrontID = 1;
+    public static final int grabberSolenoidBackID = 3;
 
-    public static final int grabberLimitSwitch = 3;
-    public static final boolean isGrabberSwitchReversed = false; 
+    public static final int grabberLimitSwitch = 1;
+    public static final boolean isGrabberSwitchReversed = true; 
   }
 }

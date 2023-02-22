@@ -9,6 +9,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -19,14 +20,10 @@ import frc.robot.Constants;
 
 public class GrabberSubsystem extends SubsystemBase {
   HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID);
-  DoubleSolenoid solenoidTop = new DoubleSolenoid(
+  DoubleSolenoid solenoid = new DoubleSolenoid(
     PneumaticsModuleType.REVPH, 
-    Constants.MechanismConstants.grabberSolenoidTopFrontID, 
-    Constants.MechanismConstants.grabberSolenoidTopBackID);
-  DoubleSolenoid solenoidBottom = new DoubleSolenoid(
-    PneumaticsModuleType.REVPH, 
-    Constants.MechanismConstants.grabberSolenoidBottomFrontID, 
-    Constants.MechanismConstants.grabberSolenoidBottomBackID);
+    Constants.MechanismConstants.grabberSolenoidFrontID, 
+    Constants.MechanismConstants.grabberSolenoidBackID);
   ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(
     Constants.MechanismConstants.grabberLimitSwitch, 
     Constants.MechanismConstants.isGrabberSwitchReversed);
@@ -36,11 +33,11 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void intake() {
-    grabber.setPercentOut(0.5); // TODO: find best value
+    grabber.setPercentOut(-0.7); // TODO: find best value
   }
 
   private void outake() {
-    grabber.setPercentOut(-0.5); // TODO: find best value
+    grabber.setPercentOut(0.5); // TODO: find best value
   }
 
   private void stop() {
@@ -48,23 +45,25 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void open() {
-    solenoidTop.set(Value.kReverse);
-    solenoidBottom.set(Value.kReverse);
+    solenoid.set(Value.kReverse);
   }
 
   private void close() {
-    solenoidTop.set(Value.kForward);
-    solenoidBottom.set(Value.kForward);
+    solenoid.set(Value.kForward);
+  }
+
+  private void neutral() {
+    solenoid.set(Value.kOff);
   }
 
   public CommandBase intakeCommand() {
     return new RunCommand(() -> {
-      if (!limitSwitch.get()) {
         intake();
-      } else {
-        stop();
-      }
-    }, this);
+        open();
+    }, this).until(() -> limitSwitch.get())
+    .andThen(new RunCommand(() -> {
+      stop();
+    }, this)).until(() -> !limitSwitch.get()).repeatedly();
   }
 
   public CommandBase outakeCommand() {
@@ -79,8 +78,21 @@ public class GrabberSubsystem extends SubsystemBase {
     return new InstantCommand(() -> close(), this);
   }
 
+  public CommandBase neutralCommand() {
+    return new InstantCommand(() -> neutral(), this);
+  }
+
+  public CommandBase stopCommand() {
+    return new RunCommand(() -> stop(), this);
+  }
+
+  public boolean hasGamePiece() {
+    return limitSwitch.get();
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putBoolean("grabber sensor", limitSwitch.get());
   }
 }

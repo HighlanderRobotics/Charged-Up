@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,13 +24,15 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
-    boolean enabled = true;
-    Mechanism2d mech2d = new Mechanism2d(48, 48);
+    HighlanderFalcon elevatorFollower;
+    boolean enabled = false;
+    Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
         "Elevator",
@@ -39,41 +42,54 @@ public class ElevatorSubsystem extends SubsystemBase {
         new Color8Bit(Color.kPurple)));
     MechanismLigament2d armLig2d = elevatorLig2d.append(new MechanismLigament2d(
         "Arm", 
-        Constants.ArmConstants.rotatingArmLengthInches,
+        Constants.ArmConstants.armLengthInches,
         90,
         15,
         new Color8Bit(Color.kLavender)));
-    private Level targetLevel;
+    private Level level = Level.L3;
 
     public ElevatorSubsystem() {
-        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
+        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
+        elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
+        elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
+        elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
+        elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         SmartDashboard.putData("elevatorsim", mech2d);
+        zeroMotor();
     }
 
     public static enum Level {
-        L1, //bottom
-        L2, //mid
-        L3, //top
-        substation
+        L1,
+        L2,
+        L3,
+        HUMAN_PLAYER
     }
 
-    private void useOutput(double output, TrapezoidProfile.State state) {
-        elevatorMotor.set(ControlMode.PercentOutput, output + Constants.ElevatorConstants.feedforward.calculate(state.velocity));
+    private void updatePID() {
+        double pidOut = Constants.ElevatorConstants.PIDController.calculate(getExtensionInches());
+        var setpoint = Constants.ElevatorConstants.PIDController.getSetpoint();
+        SmartDashboard.putNumber("elevator setpoint", setpoint.position);
+        SmartDashboard.putNumber("elevator setpoint velocity", setpoint.velocity);
+        elevatorMotor.set(
+            ControlMode.PercentOutput, 
+            pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
     }
 
-    public void setGoal(double position) {
+    private void setGoal(double position) {
+        Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
         Constants.ElevatorConstants.PIDController.setGoal(position);
     }
 
-    public void setGoal(double position, double velocity) {
+    private void setGoal(double position, double velocity) {
+        Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
-    public void setTargetLevel(Level level) {
-        this.targetLevel = level;
+    public void setLevel(Level level) {
+        this.level = level;
     }
-    public Level getTargetLevel() {
-        return targetLevel;
+    public Level getLevel() {
+        return level;
     }
 
     private double getMeasurement() {
@@ -81,7 +97,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public double getExtensionInches() {
-        return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference;
+        return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5;
+    }
+
+    public void zeroMotor() {
+        elevatorMotor.setSelectedSensorPosition(0);
     }
 
     public boolean isAtSetpoint() {
@@ -101,6 +121,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         enabled = false;
     }
 
+    public CommandBase extendToInchesCommand(double extensionInches) {
+        return new InstantCommand(() -> setGoal(extensionInches), this)
+            .andThen(new WaitUntilCommand(() -> isAtSetpoint()));
+    }
+ 
     /**
      * Computes the forward kinematics of the arm and elevator system
      * @param theta rotation of the arm in radians ccw positive from the x axis
@@ -109,7 +134,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public static Translation2d solveForwardKinematics (double theta, double r) {
         Translation2d pos = new Translation2d(r, Rotation2d.fromRadians(Constants.ElevatorConstants.elevatorAngleRad));
-        return pos.plus(new Translation2d(Constants.ArmConstants.rotatingArmLengthInches, theta));
+        return pos.plus(new Translation2d(Constants.ArmConstants.armLengthInches, theta));
     }
 
     /**
@@ -124,11 +149,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = -Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
+        double theta = -Math.asin(yPrime/Constants.ArmConstants.armLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.armLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -147,11 +172,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
+        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.armLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.armLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -199,7 +224,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         return !(positions.getFirst() < 0 || positions.getFirst() > Constants.ElevatorConstants.maxExtensionInches);
     }
 
-    /**Generates and follows a motion profile over a line for the elevator and arm */
+    /**Generates and follows a motion profile over a line for the elevator and arm.
+     * Suboptimal since it recalculates the motion profile of the elevator and arm each tick, and doesnt really follow a line.
+     */
     public static CommandBase followLineCommand(
             ElevatorSubsystem elevatorSubsystem, 
             ArmSubsystem armSubsystem, 
@@ -231,7 +258,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 if (setpoint.isPresent()) {
                     elevatorSubsystem.setGoal(setpoint.get().getFirst());
                     armSubsystem.setGoal(setpoint.get().getSecond());
-                    elevatorSubsystem.updateMech2d(setpoint.get());
+                    // elevatorSubsystem.updateMech2d(setpoint.get());
                     SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
                     SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
                 } else {
@@ -266,7 +293,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 if (setpoint.isPresent()) {
                     elevatorSubsystem.setGoal(setpoint.get().getFirst());
                     armSubsystem.setGoal(setpoint.get().getSecond());
-                    elevatorSubsystem.updateMech2d(setpoint.get());
+                    // elevatorSubsystem.updateMech2d(setpoint.get());
                     SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
                     SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
                 } else {
@@ -303,32 +330,47 @@ public class ElevatorSubsystem extends SubsystemBase {
         return sequence;
     }
 
-    public CommandBase extendCommand(ArmSubsystem armSubsystem, Level level, boolean isCone) {
-        Translation2d startPos = solveForwardKinematics(getExtensionInches(), armSubsystem.getRotation().getRadians());
+    public static CommandBase goToPoseCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Translation2d endPose) {
+        SmartDashboard.putString("target pose", endPose.toString());
+        Pair<Double, Double> goal;
+        try {
+            goal = solveBestInverseKinematics(endPose.getX(), endPose.getY()).orElseThrow();
+        } catch (NullPointerException e) {
+            return new InstantCommand();
+        }
+        SmartDashboard.putNumber("goal extension", goal.getFirst());
+        SmartDashboard.putNumber("goal rotation", goal.getSecond());
+        return new RunCommand(() -> {
+            elevatorSubsystem.setGoal(goal.getFirst());
+            armSubsystem.setGoal(goal.getSecond());
+        }, elevatorSubsystem, armSubsystem);
+    }
+
+    public static CommandBase extendCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Level level, boolean isCone) {
         if (isCone) {
-            return followLineCommand(
-                this, 
-                armSubsystem, 
-                startPos.getX(), 
-                startPos.getY(), 
-                Constants.ElevatorConstants.getGoalTranslationCones(level).getX(), 
-                Constants.ElevatorConstants.getGoalTranslationCones(level).getY());
+            return goToPoseCommand(
+                elevatorSubsystem, 
+                armSubsystem,
+                Constants.ElevatorConstants.getGoalTranslationCones(level));
         } else {
-            return followLineCommand(
-                this, 
+            return goToPoseCommand(
+                elevatorSubsystem, 
                 armSubsystem, 
-                startPos.getX(), 
-                startPos.getY(), 
-                Constants.ElevatorConstants.getGoalTranslationCubes(level).getX(), 
-                Constants.ElevatorConstants.getGoalTranslationCubes(level).getY());
+                Constants.ElevatorConstants.getGoalTranslationCubes(level));
         }
 
     }
     
     @Override
     public void periodic() {
-        if (enabled) {
-            useOutput(Constants.ElevatorConstants.PIDController.calculate(getMeasurement()), Constants.ElevatorConstants.PIDController.getSetpoint());
-        }
+        // if (enabled) {
+        //     updatePID();
+        // } else {
+            elevatorMotor.setPercentOut(0);
+        // }
+        SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+        SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
+        SmartDashboard.putNumber("elevator native position", getMeasurement());
+        SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
     }
 }
