@@ -23,6 +23,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
@@ -335,6 +336,13 @@ public final class Constants {
 
     public static final int grabberLimitSwitch = 1;
     public static final boolean isGrabberSwitchReversed = true; 
+  }
+
+  public static final class LEDConstants {
+    public static final int ledPort = 1;
+    public static final int ledLength = 130; //TODO: find
+
+    public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
   public static final double topConeLevel = 46; //this is in inches
   public static final double topCubeLevel = 35.5;
