@@ -253,12 +253,40 @@ public final class Constants {
     }
   }
   public static final class ScoringLEDs {
-    Color8Bit blue0 = new Color8Bit(0, 0, 255);
-    Color8Bit blue1 = new Color8Bit(0, 0, 255);
-    //TODO: finish
+    public static final Color8Bit goal0 = new Color8Bit(255, 0, 0); //same for red and blue goals
+    public static final Color8Bit goal1 = new Color8Bit(255, 125, 0);
+    public static final Color8Bit goal2 = new Color8Bit(255, 255, 0);
+    public static final Color8Bit goal3 = new Color8Bit(0, 255, 0);
+    public static final Color8Bit goal4 = new Color8Bit(0, 255, 255);
+    public static final Color8Bit goal5 = new Color8Bit(0, 0, 255);
+    public static final Color8Bit goal6 = new Color8Bit(125, 0, 255);
+    public static final Color8Bit goal7 = new Color8Bit(255, 0, 255);
+    public static final Color8Bit goal8 = new Color8Bit(255, 128, 84); //this color was handpicked by ava "design lead" grochowski
 
   }
+  
+  public static final HashMap<PathPointOpen, Color8Bit> lights = new HashMap<>();
+  static {
+    lights.put(ScoringPositions.blue0, ScoringLEDs.goal0);
+    lights.put(ScoringPositions.blue1, ScoringLEDs.goal1);
+    lights.put(ScoringPositions.blue2, ScoringLEDs.goal2);
+    lights.put(ScoringPositions.blue3, ScoringLEDs.goal3);
+    lights.put(ScoringPositions.blue4, ScoringLEDs.goal4);
+    lights.put(ScoringPositions.blue5, ScoringLEDs.goal5);
+    lights.put(ScoringPositions.blue6, ScoringLEDs.goal6);
+    lights.put(ScoringPositions.blue7, ScoringLEDs.goal7);
+    lights.put(ScoringPositions.blue8, ScoringLEDs.goal8);
 
+    lights.put(ScoringPositions.red0, ScoringLEDs.goal0);
+    lights.put(ScoringPositions.red1, ScoringLEDs.goal1);
+    lights.put(ScoringPositions.red2, ScoringLEDs.goal2);
+    lights.put(ScoringPositions.red3, ScoringLEDs.goal3);
+    lights.put(ScoringPositions.red4, ScoringLEDs.goal4);
+    lights.put(ScoringPositions.red5, ScoringLEDs.goal5);
+    lights.put(ScoringPositions.red6, ScoringLEDs.goal6);
+    lights.put(ScoringPositions.red7, ScoringLEDs.goal7);
+    lights.put(ScoringPositions.red8, ScoringLEDs.goal8);
+  }
   public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));
   public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));
  

@@ -45,6 +45,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -64,6 +65,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private AprilTagFieldLayout fieldLayout;
 
     public boolean hasResetOdometry = false;
+
+    private LEDSubsystem ledSubsystem = new LEDSubsystem();
 
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -188,6 +191,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     public PathPointOpen getNearestGoal (Pose2d pose, Alliance alliance) {
         PathPointOpen output = null;
+        Color8Bit color = null;
         double distance = Double.MAX_VALUE;
         if (alliance == Alliance.Blue) {
             for (PathPointOpen point : ScoringPositions.bluePositionsList) {
@@ -196,6 +200,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 if (currentDistance < distance) {
                     distance = currentDistance;
                     output = point;
+                    color = Constants.lights.get(output);
                 }
             }
         }
@@ -206,10 +211,12 @@ public class SwerveSubsystem extends SubsystemBase {
                 if (currentDistance < distance) {
                     distance = currentDistance;
                     output = point;
+                    color = Constants.lights.get(output);
                 }
             }
         }
         field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
+        ledSubsystem.setBlinking(color, 1);
         return output;
     }
     public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
