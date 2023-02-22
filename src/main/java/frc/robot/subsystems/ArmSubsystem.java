@@ -19,7 +19,6 @@ public class ArmSubsystem extends SubsystemBase{
     HighlanderFalcon armMotor;
     boolean enabled = false;
     DutyCycleEncoder absEncoder;
-    // DigitalInput aaaaaa = new DigitalInput(Constants.ArmConstants.armEncoderID);
     public ArmSubsystem () {
         armMotor = new HighlanderFalcon(Constants.ArmConstants.armMotorID);
         armMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(
@@ -30,17 +29,19 @@ public class ArmSubsystem extends SubsystemBase{
         absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
     }
 
-    private void useOutput(double output, TrapezoidProfile.State state) {
+    private void updatePID(double output, TrapezoidProfile.State state) {
         if (getMeasurement() > Constants.ArmConstants.armMaximumAngle 
             && output > 0) {
             armMotor.setPercentOut(0);
         } else if (getMeasurement() < Constants.ArmConstants.armMinimumAngle
             && output < 0) {
             armMotor.setPercentOut(0);
+        } else {
+            armMotor.set(ControlMode.PercentOutput, MathUtil.clamp(output, -0.1, 0.1));
         }
-        armMotor.set(ControlMode.PercentOutput, output + Constants.ArmConstants.feedforward.calculate(state.position, state.velocity));
     }
 
+    /**0 is down, PI/2 is horizontal */
     public void setGoal(double position) {
         position = MathUtil.clamp(position, Constants.ArmConstants.armMinimumAngle, Constants.ArmConstants.armMaximumAngle);
         Constants.ArmConstants.PIDController.setGoal(position);
@@ -71,7 +72,7 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     public Rotation2d getRotation() {
-        return new Rotation2d((getMeasurement()) * 2 * Math.PI).minus(new Rotation2d());
+        return new Rotation2d((getMeasurement()) * Math.PI * 2).minus(new Rotation2d());
     }
 
     public boolean isAtSetpoint() {
@@ -89,7 +90,8 @@ public class ArmSubsystem extends SubsystemBase{
     @Override
     public void periodic () {
         if (enabled) {
-            useOutput(Constants.ArmConstants.PIDController.calculate(getMeasurement()), Constants.ArmConstants.PIDController.getSetpoint());
+            updatePID(Constants.ArmConstants.PIDController.calculate(getRotation().getRadians()), 
+                Constants.ArmConstants.PIDController.getSetpoint());
         }
 
         SmartDashboard.putNumber("arm radians", getRotation().getRadians());

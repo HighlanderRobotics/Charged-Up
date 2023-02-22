@@ -146,6 +146,9 @@ public class RobotContainer {
     
     SmartDashboard.putData("jog arm up", new RunCommand(() -> armSubsystem.jogUp(), armSubsystem));
     SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
+  
+    SmartDashboard.putData("arm to 0", armSubsystem.runToRotationCommand(new Rotation2d(0.0)));
+    SmartDashboard.putData("arm to -1.5", armSubsystem.runToRotationCommand(new Rotation2d(-1.5)));
   }
 
   private static Command run(Command ... commands) {
