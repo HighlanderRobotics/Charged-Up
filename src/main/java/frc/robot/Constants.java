@@ -252,6 +252,13 @@ public final class Constants {
       redPositionsList.add(red8);
     }
   }
+  public static final class ScoringLEDs {
+    Color8Bit blue0 = new Color8Bit(0, 0, 255);
+    Color8Bit blue1 = new Color8Bit(0, 0, 255);
+    //TODO: finish
+
+  }
+
   public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));
   public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));
  
