@@ -18,13 +18,10 @@ import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.subsystems.ElevatorSubsystem.Level;
 
-import java.util.List;
-
 import com.pathplanner.lib.PathPlanner;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.DriverStation;
