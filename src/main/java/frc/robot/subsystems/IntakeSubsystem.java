@@ -58,7 +58,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public CommandBase stopCommand() {
-    return new RunCommand(
+    return new InstantCommand(
       () -> {this.stop(); this.retract();}, 
       this);
   }
@@ -68,7 +68,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public CommandBase outakeCommand() {
-    return new RunCommand(() -> {outake();; extend();}, this);
+    return new RunCommand(() -> {outake(); extend();}, this);
   }
 
   public boolean isExtended() {
@@ -80,6 +80,8 @@ public class IntakeSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putBoolean("intake extended?", isExtended());
+
   }
 
   @Override

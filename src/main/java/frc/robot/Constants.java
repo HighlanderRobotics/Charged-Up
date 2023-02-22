@@ -352,7 +352,7 @@ public final class Constants {
     public static final int intakeID = 20;
     public static final int intakeSolenoidForwardID = 2;
     public static final int intakeSolenoidBackwardID = 0;
-    public static final double intakeTimeToExtend = 0.3; // TODO: find
+    public static final double intakeTimeToExtend = 0.1; // TODO: find
 
     public static final int routingLeftID = 21;
     public static final int routingRightID = 22;

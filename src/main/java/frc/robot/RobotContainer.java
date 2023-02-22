@@ -74,7 +74,7 @@ public class RobotContainer {
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0.5));
     armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
-    intakeSubsystem.setDefaultCommand(intakeSubsystem.stopCommand());
+    intakeSubsystem.setDefaultCommand(new ConditionalCommand(intakeSubsystem.extendCommand(), intakeSubsystem.stopCommand(), () -> isExtended.getAsBoolean()).repeatedly());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
     superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));

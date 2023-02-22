@@ -31,6 +31,13 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     private void useOutput(double output, TrapezoidProfile.State state) {
+        if (getMeasurement() > Constants.ArmConstants.armMaximumAngle 
+            && output > 0) {
+            armMotor.setPercentOut(0);
+        } else if (getMeasurement() < Constants.ArmConstants.armMinimumAngle
+            && output < 0) {
+            armMotor.setPercentOut(0);
+        }
         armMotor.set(ControlMode.PercentOutput, output + Constants.ArmConstants.feedforward.calculate(state.position, state.velocity));
     }
 
@@ -64,7 +71,7 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     public Rotation2d getRotation() {
-        return new Rotation2d((getMeasurement() - Constants.ArmConstants.armOffset) * 2 * Math.PI);
+        return new Rotation2d((getMeasurement()) * 2 * Math.PI).minus(new Rotation2d());
     }
 
     public boolean isAtSetpoint() {
@@ -83,14 +90,6 @@ public class ArmSubsystem extends SubsystemBase{
     public void periodic () {
         if (enabled) {
             useOutput(Constants.ArmConstants.PIDController.calculate(getMeasurement()), Constants.ArmConstants.PIDController.getSetpoint());
-        }
-
-        if (getMeasurement() > Constants.ArmConstants.armMaximumAngle 
-            && armMotor.getSupplyCurrent() > 0) {
-            armMotor.setPercentOut(0);
-        } else if (getMeasurement() < Constants.ArmConstants.armMinimumAngle
-            && armMotor.getSupplyCurrent() < 0) {
-            armMotor.setPercentOut(0);
         }
 
         SmartDashboard.putNumber("arm radians", getRotation().getRadians());
