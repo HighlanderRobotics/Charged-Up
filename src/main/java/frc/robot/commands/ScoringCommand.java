@@ -4,12 +4,15 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -24,23 +27,27 @@ public class ScoringCommand extends SequentialCommandGroup {
     ArmSubsystem armSubsystem, 
     SwerveSubsystem swerveSubsystem,
     GrabberSubsystem grabberSubsystem,
-    SuperstructureSubsystem superstructureSubsystem) {
+    SuperstructureSubsystem superstructureSubsystem,
+    LEDSubsystem ledSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     
     addCommands(
       swerveSubsystem.followPathCommand(
-        swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())),
+        swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())).alongWith(
+          ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))
+        ),
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false).alongWith(
-      superstructureSubsystem.waitExtendToInches(level),
+          ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78))).alongWith(
+          superstructureSubsystem.waitExtendToInches(level)),
       // elevatorSubsystem.extendCommand(
       //   swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),
       //   elevatorSubsystem, armSubsystem, elevatorSubsystem.getLevel(), 
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
-      grabberSubsystem.openCommand())
+      grabberSubsystem.openCommand()
     );
   }
 }

@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -14,6 +15,7 @@ import frc.robot.PathPointOpen;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -27,7 +29,8 @@ public class EatingCommand extends SequentialCommandGroup {
     ElevatorSubsystem elevatorSubsystem, 
     ArmSubsystem armSubsystem, 
     SwerveSubsystem swerveSubsystem,
-    GrabberSubsystem grabberSubsystem) 
+    GrabberSubsystem grabberSubsystem,
+    LEDSubsystem ledSubsystem) 
    {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
@@ -42,12 +45,15 @@ public class EatingCommand extends SequentialCommandGroup {
     }
     addCommands(
       swerveSubsystem.followPathCommand(
-        swerveSubsystem.getPathToPoint(substationLocation)),
+        swerveSubsystem.getPathToPoint(substationLocation)).alongWith(
+          ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))
+        ),
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false),
-        superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel), 
+        false, false).alongWith(
+          ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78))).alongWith(
+          superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)), 
       // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
       //we're only picking up cones from the substations
       new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),

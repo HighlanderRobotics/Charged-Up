@@ -105,10 +105,10 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36));
     controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
     //TODO: this will only score cones bc i havent figured out the logic for cubes yet
-    controller.b().whileTrue(new ScoringCommand(Constants.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
-    controller.a().whileTrue(new ScoringCommand(Constants.midConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+    controller.b().whileTrue(new ScoringCommand(Constants.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem, ledSubsystem));
+    controller.a().whileTrue(new ScoringCommand(Constants.midConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem, ledSubsystem));
     //(run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())); why is this here???
-    controller.x().whileTrue(new ScoringCommand(Constants.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+    controller.x().whileTrue(new ScoringCommand(Constants.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem, ledSubsystem));
     isExtended
       .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))
       .whileFalse(new ConditionalCommand(
