@@ -78,8 +78,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
         headingController.enableContinuousInput(0, Math.PI * 2);
 
-        // camera = new PhotonCamera("OV5647");
-        // camera.setLED(VisionLEDMode.kOff);
+        camera = new PhotonCamera("limelight");
+        camera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),

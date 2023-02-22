@@ -42,8 +42,11 @@ public final class Constants {
   }
 
   public static final Transform3d CAMERA_TO_ROBOT = new Transform3d(
-    new Translation3d(0, Units.inchesToMeters(13.5), 0),
-    new Rotation3d(0, 0, -Math.PI / 2));
+    new Translation3d(
+      Units.inchesToMeters(-5.48),
+      Units.inchesToMeters(-10.84), 
+      Units.inchesToMeters(-22.75)),
+    new Rotation3d(0, 0, 0));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
@@ -326,7 +329,7 @@ public final class Constants {
 
   public static final class ArmConstants {
     public static final int armMotorID = 27;
-    public static final int armEncoderID = 3;
+    public static final int armEncoderID = 0;
     // TODO: Check with actual robot
     public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
@@ -361,7 +364,7 @@ public final class Constants {
     public static final int grabberSolenoidFrontID = 1;
     public static final int grabberSolenoidBackID = 3;
 
-    public static final int grabberLimitSwitch = 0;//TODO wrong
+    public static final int grabberLimitSwitch = 1;
     public static final boolean isGrabberSwitchReversed = true; 
   }
 }

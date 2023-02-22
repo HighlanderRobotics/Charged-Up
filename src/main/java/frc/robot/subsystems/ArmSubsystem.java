@@ -73,7 +73,6 @@ public class ArmSubsystem extends SubsystemBase{
             useOutput(Constants.ArmConstants.PIDController.calculate(getMeasurement()), Constants.ArmConstants.PIDController.getSetpoint());
         }
 
-        SmartDashboard.putNumber("arm radians", absEncoder.getAbsolutePosition());
-        // SmartDashboard.putBoolean("arm is getting signal", aaaaaa.get());
+        SmartDashboard.putNumber("arm radians", absEncoder.get());
     }
 }
