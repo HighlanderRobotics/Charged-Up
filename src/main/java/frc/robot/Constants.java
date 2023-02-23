@@ -12,8 +12,10 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.DifferentialDriveFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -172,12 +174,17 @@ public final class Constants {
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
+    public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
     public static final double kPXController = 1;
     public static final double kPYController = 1;
-    public static final double kPThetaController = 0.5;
-    public static final double kDThetaController = 0.1;
+    public static final double kPThetaController = 0.4;
+    public static final double kDThetaController = 0.0;
 
+    public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
+    public static final ProfiledPIDController yController = new ProfiledPIDController(kPYController, 0, 0, constraints);
+
+    public static final SimpleMotorFeedforward thetaFeedForward = new SimpleMotorFeedforward(0.24, 1.0e+3);
     /* Constraint for the motion profilied robot angle controller */
     public static final TrapezoidProfile.Constraints thetaControllerConstraints =
         new TrapezoidProfile.Constraints(
@@ -195,7 +202,7 @@ public final class Constants {
     public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0));
     public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0));  
     
-    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.6, 0.43), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(1.6, 0.43), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.6, 1.03), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.6, 1.63), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.6, 2.23), Rotation2d.fromDegrees(0));

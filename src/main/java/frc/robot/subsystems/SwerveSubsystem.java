@@ -50,6 +50,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
@@ -71,6 +72,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
+    public Pose2d pose = new Pose2d();
+
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
         0, 
@@ -83,6 +86,7 @@ public class SwerveSubsystem extends SubsystemBase {
         zeroGyro();
 
         headingController.enableContinuousInput(0, Math.PI * 2);
+        headingController.setTolerance(0.1);
 
         camera = new PhotonCamera("limelight");
         camera.setLED(VisionLEDMode.kOff);
@@ -163,6 +167,26 @@ public class SwerveSubsystem extends SubsystemBase {
             fieldRelative, 
             isOpenLoop);
     }
+    public Command poseLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
+        return new InstantCommand(
+            () -> {Constants.AutoConstants.xController.reset(getPose().getX()); 
+                Constants.AutoConstants.yController.reset(getPose().getY());}).andThen(
+            driveCommand(
+                () -> Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
+                () -> Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
+                () -> {if (false) {return 0;} 
+                        else {
+                            return (headingController.calculate(getYaw().getRadians())
+                                + Constants.AutoConstants.thetaFeedForward.calculate(headingController.getSetpoint().velocity));
+                        }
+                    },
+                fieldRelative, 
+                isOpenLoop).alongWith(
+                    new PrintCommand(pose.getX() + " x"),
+                    new PrintCommand(pose.getY() + " y"),
+                    new PrintCommand(headingController.getPositionError() + " heading error").repeatedly()
+                ));
+    }
 
     /** Generates a Command that consumes a PathPlanner path and follows it */
     public Command followPathCommand(PathPlannerTrajectory path) {
@@ -232,6 +256,9 @@ public class SwerveSubsystem extends SubsystemBase {
         field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
        // ledSubsystem.setBlinking(color, 1);
         return output;
+    }
+    public double getNearestGoalDistance () {
+        return pose.getTranslation().getDistance(getNearestGoal().getTranslation2d());
     }
     public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
         if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ){ //then its a cube goal
@@ -428,7 +455,15 @@ public class SwerveSubsystem extends SubsystemBase {
         if (DriverStation.isDisabled()) {
             hasResetOdometry = false;
         }
-        getNearestGoal();
-        getPathToPoint(getNearestGoal());
+        // getNearestGoal();
+        // getPathToPoint(getNearestGoal());
+
+        SmartDashboard.putNumber("x error", Constants.AutoConstants.xController.getPositionError());
+        SmartDashboard.putNumber("y error", Constants.AutoConstants.yController.getPositionError());
+        SmartDashboard.putNumber("x goal", Constants.AutoConstants.xController.getGoal().position);
+        SmartDashboard.putNumber("Y goal", Constants.AutoConstants.yController.getGoal().position);
+        SmartDashboard.putNumber("total error", getNearestGoalDistance());
+        pose = getPose();
+        System.out.println(pose);
     }
 }

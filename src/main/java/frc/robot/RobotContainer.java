@@ -113,6 +113,8 @@ public class RobotContainer {
     controller.a().whileTrue(new ScoringCommand(Constants.midConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     //(run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())); why is this here???
     controller.x().whileTrue(new ScoringCommand(Constants.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    controller.y().whileTrue(swerveSubsystem.poseLockDriveCommand(()-> 12.6, () -> 0.4, () -> 0, true, false));
+    
     isExtended
       .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))
       .whileFalse(new ConditionalCommand(
