@@ -4,6 +4,10 @@
 
 package frc.robot.commands;
 
+import com.pathplanner.lib.PathPoint;
+
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -26,26 +30,30 @@ public class ScoringCommand extends SequentialCommandGroup {
     ArmSubsystem armSubsystem, 
     SwerveSubsystem swerveSubsystem,
     GrabberSubsystem grabberSubsystem,
-    SuperstructureSubsystem superstructureSubsystem,
-    LEDSubsystem ledSubsystem) {
+    SuperstructureSubsystem superstructureSubsystem) {
+    // LEDSubsystem ledSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     
     addCommands(
+    new PrintCommand("scoring sequence woo" + swerveSubsystem.getPose().toString()),
       swerveSubsystem.followPathCommand(
-        swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())).alongWith(
-          ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))
-        ),
+        //swerveSubsystem.getPathBetweenTwoPoints(
+        //  new PathPoint(new Translation2d(5, 5), new Rotation2d()), swerveSubsystem.getNearestGoal())),
+       
+        swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())),//.alongWith(
+         // ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))),
       new PrintCommand("finished path"),
       swerveSubsystem.headingLockDriveCommand(
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false).alongWith(
-          ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78))).alongWith(
+        false, false)//.alongWith(
+          //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
+          .alongWith(
           superstructureSubsystem.waitExtendToInches(level)),
       // elevatorSubsystem.extendCommand(
       //   swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),
       //   elevatorSubsystem, armSubsystem, elevatorSubsystem.getLevel(), 
-      new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
+      new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()), //&& armSubsystem.isAtSetpoint()),
       grabberSubsystem.openCommand()
     );
   }

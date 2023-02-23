@@ -90,6 +90,10 @@ public class GrabberSubsystem extends SubsystemBase {
     return limitSwitch.get();
   }
 
+  public CommandBase stopAndClose(){
+    return new RunCommand(() -> {stop(); close();}, this);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

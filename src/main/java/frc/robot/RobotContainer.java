@@ -18,6 +18,7 @@ import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 
 import java.lang.System.Logger.Level;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -51,7 +52,7 @@ public class RobotContainer {
 
   private SuperstructureSubsystem superstructureSubsystem = 
     new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem);
-  private LEDSubsystem ledSubsystem = new LEDSubsystem();
+  // private LEDSubsystem ledSubsystem = new LEDSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -72,9 +73,9 @@ public class RobotContainer {
     armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
     intakeSubsystem.setDefaultCommand(new ConditionalCommand(intakeSubsystem.extendCommand(), intakeSubsystem.stopCommand(), () -> isExtended.getAsBoolean()).repeatedly());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
-    grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
+    grabberSubsystem.setDefaultCommand(grabberSubsystem.stopAndClose());
     superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));
-    ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
+   // ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -108,10 +109,10 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36));
     controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
     //TODO: this will only score cones bc i havent figured out the logic for cubes yet
-    controller.b().whileTrue(new ScoringCommand(Constants.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem, ledSubsystem));
-    controller.a().whileTrue(new ScoringCommand(Constants.midConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem, ledSubsystem));
+    controller.b().whileTrue(new ScoringCommand(Constants.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
+    controller.a().whileTrue(new ScoringCommand(Constants.midConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     //(run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())); why is this here???
-    controller.x().whileTrue(new ScoringCommand(Constants.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem, ledSubsystem));
+    controller.x().whileTrue(new ScoringCommand(Constants.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     isExtended
       .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))
       .whileFalse(new ConditionalCommand(
@@ -147,8 +148,9 @@ public class RobotContainer {
     SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
     SmartDashboard.putData("scoring sequence", new ScoringCommand(
       Constants.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, 
-      superstructureSubsystem, ledSubsystem));
-    SmartDashboard.putData("reset to vision", new InstantCommand(() -> swerveSubsystem.resetIfTargets()));
+      superstructureSubsystem));// ledSubsystem));
+    SmartDashboard.putData("reset to vision", swerveSubsystem.resetIfTargets());
+    SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
   }
 
   private static Command run(Command ... commands) {
@@ -167,7 +169,7 @@ public class RobotContainer {
 
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
-    ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20));
+    // ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20));
     // ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
   }
 }

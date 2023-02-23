@@ -40,6 +40,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -47,10 +48,12 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -66,7 +69,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public boolean hasResetOdometry = false;
 
-    private LEDSubsystem ledSubsystem = new LEDSubsystem();
+    private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -137,6 +140,8 @@ public class SwerveSubsystem extends SubsystemBase {
         for(SwerveModule mod : mSwerveMods){
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
+
+        chassisSpeeds = new ChassisSpeeds(velTwist.dx, velTwist.dy, velTwist.dtheta);
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
@@ -161,6 +166,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Generates a Command that consumes a PathPlanner path and follows it */
     public Command followPathCommand(PathPlannerTrajectory path) {
+        //field.getObject("path goal").setPoses(path.getEndState().poseMeters);
         return new SwerveControllerCommand(
             path,
             () -> getPose(), Constants.Swerve.swerveKinematics,
@@ -181,10 +187,18 @@ public class SwerveSubsystem extends SubsystemBase {
         
     }
     public PathPlannerTrajectory getPathBetweenTwoPoints (PathConstraints constraints, PathPoint start, PathPoint end) {
-        return PathPlanner.generatePath(constraints, start, end);
+        var path = PathPlanner.generatePath(constraints, start, end);
+        List<Pose2d> poses = new ArrayList<>();
+        // for (State state : path.getStates()) {
+        //     poses.add(state.poseMeters);
+        // }
+        //field.getObject("path").setPoses(poses);
+        return path;
+        
     }
     public PathPlannerTrajectory getPathToPoint (PathPoint end) {
-        return getPathBetweenTwoPoints(new PathPoint(getPose().getTranslation(), getYaw(), getYaw()), end);
+        field.getObject("starting pose").setPose(getPose());
+        return getPathBetweenTwoPoints(PathPoint.fromCurrentHolonomicState(getPose(), chassisSpeeds), end);
     }
     public PathPointOpen getNearestGoal () {
         return getNearestGoal(getPose(), DriverStation.getAlliance());
@@ -216,7 +230,7 @@ public class SwerveSubsystem extends SubsystemBase {
             }
         }
         field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
-        ledSubsystem.setBlinking(color, 1);
+       // ledSubsystem.setBlinking(color, 1);
         return output;
     }
     public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
@@ -245,7 +259,6 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
-        zeroGyro();
         System.out.println("odometry reset");
     }
 
@@ -312,17 +325,19 @@ public class SwerveSubsystem extends SubsystemBase {
     return false;
   }
 
-  public Command resetIfTargets() {
+  public CommandBase resetIfTargets() {
     return new InstantCommand(() -> {
         try {
+            System.out.println(getEstimatedPose().getFirst().get(0).toString());
             resetOdometry(getEstimatedPose().getFirst().get(0));
             hasResetOdometry = true;
         } catch (Exception e) {
             // error handling is for nerds
             // Also if we get an error we just try again next loop
             System.out.println(e.getMessage());
+            SmartDashboard.putString("pose est error", e.getMessage());
         }
-    });
+    }, this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
     /**
@@ -414,5 +429,6 @@ public class SwerveSubsystem extends SubsystemBase {
             hasResetOdometry = false;
         }
         getNearestGoal();
+        getPathToPoint(getNearestGoal());
     }
 }
