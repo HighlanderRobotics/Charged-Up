@@ -313,8 +313,8 @@ public final class Constants {
 
     static {
       PIDController.setTolerance(
-        HighlanderFalcon.radToNative(0.1), //TODO: is this good?
-        HighlanderFalcon.rpmToNative(1.0));
+        1.0, //TODO: is this good?
+        1.0);
     }
 
     public static final double elevatorAngleRad = Math.toRadians(41);
@@ -345,15 +345,15 @@ public final class Constants {
     // TODO: Check with actual robot
     public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(0.0,0.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, armConstraints);
+    public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(0.5,0.5);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.5, 0.0, 0.0, armConstraints);
     static {
       PIDController.setTolerance(
-        HighlanderFalcon.radToNative(0.1), //TODO: is this good?
-        HighlanderFalcon.rpmToNative(1.0));
+        0.1, //TODO: is this good?
+        0.2);
     }
     public static final double armLengthInches = 12.5;
-    public static final double armOffset = 1.2; // encoder native
+    public static final double armOffset = 1.1; // encoder native
 
     public static final double armMinimumAngle = -0.25;
     public static final double armMaximumAngle = 0.0;

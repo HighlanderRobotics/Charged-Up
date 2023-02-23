@@ -153,6 +153,9 @@ public class RobotContainer {
       superstructureSubsystem));// ledSubsystem));
     SmartDashboard.putData("reset to vision", swerveSubsystem.resetIfTargets());
     SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
+  
+    SmartDashboard.putData("arm to 0", armSubsystem.runToRotationCommand(new Rotation2d(0.0)));
+    SmartDashboard.putData("arm to -1.5", armSubsystem.runToRotationCommand(new Rotation2d(-1.5)));
   }
 
   private static Command run(Command ... commands) {
