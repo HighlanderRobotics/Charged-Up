@@ -313,6 +313,7 @@ public class SwerveSubsystem extends SubsystemBase {
         } catch (Exception e) {
             // error handling is for nerds
             // Also if we get an error we just try again next loop
+            System.out.println(e.getMessage());
         }
     });
   }

@@ -15,6 +15,9 @@ import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
+
+import java.lang.System.Logger.Level;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -142,6 +145,10 @@ public class RobotContainer {
     
     SmartDashboard.putData("jog arm up", new RunCommand(() -> armSubsystem.jogUp(), armSubsystem));
     SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
+    SmartDashboard.putData("scoring sequence", new ScoringCommand(
+      Constants.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, 
+      superstructureSubsystem, ledSubsystem));
+    SmartDashboard.putData("reset to vision", new InstantCommand(() -> swerveSubsystem.resetIfTargets()));
   }
 
   private static Command run(Command ... commands) {
