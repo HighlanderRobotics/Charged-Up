@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
 import edu.wpi.first.math.Pair;
@@ -346,11 +347,14 @@ public class ElevatorSubsystem extends SubsystemBase {
         if (enabled) {
             updatePID();
         } else {
-            elevatorMotor.setPercentOut(0);
+            elevatorMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, 0);
         }
         SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
         SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
         SmartDashboard.putNumber("elevator native position", getMeasurement());
+        // We might have accidentaly tuned elevator pid with this call on, which modifies the state of the pid controller
+        // Basically, dont remove this line it's load bearing
         SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
+        SmartDashboard.putBoolean("elevator enable", enabled);
     }
 }
