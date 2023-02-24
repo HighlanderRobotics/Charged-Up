@@ -169,16 +169,16 @@ public final class Constants {
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 3;
-    public static final double maxAccelerationMetersPerSecondSquared = 3;
+    public static final double maxAccelerationMetersPerSecondSquared = 6;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 2;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPXController = 1;
-    public static final double kPYController = 1;
-    public static final double kPThetaController = 0.4;
+    public static final double kPXController = 5;
+    public static final double kPYController = 5;
+    public static final double kPThetaController = 0.8;
     public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
@@ -202,15 +202,15 @@ public final class Constants {
     public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0));
     public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0));  
     
-    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(1.6, 0.43), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.6, 1.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.6, 1.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.6, 2.23), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.6, 2.83), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.6, 3.43), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.6, 4.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.6, 4.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.6, 5.23), Rotation2d.fromDegrees(0));  
+    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(15.1, 0.43), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(15.1, 1.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(15.1, 1.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(15.1, 2.23), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(15.1, 2.83), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(15.1, 3.43), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(15.1, 4.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(15.1, 4.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(15.1, 5.23), Rotation2d.fromDegrees(0));  
 
     public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
     static {
@@ -307,9 +307,9 @@ public final class Constants {
     public static final int elevatorFollowerID = 26;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.0);
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,60.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/6, 0.0, 0.0139/2, elevatorConstraints);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/7, 0.0, 0.0139/2, elevatorConstraints);
 
     static {
       PIDController.setTolerance(
@@ -318,7 +318,7 @@ public final class Constants {
     }
 
     public static final double elevatorAngleRad = Math.toRadians(41);
-    public static final double maxExtensionInches = 72;
+    public static final double maxExtensionInches = 49.5;
     public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
     // Positions that the end effector needs to be in to score
     // TODO: tune
@@ -386,11 +386,11 @@ public final class Constants {
 
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
-  public static final double topConeLevel = 46; //this is in inches
+  public static final double topConeLevel = 49; //this is in inches
   public static final double topCubeLevel = 35.5;
-  public static final double midConeLevel = 34;
+  public static final double midConeLevel = 40;
   public static final double midCubeLevel = 23.5;
-  public static final double bottomLevel = 0;
+  public static final double bottomLevel = 15;
 
   public static final double humanPlayerLevel = 37.375; //or substation idk what we're calling them
 }
