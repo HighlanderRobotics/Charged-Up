@@ -100,7 +100,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+ public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putBoolean("grabber sensor", limitSwitch.get());
   }

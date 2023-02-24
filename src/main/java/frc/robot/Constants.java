@@ -340,8 +340,8 @@ public final class Constants {
     // TODO: Check with actual robot
     public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(0.5,0.5);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.5, 0.0, 0.0, armConstraints);
+    public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(3.0,4.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(-0.8, 0.0, 0.0, armConstraints);
     static {
       PIDController.setTolerance(
         0.1, //TODO: is this good?
@@ -350,8 +350,8 @@ public final class Constants {
     public static final double armLengthInches = 12.5;
     public static final double armOffset = 1.1; // encoder native
 
-    public static final double armMinimumAngle = -0.25;
-    public static final double armMaximumAngle = 0.0;
+    public static final double armMinimumAngle = -0.8;
+    public static final double armMaximumAngle = -0.05;
   }
   
   /** Constants for simple mechanisms like intake, routing, grabber */

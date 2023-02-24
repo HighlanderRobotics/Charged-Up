@@ -128,7 +128,7 @@ public class RobotContainer {
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),
-      armSubsystem.runToRotationCommand(new Rotation2d(2)))); // TODO: Find rotation
+      armSubsystem.runToRotationCommand(-0.5))); // TODO: Find rotation
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand(),
@@ -156,8 +156,10 @@ public class RobotContainer {
     SmartDashboard.putData("reset to vision", swerveSubsystem.resetIfTargets());
     SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
   
-    SmartDashboard.putData("arm to 0", armSubsystem.runToRotationCommand(new Rotation2d(0.0)));
-    SmartDashboard.putData("arm to -1.5", armSubsystem.runToRotationCommand(new Rotation2d(-1.5)));
+    SmartDashboard.putData("arm to -0.5", armSubsystem.runToRotationCommand(-0.5));
+    SmartDashboard.putData("arm to -1.3", armSubsystem.runToRotationCommand(-1.3));
+    SmartDashboard.putData("arm to horizontal", armSubsystem.runToHorizontalCommand());
+    SmartDashboard.putData("arm to routing", armSubsystem.runToRoutingCommand());
   }
 
   private static Command run(Command ... commands) {
