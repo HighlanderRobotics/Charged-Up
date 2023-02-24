@@ -296,11 +296,6 @@ public final class Constants {
   }
   public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));
   public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));
- 
-  public static final float elevatorMargin = 0; //TODO: find
-  public static final float topCubeGoal = 90;
-  public static final float midCubeGoal = 60;
-  public static final float bottomGoal = 0;
   
   public static final class ElevatorConstants {
     public static final int elevatorMotorID = 25;
@@ -386,11 +381,13 @@ public final class Constants {
 
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
-  public static final double topConeLevel = 49; //this is in inches
-  public static final double topCubeLevel = 35.5;
-  public static final double midConeLevel = 40;
-  public static final double midCubeLevel = 23.5;
-  public static final double bottomLevel = 15;
+  public static final class ScoringLevels {
+    public static final double topConeLevel = 49; //this is in inches
+    public static final double topCubeLevel = 35.5;
+    public static final double midConeLevel = 40;
+    public static final double midCubeLevel = 23.5;
+    public static final double bottomLevel = 15;
+  }
 
   public static final double humanPlayerLevel = 37.375; //or substation idk what we're calling them
 }

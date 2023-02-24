@@ -5,6 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -47,6 +48,8 @@ public class ScoringCommand extends SequentialCommandGroup {
         true, false)
           .until(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;}),//.alongWith(
           //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
+      new InstantCommand(() -> {elevatorSubsystem.setTopLevel(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())); 
+        elevatorSubsystem.setMidLevel(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()));},
       swerveSubsystem.driveCommand(() -> 0, () -> 0, () -> 0, false, false)
           .alongWith(
           superstructureSubsystem.waitExtendToInches(level)),

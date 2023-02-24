@@ -46,7 +46,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         90,
         15,
         new Color8Bit(Color.kLavender)));
-    private double level = Constants.topConeLevel;
+    public double topLevel = Constants.ScoringLevels.topConeLevel; //to avoid null pointer exception
+    public double midLevel = Constants.ScoringLevels.midConeLevel;
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
@@ -80,11 +81,25 @@ public class ElevatorSubsystem extends SubsystemBase {
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
-    public void setLevel(double level) {
-        this.level = level;
+    public void setTopLevel(boolean cone) {
+        if (cone = true) {
+            topLevel = Constants.ScoringLevels.topConeLevel; //this is the dumbest possible way to do this lol
+        } else {
+            topLevel = Constants.ScoringLevels.topCubeLevel;
+        }
     }
-    public double getLevel() {
-        return level;
+    public double getTopLevel() {
+        return topLevel;
+    }
+    public void setMidLevel(boolean cone) {
+        if (cone = true) {
+            midLevel = Constants.ScoringLevels.midConeLevel;
+        } else {
+            midLevel = Constants.ScoringLevels.midCubeLevel;
+        }
+    }
+    public double getMidLevel(){
+        return midLevel;
     }
 
     private double getMeasurement() {
