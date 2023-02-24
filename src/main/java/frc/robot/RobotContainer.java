@@ -112,8 +112,8 @@ public class RobotContainer {
 
     controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)));
     controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
-    controller.y().whileTrue(new ScoringCommand(elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
-    controller.b().whileTrue(new ScoringCommand(elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    controller.y().whileTrue(new ScoringCommand(swerveSubsystem.getExtension(ElevatorSubsystem.ScoringLevels.L3), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
+    controller.b().whileTrue(new ScoringCommand(swerveSubsystem.getExtension(ElevatorSubsystem.ScoringLevels.L2), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     controller.a().whileTrue(new ScoringCommand(Constants.ScoringLevels.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     

@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
@@ -265,6 +266,13 @@ public class SwerveSubsystem extends SubsystemBase {
             return true;
         }
     }
+    public double getExtension(ElevatorSubsystem.ScoringLevels level) {
+        if (checkIfConeGoal(getNearestGoal()) == true) {
+            return level.extensionInchesCones;
+        } else {
+            return level.extensionInchesCubes;
+        }
+    }
 
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
@@ -461,6 +469,6 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Y goal", Constants.AutoConstants.yController.getGoal().position);
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         pose = getPose();
-        System.out.println(pose);
+        
     }
 }

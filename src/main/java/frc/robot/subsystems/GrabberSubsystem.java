@@ -14,6 +14,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
@@ -60,7 +62,10 @@ public class GrabberSubsystem extends SubsystemBase {
     return new RunCommand(() -> {
         intake();
         open();
-    }, this).until(() -> limitSwitch.get())
+    }, this)
+    .raceWith(
+      new WaitUntilCommand(() -> limitSwitch.get())
+      .andThen(new WaitCommand(0.25)))
     .andThen(new RunCommand(() -> {
       stop();
     }, this)).until(() -> !limitSwitch.get()).repeatedly();

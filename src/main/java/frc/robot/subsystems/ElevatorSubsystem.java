@@ -132,6 +132,18 @@ public class ElevatorSubsystem extends SubsystemBase {
         enabled = false;
     }
 
+    public enum ScoringLevels {
+        L1(Constants.ScoringLevels.bottomLevel, Constants.ScoringLevels.bottomLevel),
+        L2(Constants.ScoringLevels.midConeLevel, Constants.ScoringLevels.midCubeLevel), 
+        L3(Constants.ScoringLevels.topConeLevel, Constants.ScoringLevels.topCubeLevel);
+        public double extensionInchesCones;
+        public double extensionInchesCubes;
+        ScoringLevels(double extensionInchesCones, double extensionInchesCubes) {
+            this.extensionInchesCones = extensionInchesCones;
+            this.extensionInchesCubes = extensionInchesCubes;
+        }
+    }
+
     public CommandBase extendToInchesCommand(double extensionInches) {
         return new InstantCommand(() -> setGoal(extensionInches), this)
             .andThen(new WaitUntilCommand(() -> isAtSetpoint()));
