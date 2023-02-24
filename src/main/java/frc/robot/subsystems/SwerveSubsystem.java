@@ -104,8 +104,8 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        Vector<N3> odoStdDevs = VecBuilder.fill(0.0, 0.0, 0.0);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.2, 0.2, 0.2);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -174,12 +174,9 @@ public class SwerveSubsystem extends SubsystemBase {
             driveCommand(
                 () -> Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
                 () -> Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
-                () -> {if (false) {return 0;} 
-                        else {
-                            return (headingController.calculate(getYaw().getRadians())
-                                + Constants.AutoConstants.thetaFeedForward.calculate(headingController.getSetpoint().velocity));
-                        }
-                    },
+                () -> {return (headingController.calculate(getYaw().getRadians())
+                            + Constants.AutoConstants.thetaFeedForward.calculate(headingController.getSetpoint().velocity));
+                        },
                 fieldRelative, 
                 isOpenLoop).alongWith(
                     new PrintCommand(pose.getX() + " x"),

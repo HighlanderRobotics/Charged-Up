@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -67,7 +68,12 @@ public class RobotContainer {
       true, 
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
-    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(1.0));
+    elevatorSubsystem.setDefaultCommand(
+      elevatorSubsystem.extendToInchesCommand(1.0)
+      .andThen(new StartEndCommand(
+        () -> elevatorSubsystem.disable(), 
+        () -> elevatorSubsystem.enable(), 
+        elevatorSubsystem)));
     armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
     intakeSubsystem.setDefaultCommand(new ConditionalCommand(intakeSubsystem.extendCommand(), intakeSubsystem.stopCommand(), () -> isExtended.getAsBoolean()).repeatedly());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
