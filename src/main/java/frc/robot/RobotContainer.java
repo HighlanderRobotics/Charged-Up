@@ -112,12 +112,10 @@ public class RobotContainer {
 
     controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)));
     controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
-    //TODO: this will only score cones bc i havent figured out the logic for cubes yet
-    controller.y().whileTrue(new ScoringCommand(elevatorSubsystem.getTopLevel(), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
-    controller.b().whileTrue(new ScoringCommand(elevatorSubsystem.getMidLevel(), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
-    //(run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())); why is this here???
+    controller.y().whileTrue(new ScoringCommand(elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
+    controller.b().whileTrue(new ScoringCommand(elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     controller.a().whileTrue(new ScoringCommand(Constants.ScoringLevels.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
-    controller.x().whileTrue(swerveSubsystem.poseLockDriveCommand(()-> 12.6, () -> 0.4, () -> 0, true, false));
+    controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
     isExtended
       .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))
@@ -154,7 +152,7 @@ public class RobotContainer {
     SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
     SmartDashboard.putData("scoring sequence", new ScoringCommand(
       Constants.ScoringLevels.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, 
-      superstructureSubsystem));// ledSubsystem));
+      superstructureSubsystem));
     SmartDashboard.putData("reset to vision", swerveSubsystem.resetIfTargets());
     SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
   
