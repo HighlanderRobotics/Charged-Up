@@ -73,7 +73,7 @@ public class RobotContainer {
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0.5));
-    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
+    armSubsystem.setDefaultCommand(armSubsystem.runToRoutingCommand());
     intakeSubsystem.setDefaultCommand(new ConditionalCommand(intakeSubsystem.extendCommand(), intakeSubsystem.stopCommand(), () -> isExtended.getAsBoolean()).repeatedly());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
@@ -144,11 +144,13 @@ public class RobotContainer {
 
     SmartDashboard.putData("reset elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem).ignoringDisable(true));
     
-    SmartDashboard.putData("jog arm up", new RunCommand(() -> armSubsystem.jogUp(), armSubsystem));
-    SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
+    // SmartDashboard.putData("jog arm up", new RunCommand(() -> armSubsystem.jogUp(), armSubsystem));
+    // SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
   
-    SmartDashboard.putData("arm to -0.2", armSubsystem.runToRotationCommand(-0.2));
+    SmartDashboard.putData("arm to -0.5", armSubsystem.runToRotationCommand(-0.5));
     SmartDashboard.putData("arm to -1.3", armSubsystem.runToRotationCommand(-1.3));
+    SmartDashboard.putData("arm to horizontal", armSubsystem.runToHorizontalCommand());
+    SmartDashboard.putData("arm to routing", armSubsystem.runToRoutingCommand());
   }
 
   private static Command run(Command ... commands) {

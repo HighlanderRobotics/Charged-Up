@@ -31,29 +31,38 @@ public class ArmSubsystem extends SubsystemBase{
             15.0, 
             0.5));
         absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
-        setGoal(-0.8);
+        setGoal(-1.2);
     }
 
     private void updatePID(double output, TrapezoidProfile.State state) {
         if (getMeasurement() > Constants.ArmConstants.armMaximumAngle 
-            && output > 0) {
-            armMotor.setPercentOut(0);
-        } else if (getMeasurement() < Constants.ArmConstants.armMinimumAngle
             && output < 0) {
             armMotor.setPercentOut(0);
+        } else if (getMeasurement() < Constants.ArmConstants.armMinimumAngle
+            && output > 0) {
+            armMotor.setPercentOut(0);
         } else {
-            armMotor.set(ControlMode.PercentOutput, MathUtil.clamp(output, -0.1, 0.1));
+            armMotor.set(ControlMode.PercentOutput, MathUtil.clamp(output, -0.75, 0.75));
         }
     }
 
     /**0 is down, PI/2 is horizontal */
     public void setGoal(double position) {
         // double clampedPosition = MathUtil.clamp(position, -0.6, -1.5);
+        Constants.ArmConstants.PIDController.reset(getRotation().getRadians());
         Constants.ArmConstants.PIDController.setGoal(position);
     }
 
     public CommandBase runToRotationCommand(double radians) {
         return new InstantCommand(() -> setGoal(radians), this).andThen(new WaitUntilCommand(() -> isAtSetpoint()));
+    }
+
+    public CommandBase runToHorizontalCommand() {
+        return runToRotationCommand(-1.6);
+    }
+
+    public CommandBase runToRoutingCommand() {
+        return runToRotationCommand(-1.2);
     }
 
     public void jogUp() {
@@ -100,5 +109,6 @@ public class ArmSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("arm encoder native", getMeasurement());
         SmartDashboard.putNumber("arm current", armMotor.getSupplyCurrent());
         SmartDashboard.putNumber("arm goal", Constants.ArmConstants.PIDController.getGoal().position);
+        SmartDashboard.putNumber("arm setpoint", Constants.ArmConstants.PIDController.getSetpoint().position);
     }
 }
