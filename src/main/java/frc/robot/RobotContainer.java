@@ -128,7 +128,7 @@ public class RobotContainer {
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),
-      armSubsystem.runToRotationCommand(-0.5))); // TODO: Find rotation
+      armSubsystem.runToRoutingCommand()));
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand(),
