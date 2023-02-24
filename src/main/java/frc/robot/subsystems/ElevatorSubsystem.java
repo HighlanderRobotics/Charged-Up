@@ -63,6 +63,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         var setpoint = Constants.ElevatorConstants.PIDController.getSetpoint();
         SmartDashboard.putNumber("elevator setpoint", setpoint.position);
         SmartDashboard.putNumber("elevator setpoint velocity", setpoint.velocity);
+        SmartDashboard.putNumber("elevator pid out", pidOut);
+        SmartDashboard.putNumber("elevator ff out", Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
         elevatorMotor.set(
             ControlMode.PercentOutput, 
             pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));

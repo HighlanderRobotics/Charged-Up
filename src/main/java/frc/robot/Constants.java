@@ -307,9 +307,9 @@ public final class Constants {
     public static final int elevatorFollowerID = 26;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.4887/4, 0.33984/4, 0.001);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(100.0,200.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/5, 0.0, 0.0139/4, elevatorConstraints);
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.0);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,60.0);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/6, 0.0, 0.0139/2, elevatorConstraints);
 
     static {
       PIDController.setTolerance(

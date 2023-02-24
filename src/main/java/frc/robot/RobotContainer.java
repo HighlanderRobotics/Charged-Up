@@ -69,7 +69,7 @@ public class RobotContainer {
       true, 
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
-    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(0.5));
+    elevatorSubsystem.setDefaultCommand(elevatorSubsystem.extendToInchesCommand(1.0));
     armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
     intakeSubsystem.setDefaultCommand(new ConditionalCommand(intakeSubsystem.extendCommand(), intakeSubsystem.stopCommand(), () -> isExtended.getAsBoolean()).repeatedly());
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
@@ -106,7 +106,7 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36));
+    controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)));
     controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
     //TODO: this will only score cones bc i havent figured out the logic for cubes yet
     controller.b().whileTrue(new ScoringCommand(Constants.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
