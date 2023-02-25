@@ -132,7 +132,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         enabled = false;
     }
 
-    public enum ScoringLevels {
+    public static enum ScoringLevels {
         L1(Constants.ScoringLevels.bottomLevel, Constants.ScoringLevels.bottomLevel),
         L2(Constants.ScoringLevels.midConeLevel, Constants.ScoringLevels.midCubeLevel), 
         L3(Constants.ScoringLevels.topConeLevel, Constants.ScoringLevels.topCubeLevel);

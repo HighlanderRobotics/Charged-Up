@@ -56,7 +56,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (elevatorSubsystem.getExtensionInches() > 6 || Constants.ElevatorConstants.PIDController.getGoal().position > 6 ) { // TODO: Find good value for maximum extension before "extended"
+    if (elevatorSubsystem.getExtensionInches() > 3 || Constants.ElevatorConstants.PIDController.getGoal().position > 3 ) { // TODO: Find good value for maximum extension before "extended"
       mode = ExtensionState.EXTEND;
     }
     SmartDashboard.putString("Superstructure Mode", mode.toString());

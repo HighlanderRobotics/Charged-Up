@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import frc.robot.SwerveModule;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -106,7 +107,7 @@ public class SwerveSubsystem extends SubsystemBase {
         resetModulesToAbsolute();
 
         Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.2, 0.2, 0.2);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.0, 0.0, 0.0);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -259,17 +260,21 @@ public class SwerveSubsystem extends SubsystemBase {
         return pose.getTranslation().getDistance(getNearestGoal().getTranslation2d());
     }
     public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
-        if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ){ //then its a cube goal
+        if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ||
+        (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3) == 1){ //then its a cube goal
             return false;
         }
         else { //then its a cone goal
             return true;
         }
     }
-    public double getExtension(ElevatorSubsystem.ScoringLevels level) {
-        if (checkIfConeGoal(getNearestGoal()) == true) {
+
+    public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
+        if (isCone) {
+            System.out.println("its a cone!");
             return level.extensionInchesCones;
         } else {
+            System.out.println("its a cube!");
             return level.extensionInchesCubes;
         }
     }
@@ -468,6 +473,7 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("x goal", Constants.AutoConstants.xController.getGoal().position);
         SmartDashboard.putNumber("Y goal", Constants.AutoConstants.yController.getGoal().position);
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
+        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, checkIfConeGoal(getNearestGoal())));
         pose = getPose();
         
     }

@@ -8,7 +8,9 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
@@ -22,9 +24,8 @@ import frc.robot.subsystems.SwerveSubsystem;
 public class ScoringCommand extends SequentialCommandGroup {
   /** Creates a new ScoringCommand. */
   public ScoringCommand(
-    double level,
+    ElevatorSubsystem.ScoringLevels level,
     ElevatorSubsystem elevatorSubsystem, 
-    ArmSubsystem armSubsystem, 
     SwerveSubsystem swerveSubsystem,
     GrabberSubsystem grabberSubsystem,
     SuperstructureSubsystem superstructureSubsystem) {
@@ -40,7 +41,6 @@ public class ScoringCommand extends SequentialCommandGroup {
        
       //   swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())),//.alongWith(
       //    // ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))),
-      new PrintCommand("finished path"),
       swerveSubsystem.poseLockDriveCommand(
         () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
         () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
@@ -49,14 +49,12 @@ public class ScoringCommand extends SequentialCommandGroup {
           .until(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;}),//.alongWith(
           //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
       new PrintCommand(level + ""),
+      new PrintCommand(swerveSubsystem.checkIfConeGoal(Constants.ScoringPositions.red1) + " nearest goal is cone"),
       swerveSubsystem.driveCommand(() -> 0, () -> 0, () -> 0, false, false)
-          .alongWith(
-          superstructureSubsystem.waitExtendToInches(level),
-        // elevatorSubsystem.extendCommand(
-        //   swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())),
-        //   elevatorSubsystem, armSubsystem, elevatorSubsystem.getLevel(), 
-        // new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint()), //&& armSubsystem.isAtSetpoint()),
-        grabberSubsystem.outakeCommand())
+          .raceWith(
+            superstructureSubsystem.waitExtendToInches(swerveSubsystem.getExtension(level, swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()))),
+            grabberSubsystem.outakeCommand(),
+            new WaitCommand(1))
     );
   }
 }

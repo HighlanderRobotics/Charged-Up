@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -75,7 +76,12 @@ public class RobotContainer {
         () -> elevatorSubsystem.enable(), 
         elevatorSubsystem)));
     armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
-    intakeSubsystem.setDefaultCommand(new ConditionalCommand(intakeSubsystem.extendCommand(), intakeSubsystem.stopCommand(), () -> isExtended.getAsBoolean()).repeatedly());
+    intakeSubsystem.setDefaultCommand(new WaitCommand(0.3)
+      .andThen(new ConditionalCommand(
+        intakeSubsystem.extendCommand(), 
+        intakeSubsystem.stopCommand(), 
+        () -> isExtended.getAsBoolean()
+      ).repeatedly()));
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopAndClose());
     superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));
@@ -112,9 +118,9 @@ public class RobotContainer {
 
     controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)));
     controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
-    controller.y().whileTrue(new ScoringCommand(swerveSubsystem.getExtension(ElevatorSubsystem.ScoringLevels.L3), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
-    controller.b().whileTrue(new ScoringCommand(swerveSubsystem.getExtension(ElevatorSubsystem.ScoringLevels.L2), elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
-    controller.a().whileTrue(new ScoringCommand(Constants.ScoringLevels.bottomLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
+    controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
     isExtended
@@ -124,7 +130,9 @@ public class RobotContainer {
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)), 
         () -> grabberSubsystem.hasGamePiece()));
 
-    isExtended.whileTrue(intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    isExtended.whileTrue(run(
+      intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming),
+      armSubsystem.runToHorizontalCommand()));
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),
@@ -132,7 +140,8 @@ public class RobotContainer {
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand(),
-      grabberSubsystem.intakeCommand()
+      grabberSubsystem.intakeCommand(),
+      armSubsystem.runToHorizontalCommand()
       //elevatorSubsystem.extendToInchesCommand(0.0)
     ));
   }
@@ -150,9 +159,7 @@ public class RobotContainer {
     
     SmartDashboard.putData("jog arm up", new RunCommand(() -> armSubsystem.jogUp(), armSubsystem));
     SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
-    SmartDashboard.putData("scoring sequence", new ScoringCommand(
-      Constants.ScoringLevels.topConeLevel, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem, 
-      superstructureSubsystem));
+    
     SmartDashboard.putData("reset to vision", swerveSubsystem.resetIfTargets());
     SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
   
