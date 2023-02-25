@@ -35,11 +35,11 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void intake() {
-    grabber.setPercentOut(-0.7); // TODO: find best value
+    grabber.setPercentOut(-1.0); // TODO: find best value
   }
 
   private void outake() {
-    grabber.setPercentOut(0.5); // TODO: find best value
+    grabber.setPercentOut(1.0); // TODO: find best value
   }
 
   private void stop() {
@@ -58,7 +58,7 @@ public class GrabberSubsystem extends SubsystemBase {
     solenoid.set(Value.kOff);
   }
 
-  public CommandBase intakeCommand() {
+  public CommandBase intakeOpenCommand() {
     return new RunCommand(() -> {
         intake();
         open();
@@ -71,8 +71,37 @@ public class GrabberSubsystem extends SubsystemBase {
     }, this)).until(() -> !limitSwitch.get()).repeatedly();
   }
 
+  public CommandBase intakeClosedCommand() {
+    return new RunCommand(() -> {
+        intake();
+        close();
+    }, this)
+    .raceWith(
+      new WaitUntilCommand(() -> limitSwitch.get())
+      .andThen(new WaitCommand(0.25)))
+    .andThen(new RunCommand(() -> {
+      stop();
+    }, this)).until(() -> !limitSwitch.get()).repeatedly();
+  }
+
+  public CommandBase intakeCommand() {
+    return new RunCommand(() -> {
+        intake();
+    }, this)
+    .raceWith(
+      new WaitUntilCommand(() -> limitSwitch.get())
+      .andThen(new WaitCommand(0.25)))
+    .andThen(new RunCommand(() -> {
+      stop();
+    }, this)).until(() -> !limitSwitch.get()).repeatedly();
+  }
+
   public CommandBase outakeCommand() {
     return new RunCommand(() -> outake(), this);
+  }
+
+  public CommandBase outakeOpenCommand() {
+    return new RunCommand(() -> {outake(); open();}, this);
   }
 
   public CommandBase openCommand() {

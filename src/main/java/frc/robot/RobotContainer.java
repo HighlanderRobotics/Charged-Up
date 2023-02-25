@@ -83,7 +83,7 @@ public class RobotContainer {
         () -> isExtended.getAsBoolean()
       ).repeatedly()));
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
-    grabberSubsystem.setDefaultCommand(grabberSubsystem.stopAndClose());
+    grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
     superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));
    // ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
     // Configure the trigger bindings
@@ -116,8 +116,10 @@ public class RobotContainer {
       true, 
       true));
 
-    controller.leftBumper().whileTrue(superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)));
-    controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeCommand()));
+    controller.leftBumper().whileTrue(
+      superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)
+      .alongWith(grabberSubsystem.intakeClosedCommand())));
+    controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeOpenCommand()));
     controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
     controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
@@ -140,10 +142,9 @@ public class RobotContainer {
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand(),
-      grabberSubsystem.intakeCommand(),
       armSubsystem.runToHorizontalCommand()
       //elevatorSubsystem.extendToInchesCommand(0.0)
-    ));
+    ).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
 
   private void addDashboardCommands() {

@@ -49,12 +49,16 @@ public class ScoringCommand extends SequentialCommandGroup {
           .until(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;}),//.alongWith(
           //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
       new PrintCommand(level + ""),
-      new PrintCommand(swerveSubsystem.checkIfConeGoal(Constants.ScoringPositions.red1) + " nearest goal is cone"),
+      new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
       swerveSubsystem.driveCommand(() -> 0, () -> 0, () -> 0, false, false)
-          .raceWith(
-            superstructureSubsystem.waitExtendToInches(swerveSubsystem.getExtension(level, swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()))),
-            grabberSubsystem.outakeCommand(),
-            new WaitCommand(1))
+      .raceWith(
+        superstructureSubsystem.waitExtendToInches(
+          swerveSubsystem.getExtension(
+            level, 
+            swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())))
+        .andThen(
+          grabberSubsystem.outakeCommand().withTimeout(1)))
+        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
     );
   }
 }
