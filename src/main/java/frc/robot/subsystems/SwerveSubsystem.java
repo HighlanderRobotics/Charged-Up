@@ -106,8 +106,8 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.0, 0.0, 0.0);
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 1.0);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -172,11 +172,13 @@ public class SwerveSubsystem extends SubsystemBase {
     public Command poseLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
         return new InstantCommand(
             () -> {Constants.AutoConstants.xController.reset(getPose().getX()); 
-                Constants.AutoConstants.yController.reset(getPose().getY());}).andThen(
+                Constants.AutoConstants.yController.reset(getPose().getY());
+                headingController.reset(getYaw().getRadians() % (Math.PI * 2));
+                headingController.setGoal(theta.getAsDouble());}).andThen(
             driveCommand(
                 () -> Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
                 () -> Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
-                () -> {return (headingController.calculate(getYaw().getRadians())
+                () -> {return (headingController.calculate(getYaw().getRadians() % (2 * Math.PI))
                             + Constants.AutoConstants.thetaFeedForward.calculate(headingController.getSetpoint().velocity));
                         },
                 fieldRelative, 
@@ -271,10 +273,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
         if (isCone) {
-            System.out.println("its a cone!");
+            // System.out.println("its a cone!");
             return level.extensionInchesCones;
         } else {
-            System.out.println("its a cube!");
+            // System.out.println("its a cube!");
             return level.extensionInchesCubes;
         }
     }
@@ -472,6 +474,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("y error", Constants.AutoConstants.yController.getPositionError());
         SmartDashboard.putNumber("x goal", Constants.AutoConstants.xController.getGoal().position);
         SmartDashboard.putNumber("Y goal", Constants.AutoConstants.yController.getGoal().position);
+        SmartDashboard.putNumber("Heading goal", headingController.getGoal().position);
+        SmartDashboard.putNumber("Heading error", headingController.getPositionError());
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, checkIfConeGoal(getNearestGoal())));
         pose = getPose();

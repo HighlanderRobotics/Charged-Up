@@ -176,10 +176,10 @@ public final class Constants {
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPXController = 5;
-    public static final double kPYController = 5;
-    public static final double kPThetaController = 0.8;
-    public static final double kDThetaController = 0.0;
+    public static final double kPYController = 4;
+    public static final double kPXController = 4;
+    public static final double kPThetaController = 0.6;
+    public static final double kDThetaController = 0.6;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
     public static final ProfiledPIDController yController = new ProfiledPIDController(kPYController, 0, 0, constraints);
@@ -192,25 +192,25 @@ public final class Constants {
   }
 
   public static final class ScoringPositions {
-    public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.74, 0.43), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.74, 1.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.74, 1.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.74, 2.23), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.74, 2.83), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.74, 3.43), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.74, 4.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(0));  
+    public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.74, 0.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.74, 1.03), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.74, 1.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.74, 2.23), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.74, 2.83), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.74, 3.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.74, 4.03), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(180));  
     
-    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.9, 0.52), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.9, 1.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.9, 1.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.9, 2.23), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.9, 2.83), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.9, 3.43), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.9, 4.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.9, 4.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.9, 5.23), Rotation2d.fromDegrees(0));  
+    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.9, 0.52), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.9, 1.03), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.9, 1.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.9, 2.23), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.9, 2.83), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.9, 3.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.9, 4.03), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.9, 4.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.9, 5.23), Rotation2d.fromDegrees(180));  
 
     public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
     static {
@@ -300,6 +300,7 @@ public final class Constants {
   public static final class ElevatorConstants {
     public static final int elevatorMotorID = 25;
     public static final int elevatorFollowerID = 26;
+    public static final int elevatorLimitSwitchID = 2;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.01);
@@ -382,11 +383,11 @@ public final class Constants {
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
   public static final class ScoringLevels {
-    public static final double topConeLevel = 49; //this is in inches
+    public static final double topConeLevel = 50; //this is in inches
     public static final double topCubeLevel = 35.5;
-    public static final double midConeLevel = 35;
+    public static final double midConeLevel = 40;
     public static final double midCubeLevel = 23.5;
-    public static final double bottomLevel = 15;
+    public static final double bottomLevel = 20;
   }
 
   public static final double humanPlayerLevel = 37.375; //or substation idk what we're calling them

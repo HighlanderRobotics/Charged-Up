@@ -22,17 +22,20 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
+import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
     HighlanderFalcon elevatorFollower;
     boolean enabled = true;
+    public ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
     Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
@@ -57,6 +60,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         SmartDashboard.putData("elevatorsim", mech2d);
+        Constants.ElevatorConstants.PIDController.setTolerance(3.0, 1.0);
         zeroMotor();
     }
 
@@ -110,7 +114,15 @@ public class ElevatorSubsystem extends SubsystemBase {
     public double getExtensionInches() {
         return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5;
     }
-
+    
+    public boolean isCurrentSpike() {
+        return elevatorMotor.getStatorCurrent() > 60 && elevatorMotor.getSelectedSensorVelocity() < 2048;
+    }
+    public CommandBase zeroElevator() {
+        return new RunCommand(() -> setGoal(-1), this)
+            .until(() -> isCurrentSpike())
+            .andThen(() -> elevatorMotor.setSelectedSensorPosition(0));
+    }
     public void zeroMotor() {
         elevatorMotor.setSelectedSensorPosition(0);
     }
@@ -146,7 +158,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public CommandBase extendToInchesCommand(double extensionInches) {
         return new InstantCommand(() -> setGoal(extensionInches), this)
-            .andThen(new WaitUntilCommand(() -> isAtSetpoint()));
+            .andThen(new WaitUntilCommand(() -> isAtSetpoint()), new PrintCommand("extended"));
     }
  
     /**
@@ -376,6 +388,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         } else {
             elevatorMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, 0);
         }
+
+        if (limitSwitch.get()) {
+            zeroMotor();
+        }
+
         SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
         SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
         SmartDashboard.putNumber("elevator native position", getMeasurement());
@@ -383,5 +400,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Basically, dont remove this line it's load bearing
         SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
         SmartDashboard.putBoolean("elevator enable", enabled);
+        SmartDashboard.putBoolean("elevator limit switch", limitSwitch.get());
     }
 }

@@ -28,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -63,9 +64,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()), 
-      () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()), 
+      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
+      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
+      () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
       true, 
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
@@ -119,12 +120,20 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)
       .alongWith(grabberSubsystem.intakeClosedCommand())));
-    controller.rightBumper().whileTrue(run(intakeSubsystem.runCommand(), routingSubsystem.runCommand(), grabberSubsystem.intakeOpenCommand()));
-    controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
-    controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
-    controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    controller.rightBumper().whileTrue(run(
+      intakeSubsystem.runCommand(), 
+      routingSubsystem.runCommand(), 
+      grabberSubsystem.intakeOpenCommand(),
+      armSubsystem.runToRoutingCommand()));
+    controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
+    controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
+    controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
+      .until(() -> elevatorSubsystem.limitSwitch.get())
+      .andThen(new PrintCommand("reset elevator")));
+
     isExtended
       .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))
       .whileFalse(new ConditionalCommand(
@@ -168,6 +177,8 @@ public class RobotContainer {
     SmartDashboard.putData("arm to -1.3", armSubsystem.runToRotationCommand(-1.3));
     SmartDashboard.putData("arm to horizontal", armSubsystem.runToHorizontalCommand());
     SmartDashboard.putData("arm to routing", armSubsystem.runToRoutingCommand());
+
+    SmartDashboard.putData("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
   }
 
   private static Command run(Command ... commands) {

@@ -35,7 +35,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void intake() {
-    grabber.setPercentOut(-1.0); // TODO: find best value
+    grabber.setPercentOut(-0.75); // TODO: find best value
   }
 
   private void outake() {
@@ -100,8 +100,11 @@ public class GrabberSubsystem extends SubsystemBase {
     return new RunCommand(() -> outake(), this);
   }
 
-  public CommandBase outakeOpenCommand() {
-    return new RunCommand(() -> {outake(); open();}, this);
+  public CommandBase outakeNeutralCommand() {
+    return new InstantCommand(() -> outake(), this)
+      .andThen(new WaitCommand(0.25),
+      new InstantCommand(() -> open(), this), 
+      new RunCommand(() -> {outake(); neutral();}, this));
   }
 
   public CommandBase openCommand() {

@@ -4,7 +4,10 @@
 
 package frc.robot.commands;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -25,6 +28,7 @@ public class ScoringCommand extends SequentialCommandGroup {
   /** Creates a new ScoringCommand. */
   public ScoringCommand(
     ElevatorSubsystem.ScoringLevels level,
+    DoubleSupplier adjustmentSupplier,
     ElevatorSubsystem elevatorSubsystem, 
     SwerveSubsystem swerveSubsystem,
     GrabberSubsystem grabberSubsystem,
@@ -34,31 +38,30 @@ public class ScoringCommand extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
     
     addCommands(
-    new PrintCommand("scoring sequence woo" + swerveSubsystem.getPose().toString()),
-      // swerveSubsystem.followPathCommand(
-      //   //swerveSubsystem.getPathBetweenTwoPoints(
-      //   //  new PathPoint(new Translation2d(5, 5), new Rotation2d()), swerveSubsystem.getNearestGoal())),
-       
-      //   swerveSubsystem.getPathToPoint(swerveSubsystem.getNearestGoal())),//.alongWith(
-      //    // ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))),
-      swerveSubsystem.poseLockDriveCommand(
-        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
-        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
-        () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        true, false)
-          .until(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;}),//.alongWith(
-          //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
-      new PrintCommand(level + ""),
-      new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
-      swerveSubsystem.driveCommand(() -> 0, () -> 0, () -> 0, false, false)
-      .raceWith(
-        superstructureSubsystem.waitExtendToInches(
-          swerveSubsystem.getExtension(
-            level, 
-            swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())))
-        .andThen(
-          grabberSubsystem.outakeCommand().withTimeout(1)))
-        .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+      new PrintCommand("scoring sequence woo" + swerveSubsystem.getPose().toString()),
+      // swerveSubsystem.poseLockDriveCommand(
+      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
+      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
+      //   () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
+      //   true, false)
+      swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
+        .alongWith(
+          // new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;})//.alongWith(
+            
+                //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
+              new PrintCommand(level + " level").andThen(
+              new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
+                superstructureSubsystem.waitExtendToInches(
+                  swerveSubsystem.getExtension(
+                    level, 
+                    swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())))
+                .andThen(
+                    new PrintCommand("extended elevator"),
+                    grabberSubsystem.outakeCommand()
+                  )
+                  .withTimeout(1))
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+            )
     );
   }
 }
