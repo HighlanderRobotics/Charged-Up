@@ -48,7 +48,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase waitExtendToInches(double extensionInches){
     return new InstantCommand(() -> mode = ExtensionState.EXTEND)
-      .andThen(new WaitCommand(0.25))
+      .andThen(new WaitCommand(0.35))
       .andThen(elevatorSubsystem.extendToInchesCommand(extensionInches))
       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }

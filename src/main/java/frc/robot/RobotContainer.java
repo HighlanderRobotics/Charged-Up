@@ -14,6 +14,7 @@ import frc.robot.subsystems.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -118,7 +119,7 @@ public class RobotContainer {
       true));
 
     controller.leftBumper().whileTrue(
-      superstructureSubsystem.waitExtendToInches(36).andThen(new RunCommand(() -> {}, elevatorSubsystem)
+      superstructureSubsystem.waitExtendToInches(30).andThen(new RunCommand(() -> {}, elevatorSubsystem)
       .alongWith(grabberSubsystem.intakeClosedCommand())));
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 
@@ -179,6 +180,8 @@ public class RobotContainer {
     SmartDashboard.putData("arm to routing", armSubsystem.runToRoutingCommand());
 
     SmartDashboard.putData("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
+
+    SmartDashboard.putData("scoring sequence", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
   }
 
   private static Command run(Command ... commands) {

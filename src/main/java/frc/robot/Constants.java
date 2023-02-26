@@ -304,7 +304,7 @@ public final class Constants {
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.01);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,60.0);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,40.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/7, 0.0, 0.0139/2, elevatorConstraints);
 
     static {
@@ -383,7 +383,7 @@ public final class Constants {
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
   public static final class ScoringLevels {
-    public static final double topConeLevel = 50; //this is in inches
+    public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 35.5;
     public static final double midConeLevel = 40;
     public static final double midCubeLevel = 23.5;
