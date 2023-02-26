@@ -13,8 +13,8 @@ public class HighlanderFalcon extends TalonFX {
     private double lastSet = 0.0;
     private TalonFXControlMode lastControlMode = null;
 
-    static double TICKS_TO_ROTATIONS = 1 / 2048;
-    static double ROTATIONS_TO_TICKS = 2048;
+    static final double TICKS_TO_ROTATIONS = 1.0 / 2048.0;
+    static final double ROTATIONS_TO_TICKS = 2048;
 
     private double gearRatio = 1.0;
 
@@ -55,6 +55,10 @@ public class HighlanderFalcon extends TalonFX {
         this.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 80, 0.5));
     }
 
+    public double getGearing() {
+        return gearRatio;
+    }
+
     /**Gets the last value sent to the motor */
     public double getLastSet() {
         return lastSet;
@@ -72,7 +76,7 @@ public class HighlanderFalcon extends TalonFX {
 
     /**Gets the encoder position in rotations */
     public double getRotations() {
-        return super.getSelectedSensorPosition() * TICKS_TO_ROTATIONS * gearRatio;
+        return getSelectedSensorPosition() * TICKS_TO_ROTATIONS * (1.0 / gearRatio);
     }
 
     /**Gets the encoder position in degrees */
@@ -87,7 +91,7 @@ public class HighlanderFalcon extends TalonFX {
 
     /**Gets the encoder RPM */
     public double getRPM() {
-        return super.getSelectedSensorVelocity() * 10 * 60 * gearRatio;
+        return this.getSelectedSensorVelocity() * 10 * 60 * (1 / gearRatio);
     }
 
     /**Gets the encoder rotations per second */

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -20,16 +22,21 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
+import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
-    // HighlanderFalcon elevatorMotor;
+    HighlanderFalcon elevatorMotor;
+    HighlanderFalcon elevatorFollower;
     boolean enabled = true;
-    /*Mechanism2d mech2d = new Mechanism2d(48, 48);
+    public ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
+    Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
         "Elevator",
@@ -39,32 +46,64 @@ public class ElevatorSubsystem extends SubsystemBase {
         new Color8Bit(Color.kPurple)));
     MechanismLigament2d armLig2d = elevatorLig2d.append(new MechanismLigament2d(
         "Arm", 
-        Constants.ArmConstants.rotatingArmLengthInches,
+        Constants.ArmConstants.armLengthInches,
         90,
         15,
-        new Color8Bit(Color.kLavender)));*/
+        new Color8Bit(Color.kLavender)));
+    public double topLevel = Constants.ScoringLevels.topConeLevel; //to avoid null pointer exception
+    public double midLevel = Constants.ScoringLevels.midConeLevel;
 
     public ElevatorSubsystem() {
-        /*elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID);
-        SmartDashboard.putData("elevatorsim", mech2d);*/
+        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
+        elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
+        elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
+        elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
+        elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
+        SmartDashboard.putData("elevatorsim", mech2d);
+        zeroMotor();
     }
 
-    public static enum Level {
-        L1,
-        L2,
-        L3
+    private void updatePID() {
+        double pidOut = Constants.ElevatorConstants.PIDController.calculate(getExtensionInches());
+        var setpoint = Constants.ElevatorConstants.PIDController.getSetpoint();
+        SmartDashboard.putNumber("elevator setpoint", setpoint.position);
+        SmartDashboard.putNumber("elevator setpoint velocity", setpoint.velocity);
+        SmartDashboard.putNumber("elevator pid out", pidOut);
+        SmartDashboard.putNumber("elevator ff out", Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
+        elevatorMotor.set(
+            ControlMode.PercentOutput, 
+            pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
     }
 
-    private void useOutput(double output, TrapezoidProfile.State state) {
-        //elevatorMotor.set(ControlMode.PercentOutput, output + Constants.ElevatorConstants.feedforward.calculate(state.velocity));
+    private void setGoal(double position) {
+        Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
+        Constants.ElevatorConstants.PIDController.setGoal(position);
     }
 
-    public void setGoal(double position) {
-        //Constants.ElevatorConstants.PIDController.setGoal(position);
+    private void setGoal(double position, double velocity) {
+        Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
+        Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
-    public void setGoal(double position, double velocity) {
-        //Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
+    public void setTopLevel(boolean cone) {
+        if (cone = true) {
+            topLevel = Constants.ScoringLevels.topConeLevel; //this is the dumbest possible way to do this lol
+        } else {
+            topLevel = Constants.ScoringLevels.topCubeLevel;
+        }
+    }
+    public double getTopLevel() {
+        return topLevel;
+    }
+    public void setMidLevel(boolean cone) {
+        if (cone = true) {
+            midLevel = Constants.ScoringLevels.midConeLevel;
+        } else {
+            midLevel = Constants.ScoringLevels.midCubeLevel;
+        }
+    }
+    public double getMidLevel(){
+        return midLevel;
     }
 
     private double getMeasurement() {
@@ -72,11 +111,23 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public double getExtensionInches() {
-        return 0; //elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference;
+        return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5;
+    }
+    
+    public boolean isCurrentSpike() {
+        return elevatorMotor.getStatorCurrent() > 60 && elevatorMotor.getSelectedSensorVelocity() < 2048;
+    }
+    public CommandBase zeroElevator() {
+        return new RunCommand(() -> setGoal(-1), this)
+            .until(() -> isCurrentSpike())
+            .andThen(() -> elevatorMotor.setSelectedSensorPosition(0));
+    }
+    public void zeroMotor() {
+        elevatorMotor.setSelectedSensorPosition(0);
     }
 
-    public boolean isAtSetpoint() {
-        return Constants.ElevatorConstants.PIDController.atGoal();
+    public boolean isAtGoal() {
+        return Math.abs(Constants.ElevatorConstants.PIDController.getGoal().position - getExtensionInches()) < 3.0;
     }
 
     public void updateMech2d(Pair<Double, Double> state) {
@@ -92,15 +143,33 @@ public class ElevatorSubsystem extends SubsystemBase {
        // enabled = false;
     }
 
+    public static enum ScoringLevels {
+        L1(Constants.ScoringLevels.bottomLevel, Constants.ScoringLevels.bottomLevel),
+        L2(Constants.ScoringLevels.midConeLevel, Constants.ScoringLevels.midCubeLevel), 
+        L3(Constants.ScoringLevels.topConeLevel, Constants.ScoringLevels.topCubeLevel);
+        public double extensionInchesCones;
+        public double extensionInchesCubes;
+        ScoringLevels(double extensionInchesCones, double extensionInchesCubes) {
+            this.extensionInchesCones = extensionInchesCones;
+            this.extensionInchesCubes = extensionInchesCubes;
+        }
+    }
+
+    public CommandBase extendToInchesCommand(double extensionInches) {
+        return new InstantCommand(() -> setGoal(extensionInches), this)
+            .andThen(new WaitUntilCommand(() -> isAtGoal()), new PrintCommand("extended"));
+    }
+ 
     /**
      * Computes the forward kinematics of the arm and elevator system
      * @param theta rotation of the arm in radians ccw positive from the x axis
      * @param r extension of the elevator in inches
-     * @return translation2d of the position of the end effector, in inches
+     * @return translat
+     * ion2d of the position of the end effector, in inches
      */
     public static Translation2d solveForwardKinematics (double theta, double r) {
         Translation2d pos = new Translation2d(r, Rotation2d.fromRadians(Constants.ElevatorConstants.elevatorAngleRad));
-        return pos.plus(new Translation2d(Constants.ArmConstants.rotatingArmLengthInches, theta));
+        return pos.plus(new Translation2d(Constants.ArmConstants.armLengthInches, theta));
     }
 
     /**
@@ -115,11 +184,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = -Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
+        double theta = -Math.asin(yPrime/Constants.ArmConstants.armLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.armLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -138,11 +207,11 @@ public class ElevatorSubsystem extends SubsystemBase {
             - (x * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
         double yPrime = (y * Math.cos(-Constants.ElevatorConstants.elevatorAngleRad)) 
             + (y * Math.sin(-Constants.ElevatorConstants.elevatorAngleRad));
-        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.rotatingArmLengthInches);
+        double theta = Math.PI + Math.asin(yPrime/Constants.ArmConstants.armLengthInches);
         if (theta == Double.NaN) {
             return Optional.empty();
         }
-        double r1 = xPrime - (Constants.ArmConstants.rotatingArmLengthInches * Math.cos(theta));
+        double r1 = xPrime - (Constants.ArmConstants.armLengthInches * Math.cos(theta));
         if (r1 == Double.NaN) {
             return Optional.empty();
         }
@@ -190,7 +259,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         return !(positions.getFirst() < 0 || positions.getFirst() > Constants.ElevatorConstants.maxExtensionInches);
     }
 
-    /**Generates and follows a motion profile over a line for the elevator and arm */
+    /**Generates and follows a motion profile over a line for the elevator and arm.
+     * Suboptimal since it recalculates the motion profile of the elevator and arm each tick, and doesnt really follow a line.
+     */
     public static CommandBase followLineCommand(
             ElevatorSubsystem elevatorSubsystem, 
             ArmSubsystem armSubsystem, 
@@ -222,7 +293,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 if (setpoint.isPresent()) {
                     elevatorSubsystem.setGoal(setpoint.get().getFirst());
                     armSubsystem.setGoal(setpoint.get().getSecond());
-                    elevatorSubsystem.updateMech2d(setpoint.get());
+                    // elevatorSubsystem.updateMech2d(setpoint.get());
                     SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
                     SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
                 } else {
@@ -257,7 +328,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 if (setpoint.isPresent()) {
                     elevatorSubsystem.setGoal(setpoint.get().getFirst());
                     armSubsystem.setGoal(setpoint.get().getSecond());
-                    elevatorSubsystem.updateMech2d(setpoint.get());
+                    // elevatorSubsystem.updateMech2d(setpoint.get());
                     SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
                     SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
                 } else {
@@ -294,32 +365,42 @@ public class ElevatorSubsystem extends SubsystemBase {
         return sequence;
     }
 
-    public CommandBase extendCommand(ArmSubsystem armSubsystem, Level level, boolean isCone) {
-        Translation2d startPos = solveForwardKinematics(getExtensionInches(), armSubsystem.getRotation().getRadians());
-        if (isCone) {
-            return followLineCommand(
-                this, 
-                armSubsystem, 
-                startPos.getX(), 
-                startPos.getY(), 
-                Constants.ElevatorConstants.getGoalTranslationCones(level).getX(), 
-                Constants.ElevatorConstants.getGoalTranslationCones(level).getY());
-        } else {
-            return followLineCommand(
-                this, 
-                armSubsystem, 
-                startPos.getX(), 
-                startPos.getY(), 
-                Constants.ElevatorConstants.getGoalTranslationCubes(level).getX(), 
-                Constants.ElevatorConstants.getGoalTranslationCubes(level).getY());
+    public static CommandBase goToPoseCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Translation2d endPose) {
+        SmartDashboard.putString("target pose", endPose.toString());
+        Pair<Double, Double> goal;
+        try {
+            goal = solveBestInverseKinematics(endPose.getX(), endPose.getY()).orElseThrow();
+        } catch (NullPointerException e) {
+            return new InstantCommand();
         }
-
+        SmartDashboard.putNumber("goal extension", goal.getFirst());
+        SmartDashboard.putNumber("goal rotation", goal.getSecond());
+        return new RunCommand(() -> {
+            elevatorSubsystem.setGoal(goal.getFirst());
+            armSubsystem.setGoal(goal.getSecond());
+        }, elevatorSubsystem, armSubsystem);
     }
     
     @Override
     public void periodic() {
         if (enabled) {
-            useOutput(Constants.ElevatorConstants.PIDController.calculate(getMeasurement()), Constants.ElevatorConstants.PIDController.getSetpoint());
+            updatePID();
+        } else {
+            elevatorMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, 0);
         }
+
+        if (limitSwitch.get()) {
+            zeroMotor();
+        }
+
+        SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+        SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
+        SmartDashboard.putNumber("elevator native position", getMeasurement());
+        // We might have accidentaly tuned elevator pid with this call on, which modifies the state of the pid controller
+        // Basically, dont remove this line it's load bearing
+        SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
+        SmartDashboard.putBoolean("elevator enable", enabled);
+        SmartDashboard.putBoolean("elevator limit switch", limitSwitch.get());
+        SmartDashboard.putBoolean("elevator is at goal", isAtGoal());
     }
 }

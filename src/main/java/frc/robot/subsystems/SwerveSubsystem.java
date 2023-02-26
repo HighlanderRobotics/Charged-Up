@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -43,16 +45,21 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -70,6 +77,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public boolean hasResetOdometry = false;
 
+    private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
+
+    public Pose2d pose = new Pose2d();
+
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
         0, 
@@ -82,9 +93,10 @@ public class SwerveSubsystem extends SubsystemBase {
         zeroGyro();
 
         headingController.enableContinuousInput(0, Math.PI * 2);
+        headingController.setTolerance(0.1);
 
-        // camera = new PhotonCamera("OV5647");
-        // camera.setLED(VisionLEDMode.kOn);
+        camera = new PhotonCamera("limelight");
+        camera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -99,8 +111,8 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        Vector<N3> odoStdDevs = VecBuilder.fill(0.0, 0.0, 0.0);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 1.0);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -139,6 +151,8 @@ public class SwerveSubsystem extends SubsystemBase {
         for(SwerveModule mod : mSwerveMods){
             mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
         }
+
+        chassisSpeeds = new ChassisSpeeds(velTwist.dx, velTwist.dy, velTwist.dtheta);
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
@@ -160,9 +174,29 @@ public class SwerveSubsystem extends SubsystemBase {
             fieldRelative, 
             isOpenLoop);
     }
+    public Command poseLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
+        return new InstantCommand(
+            () -> {Constants.AutoConstants.xController.reset(getPose().getX()); 
+                Constants.AutoConstants.yController.reset(getPose().getY());
+                headingController.reset(getYaw().getRadians() % (Math.PI * 2));
+                headingController.setGoal(theta.getAsDouble());}).andThen(
+            driveCommand(
+                () -> Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
+                () -> Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
+                () -> {return (headingController.calculate(getYaw().getRadians() % (2 * Math.PI))
+                            + Constants.AutoConstants.thetaFeedForward.calculate(headingController.getSetpoint().velocity));
+                        },
+                fieldRelative, 
+                isOpenLoop).alongWith(
+                    new PrintCommand(pose.getX() + " x"),
+                    new PrintCommand(pose.getY() + " y"),
+                    new PrintCommand(headingController.getPositionError() + " heading error").repeatedly()
+                ));
+    }
 
     /** Generates a Command that consumes a PathPlanner path and follows it */
     public Command followPathCommand(PathPlannerTrajectory path) {
+        //field.getObject("path goal").setPoses(path.getEndState().poseMeters);
         return new SwerveControllerCommand(
             path,
             () -> getPose(), 
@@ -184,27 +218,73 @@ public class SwerveSubsystem extends SubsystemBase {
         
     }
     public PathPlannerTrajectory getPathBetweenTwoPoints (PathConstraints constraints, PathPoint start, PathPoint end) {
-        return PathPlanner.generatePath(constraints, start, end);
+        var path = PathPlanner.generatePath(constraints, start, end);
+        List<Pose2d> poses = new ArrayList<>();
+        // for (State state : path.getStates()) {
+        //     poses.add(state.poseMeters);
+        // }
+        //field.getObject("path").setPoses(poses);
+        return path;
+        
     }
     public PathPlannerTrajectory getPathToPoint (PathPoint end) {
-        return getPathBetweenTwoPoints(new PathPoint(getPose().getTranslation(), getYaw(), getYaw()), end);
+        field.getObject("starting pose").setPose(getPose());
+        return getPathBetweenTwoPoints(PathPoint.fromCurrentHolonomicState(getPose(), chassisSpeeds), end);
     }
     public PathPointOpen getNearestGoal () {
-        return getNearestGoal(getPose());
+        return getNearestGoal(getPose(), DriverStation.getAlliance());
     }
-    public PathPointOpen getNearestGoal (Pose2d pose) {
+    public PathPointOpen getNearestGoal (Pose2d pose, Alliance alliance) {
         PathPointOpen output = null;
+        Color8Bit color = null;
         double distance = Double.MAX_VALUE;
-        for (PathPointOpen point : ScoringPositions.bluePositionsList) {
-            double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
-                Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
-            if (currentDistance < distance) {
-                distance = currentDistance;
-                output = point;
+        if (alliance == Alliance.Blue) {
+            for (PathPointOpen point : ScoringPositions.bluePositionsList) {
+                double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
+                    Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+                if (currentDistance < distance) {
+                    distance = currentDistance;
+                    output = point;
+                    color = Constants.lights.get(output);
+                }
+            }
+        }
+        if (alliance == Alliance.Red) {
+            for (PathPointOpen point : ScoringPositions.redPositionsList) {
+                double currentDistance = Math.sqrt(Math.pow(pose.getY() - point.getTranslation2d().getY(), 2) +
+                    Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+                if (currentDistance < distance) {
+                    distance = currentDistance;
+                    output = point;
+                    color = Constants.lights.get(output);
+                }
             }
         }
         field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
+       // ledSubsystem.setBlinking(color, 1);
         return output;
+    }
+    public double getNearestGoalDistance () {
+        return pose.getTranslation().getDistance(getNearestGoal().getTranslation2d());
+    }
+    public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
+        if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ||
+        (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3) == 1){ //then its a cube goal
+            return false;
+        }
+        else { //then its a cone goal
+            return true;
+        }
+    }
+
+    public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
+        if (isCone) {
+            // System.out.println("its a cone!");
+            return level.extensionInchesCones;
+        } else {
+            // System.out.println("its a cube!");
+            return level.extensionInchesCubes;
+        }
     }
 
 
@@ -252,7 +332,6 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
-        zeroGyro();
         System.out.println("odometry reset");
     }
 
@@ -319,16 +398,19 @@ public class SwerveSubsystem extends SubsystemBase {
     return false;
   }
 
-  public Command resetIfTargets() {
+  public CommandBase resetIfTargets() {
     return new InstantCommand(() -> {
         try {
+            System.out.println(getEstimatedPose().getFirst().get(0).toString());
             resetOdometry(getEstimatedPose().getFirst().get(0));
             hasResetOdometry = true;
         } catch (Exception e) {
             // error handling is for nerds
             // Also if we get an error we just try again next loop
+            System.out.println(e.getMessage());
+            SmartDashboard.putString("pose est error", e.getMessage());
         }
-    });
+    }, this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
     /**
@@ -392,30 +474,25 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        // result = camera.getLatestResult();
-
-        if (DriverStation.isDisabled()){
-            resetModulesToAbsolute();
+        if (camera != null) {
+            try {
+                result = camera.getLatestResult();
+            } catch (Error e) {
+                System.out.print("Error in camera processing " + e.getMessage());
+            }
         }
-        
-        // if (camera != null) {
-        //     try {
-        //         result = camera.getLatestResult();
-        //     } catch (Error e) {
-        //         System.out.print("Error in camera processing " + e.getMessage());
-        //     }
-        // }
-        //if (result.hasTargets()) {
-            //updateOdometry(getEstimatedPose());
-        //}
+        if (result != null && result.hasTargets()) {
+            updateOdometry(getEstimatedPose());
+        }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
-        for(SwerveModule mod : mSwerveMods){
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
-            SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
-        }
+        // for(SwerveModule mod : mSwerveMods){
+        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
+        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
+        // }
+
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
         field.setRobotPose(getPose());
         SmartDashboard.putData(field);
@@ -424,6 +501,18 @@ public class SwerveSubsystem extends SubsystemBase {
         if (DriverStation.isDisabled()) {
             hasResetOdometry = false;
         }
-        getNearestGoal();
+        // getNearestGoal();
+        // getPathToPoint(getNearestGoal());
+
+        SmartDashboard.putNumber("x error", Constants.AutoConstants.xController.getPositionError());
+        SmartDashboard.putNumber("y error", Constants.AutoConstants.yController.getPositionError());
+        SmartDashboard.putNumber("x goal", Constants.AutoConstants.xController.getGoal().position);
+        SmartDashboard.putNumber("Y goal", Constants.AutoConstants.yController.getGoal().position);
+        SmartDashboard.putNumber("Heading goal", headingController.getGoal().position);
+        SmartDashboard.putNumber("Heading error", headingController.getPositionError());
+        SmartDashboard.putNumber("total error", getNearestGoalDistance());
+        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, checkIfConeGoal(getNearestGoal())));
+        pose = getPose();
+        
     }
 }

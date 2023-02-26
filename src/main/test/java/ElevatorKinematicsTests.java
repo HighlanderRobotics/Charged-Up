@@ -41,6 +41,9 @@ public class ElevatorKinematicsTests {
 
         assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.l2TranslationCubes).isPresent());
         assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.l3TranslationCubes).isPresent());
+
+        assertEquals(true, ElevatorSubsystem.solveBestInverseKinematics(Constants.ElevatorConstants.defaultPosition).isPresent());
+
     }
 
 }

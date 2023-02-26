@@ -20,10 +20,10 @@ import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.PlacingSubsystem;
 import frc.robot.subsystems.RoutingSubsystem;
+import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem.Level;
+import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 
 public class AutoChooser {
 
@@ -40,7 +40,7 @@ public class AutoChooser {
     
     
     public AutoChooser(SwerveSubsystem swerveSubsystem,
-    IntakeSubsystem intakeSubsystem, ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, GrabberSubsystem grabberSubsystem){
+    IntakeSubsystem intakeSubsystem, ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, GrabberSubsystem grabberSubsystem, SuperstructureSubsystem superstructureSubsystem){
       
         this.intakeSubsystem = intakeSubsystem;
         this.swerveSubsystem = swerveSubsystem;
@@ -50,7 +50,7 @@ public class AutoChooser {
        
 
 
-        eventMap.put("Score", new ElevatorCommand(Level.L3, elevatorSubsystem, armSubsystem, swerveSubsystem, grabberSubsystem)); 
+        eventMap.put("Score", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); 
 
         chooser.setDefaultOption("none", new InstantCommand(() -> {}));
             //"Two Cone Auto", 
