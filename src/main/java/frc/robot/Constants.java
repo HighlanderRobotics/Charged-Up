@@ -310,7 +310,7 @@ public final class Constants {
     static {
       PIDController.setTolerance(
         4.0, //TODO: is this good?
-        1.0);
+        2.0);
     }
 
     public static final double elevatorAngleRad = Math.toRadians(41);

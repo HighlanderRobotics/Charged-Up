@@ -60,7 +60,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         SmartDashboard.putData("elevatorsim", mech2d);
-        Constants.ElevatorConstants.PIDController.setTolerance(3.0, 1.0);
         zeroMotor();
     }
 
@@ -127,8 +126,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorMotor.setSelectedSensorPosition(0);
     }
 
-    public boolean isAtSetpoint() {
-        return Constants.ElevatorConstants.PIDController.atGoal();
+    public boolean isAtGoal() {
+        return Math.abs(Constants.ElevatorConstants.PIDController.getGoal().position - getExtensionInches()) < 3.0;
     }
 
     public void updateMech2d(Pair<Double, Double> state) {
@@ -158,14 +157,15 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public CommandBase extendToInchesCommand(double extensionInches) {
         return new InstantCommand(() -> setGoal(extensionInches), this)
-            .andThen(new WaitUntilCommand(() -> isAtSetpoint()), new PrintCommand("extended"));
+            .andThen(new WaitUntilCommand(() -> isAtGoal()), new PrintCommand("extended"));
     }
  
     /**
      * Computes the forward kinematics of the arm and elevator system
      * @param theta rotation of the arm in radians ccw positive from the x axis
      * @param r extension of the elevator in inches
-     * @return translation2d of the position of the end effector, in inches
+     * @return translat
+     * ion2d of the position of the end effector, in inches
      */
     public static Translation2d solveForwardKinematics (double theta, double r) {
         Translation2d pos = new Translation2d(r, Rotation2d.fromRadians(Constants.ElevatorConstants.elevatorAngleRad));
@@ -401,5 +401,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
         SmartDashboard.putBoolean("elevator enable", enabled);
         SmartDashboard.putBoolean("elevator limit switch", limitSwitch.get());
+        SmartDashboard.putBoolean("elevator is at goal", isAtGoal());
     }
 }

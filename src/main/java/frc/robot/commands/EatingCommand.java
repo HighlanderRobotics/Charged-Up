@@ -56,7 +56,7 @@ public class EatingCommand extends SequentialCommandGroup {
           superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)), 
       // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
       //we're only picking up cones from the substations
-      new WaitUntilCommand(() -> elevatorSubsystem.isAtSetpoint() && armSubsystem.isAtSetpoint()),
+      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal() && armSubsystem.isAtSetpoint()),
       grabberSubsystem.closeCommand()
     );
   }

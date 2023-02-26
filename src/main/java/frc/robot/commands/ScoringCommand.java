@@ -57,9 +57,11 @@ public class ScoringCommand extends SequentialCommandGroup {
                     swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())))
                 .andThen(
                     new PrintCommand("extended elevator"),
-                    grabberSubsystem.outakeCommand()
+                    new WaitCommand(0.25),
+                    grabberSubsystem.outakeNeutralCommand()
                   )
-                  .withTimeout(1))
+                  // .withTimeout(1)
+                  )
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
             )
     );
