@@ -48,7 +48,7 @@ public class ScoringCommand extends SequentialCommandGroup {
         .alongWith(
           new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;})//.alongWith(
             .andThen(
-            
+              grabberSubsystem.closeCommand(),
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
               new PrintCommand(level + " level"),
               new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
@@ -59,7 +59,10 @@ public class ScoringCommand extends SequentialCommandGroup {
                 .andThen(
                     new PrintCommand("extended elevator"),
                     new WaitCommand(0.25),
-                    grabberSubsystem.outakeNeutralCommand()
+                    new ConditionalCommand(
+                      grabberSubsystem.outakeNeutralCommand(), 
+                      grabberSubsystem.openCommand(), 
+                      () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()))
                   )
                   // .withTimeout(1)
                   )
