@@ -176,8 +176,8 @@ public final class Constants {
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPYController = 4;
-    public static final double kPXController = 4;
+    public static final double kPYController = 1.5;
+    public static final double kPXController = 1.5;
     public static final double kPThetaController = 0.25;
     public static final double kDThetaController = 0.0;
 

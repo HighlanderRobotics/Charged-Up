@@ -176,9 +176,9 @@ public class SwerveSubsystem extends SubsystemBase {
                 headingController.reset(getYaw().getRadians() % (Math.PI * 2));
                 headingController.setGoal(theta.getAsDouble());}).andThen(
             driveCommand(
-                () -> 0,//Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
-                () -> 0,//Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
-                () -> headingController.calculate(pose.getRotation().getRadians() % (2 * Math.PI)),
+                () -> deadband(Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 0.1), 
+                () -> deadband(Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()), 0.1),
+                () -> deadband(headingController.calculate(pose.getRotation().getRadians() % (2 * Math.PI)), 0.1),
                 fieldRelative, 
                 isOpenLoop).alongWith(
                     new PrintCommand(pose.getX() + " x"),
@@ -436,6 +436,14 @@ public class SwerveSubsystem extends SubsystemBase {
         for (SwerveModule module: mSwerveMods) {
             module.resetToAbsolute();
         }
+    }
+
+    public double deadband(double value, double minumum) {
+        if (Math.abs(value) < minumum) {
+            return 0;
+        }
+
+        return value;
     }
 
     @Override
