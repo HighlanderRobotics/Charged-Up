@@ -39,17 +39,18 @@ public class ScoringCommand extends SequentialCommandGroup {
     
     addCommands(
       new PrintCommand("scoring sequence woo" + swerveSubsystem.getPose().toString()),
-      // swerveSubsystem.poseLockDriveCommand(
-      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
-      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
-      //   () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-      //   true, false)
-      swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
+      swerveSubsystem.poseLockDriveCommand(
+        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
+        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
+        () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
+        true, false)
+      // swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
         .alongWith(
-          // new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;})//.alongWith(
+          new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;})//.alongWith(
+            .andThen(
             
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
-              new PrintCommand(level + " level").andThen(
+              new PrintCommand(level + " level"),
               new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
                 superstructureSubsystem.waitExtendToInches(
                   swerveSubsystem.getExtension(

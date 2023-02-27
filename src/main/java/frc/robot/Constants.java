@@ -170,16 +170,16 @@ public final class Constants {
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 3;
     public static final double maxAccelerationMetersPerSecondSquared = 6;
-    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 2;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 2;
+    public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
     public static final double kPYController = 4;
     public static final double kPXController = 4;
-    public static final double kPThetaController = 0.6;
-    public static final double kDThetaController = 0.6;
+    public static final double kPThetaController = 0.25;
+    public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
     public static final ProfiledPIDController yController = new ProfiledPIDController(kPYController, 0, 0, constraints);
@@ -202,15 +202,15 @@ public final class Constants {
     public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(180));
     public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(180));  
     
-    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.9, 0.52), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.9, 1.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.9, 1.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.9, 2.23), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.9, 2.83), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.9, 3.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.9, 4.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.9, 4.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.9, 5.23), Rotation2d.fromDegrees(180));  
+    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.9, 0.52), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.9, 1.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.9, 1.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.9, 2.23), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.9, 2.83), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.9, 3.43), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.9, 4.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.9, 4.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.9, 5.23), Rotation2d.fromDegrees(0));  
 
     public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
     static {

@@ -106,7 +106,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 1.0);
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.2);
         Vector<N3> visStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -176,11 +176,9 @@ public class SwerveSubsystem extends SubsystemBase {
                 headingController.reset(getYaw().getRadians() % (Math.PI * 2));
                 headingController.setGoal(theta.getAsDouble());}).andThen(
             driveCommand(
-                () -> Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
-                () -> Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
-                () -> {return (headingController.calculate(getYaw().getRadians() % (2 * Math.PI))
-                            + Constants.AutoConstants.thetaFeedForward.calculate(headingController.getSetpoint().velocity));
-                        },
+                () -> 0,//Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
+                () -> 0,//Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
+                () -> headingController.calculate(pose.getRotation().getRadians() % (2 * Math.PI)),
                 fieldRelative, 
                 isOpenLoop).alongWith(
                     new PrintCommand(pose.getX() + " x"),
@@ -427,6 +425,10 @@ public class SwerveSubsystem extends SubsystemBase {
     /** @return the yaw of the drive base, based on the gyro's rotation */
     public Rotation2d getYaw() {
         return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - gyro.getYaw()) : Rotation2d.fromDegrees(gyro.getYaw());
+    }
+
+    public Rotation2d getAbsYaw() {
+        return Rotation2d.fromDegrees(gyro.getAbsoluteCompassHeading());
     }
 
     /** Resets the encoders on all swerve modules to the cancoder values */
