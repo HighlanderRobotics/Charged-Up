@@ -53,7 +53,7 @@ public class RobotContainer {
   private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
 
   private SuperstructureSubsystem superstructureSubsystem = 
-    new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem);
+    new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem, swerveSubsystem);
   private LEDSubsystem ledSubsystem = new LEDSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =

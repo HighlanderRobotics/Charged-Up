@@ -178,7 +178,7 @@ public final class Constants {
 
     public static final double kPYController = 1.5;
     public static final double kPXController = 1.5;
-    public static final double kPThetaController = 0.25;
+    public static final double kPThetaController = 0.3;
     public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
@@ -202,15 +202,15 @@ public final class Constants {
     public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(180));
     public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(180));  
     
-    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.9, 0.52), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.9, 1.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.9, 1.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.9, 2.23), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.9, 2.83), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.9, 3.43), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.9, 4.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.9, 4.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.9, 5.23), Rotation2d.fromDegrees(0));  
+    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(15.0, 0.52), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(15.0, 1.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(15.0, 1.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(15.0, 2.23), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(15.0, 2.83), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(15.0, 3.23), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(15.0, 4.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(15.0, 4.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(15.0, 5.23), Rotation2d.fromDegrees(0));  
 
     public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
     static {

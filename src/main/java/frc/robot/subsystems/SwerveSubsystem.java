@@ -75,7 +75,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
     public Pose2d pose = new Pose2d();
-    public boolean nearestGoalIsCone = false;
+    public boolean nearestGoalIsCone = true;
+    public double extensionInches = 0;
 
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -265,8 +266,8 @@ public class SwerveSubsystem extends SubsystemBase {
         return pose.getTranslation().getDistance(getNearestGoal().getTranslation2d());
     }
     public boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
-        System.out.println("index " + (Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3));
-        System.out.println("index " + (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3));
+        // System.out.println("index " + (Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3));
+        // System.out.println("index " + (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3));
         if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ||
         (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3) == 1){ //then its a cube goal
             return false;
@@ -276,7 +277,8 @@ public class SwerveSubsystem extends SubsystemBase {
         }
     }
 
-    public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
+    public double getExtension(ElevatorSubsystem.ScoringLevels level) {
+        System.out.println(nearestGoalIsCone);
         if (nearestGoalIsCone) {
             System.out.println("its a cone!");
             return level.getConeInches();
@@ -494,8 +496,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Heading goal", headingController.getGoal().position);
         SmartDashboard.putNumber("Heading error", headingController.getPositionError());
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
-        // SmartDashboard.putBoolean("is cone goal", checkIfConeGoal(getNearestGoal()));
-        // SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, checkIfConeGoal(getNearestGoal())));
+        SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
+        // SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }

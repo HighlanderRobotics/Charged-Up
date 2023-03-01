@@ -109,6 +109,10 @@ public class GrabberSubsystem extends SubsystemBase {
       new RunCommand(() -> {outake(); neutral();}, this));
   }
 
+  public CommandBase outakeOpenCommand() {
+    return new RunCommand(() -> {grabber.setPercentOut(0.4); open();}, this);
+  }
+
   public CommandBase openCommand() {
     return new InstantCommand(() -> open(), this);
   }

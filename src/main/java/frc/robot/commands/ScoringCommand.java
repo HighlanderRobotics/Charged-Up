@@ -20,6 +20,7 @@ import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -52,17 +53,14 @@ public class ScoringCommand extends SequentialCommandGroup {
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
               new PrintCommand(level + " level"),
               new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
-                superstructureSubsystem.waitExtendToInches(
-                  swerveSubsystem.getExtension(
-                    level, 
-                    swerveSubsystem.nearestGoalIsCone))
+                superstructureSubsystem.waitExtendToGoal(level)
                 .andThen(
                     new PrintCommand("extended elevator"),
                     new WaitCommand(0.25),
                     new ConditionalCommand(
                       grabberSubsystem.outakeNeutralCommand(), 
-                      grabberSubsystem.outakeNeutralCommand(), 
-                      () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()))
+                      grabberSubsystem.outakeOpenCommand(), 
+                      () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) && level == ScoringLevels.L3)
                   )
                   // .withTimeout(1)
                   )
