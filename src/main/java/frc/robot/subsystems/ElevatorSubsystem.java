@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -140,9 +141,13 @@ public class ElevatorSubsystem extends SubsystemBase {
         }
     }
 
-    public CommandBase extendToInchesCommand(double extensionInches) {
-        return new InstantCommand(() -> setGoal(extensionInches), this)
+    public CommandBase extendToInchesCommand(DoubleSupplier extensionInches) {
+        return new InstantCommand(() -> setGoal(extensionInches.getAsDouble()), this)
             .andThen(new WaitUntilCommand(() -> isAtGoal()), new PrintCommand("extended"));
+    }
+
+    public CommandBase extendToInchesCommand(double extensionInches) {
+        return extendToInchesCommand(() -> extensionInches);
     }
  
     /**
