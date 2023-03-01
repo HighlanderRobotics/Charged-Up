@@ -66,8 +66,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Field2d field = new Field2d();
 
-    private PhotonCamera camera = null;
-    private PhotonPipelineResult result = null;
+    private PhotonCamera rightCamera = null;
+    private PhotonPipelineResult rightResult = null;
+    private PhotonCamera leftCamera = null;
+    private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
 
     public boolean hasResetOdometry = false;
@@ -92,8 +94,11 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.enableContinuousInput(0, Math.PI * 2);
         headingController.setTolerance(0.1);
 
-        camera = new PhotonCamera("limelight-right");
-        camera.setLED(VisionLEDMode.kOff);
+        rightCamera = new PhotonCamera("limelight-right");
+        rightCamera.setLED(VisionLEDMode.kOff);
+
+        leftCamera = new PhotonCamera("limelight-left");
+        leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -328,9 +333,9 @@ public class SwerveSubsystem extends SubsystemBase {
    * 
    * @return a pair of the list of poses from each target, and the latency of the result
    */
-  public Pair<List<Pose2d>, Double> getEstimatedPose(){
+  public Pair<List<Pose2d>, Double> getEstimatedPose(Transform3d cameraToRobot, PhotonPipelineResult result){
     // Only do work if we actually have targets, if we don't return null
-    if (result.hasTargets()){
+    if (rightResult.hasTargets()){
       // List that we're going to return later
       List<Pose2d> poses = new ArrayList<Pose2d>();
       // Loop through all the targets
@@ -351,13 +356,13 @@ public class SwerveSubsystem extends SubsystemBase {
         if (target.getPoseAmbiguity() < 0.1) {
           // Calculate and add the pose to our list of poses
           // May need to invert the camera to robot transform?
-          poses.add(getFieldToRobot(targetPose3d, Constants.CAMERA_TO_ROBOT, target.getBestCameraToTarget()).toPose2d());
+          poses.add(getFieldToRobot(targetPose3d, cameraToRobot, target.getBestCameraToTarget()).toPose2d());
         }
         // Return the list of poses and the latency
         if (poses == null || poses.isEmpty()) {
             return null;
         }
-        return new Pair<>(poses, result.getLatencyMillis());
+        return new Pair<>(poses, rightResult.getLatencyMillis());
       }
     }
     // Returns null if no targets are found
@@ -365,8 +370,8 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public boolean hasTargets() {
-    if (result != null) {
-        return result.hasTargets();
+    if (rightResult != null) {
+        return rightResult.hasTargets();
     }
     return false;
   }
@@ -374,8 +379,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase resetIfTargets() {
     return new InstantCommand(() -> {
         try {
-            System.out.println(getEstimatedPose().getFirst().get(0).toString());
-            resetOdometry(getEstimatedPose().getFirst().get(0));
+            System.out.println(getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0).toString());
+            resetOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0));
+            
+            System.out.println(getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0).toString());
+            resetOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0));
             hasResetOdometry = true;
         } catch (Exception e) {
             // error handling is for nerds
@@ -400,7 +408,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }   
 
     public double getCameraResultLatency(){
-        return result.getLatencyMillis();
+        return rightResult.getLatencyMillis();
     }
 
     /** @return the current state of each of the swerve modules, including current speed */
@@ -459,15 +467,26 @@ public class SwerveSubsystem extends SubsystemBase {
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        if (camera != null) {
+        if (rightCamera != null) {
             try {
-                result = camera.getLatestResult();
+                rightResult = rightCamera.getLatestResult();
             } catch (Error e) {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
         }
-        if (result != null && result.hasTargets()) {
-            updateOdometry(getEstimatedPose());
+        if (rightResult != null && rightResult.hasTargets()) {
+            updateOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
+        }
+
+        if (leftCamera != null) {
+            try {
+                leftResult = leftCamera.getLatestResult();
+            } catch (Error e) {
+                System.out.print("Error in camera processing " + e.getMessage());
+            }
+        }
+        if (leftResult != null && leftResult.hasTargets()) {
+            updateOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
         }
 
         // Log swerve module information

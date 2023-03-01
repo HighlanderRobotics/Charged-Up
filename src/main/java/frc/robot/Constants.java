@@ -43,12 +43,18 @@ public final class Constants {
     public static final int driverControllerPort = 0;
   }
 
-  public static final Transform3d CAMERA_TO_ROBOT = new Transform3d(
+  public static final Transform3d rightCameraToRobot = new Transform3d(
     new Translation3d(
       Units.inchesToMeters(-5.48),
       Units.inchesToMeters(-10.84), 
       Units.inchesToMeters(-22.75)),
     new Rotation3d(0, 0, -Units.degreesToRadians(5)));
+  public static final Transform3d leftCameraToRobot = new Transform3d(
+    new Translation3d(
+      Units.inchesToMeters(-5.48),
+      Units.inchesToMeters(10.84), 
+      Units.inchesToMeters(-22.75)),
+    new Rotation3d(0, 0, Units.degreesToRadians(5)));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
