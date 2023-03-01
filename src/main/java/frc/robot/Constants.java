@@ -388,6 +388,7 @@ public final class Constants {
 
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
+  
   public static final class ScoringLevels {
     public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 35.5;
