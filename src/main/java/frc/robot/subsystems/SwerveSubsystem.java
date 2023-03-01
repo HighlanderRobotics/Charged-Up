@@ -280,10 +280,10 @@ public class SwerveSubsystem extends SubsystemBase {
     public double getExtension(ElevatorSubsystem.ScoringLevels level) {
         System.out.println(nearestGoalIsCone);
         if (nearestGoalIsCone) {
-            System.out.println("its a cone!");
+            // System.out.println("its a cone!");
             return level.getConeInches();
         } else {
-            System.out.println("its a cube!");
+            // System.out.println("its a cube!");
             return level.getCubeInches();
         }
     }
@@ -497,7 +497,7 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Heading error", headingController.getPositionError());
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
-        // SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
+        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }

@@ -59,7 +59,10 @@ public class ScoringCommand extends SequentialCommandGroup {
                     new WaitCommand(0.25),
                     new ConditionalCommand(
                       grabberSubsystem.outakeNeutralCommand(), 
-                      grabberSubsystem.outakeOpenCommand(), 
+                      new ConditionalCommand(
+                        grabberSubsystem.openCommand(), 
+                        grabberSubsystem.outakeOpenCommand(), 
+                        () -> swerveSubsystem.nearestGoalIsCone), 
                       () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) && level == ScoringLevels.L3)
                   )
                   // .withTimeout(1)

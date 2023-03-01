@@ -207,7 +207,7 @@ public final class Constants {
     public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(15.0, 1.63), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(15.0, 2.23), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(15.0, 2.83), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(15.0, 3.23), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(15.0, 3.3), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(15.0, 4.03), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(15.0, 4.63), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(15.0, 5.23), Rotation2d.fromDegrees(0));  
@@ -385,7 +385,7 @@ public final class Constants {
   public static final class ScoringLevels {
     public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 35.5;
-    public static final double midConeLevel = 40;
+    public static final double midConeLevel = 38.5;
     public static final double midCubeLevel = 23.5;
     public static final double bottomLevel = 20;
   }
