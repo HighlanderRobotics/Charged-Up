@@ -48,7 +48,7 @@ public final class Constants {
       Units.inchesToMeters(-5.48),
       Units.inchesToMeters(-10.84), 
       Units.inchesToMeters(-22.75)),
-    new Rotation3d(0, 0, 0));
+    new Rotation3d(0, 0, -Units.degreesToRadians(5)));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
@@ -234,7 +234,7 @@ public final class Constants {
       positions.put("red7", red7);
       positions.put("red8", red8);
     }
-    public static final List<PathPointOpen > bluePositionsList = new ArrayList<>();
+    public static final List<PathPointOpen> bluePositionsList = new ArrayList<>();
     static {
       bluePositionsList.add(blue0);
       bluePositionsList.add(blue1);
@@ -377,8 +377,8 @@ public final class Constants {
   }
 
   public static final class LEDConstants {
-    public static final int ledPort = 8;
-    public static final int ledLength = 130; //TODO: find
+    public static final int ledPort = 1;
+    public static final int ledLength = 140; //TODO: find
 
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }

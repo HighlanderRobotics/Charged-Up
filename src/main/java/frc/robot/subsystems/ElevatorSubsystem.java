@@ -153,6 +153,14 @@ public class ElevatorSubsystem extends SubsystemBase {
             this.extensionInchesCones = extensionInchesCones;
             this.extensionInchesCubes = extensionInchesCubes;
         }
+
+        public double getConeInches() {
+            return this.extensionInchesCones;
+        }
+
+        public double getCubeInches() {
+            return this.extensionInchesCubes;
+        }
     }
 
     public CommandBase extendToInchesCommand(double extensionInches) {

@@ -75,6 +75,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
     public Pose2d pose = new Pose2d();
+    public boolean nearestGoalIsCone = false;
 
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -90,7 +91,7 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.enableContinuousInput(0, Math.PI * 2);
         headingController.setTolerance(0.1);
 
-        camera = new PhotonCamera("limelight");
+        camera = new PhotonCamera("limelight-right");
         camera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
@@ -125,7 +126,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
         Pose2d velPose = new Pose2d(translation.times(0.02), new Rotation2d(rotation * 0.02));
         Twist2d velTwist = new Pose2d().log(velPose);
         SwerveModuleState[] swerveModuleStates =
@@ -134,7 +135,8 @@ public class SwerveSubsystem extends SubsystemBase {
                                     velTwist.dx / 0.02, 
                                     velTwist.dy / 0.02, 
                                     velTwist.dtheta /0.02, 
-                                    getYaw()
+                                    useAlliance && DriverStation.getAlliance() == DriverStation.Alliance.Red
+                                        ? getYaw().plus(new Rotation2d(Math.PI)) : getYaw()
                                 )
                                 : new ChassisSpeeds(
                                     velTwist.dx / 0.02, 
@@ -151,13 +153,14 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
-    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop) {
+    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
         return new RunCommand(
             () -> drive(
                 new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
                 omega.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
                 fieldRelative, 
-                isOpenLoop), 
+                isOpenLoop,
+                useAlliance), 
                 this);
     }
 
@@ -167,7 +170,8 @@ public class SwerveSubsystem extends SubsystemBase {
             y, 
             () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), 
             fieldRelative, 
-            isOpenLoop);
+            isOpenLoop,
+            true);
     }
     public Command poseLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
         return new InstantCommand(
@@ -176,14 +180,15 @@ public class SwerveSubsystem extends SubsystemBase {
                 headingController.reset(getYaw().getRadians() % (Math.PI * 2));
                 headingController.setGoal(theta.getAsDouble());}).andThen(
             driveCommand(
-                () -> deadband(Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 0.1), 
-                () -> deadband(Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()), 0.1),
-                () -> deadband(headingController.calculate(pose.getRotation().getRadians() % (2 * Math.PI)), 0.1),
+                () -> deadband(Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 0.05), 
+                () -> deadband(Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()), 0.05),
+                () -> deadband(headingController.calculate(pose.getRotation().getRadians() % (2 * Math.PI)), 0.05),
                 fieldRelative, 
-                isOpenLoop).alongWith(
+                isOpenLoop,
+                false).alongWith(
                     new PrintCommand(pose.getX() + " x"),
                     new PrintCommand(pose.getY() + " y"),
-                    new PrintCommand(headingController.getPositionError() + " heading error").repeatedly()
+                    new PrintCommand(headingController.getPositionError() + " heading error")
                 ));
     }
 
@@ -259,7 +264,9 @@ public class SwerveSubsystem extends SubsystemBase {
     public double getNearestGoalDistance () {
         return pose.getTranslation().getDistance(getNearestGoal().getTranslation2d());
     }
-    public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
+    public boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
+        System.out.println("index " + (Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3));
+        System.out.println("index " + (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3));
         if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ||
         (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3) == 1){ //then its a cube goal
             return false;
@@ -270,12 +277,12 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
-        if (isCone) {
-            // System.out.println("its a cone!");
-            return level.extensionInchesCones;
+        if (nearestGoalIsCone) {
+            System.out.println("its a cone!");
+            return level.getConeInches();
         } else {
-            // System.out.println("its a cube!");
-            return level.extensionInchesCubes;
+            System.out.println("its a cube!");
+            return level.getCubeInches();
         }
     }
 
@@ -487,8 +494,9 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Heading goal", headingController.getGoal().position);
         SmartDashboard.putNumber("Heading error", headingController.getPositionError());
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
-        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, checkIfConeGoal(getNearestGoal())));
+        // SmartDashboard.putBoolean("is cone goal", checkIfConeGoal(getNearestGoal()));
+        // SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, checkIfConeGoal(getNearestGoal())));
         pose = getPose();
-        
+        nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }
 }

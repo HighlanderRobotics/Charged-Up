@@ -54,7 +54,7 @@ public class RobotContainer {
 
   private SuperstructureSubsystem superstructureSubsystem = 
     new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem);
-  // private LEDSubsystem ledSubsystem = new LEDSubsystem();
+  private LEDSubsystem ledSubsystem = new LEDSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -69,6 +69,7 @@ public class RobotContainer {
       () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
       () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
       true, 
+      true,
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(
@@ -87,7 +88,7 @@ public class RobotContainer {
     routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
     superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));
-   // ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
+    ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -201,6 +202,6 @@ public class RobotContainer {
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
     // ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20));
-    // ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
+    ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
   }
 }

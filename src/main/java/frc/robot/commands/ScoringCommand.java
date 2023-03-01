@@ -55,13 +55,13 @@ public class ScoringCommand extends SequentialCommandGroup {
                 superstructureSubsystem.waitExtendToInches(
                   swerveSubsystem.getExtension(
                     level, 
-                    swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())))
+                    swerveSubsystem.nearestGoalIsCone))
                 .andThen(
                     new PrintCommand("extended elevator"),
                     new WaitCommand(0.25),
                     new ConditionalCommand(
                       grabberSubsystem.outakeNeutralCommand(), 
-                      grabberSubsystem.openCommand(), 
+                      grabberSubsystem.outakeNeutralCommand(), 
                       () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()))
                   )
                   // .withTimeout(1)
