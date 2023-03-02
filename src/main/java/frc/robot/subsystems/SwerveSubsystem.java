@@ -64,7 +64,8 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
     //degrees in radians 
-    public PIDController ballanceController = new PIDController(1.5, 0, 0.5);
+    public PIDController xBallanceController = new PIDController(1.5, 0, 0.5);
+    public PIDController yBallanceController = new PIDController(1.5, 0, 0.5);
     public SwerveDrivePoseEstimator poseEstimator;
     public SwerveModule[] mSwerveMods;
     public Pigeon2 gyro;
@@ -102,8 +103,8 @@ public class SwerveSubsystem extends SubsystemBase {
         rightCamera = new PhotonCamera("limelight-right");
         rightCamera.setLED(VisionLEDMode.kOff);
 
-        leftCamera = new PhotonCamera("limelight-left");
-        leftCamera.setLED(VisionLEDMode.kOff);
+        // leftCamera = new PhotonCamera("limelight-left");
+        // leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -310,22 +311,23 @@ public class SwerveSubsystem extends SubsystemBase {
                 new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
                 this::setModuleStates, // Module states consumer used to output to the drive subsystem
                 eventMap,
-                false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+                true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
     
 
     }
-
     
     public CommandBase autoBalance(){
         return new RunCommand(
             () -> drive(
-                new Translation2d(0, ballanceController.calculate(gyro.getPitch())),
+                new Translation2d(
+                    xBallanceController.calculate(deadband(gyro.getRoll(), 0.5)), 
+                    yBallanceController.calculate(deadband(gyro.getPitch(), 0.5))),
                 0,
                 false,
                 false,
-                true),
+                false),
              this);
     }
     /* Used by SwerveControllerCommand in Auto */
@@ -432,7 +434,7 @@ public class SwerveSubsystem extends SubsystemBase {
             System.out.println(e.getMessage());
             SmartDashboard.putString("pose est error", e.getMessage());
         }
-    }, this).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+    }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
 
     /**

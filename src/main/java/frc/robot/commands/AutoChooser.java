@@ -26,10 +26,6 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 
 public class AutoChooser {
-
-    
-    
-
     SendableChooser<Command> chooser = new SendableChooser<Command>();
     SwerveSubsystem swerveSubsystem;
     IntakeSubsystem intakeSubsystem;
@@ -47,10 +43,11 @@ public class AutoChooser {
         this.elevatorSubsystem = elevatorSubsystem; 
         this.armSubsystem = armSubsystem;
         this.grabberSubsystem = grabberSubsystem;
-       
 
-
-        eventMap.put("Score", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); 
+        eventMap.put("Score", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+        eventMap.put("Score L3", new PrintCommand("scoring!!!!!"));//new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+        eventMap.put("Balance", swerveSubsystem.autoBalance());
+        eventMap.put("Intake", intakeSubsystem.runCommand().withTimeout(3)); 
 
         chooser.setDefaultOption("none", new InstantCommand(() -> {}));
             //"Two Cone Auto", 
@@ -59,23 +56,17 @@ public class AutoChooser {
         chooser.addOption("NONE", new PrintCommand("owo"));
         chooser.addOption("1 + Park Bottom Blue", new PrintCommand("working"));
         chooser.addOption("2 + Park Top Blue", new PrintCommand("yes"));
-        chooser.addOption("1 + Park Top Blue", new PrintCommand("Working again"));
+        chooser.addOption("1 + Park Top Blue", onePlusParkTopBlue());
         chooser.addOption("3 Piece Top Blue", new PrintCommand("Working again"));
         chooser.addOption("3 Piece Bottom Blue", new PrintCommand("Working again"));
 
-        SmartDashboard.putData("autotester", chooser);
+        SmartDashboard.putData("auto chooser", chooser);
 
         //List<PathPlannerTrajectory> twoConeGroup = PathPlanner.loadPathGroup
     //("TwoCone", new PathConstraints(4, 3));
-    //HashMap<String, Command> Constants.eventMap = new HashMap<>();
-    
-    
-      
+    //HashMap<String, Command> Constants.eventMap = new HashMap<>();  
     }
     
-    
-    
-
     public Command getAutoCommand(){
       return chooser.getSelected();
     }
@@ -85,7 +76,6 @@ public class AutoChooser {
           new WaitCommand(1.0).andThen(
             intakeSubsystem.runCommand()));
       }
-
 
       //change to put in constructor
       private Command parkMiddleBlue(){
@@ -102,30 +92,30 @@ public class AutoChooser {
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(pathGroup);
       }
 
-      private Command PieceBottomBlue(){
+      private Command threePieceBottomBlue(){
         List<PathPlannerTrajectory> pieceBottomGroup = PathPlanner.loadPathGroup(
           "3 Piece Bottom Blue", new PathConstraints(4, 3));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(pieceBottomGroup);
       }
-      private Command PieceTopBlue(){
+      private Command threePieceTopBlue(){
         List<PathPlannerTrajectory> pieceTopGroup = PathPlanner.loadPathGroup(
           "3 Piece Top Blue", new PathConstraints(4, 3));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(pieceTopGroup);
       }
-      private Command ParkBottomBlue(){
+      private Command onePlusParkBottomBlue(){
         List<PathPlannerTrajectory> parkBottomGroup = PathPlanner.loadPathGroup(
-          "1+ Park Bottom Blue", new PathConstraints(4, 3));
+          "1 + Park Bottom Blue", new PathConstraints(4, 3));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(parkBottomGroup);
       }
 
-      private Command ParkTopBlue(){
+      private Command onePlusParkTopBlue(){
         List<PathPlannerTrajectory> parkTopGroup = PathPlanner.loadPathGroup(
-          "1+ Park Top Blue", new PathConstraints(4, 3));
+          "1 + Park Top Blue", new PathConstraints(2, 3));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(parkTopGroup);
       }
       private Command twoParkTopBlue(){
         List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
-          "2+ Park Top Blue", new PathConstraints(4, 3));
+          "2 + Park Top Blue", new PathConstraints(4, 3));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
       }
 

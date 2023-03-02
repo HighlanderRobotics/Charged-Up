@@ -60,7 +60,7 @@ public class RobotContainer {
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
 
-  Trigger isExtended = new Trigger(() -> elevatorSubsystem.getExtensionInches() > 6 || Constants.ElevatorConstants.PIDController.getGoal().position > 6);
+  Trigger isExtended = superstructureSubsystem.extendTrigger;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
