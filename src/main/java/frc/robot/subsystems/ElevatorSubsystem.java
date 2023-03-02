@@ -58,6 +58,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
+        elevatorMotor.configVoltageCompSaturation(10);
+        elevatorFollower.configVoltageCompSaturation(10);
         SmartDashboard.putData("elevatorsim", mech2d);
         zeroMotor();
     }
@@ -92,12 +94,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5;
     }
     
-    public boolean isCurrentSpike() {
-        return elevatorMotor.getStatorCurrent() > 60 && elevatorMotor.getSelectedSensorVelocity() < 2048;
-    }
     public CommandBase zeroElevator() {
         return new RunCommand(() -> setGoal(-1), this)
-            .until(() -> isCurrentSpike())
+            .until(() -> limitSwitch.get())
             .andThen(() -> elevatorMotor.setSelectedSensorPosition(0));
     }
     public void zeroMotor() {

@@ -74,7 +74,8 @@ public class RobotContainer {
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(
       elevatorSubsystem.extendToInchesCommand(1.0)
-      .andThen(new StartEndCommand(
+      .andThen(elevatorSubsystem.zeroElevator(),
+        new StartEndCommand(
         () -> elevatorSubsystem.disable(), 
         () -> elevatorSubsystem.enable(), 
         elevatorSubsystem)));
@@ -118,6 +119,8 @@ public class RobotContainer {
       () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
       true, 
       true));
+    
+    new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kGreen)));
 
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(30).andThen(new RunCommand(() -> {}, elevatorSubsystem)

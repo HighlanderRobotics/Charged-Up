@@ -283,7 +283,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public double getExtension(ElevatorSubsystem.ScoringLevels level) {
-        System.out.println(nearestGoalIsCone);
+        // System.out.println(nearestGoalIsCone);
         if (nearestGoalIsCone) {
             // System.out.println("its a cone!");
             return level.getConeInches();
@@ -370,8 +370,14 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public boolean hasTargets() {
+    if (leftResult != null && rightResult != null) {
+        return leftResult.hasTargets() || rightResult.hasTargets();
+    }
     if (rightResult != null) {
         return rightResult.hasTargets();
+    }
+    if (leftResult != null) {
+        return leftResult.hasTargets();
     }
     return false;
   }

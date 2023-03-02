@@ -45,14 +45,14 @@ public final class Constants {
 
   public static final Transform3d rightCameraToRobot = new Transform3d(
     new Translation3d(
-      Units.inchesToMeters(-5.48),
-      Units.inchesToMeters(-10.84), 
+      Units.inchesToMeters(-8),
+      Units.inchesToMeters(-9.75), 
       Units.inchesToMeters(-22.75)),
     new Rotation3d(0, 0, -Units.degreesToRadians(5)));
   public static final Transform3d leftCameraToRobot = new Transform3d(
     new Translation3d(
-      Units.inchesToMeters(-5.48),
-      Units.inchesToMeters(10.84), 
+      Units.inchesToMeters(-8),
+      Units.inchesToMeters(9.75), 
       Units.inchesToMeters(-22.75)),
     new Rotation3d(0, 0, Units.degreesToRadians(5)));
 
@@ -175,16 +175,16 @@ public final class Constants {
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 3;
-    public static final double maxAccelerationMetersPerSecondSquared = 6;
+    public static final double maxAccelerationMetersPerSecondSquared = 3;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
     public static final double kPYController = 1.5;
     public static final double kPXController = 1.5;
-    public static final double kPThetaController = 0.3;
+    public static final double kPThetaController = 0.7;
     public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
@@ -348,7 +348,7 @@ public final class Constants {
     public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(3.0,4.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(-0.8, 0.0, 0.0, armConstraints);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(-1.2, 0.0, 0.0, armConstraints);
     static {
       PIDController.setTolerance(
         0.1, //TODO: is this good?
@@ -388,7 +388,7 @@ public final class Constants {
 
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
-  
+
   public static final class ScoringLevels {
     public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 35.5;
