@@ -70,25 +70,14 @@ public class IntakeSubsystem extends SubsystemBase {
     return new RunCommand(() -> {outake(); extend();}, this);
   }
 
-  public boolean isExtended() {
-    return 
-    timeSinceExtended.get() > Constants.MechanismConstants.intakeTimeToExtend 
-    && solenoid.get() == Value.kForward;
-  }
-
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putBoolean("intake extended?", isExtended());
 
   }
 
   @Override
   public void simulationPeriodic() {
-    SmartDashboard.putBoolean("intake extended?", isExtended());
   }
 
-public Object activate() {
-    return null;
-}
 }

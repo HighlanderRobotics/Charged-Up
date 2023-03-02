@@ -43,12 +43,18 @@ public final class Constants {
     public static final int driverControllerPort = 0;
   }
 
-  public static final Transform3d CAMERA_TO_ROBOT = new Transform3d(
+  public static final Transform3d rightCameraToRobot = new Transform3d(
     new Translation3d(
-      Units.inchesToMeters(-5.48),
-      Units.inchesToMeters(-10.84), 
+      Units.inchesToMeters(-8),
+      Units.inchesToMeters(-9.75), 
       Units.inchesToMeters(-22.75)),
-    new Rotation3d(0, 0, 0));
+    new Rotation3d(0, 0, -Units.degreesToRadians(5)));
+  public static final Transform3d leftCameraToRobot = new Transform3d(
+    new Translation3d(
+      Units.inchesToMeters(-8),
+      Units.inchesToMeters(9.75), 
+      Units.inchesToMeters(-22.75)),
+    new Rotation3d(0, 0, Units.degreesToRadians(5)));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
@@ -169,17 +175,17 @@ public final class Constants {
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 3;
-    public static final double maxAccelerationMetersPerSecondSquared = 6;
-    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 2;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 2;
+    public static final double maxAccelerationMetersPerSecondSquared = 3;
+    public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPYController = 4;
-    public static final double kPXController = 4;
-    public static final double kPThetaController = 0.6;
-    public static final double kDThetaController = 0.6;
+    public static final double kPYController = 1.5;
+    public static final double kPXController = 1.5;
+    public static final double kPThetaController = 0.7;
+    public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
     public static final ProfiledPIDController yController = new ProfiledPIDController(kPYController, 0, 0, constraints);
@@ -202,15 +208,15 @@ public final class Constants {
     public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(180));
     public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(180));  
     
-    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(14.9, 0.52), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(14.9, 1.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(14.9, 1.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(14.9, 2.23), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(14.9, 2.83), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(14.9, 3.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(14.9, 4.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(14.9, 4.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(14.9, 5.23), Rotation2d.fromDegrees(180));  
+    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(15.0, 0.52), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(15.0, 1.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(15.0, 1.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(15.0, 2.23), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(15.0, 2.83), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(15.0, 3.3), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(15.0, 4.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(15.0, 4.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(15.0, 5.23), Rotation2d.fromDegrees(0));  
 
     public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
     static {
@@ -234,7 +240,7 @@ public final class Constants {
       positions.put("red7", red7);
       positions.put("red8", red8);
     }
-    public static final List<PathPointOpen > bluePositionsList = new ArrayList<>();
+    public static final List<PathPointOpen> bluePositionsList = new ArrayList<>();
     static {
       bluePositionsList.add(blue0);
       bluePositionsList.add(blue1);
@@ -304,7 +310,7 @@ public final class Constants {
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.01);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,60.0);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,40.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/7, 0.0, 0.0139/2, elevatorConstraints);
 
     static {
@@ -342,7 +348,7 @@ public final class Constants {
     public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
     public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(3.0,4.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(-0.8, 0.0, 0.0, armConstraints);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(-1.2, 0.0, 0.0, armConstraints);
     static {
       PIDController.setTolerance(
         0.1, //TODO: is this good?
@@ -377,15 +383,16 @@ public final class Constants {
   }
 
   public static final class LEDConstants {
-    public static final int ledPort = 8;
-    public static final int ledLength = 130; //TODO: find
+    public static final int ledPort = 1;
+    public static final int ledLength = 140; //TODO: find
 
     public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
   }
+
   public static final class ScoringLevels {
-    public static final double topConeLevel = 50; //this is in inches
+    public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 35.5;
-    public static final double midConeLevel = 40;
+    public static final double midConeLevel = 38.5;
     public static final double midCubeLevel = 23.5;
     public static final double bottomLevel = 20;
   }

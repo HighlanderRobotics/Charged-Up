@@ -4,15 +4,19 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
+import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 
 public class SuperstructureSubsystem extends SubsystemBase {
   IntakeSubsystem intakeSubsystem;
@@ -20,6 +24,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
   ArmSubsystem armSubsystem;
   RoutingSubsystem routingSubsystem;
   GrabberSubsystem grabberSubsystem;
+  SwerveSubsystem swerveSubsystem;
 
   ExtensionState mode = ExtensionState.RETRACT_AND_ROUTE;
 
@@ -33,30 +38,42 @@ public class SuperstructureSubsystem extends SubsystemBase {
     ElevatorSubsystem elevatorSubsystem,
     ArmSubsystem armSubsystem,
     RoutingSubsystem routingSubsystem,
-    GrabberSubsystem grabberSubsystem
+    GrabberSubsystem grabberSubsystem,
+    SwerveSubsystem swerveSubsystem
   ) {
     this.intakeSubsystem = intakeSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
     this.armSubsystem = armSubsystem;
     this.routingSubsystem = routingSubsystem;
     this.grabberSubsystem = grabberSubsystem;
+    this.swerveSubsystem = swerveSubsystem;
   }
 
   public void setMode(ExtensionState mode) {
     this.mode = mode;
   }
 
-  public CommandBase waitExtendToInches(double extensionInches){
+  public CommandBase waitExtendToInches(DoubleSupplier extensionInches){
     return new InstantCommand(() -> mode = ExtensionState.EXTEND)
-      .andThen(new WaitCommand(0.25))
+      .andThen(new WaitCommand(0.35))
       .andThen(elevatorSubsystem.extendToInchesCommand(extensionInches))
       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
+  }
+
+  public CommandBase waitExtendToInches(double extensionInches) {
+    return waitExtendToInches(() -> extensionInches);
+  }
+
+  public CommandBase waitExtendToGoal(ScoringLevels level) {
+    return new PrintCommand("extension target " + swerveSubsystem.getExtension(level))
+      .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level)));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    if (elevatorSubsystem.getExtensionInches() > 4.5 || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5 ) { // TODO: Find good value for maximum extension before "extended"
+    if ((elevatorSubsystem.getExtensionInches() > 4.5 || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5)
+      && (armSubsystem.getRotation().getRadians() < -1.4)) { // TODO: Find good value for maximum extension before "extended"
       mode = ExtensionState.EXTEND;
     }
     SmartDashboard.putString("Superstructure Mode", mode.toString());

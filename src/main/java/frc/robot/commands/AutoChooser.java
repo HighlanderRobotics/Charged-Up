@@ -82,11 +82,8 @@ public class AutoChooser {
 
     private Command runIntake() {
         return new ParallelCommandGroup(
-          new WaitCommand(1.0).andThen(new RunCommand(() -> 
-          {
-            intakeSubsystem.activate(); 
-            //intakeSubsystem.setIntakeRPM(4000);
-          }, intakeSubsystem)));
+          new WaitCommand(1.0).andThen(
+            intakeSubsystem.runCommand()));
       }
 
 

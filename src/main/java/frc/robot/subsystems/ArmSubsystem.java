@@ -57,11 +57,11 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     public CommandBase runToHorizontalCommand() {
-        return runToRotationCommand(-1.6);
+        return runToRotationCommand(-1.7);
     }
 
     public CommandBase runToRoutingCommand() {
-        return runToRotationCommand(-1.2);
+        return runToRotationCommand(-1.35);
     }
 
     public void jogUp() {

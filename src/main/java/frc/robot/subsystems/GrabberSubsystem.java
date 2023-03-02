@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.wpilibj.DoubleSolenoid;
@@ -32,6 +33,7 @@ public class GrabberSubsystem extends SubsystemBase {
   /** Creates a new GrabberSubsystem. */
   public GrabberSubsystem() {
     grabber.setNeutralMode(NeutralMode.Brake);
+    grabber.configVoltageCompSaturation(10);
   }
 
   private void intake() {
@@ -39,12 +41,13 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void outake() {
-    grabber.setPercentOut(0.2); // TODO: find best value
+    grabber.set(ControlMode.PercentOutput, 0.18); // TODO: find best value
   }
 
-   private void stop() {
-  //   grabber.setPercentOut(0); // might want to use PID hold
-   }
+  private void stop() {
+    // grabber.set(ControlMode.Velocity, 0); // might want to use PID hold
+    grabber.setPercentOut(0);
+  }
 
   private void open() {
     solenoid.set(Value.kReverse);
@@ -106,6 +109,10 @@ public class GrabberSubsystem extends SubsystemBase {
       new RunCommand(() -> {outake(); neutral();}, this));
   }
 
+  public CommandBase outakeOpenCommand() {
+    return new RunCommand(() -> {grabber.setPercentOut(0.4); open();}, this);
+  }
+
   public CommandBase openCommand() {
     return new InstantCommand(() -> open(), this);
   }
@@ -134,5 +141,7 @@ public class GrabberSubsystem extends SubsystemBase {
  public void periodic() {
     // This method will be called once per scheduler run
     SmartDashboard.putBoolean("grabber sensor", limitSwitch.get());
+    SmartDashboard.putNumber("grabber output", grabber.getMotorOutputPercent());
+    SmartDashboard.putNumber("grabber vel falcon units", grabber.getSelectedSensorVelocity());
   }
 }

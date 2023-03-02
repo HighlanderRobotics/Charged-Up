@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
@@ -50,8 +51,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         90,
         15,
         new Color8Bit(Color.kLavender)));
-    public double topLevel = Constants.ScoringLevels.topConeLevel; //to avoid null pointer exception
-    public double midLevel = Constants.ScoringLevels.midConeLevel;
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
@@ -59,6 +58,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
+        elevatorMotor.configVoltageCompSaturation(10);
+        elevatorFollower.configVoltageCompSaturation(10);
         SmartDashboard.putData("elevatorsim", mech2d);
         zeroMotor();
     }
@@ -85,27 +86,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
     }
 
-    public void setTopLevel(boolean cone) {
-        if (cone = true) {
-            topLevel = Constants.ScoringLevels.topConeLevel; //this is the dumbest possible way to do this lol
-        } else {
-            topLevel = Constants.ScoringLevels.topCubeLevel;
-        }
-    }
-    public double getTopLevel() {
-        return topLevel;
-    }
-    public void setMidLevel(boolean cone) {
-        if (cone = true) {
-            midLevel = Constants.ScoringLevels.midConeLevel;
-        } else {
-            midLevel = Constants.ScoringLevels.midCubeLevel;
-        }
-    }
-    public double getMidLevel(){
-        return midLevel;
-    }
-
     private double getMeasurement() {
        return 0; //elevatorMotor.getSelectedSensorPosition();
     }
@@ -114,12 +94,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         return elevatorMotor.getRotations() * Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5;
     }
     
-    public boolean isCurrentSpike() {
-        return elevatorMotor.getStatorCurrent() > 60 && elevatorMotor.getSelectedSensorVelocity() < 2048;
-    }
     public CommandBase zeroElevator() {
         return new RunCommand(() -> setGoal(-1), this)
-            .until(() -> isCurrentSpike())
+            .until(() -> limitSwitch.get())
             .andThen(() -> elevatorMotor.setSelectedSensorPosition(0));
     }
     public void zeroMotor() {
@@ -143,7 +120,7 @@ public class ElevatorSubsystem extends SubsystemBase {
        // enabled = false;
     }
 
-    public static enum ScoringLevels {
+    public enum ScoringLevels {
         L1(Constants.ScoringLevels.bottomLevel, Constants.ScoringLevels.bottomLevel),
         L2(Constants.ScoringLevels.midConeLevel, Constants.ScoringLevels.midCubeLevel), 
         L3(Constants.ScoringLevels.topConeLevel, Constants.ScoringLevels.topCubeLevel);
@@ -153,11 +130,23 @@ public class ElevatorSubsystem extends SubsystemBase {
             this.extensionInchesCones = extensionInchesCones;
             this.extensionInchesCubes = extensionInchesCubes;
         }
+
+        public double getConeInches() {
+            return this.extensionInchesCones;
+        }
+
+        public double getCubeInches() {
+            return this.extensionInchesCubes;
+        }
+    }
+
+    public CommandBase extendToInchesCommand(DoubleSupplier extensionInches) {
+        return new InstantCommand(() -> setGoal(extensionInches.getAsDouble()), this)
+            .andThen(new WaitUntilCommand(() -> isAtGoal()), new PrintCommand("extended"));
     }
 
     public CommandBase extendToInchesCommand(double extensionInches) {
-        return new InstantCommand(() -> setGoal(extensionInches), this)
-            .andThen(new WaitUntilCommand(() -> isAtGoal()), new PrintCommand("extended"));
+        return extendToInchesCommand(() -> extensionInches);
     }
  
     /**

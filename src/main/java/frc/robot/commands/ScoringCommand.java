@@ -20,6 +20,7 @@ import frc.robot.subsystems.GrabberSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
@@ -39,26 +40,30 @@ public class ScoringCommand extends SequentialCommandGroup {
     
     addCommands(
       new PrintCommand("scoring sequence woo" + swerveSubsystem.getPose().toString()),
-      // swerveSubsystem.poseLockDriveCommand(
-      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
-      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
-      //   () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-      //   true, false)
-      swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
+      swerveSubsystem.poseLockDriveCommand(
+        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
+        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
+        () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
+        true, false)
+      // swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
         .alongWith(
-          // new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.1;})//.alongWith(
-            
+          new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.05;})//.alongWith(
+            .andThen(
+              grabberSubsystem.closeCommand(),
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
-              new PrintCommand(level + " level").andThen(
+              new PrintCommand(level + " level"),
               new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
-                superstructureSubsystem.waitExtendToInches(
-                  swerveSubsystem.getExtension(
-                    level, 
-                    swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal())))
+                superstructureSubsystem.waitExtendToGoal(level)
                 .andThen(
                     new PrintCommand("extended elevator"),
                     new WaitCommand(0.25),
-                    grabberSubsystem.outakeNeutralCommand()
+                    new ConditionalCommand(
+                      grabberSubsystem.outakeNeutralCommand(), 
+                      new ConditionalCommand(
+                        grabberSubsystem.openCommand(), 
+                        grabberSubsystem.outakeOpenCommand(), 
+                        () -> swerveSubsystem.nearestGoalIsCone), 
+                      () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) && level == ScoringLevels.L3)
                   )
                   // .withTimeout(1)
                   )

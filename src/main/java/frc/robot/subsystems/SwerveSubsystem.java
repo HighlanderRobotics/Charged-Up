@@ -71,8 +71,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Field2d field = new Field2d();
 
-    private PhotonCamera camera = null;
-    private PhotonPipelineResult result = null;
+    private PhotonCamera rightCamera = null;
+    private PhotonPipelineResult rightResult = null;
+    private PhotonCamera leftCamera = null;
+    private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
 
     public boolean hasResetOdometry = false;
@@ -80,6 +82,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private ChassisSpeeds chassisSpeeds = new ChassisSpeeds();
 
     public Pose2d pose = new Pose2d();
+    public boolean nearestGoalIsCone = true;
+    public double extensionInches = 0;
 
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -95,8 +99,11 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.enableContinuousInput(0, Math.PI * 2);
         headingController.setTolerance(0.1);
 
-        camera = new PhotonCamera("limelight");
-        camera.setLED(VisionLEDMode.kOff);
+        rightCamera = new PhotonCamera("limelight-right");
+        rightCamera.setLED(VisionLEDMode.kOff);
+
+        leftCamera = new PhotonCamera("limelight-left");
+        leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -111,7 +118,7 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 1.0);
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.2);
         Vector<N3> visStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
 
         poseEstimator = new SwerveDrivePoseEstimator(
@@ -130,7 +137,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
-    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+    public void drive(Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
         Pose2d velPose = new Pose2d(translation.times(0.02), new Rotation2d(rotation * 0.02));
         Twist2d velTwist = new Pose2d().log(velPose);
         SwerveModuleState[] swerveModuleStates =
@@ -139,7 +146,8 @@ public class SwerveSubsystem extends SubsystemBase {
                                     velTwist.dx / 0.02, 
                                     velTwist.dy / 0.02, 
                                     velTwist.dtheta /0.02, 
-                                    getYaw()
+                                    useAlliance && DriverStation.getAlliance() == DriverStation.Alliance.Red
+                                        ? getYaw().plus(new Rotation2d(Math.PI)) : getYaw()
                                 )
                                 : new ChassisSpeeds(
                                     velTwist.dx / 0.02, 
@@ -156,13 +164,14 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
-    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop) {
+    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
         return new RunCommand(
             () -> drive(
                 new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
                 omega.getAsDouble() * Constants.Swerve.maxAngularVelocity, 
                 fieldRelative, 
-                isOpenLoop), 
+                isOpenLoop,
+                useAlliance), 
                 this);
     }
 
@@ -172,7 +181,8 @@ public class SwerveSubsystem extends SubsystemBase {
             y, 
             () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), 
             fieldRelative, 
-            isOpenLoop);
+            isOpenLoop,
+            true);
     }
     public Command poseLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
         return new InstantCommand(
@@ -181,16 +191,15 @@ public class SwerveSubsystem extends SubsystemBase {
                 headingController.reset(getYaw().getRadians() % (Math.PI * 2));
                 headingController.setGoal(theta.getAsDouble());}).andThen(
             driveCommand(
-                () -> Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 
-                () -> Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()),
-                () -> {return (headingController.calculate(getYaw().getRadians() % (2 * Math.PI))
-                            + Constants.AutoConstants.thetaFeedForward.calculate(headingController.getSetpoint().velocity));
-                        },
+                () -> deadband(Constants.AutoConstants.xController.calculate(pose.getX(), x.getAsDouble()), 0.05), 
+                () -> deadband(Constants.AutoConstants.yController.calculate(pose.getY(), y.getAsDouble()), 0.05),
+                () -> deadband(headingController.calculate(pose.getRotation().getRadians() % (2 * Math.PI)), 0.05),
                 fieldRelative, 
-                isOpenLoop).alongWith(
+                isOpenLoop,
+                false).alongWith(
                     new PrintCommand(pose.getX() + " x"),
                     new PrintCommand(pose.getY() + " y"),
-                    new PrintCommand(headingController.getPositionError() + " heading error").repeatedly()
+                    new PrintCommand(headingController.getPositionError() + " heading error")
                 ));
     }
 
@@ -267,7 +276,9 @@ public class SwerveSubsystem extends SubsystemBase {
     public double getNearestGoalDistance () {
         return pose.getTranslation().getDistance(getNearestGoal().getTranslation2d());
     }
-    public Boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
+    public boolean checkIfConeGoal(PathPointOpen goal){ //this doesn't apply for level 1 scoring positions
+        // System.out.println("index " + (Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3));
+        // System.out.println("index " + (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3));
         if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1 ||
         (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3) == 1){ //then its a cube goal
             return false;
@@ -277,13 +288,14 @@ public class SwerveSubsystem extends SubsystemBase {
         }
     }
 
-    public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
-        if (isCone) {
+    public double getExtension(ElevatorSubsystem.ScoringLevels level) {
+        // System.out.println(nearestGoalIsCone);
+        if (nearestGoalIsCone) {
             // System.out.println("its a cone!");
-            return level.extensionInchesCones;
+            return level.getConeInches();
         } else {
             // System.out.println("its a cube!");
-            return level.extensionInchesCubes;
+            return level.getCubeInches();
         }
     }
 
@@ -312,7 +324,8 @@ public class SwerveSubsystem extends SubsystemBase {
                 new Translation2d(0, ballanceController.calculate(gyro.getPitch())),
                 0,
                 false,
-                false),
+                false,
+                true),
              this);
     }
     /* Used by SwerveControllerCommand in Auto */
@@ -355,9 +368,9 @@ public class SwerveSubsystem extends SubsystemBase {
    * 
    * @return a pair of the list of poses from each target, and the latency of the result
    */
-  public Pair<List<Pose2d>, Double> getEstimatedPose(){
+  public Pair<List<Pose2d>, Double> getEstimatedPose(Transform3d cameraToRobot, PhotonPipelineResult result){
     // Only do work if we actually have targets, if we don't return null
-    if (result.hasTargets()){
+    if (rightResult.hasTargets()){
       // List that we're going to return later
       List<Pose2d> poses = new ArrayList<Pose2d>();
       // Loop through all the targets
@@ -378,13 +391,13 @@ public class SwerveSubsystem extends SubsystemBase {
         if (target.getPoseAmbiguity() < 0.1) {
           // Calculate and add the pose to our list of poses
           // May need to invert the camera to robot transform?
-          poses.add(getFieldToRobot(targetPose3d, Constants.CAMERA_TO_ROBOT, target.getBestCameraToTarget()).toPose2d());
+          poses.add(getFieldToRobot(targetPose3d, cameraToRobot, target.getBestCameraToTarget()).toPose2d());
         }
         // Return the list of poses and the latency
         if (poses == null || poses.isEmpty()) {
             return null;
         }
-        return new Pair<>(poses, result.getLatencyMillis());
+        return new Pair<>(poses, rightResult.getLatencyMillis());
       }
     }
     // Returns null if no targets are found
@@ -392,8 +405,14 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public boolean hasTargets() {
-    if (result != null) {
-        return result.hasTargets();
+    if (leftResult != null && rightResult != null) {
+        return leftResult.hasTargets() || rightResult.hasTargets();
+    }
+    if (rightResult != null) {
+        return rightResult.hasTargets();
+    }
+    if (leftResult != null) {
+        return leftResult.hasTargets();
     }
     return false;
   }
@@ -401,8 +420,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase resetIfTargets() {
     return new InstantCommand(() -> {
         try {
-            System.out.println(getEstimatedPose().getFirst().get(0).toString());
-            resetOdometry(getEstimatedPose().getFirst().get(0));
+            System.out.println(getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0).toString());
+            resetOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0));
+            
+            System.out.println(getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0).toString());
+            resetOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0));
             hasResetOdometry = true;
         } catch (Exception e) {
             // error handling is for nerds
@@ -426,9 +448,9 @@ public class SwerveSubsystem extends SubsystemBase {
          return tagPose.plus(cameraToTarget.inverse()).plus(robotToCamera.inverse()); 
      }   
 
-     public double getCameraResultLatency(){
-         return result.getLatencyMillis();
-     }
+    public double getCameraResultLatency(){
+        return rightResult.getLatencyMillis();
+    }
 
     /** @return the current state of each of the swerve modules, including current speed */
     public SwerveModuleState[] getModuleStates(){
@@ -463,6 +485,10 @@ public class SwerveSubsystem extends SubsystemBase {
         return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - gyro.getYaw()) : Rotation2d.fromDegrees(gyro.getYaw());
     }
 
+    public Rotation2d getAbsYaw() {
+        return Rotation2d.fromDegrees(gyro.getAbsoluteCompassHeading());
+    }
+
     /** Resets the encoders on all swerve modules to the cancoder values */
     public void resetModulesToAbsolute() {
         for (SwerveModule module: mSwerveMods) {
@@ -470,19 +496,38 @@ public class SwerveSubsystem extends SubsystemBase {
         }
     }
 
+    public double deadband(double value, double minumum) {
+        if (Math.abs(value) < minumum) {
+            return 0;
+        }
+
+        return value;
+    }
+
     @Override
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        if (camera != null) {
+        if (rightCamera != null) {
             try {
-                result = camera.getLatestResult();
+                rightResult = rightCamera.getLatestResult();
             } catch (Error e) {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
         }
-        if (result != null && result.hasTargets()) {
-            updateOdometry(getEstimatedPose());
+        if (rightResult != null && rightResult.hasTargets()) {
+            updateOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
+        }
+
+        if (leftCamera != null) {
+            try {
+                leftResult = leftCamera.getLatestResult();
+            } catch (Error e) {
+                System.out.print("Error in camera processing " + e.getMessage());
+            }
+        }
+        if (leftResult != null && leftResult.hasTargets()) {
+            updateOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
         }
 
         // Log swerve module information
@@ -511,8 +556,9 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Heading goal", headingController.getGoal().position);
         SmartDashboard.putNumber("Heading error", headingController.getPositionError());
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
-        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, checkIfConeGoal(getNearestGoal())));
+        SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
+        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
         pose = getPose();
-        
+        nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }
 }
