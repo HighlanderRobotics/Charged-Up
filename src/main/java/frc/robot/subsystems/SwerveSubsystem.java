@@ -80,7 +80,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public boolean nearestGoalIsCone = true;
     public double extensionInches = 0;
 
-    private ProfiledPIDController headingController = new ProfiledPIDController(
+    public ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
         0, 
         Constants.AutoConstants.kDThetaController,
@@ -97,8 +97,8 @@ public class SwerveSubsystem extends SubsystemBase {
         rightCamera = new PhotonCamera("limelight-right");
         rightCamera.setLED(VisionLEDMode.kOff);
 
-        leftCamera = new PhotonCamera("limelight-left");
-        leftCamera.setLED(VisionLEDMode.kOff);
+        // leftCamera = new PhotonCamera("limelight-left");
+        // leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -113,8 +113,8 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.2);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.2, 0.2, 0.2);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 

@@ -130,9 +130,9 @@ public class RobotContainer {
       routingSubsystem.runCommand(), 
       grabberSubsystem.intakeOpenCommand(),
       armSubsystem.runToRoutingCommand()));
-    controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
-    controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
-    controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));// ledSubsystem));
+    controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); //ledSubsystem));
+    controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); //ledSubsystem));
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
