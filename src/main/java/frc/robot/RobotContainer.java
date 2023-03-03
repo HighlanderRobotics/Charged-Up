@@ -120,7 +120,7 @@ public class RobotContainer {
       true, 
       true));
     
-    new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kGreen)));
+    new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
 
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(30).andThen(new RunCommand(() -> {}, elevatorSubsystem)

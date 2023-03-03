@@ -48,7 +48,7 @@ public final class Constants {
       Units.inchesToMeters(-8),
       Units.inchesToMeters(-9.75), 
       Units.inchesToMeters(-22.75)),
-    new Rotation3d(0, 0, -Units.degreesToRadians(5)));
+    new Rotation3d(0, 0, Units.degreesToRadians(-5)));
   public static final Transform3d leftCameraToRobot = new Transform3d(
     new Translation3d(
       Units.inchesToMeters(-8),
@@ -198,15 +198,15 @@ public final class Constants {
   }
 
   public static final class ScoringPositions {
-    public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.74, 0.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.74, 1.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.74, 1.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.74, 2.23), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.74, 2.83), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.74, 3.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.74, 4.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.74, 4.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.74, 5.23), Rotation2d.fromDegrees(180));  
+    public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.54, 0.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.54, 1.03), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.54, 1.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.54, 2.23), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.54, 2.83), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.54, 3.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.54, 3.9), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.54, 4.4), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.54, 5.0), Rotation2d.fromDegrees(180));  
     
     public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(15.0, 0.52), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(15.0, 1.03), Rotation2d.fromDegrees(0));
@@ -386,7 +386,7 @@ public final class Constants {
     public static final int ledPort = 1;
     public static final int ledLength = 140; //TODO: find
 
-    public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
+    public static final Color8Bit defaultColor = new Color8Bit(58 / 2, 11 / 2, 110 / 2);
   }
 
   public static final class ScoringLevels {

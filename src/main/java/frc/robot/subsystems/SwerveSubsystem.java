@@ -37,8 +37,10 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
@@ -97,8 +99,8 @@ public class SwerveSubsystem extends SubsystemBase {
         rightCamera = new PhotonCamera("limelight-right");
         rightCamera.setLED(VisionLEDMode.kOff);
 
-        // leftCamera = new PhotonCamera("limelight-left");
-        // leftCamera.setLED(VisionLEDMode.kOff);
+        leftCamera = new PhotonCamera("limelight-left");
+        leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -316,14 +318,13 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Updates the pose estimator from a (presumably vision) measurement
      * Input is in the form of a list of pose2ds and a latency measurement
      */
-    public void updateOdometry(Pair<List<Pose2d>, Double> data){
+    public void addVisionMeasurement(Pair<List<Pose2d>, Double> data){
         if (data != null) {
             field.getObject("Latest Vision Pose").setPoses(data.getFirst());
-            SmartDashboard.putNumber("Latency", data.getSecond());
+            SmartDashboard.putNumber("tinestamp", data.getSecond());
             for (Pose2d pose : data.getFirst()){
                 // Data is in milliseconds, need to convert to seconds
-                poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp() - (data.getSecond() / 1000));
-                zeroGyro(pose.getRotation().getDegrees());
+                poseEstimator.addVisionMeasurement(pose, data.getSecond());
             }
         }
     }
@@ -331,15 +332,19 @@ public class SwerveSubsystem extends SubsystemBase {
     
   /**Processes the vision result.
    * 
-   * @return a pair of the list of poses from each target, and the latency of the result
+   * @return a pair of the list of poses from each target, and the timestamp of the result
    */
   public Pair<List<Pose2d>, Double> getEstimatedPose(Transform3d cameraToRobot, PhotonPipelineResult result){
     // Only do work if we actually have targets, if we don't return null
-    if (rightResult.hasTargets()){
+    if (result.hasTargets()){
       // List that we're going to return later
       List<Pose2d> poses = new ArrayList<Pose2d>();
       // Loop through all the targets
       for (PhotonTrackedTarget target : result.getTargets()){
+        if (2.0 < target.getBestCameraToTarget().getTranslation().getDistance(new Translation3d(0, new Rotation3d()))){
+            System.out.println("Too far from apriltag");
+            continue;
+        }
         // Use a switch statement to lookup the pose of the marker
         // Later will switch this to use wpilibs json file to lookup pose of marker
         Pose3d targetPose3d = new Pose3d();
@@ -362,7 +367,7 @@ public class SwerveSubsystem extends SubsystemBase {
         if (poses == null || poses.isEmpty()) {
             return null;
         }
-        return new Pair<>(poses, rightResult.getLatencyMillis());
+        return new Pair<>(poses, result.getTimestampSeconds());
       }
     }
     // Returns null if no targets are found
@@ -481,7 +486,7 @@ public class SwerveSubsystem extends SubsystemBase {
             }
         }
         if (rightResult != null && rightResult.hasTargets()) {
-            updateOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
+            addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
         }
 
         if (leftCamera != null) {
@@ -492,7 +497,7 @@ public class SwerveSubsystem extends SubsystemBase {
             }
         }
         if (leftResult != null && leftResult.hasTargets()) {
-            updateOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
+            addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
         }
 
         // Log swerve module information
