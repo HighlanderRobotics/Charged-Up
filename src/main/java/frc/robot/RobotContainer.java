@@ -58,6 +58,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
+  private final CommandXboxController controller2 =
+      new CommandXboxController(OperatorConstants.operatorControllerPort);
 
   Trigger isExtended = new Trigger(() -> elevatorSubsystem.getExtensionInches() > 6 || Constants.ElevatorConstants.PIDController.getGoal().position > 6);
 
@@ -130,9 +132,11 @@ public class RobotContainer {
       routingSubsystem.runCommand(), 
       grabberSubsystem.intakeOpenCommand(),
       armSubsystem.runToRoutingCommand()));
-    controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));// ledSubsystem));
-    controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); //ledSubsystem));
-    controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)); //ledSubsystem));
+    controller2.y().whileTrue(new InstantCommand (()-> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L3)));
+    controller2.b().whileTrue(new InstantCommand (()-> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L2)));
+    controller2.x().whileTrue(new InstantCommand (()-> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L1)));
+    
+    controller.y().whileTrue(new ScoringCommand(swerveSubsystem.getLevel(), () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)

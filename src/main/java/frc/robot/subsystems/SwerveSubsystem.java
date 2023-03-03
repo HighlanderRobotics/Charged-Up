@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import frc.robot.SwerveModule;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
@@ -79,6 +80,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
     public double extensionInches = 0;
+    public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L1;
 
     public ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -467,6 +469,13 @@ public class SwerveSubsystem extends SubsystemBase {
         }
 
         return value;
+    }
+    public void setLevel(ElevatorSubsystem.ScoringLevels level){
+        extensionLevel = level;
+        extensionInches = getExtension(level);
+    }
+    public ElevatorSubsystem.ScoringLevels getLevel(){
+        return extensionLevel;
     }
 
     @Override
