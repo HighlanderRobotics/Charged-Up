@@ -41,6 +41,7 @@ import frc.lib.util.SwerveModuleConstants;
 public final class Constants {
   public static class OperatorConstants {
     public static final int driverControllerPort = 0;
+    public static final int operatorControllerPort = 1;
   }
 
   public static final Transform3d rightCameraToRobot = new Transform3d(
