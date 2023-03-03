@@ -8,6 +8,7 @@ import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public PIDController xBallanceController = new PIDController(1.5, 0, 0.5);
     public PIDController yBallanceController = new PIDController(1.5, 0, 0.5);
     public SwerveDrivePoseEstimator poseEstimator;
+    public SwerveDriveOdometry wheelOnlyOdo;
     public SwerveModule[] mSwerveMods;
     public Pigeon2 gyro;
 
@@ -74,6 +76,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private PhotonCamera rightCamera = null;
     private PhotonPipelineResult rightResult = null;
+    private double lastVisionFrameTimestamp = 0;
     private PhotonCamera leftCamera = null;
     private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
@@ -120,7 +123,7 @@ public class SwerveSubsystem extends SubsystemBase {
         resetModulesToAbsolute();
 
         Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.2);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.2, 0.2, 0.1);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -129,6 +132,8 @@ public class SwerveSubsystem extends SubsystemBase {
             new Pose2d(),
             odoStdDevs,
             visStdDevs);
+
+        wheelOnlyOdo = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
         
         try {
             fieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
@@ -311,7 +316,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
                 this::setModuleStates, // Module states consumer used to output to the drive subsystem
                 eventMap,
-                true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+                false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
     
@@ -347,6 +352,7 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
+        wheelOnlyOdo.resetPosition(getYaw(), getModulePositions(), pose);
         System.out.println("odometry reset");
     }
 
@@ -359,7 +365,7 @@ public class SwerveSubsystem extends SubsystemBase {
             SmartDashboard.putNumber("Latency", data.getSecond());
             for (Pose2d pose : data.getFirst()){
                 // Data is in milliseconds, need to convert to seconds
-                poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp() - (data.getSecond() / 1000));
+                poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp());
                 zeroGyro(pose.getRotation().getDegrees());
             }
         }
@@ -368,7 +374,7 @@ public class SwerveSubsystem extends SubsystemBase {
     
   /**Processes the vision result.
    * 
-   * @return a pair of the list of poses from each target, and the latency of the result
+   * @return a pair of the list of poses from each target, and the timestamp of the result
    */
   public Pair<List<Pose2d>, Double> getEstimatedPose(Transform3d cameraToRobot, PhotonPipelineResult result){
     // Only do work if we actually have targets, if we don't return null
@@ -399,7 +405,7 @@ public class SwerveSubsystem extends SubsystemBase {
         if (poses == null || poses.isEmpty()) {
             return null;
         }
-        return new Pair<>(poses, rightResult.getLatencyMillis());
+        return new Pair<>(poses, rightResult.getTimestampSeconds());
       }
     }
     // Returns null if no targets are found
@@ -508,7 +514,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
-        poseEstimator.update(getYaw(), getModulePositions());  
+        poseEstimator.update(getYaw(), getModulePositions()); 
+        wheelOnlyOdo.update(getYaw(), getModulePositions());
         
         if (rightCamera != null) {
             try {
@@ -517,10 +524,12 @@ public class SwerveSubsystem extends SubsystemBase {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
         }
-        if (rightResult != null && rightResult.hasTargets()) {
+        if (rightResult != null && rightResult.hasTargets() && lastVisionFrameTimestamp < rightResult.getTimestampSeconds()) {
             updateOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
         }
-
+        if (rightResult != null) {
+            lastVisionFrameTimestamp = rightResult.getLatencyMillis();
+        }
         if (leftCamera != null) {
             try {
                 leftResult = leftCamera.getLatestResult();
@@ -542,6 +551,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
         field.setRobotPose(getPose());
+        field.getObject("odo only poes").setPose(wheelOnlyOdo.getPoseMeters());
         SmartDashboard.putData(field);
         SmartDashboard.putBoolean("Has reset", hasResetOdometry);
 
@@ -560,6 +570,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
         SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
+        SmartDashboard.putString("alliance", DriverStation.getAlliance().toString());
+        SmartDashboard.putNumber("vision latency", Timer.getFPGATimestamp() - rightResult.getTimestampSeconds());
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }

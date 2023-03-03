@@ -59,6 +59,7 @@ public class AutoChooser {
         chooser.addOption("1 + Park Top Blue", onePlusParkTopBlue());
         chooser.addOption("3 Piece Top Blue", new PrintCommand("Working again"));
         chooser.addOption("3 Piece Bottom Blue", new PrintCommand("Working again"));
+        chooser.addOption("GoesFiveFeet", goesFiveFeet());
 
         SmartDashboard.putData("auto chooser", chooser);
 
@@ -104,19 +105,25 @@ public class AutoChooser {
       }
       private Command onePlusParkBottomBlue(){
         List<PathPlannerTrajectory> parkBottomGroup = PathPlanner.loadPathGroup(
-          "1 + Park Bottom Blue", new PathConstraints(4, 3));
+          "1 + Park Bottom Blue", new PathConstraints(.5, .5));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(parkBottomGroup);
       }
 
       private Command onePlusParkTopBlue(){
         List<PathPlannerTrajectory> parkTopGroup = PathPlanner.loadPathGroup(
-          "1 + Park Top Blue", new PathConstraints(2, 3));
+          "1 + Park Top Blue", new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(parkTopGroup);
       }
       private Command twoParkTopBlue(){
         List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
           "2 + Park Top Blue", new PathConstraints(4, 3));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
+      }
+
+      private Command goesFiveFeet(){
+        List<PathPlannerTrajectory> fiveFeetGroup = PathPlanner.loadPathGroup(
+          "GoesFiveFeet", new PathConstraints(1.0, .5));
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(fiveFeetGroup).andThen(swerveSubsystem.driveCommand(() -> 0, ()-> 0, () -> 0, false, false, false));
       }
 
       
