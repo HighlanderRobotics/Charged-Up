@@ -198,15 +198,15 @@ public final class Constants {
   }
 
   public static final class ScoringPositions {
-    public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.54, 0.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.54, 1.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.54, 1.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.54, 2.23), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.54, 2.83), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.54, 3.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.54, 3.9), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.54, 4.4), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.54, 5.0), Rotation2d.fromDegrees(180));  
+    public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.5, 0.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.5, 1.03), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.5, 1.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.5, 2.23), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.5, 2.83), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.5, 3.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.5, 3.9), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.5, 4.4), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.5, 5.0), Rotation2d.fromDegrees(180));  
     
     public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(15.0, 0.52), Rotation2d.fromDegrees(0));
     public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(15.0, 1.03), Rotation2d.fromDegrees(0));
