@@ -365,7 +365,7 @@ public final class Constants {
   /** Constants for simple mechanisms like intake, routing, grabber */
   public static final class MechanismConstants {
     public static final int intakeID = 20;
-    public static final int intakeSolenoidForwardID = 2;
+    public static final int intakeSolenoidForwardID = 3;
     public static final int intakeSolenoidBackwardID = 0;
     public static final double intakeTimeToExtend = 0.1; // TODO: find
 
@@ -376,8 +376,8 @@ public final class Constants {
     public static final double conveyerKP = 1; // TODO: tune
 
     public static final int grabberID = 24;
-    public static final int grabberSolenoidFrontID = 1;
-    public static final int grabberSolenoidBackID = 3;
+    public static final int grabberSolenoidFrontID = 2;
+    public static final int grabberSolenoidBackID = 1;
 
     public static final int grabberLimitSwitch = 1;
     public static final boolean isGrabberSwitchReversed = true; 

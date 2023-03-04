@@ -19,7 +19,7 @@ import frc.robot.Constants;
 public class IntakeSubsystem extends SubsystemBase {
   HighlanderFalcon intake = new HighlanderFalcon(Constants.MechanismConstants.intakeID);
   DoubleSolenoid solenoid = new DoubleSolenoid(
-    PneumaticsModuleType.REVPH, 
+    PneumaticsModuleType.CTREPCM, 
     Constants.MechanismConstants.intakeSolenoidForwardID, 
     Constants.MechanismConstants.intakeSolenoidBackwardID);
   // Timer to make sure that the intake has time to extend when we check if its out
