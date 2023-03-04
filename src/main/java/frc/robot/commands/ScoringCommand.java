@@ -44,9 +44,9 @@ public class ScoringCommand extends SequentialCommandGroup {
         () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
         () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
         () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        true, false)
+        true, false).finallyDo((boolean interrupt) -> System.out.println("end scoring"))
       // swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
-        .alongWith(
+        .raceWith(
           new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.05;})//.alongWith(
             .andThen(
               grabberSubsystem.closeCommand(),
@@ -65,10 +65,11 @@ public class ScoringCommand extends SequentialCommandGroup {
                         () -> swerveSubsystem.nearestGoalIsCone), 
                       () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) && level == ScoringLevels.L3)
                   )
-                  // .withTimeout(1)
+                  .withTimeout(2),
+                  new PrintCommand("aaaaaaaaaaaaaaa")
                   )
-                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-            )
+                // .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+            )//.withTimeout(3.0)
     );
   }
 }

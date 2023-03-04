@@ -330,9 +330,9 @@ public class SwerveSubsystem extends SubsystemBase {
         return driveCommand(
                 () -> {
                     if (gyro.getRoll() > 10.0) {
-                        return -0.15;
+                        return -0.1;
                     } else if (gyro.getRoll() < -10.0) {
-                        return 0.15;
+                        return 0.1;
                     } else {
                         return 0.0;
                     }

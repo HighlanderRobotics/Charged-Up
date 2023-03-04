@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score No Aim"
+          "Score"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",

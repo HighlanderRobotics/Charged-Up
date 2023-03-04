@@ -57,7 +57,13 @@ public class AutoChooser {
         this.grabberSubsystem = grabberSubsystem;
         this.routingSubsystem = routingSubsystem;
 
-        eventMap.put("Score", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+        eventMap.put("Score", new ScoringCommand(
+          ScoringLevels.L3, 
+          () -> 0, 
+          elevatorSubsystem, 
+          swerveSubsystem, 
+          grabberSubsystem, 
+          superstructureSubsystem).asProxy().andThen(new PrintCommand("bbbbbbbb")));
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
         eventMap.put("Score No Aim", new ProxyCommand(
           superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.topConeLevel)
@@ -67,13 +73,14 @@ public class AutoChooser {
                 grabberSubsystem.outakeNeutralCommand()
                   .withTimeout(1.0),
               new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-            )).withTimeout(3.0));
+            ).withTimeout(2.0)));
+        eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand(), 
           routingSubsystem.runCommand(), 
           grabberSubsystem.intakeOpenCommand(),
-          armSubsystem.runToRoutingCommand())); 
+          armSubsystem.runToRoutingCommand()).asProxy()); 
         eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
             () -> 1.0,
             () -> 0.0,
