@@ -57,22 +57,14 @@ public class AutoChooser {
 
         eventMap.put("Score", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
-        eventMap.put("Score No Aim", new InstantCommand()
-          // superstructureSubsystem.waitExtendToGoal(ScoringLevels.L3)
-          // .andThen(
-          //     new PrintCommand("extended elevator"),
-          //     new WaitCommand(0.25),
-          //     new ConditionalCommand(
-          //       grabberSubsystem.outakeNeutralCommand(), 
-          //       new ConditionalCommand(
-          //         grabberSubsystem.openCommand(), 
-          //         grabberSubsystem.outakeOpenCommand(), 
-          //         () -> swerveSubsystem.nearestGoalIsCone), 
-          //       () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()))
-          //       .withTimeout(1.0)
-          //       .andThen(
-          //         elevatorSubsystem.extendToInchesCommand(1.0))
-            );
+        eventMap.put("Score No Aim",
+          superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.topConeLevel)
+          .andThen(
+              new PrintCommand("extended elevator"),
+              new WaitCommand(0.25),
+                grabberSubsystem.outakeNeutralCommand()
+                .withTimeout(1.0)
+            ).asProxy());
         eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand(), 
