@@ -375,8 +375,8 @@ public final class Constants {
     public static final double conveyerKP = 1; // TODO: tune
 
     public static final int grabberID = 24;
-    public static final int grabberSolenoidFrontID = 1;
-    public static final int grabberSolenoidBackID = 2;
+    public static final int grabberSolenoidFrontID = 2;
+    public static final int grabberSolenoidBackID = 1;
 
     public static final int grabberLimitSwitch = 1;
     public static final boolean isGrabberSwitchReversed = true; 

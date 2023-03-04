@@ -60,7 +60,7 @@ public class RobotContainer {
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
 
-  Trigger isExtended = superstructureSubsystem.extendTrigger;
+  Trigger isExtended = new Trigger(() -> elevatorSubsystem.getExtensionInches() > 4.5 || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -81,7 +81,7 @@ public class RobotContainer {
         () -> elevatorSubsystem.disable(), 
         () -> elevatorSubsystem.enable(), 
         elevatorSubsystem)));
-    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
+    armSubsystem.setDefaultCommand(armSubsystem.runToRoutingCommand());
     intakeSubsystem.setDefaultCommand(new WaitCommand(0.3)
       .andThen(new ConditionalCommand(
         intakeSubsystem.extendCommand(), 
@@ -156,8 +156,8 @@ public class RobotContainer {
       armSubsystem.runToRoutingCommand()));
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
-      routingSubsystem.stopCommand(),
-      armSubsystem.runToHorizontalCommand()
+      routingSubsystem.stopCommand()
+      // armSubsystem.runToHorizontalCommand()
       //elevatorSubsystem.extendToInchesCommand(0.0)
     ).withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
