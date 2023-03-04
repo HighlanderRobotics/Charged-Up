@@ -113,8 +113,8 @@ public class SwerveSubsystem extends SubsystemBase {
         rightCamera = new PhotonCamera("limelight-right");
         rightCamera.setLED(VisionLEDMode.kOff);
 
-        // leftCamera = new PhotonCamera("limelight-left");
-        // leftCamera.setLED(VisionLEDMode.kOff);
+        leftCamera = new PhotonCamera("limelight-left");
+        leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -130,7 +130,7 @@ public class SwerveSubsystem extends SubsystemBase {
         resetModulesToAbsolute();
 
         Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.4, 0.4, 0.3);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -317,7 +317,7 @@ public class SwerveSubsystem extends SubsystemBase {
         return
             new SwerveAutoBuilder(
                 () -> getPose(), // Pose2d supplier
-                (Pose2d pose) -> resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+                (Pose2d pose) -> {resetOdometry(pose); zeroGyro(pose.getRotation().getDegrees());}, // Pose2d consumer, used to reset odometry at the beginning of auto
                 Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
                 new PIDConstants(Constants.AutoConstants.kPXController, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
                 new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
@@ -326,8 +326,6 @@ public class SwerveSubsystem extends SubsystemBase {
                 true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
-    
-
     }
     
     public CommandBase autoBalance(){
@@ -363,8 +361,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
+        hasResetOdometry = true;
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
-        zeroGyro(pose.getRotation().getDegrees());
+        // zeroGyro(pose.getRotation().getDegrees());
         wheelOnlyOdo.resetPosition(getYaw(), getModulePositions(), pose);
         System.out.println("odometry reset");
     }
@@ -375,6 +374,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public void addVisionMeasurement(Pair<List<Pose2d>, Double> data){
         if (data != null) {
             SmartDashboard.putNumber("tinestamp", data.getSecond());
+            field.getObject("Latest Vision Pose").setPoses(data.getFirst());
             for (Pose2d pose : data.getFirst()){
                 // Data is in milliseconds, need to convert to seconds
                 poseEstimator.addVisionMeasurement(pose, data.getSecond());
@@ -395,7 +395,7 @@ public class SwerveSubsystem extends SubsystemBase {
       List<Pose2d> poses = new ArrayList<Pose2d>();
       // Loop through all the targets
       for (PhotonTrackedTarget target : result.getTargets()){
-        if (2.0 < target.getBestCameraToTarget().getTranslation().getDistance(new Translation3d(0, new Rotation3d()))){
+        if (2.5 < target.getBestCameraToTarget().getTranslation().getDistance(new Translation3d(0, new Rotation3d()))){
             System.out.println("Too far from apriltag");
             continue;
         }

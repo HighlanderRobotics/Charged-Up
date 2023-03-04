@@ -63,7 +63,11 @@ public class AutoChooser {
           elevatorSubsystem, 
           swerveSubsystem, 
           grabberSubsystem, 
-          superstructureSubsystem).asProxy().andThen(new PrintCommand("bbbbbbbb")));
+          superstructureSubsystem).asProxy().andThen(
+            new PrintCommand("bbbbbbbb"), 
+            new InstantCommand(() -> {}, swerveSubsystem),
+            new WaitCommand(1.0),
+            new PrintCommand("ccccccccccccccccccccccc")));
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
         eventMap.put("Score No Aim", new ProxyCommand(
           superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.topConeLevel)
