@@ -59,6 +59,8 @@ public class RobotContainer {
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
+  private final CommandXboxController operator =
+      new CommandXboxController(OperatorConstants.operatorControllerPort);
 
   Trigger isExtended = new Trigger(() -> elevatorSubsystem.getExtensionInches() > 4.5 || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5);
 
@@ -123,7 +125,7 @@ public class RobotContainer {
       true, 
       true));
     
-    new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kGreen)));
+    new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
 
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(30).andThen(new RunCommand(() -> {}, elevatorSubsystem)
@@ -133,9 +135,13 @@ public class RobotContainer {
       routingSubsystem.runCommand(), 
       grabberSubsystem.intakeOpenCommand(),
       armSubsystem.runToRoutingCommand()));
-    controller.y().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L3, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));// ledSubsystem));
-    controller.b().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L2, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
-    controller.a().whileTrue(new ScoringCommand(ElevatorSubsystem.ScoringLevels.L1, () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem)); //ledSubsystem));
+    operator.y().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L3)));
+    operator.b().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L2)));
+    operator.a().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L1)));
+    
+    controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)

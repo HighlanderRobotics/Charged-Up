@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import frc.robot.SwerveModule;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
@@ -42,8 +43,10 @@ import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
@@ -89,10 +92,11 @@ public class SwerveSubsystem extends SubsystemBase {
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
     public double extensionInches = 0;
+    public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
 
     private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
 
-    private ProfiledPIDController headingController = new ProfiledPIDController(
+    public ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
         0, 
         Constants.AutoConstants.kDThetaController,
@@ -125,8 +129,8 @@ public class SwerveSubsystem extends SubsystemBase {
         Timer.delay(1.0);
         resetModulesToAbsolute();
 
-        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.2);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.2, 0.2, 0.1);
+        Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -360,6 +364,7 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
+        zeroGyro(pose.getRotation().getDegrees());
         wheelOnlyOdo.resetPosition(getYaw(), getModulePositions(), pose);
         System.out.println("odometry reset");
     }
@@ -367,14 +372,13 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Updates the pose estimator from a (presumably vision) measurement
      * Input is in the form of a list of pose2ds and a latency measurement
      */
-    public void updateOdometry(Pair<List<Pose2d>, Double> data){
+    public void addVisionMeasurement(Pair<List<Pose2d>, Double> data){
         if (data != null) {
-            SmartDashboard.putNumber("Latency", data.getSecond());
+            SmartDashboard.putNumber("tinestamp", data.getSecond());
             for (Pose2d pose : data.getFirst()){
                 // Data is in milliseconds, need to convert to seconds
-                poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp());
+                poseEstimator.addVisionMeasurement(pose, data.getSecond());
                 zeroGyro(pose.getRotation().getDegrees());
-                dashboardFieldVisionPoses.add(pose);
             }
         }
     }
@@ -386,11 +390,15 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Pair<List<Pose2d>, Double> getEstimatedPose(Transform3d cameraToRobot, PhotonPipelineResult result){
     // Only do work if we actually have targets, if we don't return null
-    if (rightResult.hasTargets()){
+    if (result.hasTargets()){
       // List that we're going to return later
       List<Pose2d> poses = new ArrayList<Pose2d>();
       // Loop through all the targets
       for (PhotonTrackedTarget target : result.getTargets()){
+        if (2.0 < target.getBestCameraToTarget().getTranslation().getDistance(new Translation3d(0, new Rotation3d()))){
+            System.out.println("Too far from apriltag");
+            continue;
+        }
         // Use a switch statement to lookup the pose of the marker
         // Later will switch this to use wpilibs json file to lookup pose of marker
         Pose3d targetPose3d = new Pose3d();
@@ -413,7 +421,7 @@ public class SwerveSubsystem extends SubsystemBase {
         if (poses == null || poses.isEmpty()) {
             return null;
         }
-        return new Pair<>(poses, rightResult.getTimestampSeconds());
+        return new Pair<>(poses, result.getTimestampSeconds());
       }
     }
     // Returns null if no targets are found
@@ -519,6 +527,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
         return value;
     }
+    public void setLevel(ElevatorSubsystem.ScoringLevels level){
+        extensionLevel = level;
+        extensionInches = getExtension(level);
+    }
+    public ElevatorSubsystem.ScoringLevels getLevel(){
+        return extensionLevel;
+    }
 
     @Override
     public void periodic(){
@@ -532,8 +547,8 @@ public class SwerveSubsystem extends SubsystemBase {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
         }
-        if (rightResult != null && rightResult.hasTargets() && lastVisionFrameTimestamp < rightResult.getTimestampSeconds()) {
-            updateOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
+        if (rightResult != null && rightResult.hasTargets()) {
+            addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
         }
         if (rightResult != null) {
             lastVisionFrameTimestamp = rightResult.getLatencyMillis();
@@ -546,7 +561,7 @@ public class SwerveSubsystem extends SubsystemBase {
             }
         }
         if (leftResult != null && leftResult.hasTargets()) {
-            updateOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
+            addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
         }
 
         // Log swerve module information

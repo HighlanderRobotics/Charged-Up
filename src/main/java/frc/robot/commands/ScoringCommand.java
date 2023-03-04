@@ -46,8 +46,8 @@ public class ScoringCommand extends SequentialCommandGroup {
         () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         true, false).finallyDo((boolean interrupt) -> System.out.println("end scoring"))
       // swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
-        .raceWith(
-          new WaitUntilCommand(() -> {return swerveSubsystem.getNearestGoalDistance() < 0.05;})//.alongWith(
+        .alongWith(
+          new WaitUntilCommand(() -> (swerveSubsystem.getNearestGoalDistance() < 0.05))//.alongWith(
             .andThen(
               grabberSubsystem.closeCommand(),
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))

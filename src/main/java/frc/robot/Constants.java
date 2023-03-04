@@ -41,6 +41,7 @@ import frc.lib.util.SwerveModuleConstants;
 public final class Constants {
   public static class OperatorConstants {
     public static final int driverControllerPort = 0;
+    public static final int operatorControllerPort = 1;
   }
 
   public static final Transform3d rightCameraToRobot = new Transform3d(
@@ -48,7 +49,7 @@ public final class Constants {
       Units.inchesToMeters(-8),
       Units.inchesToMeters(-9.75), 
       Units.inchesToMeters(-22.75)),
-    new Rotation3d(0, 0, -Units.degreesToRadians(5)));
+    new Rotation3d(0, 0, Units.degreesToRadians(-5)));
   public static final Transform3d leftCameraToRobot = new Transform3d(
     new Translation3d(
       Units.inchesToMeters(-8),
@@ -386,7 +387,7 @@ public final class Constants {
     public static final int ledPort = 1;
     public static final int ledLength = 140; //TODO: find
 
-    public static final Color8Bit defaultColor = new Color8Bit(58, 11, 110);
+    public static final Color8Bit defaultColor = new Color8Bit(58 / 2, 11 / 2, 110 / 2);
   }
 
   public static final class ScoringLevels {

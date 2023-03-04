@@ -69,6 +69,10 @@ public class SuperstructureSubsystem extends SubsystemBase {
       .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level)));
   }
 
+  public CommandBase waitExtendToGoal() {
+    return waitExtendToGoal(swerveSubsystem.getLevel());
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
