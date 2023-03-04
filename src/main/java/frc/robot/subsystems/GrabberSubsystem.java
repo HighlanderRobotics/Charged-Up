@@ -24,7 +24,7 @@ import frc.robot.Constants;
 public class GrabberSubsystem extends SubsystemBase {
   HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID);
   DoubleSolenoid solenoid = new DoubleSolenoid(
-    PneumaticsModuleType.REVPH, 
+    PneumaticsModuleType.CTREPCM, 
     Constants.MechanismConstants.grabberSolenoidFrontID, 
     Constants.MechanismConstants.grabberSolenoidBackID);
   ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(

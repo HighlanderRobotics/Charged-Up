@@ -19,7 +19,7 @@ import frc.robot.Constants;
 public class IntakeSubsystem extends SubsystemBase {
   HighlanderFalcon intake = new HighlanderFalcon(Constants.MechanismConstants.intakeID);
   DoubleSolenoid solenoid = new DoubleSolenoid(
-    PneumaticsModuleType.REVPH, 
+    PneumaticsModuleType.CTREPCM, 
     Constants.MechanismConstants.intakeSolenoidForwardID, 
     Constants.MechanismConstants.intakeSolenoidBackwardID);
   // Timer to make sure that the intake has time to extend when we check if its out
@@ -30,7 +30,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
    private void run() {
-  //   intake.setPercentOut(0.5);
+     intake.setPercentOut(0.5);
    }
 
   private void outake() {
@@ -47,7 +47,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
    private void retract() {
-     //solenoid.set(Value.kReverse);
+     solenoid.set(Value.kReverse);
   }
 
   public CommandBase runCommand() {

@@ -55,7 +55,7 @@ public class RobotContainer {
   private SuperstructureSubsystem superstructureSubsystem = 
   new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem, swerveSubsystem);
   // private LEDSubsystem ledSubsystem = new LEDSubsystem();
-  private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, elevatorSubsystem, armSubsystem, grabberSubsystem, superstructureSubsystem);
+  private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, elevatorSubsystem, armSubsystem, grabberSubsystem, routingSubsystem, superstructureSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -142,9 +142,7 @@ public class RobotContainer {
       .until(() -> elevatorSubsystem.limitSwitch.get())
       .andThen(new PrintCommand("reset elevator")));
 
-    isExtended
-      .whileTrue(new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.EXTEND)))
-      .whileFalse(new ConditionalCommand(
+    isExtended.whileFalse(new ConditionalCommand(
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)), 
         () -> grabberSubsystem.hasGamePiece()));

@@ -7,13 +7,16 @@ import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.ArmSubsystem;
@@ -32,22 +35,59 @@ public class AutoChooser {
     ElevatorSubsystem elevatorSubsystem;
     ArmSubsystem armSubsystem;
     GrabberSubsystem grabberSubsystem;
+    RoutingSubsystem routingSubsystem;
     HashMap<String, Command> eventMap = new HashMap<>();
     
     
-    public AutoChooser(SwerveSubsystem swerveSubsystem,
-    IntakeSubsystem intakeSubsystem, ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, GrabberSubsystem grabberSubsystem, SuperstructureSubsystem superstructureSubsystem){
+    public AutoChooser(
+      SwerveSubsystem swerveSubsystem,
+      IntakeSubsystem intakeSubsystem, 
+      ElevatorSubsystem elevatorSubsystem, 
+      ArmSubsystem armSubsystem, 
+      GrabberSubsystem grabberSubsystem, 
+      RoutingSubsystem routingSubsystem,
+      SuperstructureSubsystem superstructureSubsystem){
       
         this.intakeSubsystem = intakeSubsystem;
         this.swerveSubsystem = swerveSubsystem;
         this.elevatorSubsystem = elevatorSubsystem; 
         this.armSubsystem = armSubsystem;
         this.grabberSubsystem = grabberSubsystem;
+        this.routingSubsystem = routingSubsystem;
 
         eventMap.put("Score", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
-        eventMap.put("Score L3", new PrintCommand("scoring!!!!!"));//new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+        eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+        eventMap.put("Score No Aim", 
+          superstructureSubsystem.waitExtendToGoal(ScoringLevels.L3)
+          .andThen(
+              new PrintCommand("extended elevator"),
+              new WaitCommand(0.25),
+              new ConditionalCommand(
+                grabberSubsystem.outakeNeutralCommand(), 
+                new ConditionalCommand(
+                  grabberSubsystem.openCommand(), 
+                  grabberSubsystem.outakeOpenCommand(), 
+                  () -> swerveSubsystem.nearestGoalIsCone), 
+                () -> swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()))
+                .withTimeout(1.0)
+                .andThen(
+                  elevatorSubsystem.extendToInchesCommand(1.0))
+            ));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
-        eventMap.put("Intake", intakeSubsystem.runCommand().withTimeout(3)); 
+        eventMap.put("Intake", run(
+          intakeSubsystem.runCommand(), 
+          routingSubsystem.runCommand(), 
+          grabberSubsystem.intakeOpenCommand(),
+          armSubsystem.runToRoutingCommand())); 
+        eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
+            () -> 1.0,
+            () -> 0.0,
+            () -> 0.0,
+            false,
+            false,
+            false
+          ).withTimeout(1.0)
+          .finallyDo((boolean interrupt) -> swerveSubsystem.drive(new Translation2d(), 0, false, false, false)));
 
         chooser.setDefaultOption("none", new InstantCommand(() -> {}));
             //"Two Cone Auto", 
@@ -61,7 +101,7 @@ public class AutoChooser {
         chooser.addOption("3 Piece Bottom Blue", new PrintCommand("Working again"));
         chooser.addOption("GoesFiveFeet", goesFiveFeet());
 
-        SmartDashboard.putData("auto chooser", chooser);
+        SmartDashboard.putData("autoChooser", chooser);
 
         //List<PathPlannerTrajectory> twoConeGroup = PathPlanner.loadPathGroup
     //("TwoCone", new PathConstraints(4, 3));
@@ -71,12 +111,6 @@ public class AutoChooser {
     public Command getAutoCommand(){
       return chooser.getSelected();
     }
-
-    private Command runIntake() {
-        return new ParallelCommandGroup(
-          new WaitCommand(1.0).andThen(
-            intakeSubsystem.runCommand()));
-      }
 
       //change to put in constructor
       private Command parkMiddleBlue(){
@@ -126,5 +160,7 @@ public class AutoChooser {
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(fiveFeetGroup).andThen(swerveSubsystem.driveCommand(() -> 0, ()-> 0, () -> 0, false, false, false));
       }
 
-      
+      private static Command run(Command ... commands) {
+        return new ParallelCommandGroup(commands);
+      }
 }

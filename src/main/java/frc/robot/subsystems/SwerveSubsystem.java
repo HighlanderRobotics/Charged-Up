@@ -31,6 +31,7 @@ import com.pathplanner.lib.PathPoint;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -65,8 +66,8 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
     //degrees in radians 
-    public PIDController xBallanceController = new PIDController(1.5, 0, 0.5);
-    public PIDController yBallanceController = new PIDController(1.5, 0, 0.5);
+    public PIDController xBallanceController = new PIDController(0.01, 0, 0.1);
+    public PIDController yBallanceController = new PIDController(1.0, 0, 0.5);
     public SwerveDrivePoseEstimator poseEstimator;
     public SwerveDriveOdometry wheelOnlyOdo;
     public SwerveModule[] mSwerveMods;
@@ -88,6 +89,8 @@ public class SwerveSubsystem extends SubsystemBase {
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
     public double extensionInches = 0;
+
+    private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
 
     private ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -170,7 +173,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
-    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
+    public CommandBase driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
         return new RunCommand(
             () -> drive(
                 new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
@@ -316,7 +319,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
                 this::setModuleStates, // Module states consumer used to output to the drive subsystem
                 eventMap,
-                false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+                true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
     
@@ -324,16 +327,21 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     
     public CommandBase autoBalance(){
-        return new RunCommand(
-            () -> drive(
-                new Translation2d(
-                    xBallanceController.calculate(deadband(gyro.getRoll(), 0.5)), 
-                    yBallanceController.calculate(deadband(gyro.getPitch(), 0.5))),
-                0,
+        return driveCommand(
+                () -> {
+                    if (gyro.getRoll() > 10.0) {
+                        return -0.15;
+                    } else if (gyro.getRoll() < -10.0) {
+                        return 0.15;
+                    } else {
+                        return 0.0;
+                    }
+                }, 
+                () -> 0,
+                () -> 0,
                 false,
                 false,
-                false),
-             this);
+                false);
     }
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
@@ -346,7 +354,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Return the pose of the drivebase, as estimated by the pose estimator. */
     public Pose2d getPose() {
-        return poseEstimator.getEstimatedPosition();
+        return wheelOnlyOdo.getPoseMeters();
     }
 
     /** Resets the pose estimator to the given pose */
@@ -361,12 +369,12 @@ public class SwerveSubsystem extends SubsystemBase {
      */
     public void updateOdometry(Pair<List<Pose2d>, Double> data){
         if (data != null) {
-            field.getObject("Latest Vision Pose").setPoses(data.getFirst());
             SmartDashboard.putNumber("Latency", data.getSecond());
             for (Pose2d pose : data.getFirst()){
                 // Data is in milliseconds, need to convert to seconds
                 poseEstimator.addVisionMeasurement(pose, Timer.getFPGATimestamp());
                 zeroGyro(pose.getRotation().getDegrees());
+                dashboardFieldVisionPoses.add(pose);
             }
         }
     }
@@ -551,7 +559,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
         field.setRobotPose(getPose());
-        field.getObject("odo only poes").setPose(wheelOnlyOdo.getPoseMeters());
+        field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
+        field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
+        field.getObject("Latest Vision Pose").setPoses(dashboardFieldVisionPoses);
+        dashboardFieldVisionPoses.clear();
         SmartDashboard.putData(field);
         SmartDashboard.putBoolean("Has reset", hasResetOdometry);
 
@@ -572,6 +583,10 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
         SmartDashboard.putString("alliance", DriverStation.getAlliance().toString());
         SmartDashboard.putNumber("vision latency", Timer.getFPGATimestamp() - rightResult.getTimestampSeconds());
+        SmartDashboard.putNumber("gyro roll", gyro.getRoll());
+        SmartDashboard.putNumber("gyro pitch", gyro.getPitch());
+        SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
+        SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }

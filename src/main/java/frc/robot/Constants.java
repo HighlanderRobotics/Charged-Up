@@ -174,8 +174,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
-    public static final double maxSpeedMetersPerSecond = 0.25;
-    public static final double maxAccelerationMetersPerSecondSquared = 0.25;
+    public static final double maxSpeedMetersPerSecond = 2;
+    public static final double maxAccelerationMetersPerSecondSquared = 2;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
 
@@ -184,8 +184,8 @@ public final class Constants {
 
     public static final double kPYController = 1.5;
     public static final double kPXController = 1.5;
-    public static final double kPThetaController = 0.7;
-    public static final double kDThetaController = 0.0;
+    public static final double kPThetaController = 1.0;
+    public static final double kDThetaController = 0.1;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
     public static final ProfiledPIDController yController = new ProfiledPIDController(kPYController, 0, 0, constraints);
@@ -364,7 +364,7 @@ public final class Constants {
   /** Constants for simple mechanisms like intake, routing, grabber */
   public static final class MechanismConstants {
     public static final int intakeID = 20;
-    public static final int intakeSolenoidForwardID = 2;
+    public static final int intakeSolenoidForwardID = 3;
     public static final int intakeSolenoidBackwardID = 0;
     public static final double intakeTimeToExtend = 0.1; // TODO: find
 
@@ -376,7 +376,7 @@ public final class Constants {
 
     public static final int grabberID = 24;
     public static final int grabberSolenoidFrontID = 1;
-    public static final int grabberSolenoidBackID = 3;
+    public static final int grabberSolenoidBackID = 2;
 
     public static final int grabberLimitSwitch = 1;
     public static final boolean isGrabberSwitchReversed = true; 
