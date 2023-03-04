@@ -15,9 +15,11 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -57,14 +59,15 @@ public class AutoChooser {
 
         eventMap.put("Score", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
-        eventMap.put("Score No Aim",
+        eventMap.put("Score No Aim", new ProxyCommand(
           superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.topConeLevel)
           .andThen(
               new PrintCommand("extended elevator"),
               new WaitCommand(0.25),
                 grabberSubsystem.outakeNeutralCommand()
-                .withTimeout(1.0)
-            ).asProxy());
+                  .withTimeout(1.0),
+              new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            )).withTimeout(3.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand(), 

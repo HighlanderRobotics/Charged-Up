@@ -19,9 +19,9 @@
         "names": [
           "Score No Aim"
         ],
-        "executionBehavior": "sequential",
-        "waitBehavior": "after",
-        "waitTime": 0.5
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 2.0
       }
     },
     {
