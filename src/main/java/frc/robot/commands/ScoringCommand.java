@@ -47,7 +47,7 @@ public class ScoringCommand extends SequentialCommandGroup {
         true, false)
       // swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
         .alongWith(
-          new WaitUntilCommand(() -> {return (swerveSubsystem.getNearestGoalDistance() < 0.05 && swerveSubsystem.headingController.atGoal());})//.alongWith(
+          new WaitUntilCommand(() -> {return (swerveSubsystem.getNearestGoalDistance() < 0.03 && swerveSubsystem.headingController.atGoal());})//.alongWith(
             .andThen(
               grabberSubsystem.closeCommand(),
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))

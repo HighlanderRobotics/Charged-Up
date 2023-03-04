@@ -82,7 +82,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
     public double extensionInches = 0;
-    public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L1;
+    public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
 
     public ProfiledPIDController headingController = new ProfiledPIDController(
         Constants.AutoConstants.kPThetaController, 
@@ -118,7 +118,7 @@ public class SwerveSubsystem extends SubsystemBase {
         resetModulesToAbsolute();
 
         Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.2, 0.2, 0.2);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -314,6 +314,7 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
+        zeroGyro(pose.getRotation().getDegrees());
         System.out.println("odometry reset");
     }
 
