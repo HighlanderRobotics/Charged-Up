@@ -4,6 +4,8 @@
 
 package frc.lib.components;
 
+import com.ctre.phoenix.motorcontrol.StatusFrame;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -20,15 +22,18 @@ public class HighlanderFalcon extends TalonFX {
 
     public HighlanderFalcon(int id) {
         super(id);
+        bandWithLimitMotorCAN(this);
     }
 
     public HighlanderFalcon(int id, double gearing) {
         super(id);
         gearRatio = gearing;
+        bandWithLimitMotorCAN(this);
     }
 
     public HighlanderFalcon(int id, String canbus) {
         super(id, canbus);
+        bandWithLimitMotorCAN(this);
     }
 
     /**Makes a new HighlanderFalcon with a PID controller built in */
@@ -38,6 +43,7 @@ public class HighlanderFalcon extends TalonFX {
         this.config_kP(0, p);
         this.config_kI(0, i);
         this.config_kD(0, d);
+        bandWithLimitMotorCAN(this);
     }
 
     public HighlanderFalcon(int id, double gearing, double p, double i, double d, double accelRpmSquared, double maxVelRpm) {
@@ -48,6 +54,7 @@ public class HighlanderFalcon extends TalonFX {
         this.config_kD(0, d);
         this.configMotionAcceleration(HighlanderFalcon.rotToNative(accelRpmSquared));
         this.configMotionCruiseVelocity(HighlanderFalcon.rpmToNative(maxVelRpm));
+        bandWithLimitMotorCAN(this);
     }
 
     public void defaultConfigs() {
@@ -139,5 +146,18 @@ public class HighlanderFalcon extends TalonFX {
     public static int rpmToNative(double rpm) {
         return (int) rotToNative(rpm / 600);
     }
+
+    /** Stolen from 841. Limits CAN network usage */
+    private static void bandWithLimitMotorCAN(TalonFX motor) {
+        motor.setStatusFramePeriod(StatusFrame.Status_10_MotionMagic,255);
+        motor.setStatusFramePeriod(StatusFrame.Status_1_General,40);
+        motor.setStatusFramePeriod(StatusFrame.Status_4_AinTempVbat, 255);
+        motor.setStatusFramePeriod(StatusFrameEnhanced.Status_3_Quadrature, 255); 
+        motor.setStatusFramePeriod(StatusFrame.Status_9_MotProfBuffer,255);
+        motor.setStatusFramePeriod(StatusFrame.Status_12_Feedback1,255);
+        motor.setStatusFramePeriod(StatusFrame.Status_13_Base_PIDF0,255);
+        motor.setStatusFramePeriod(StatusFrame.Status_14_Turn_PIDF1,255);
+        motor.setStatusFramePeriod(StatusFrame.Status_15_FirmwareApiStatus,255);
+      }
 
 }
