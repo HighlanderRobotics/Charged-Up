@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import org.photonvision.PhotonCamera;
@@ -81,6 +82,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
+    public Optional<Boolean> isConeOveride = Optional.empty();
     public double extensionInches = 0;
     public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
 
@@ -286,15 +288,39 @@ public class SwerveSubsystem extends SubsystemBase {
         }
     }
 
+    public boolean checkIfConeGoalWithOverride() {
+        if (isConeOveride.isPresent()) {
+            return isConeOveride.get();
+        } else {
+            return checkIfConeGoal(getNearestGoal());
+        }
+    }
+
     public double getExtension(ElevatorSubsystem.ScoringLevels level) {
         // System.out.println(nearestGoalIsCone);
-        if (nearestGoalIsCone) {
-            // System.out.println("its a cone!");
-            return level.getConeInches();
+        if (isConeOveride.isPresent()) {
+            if (isConeOveride.get()) {
+                return level.getConeInches();
+            } else {
+                return level.getCubeInches();
+            }
         } else {
-            // System.out.println("its a cube!");
-            return level.getCubeInches();
+            if (nearestGoalIsCone) {
+                // System.out.println("its a cone!");
+                return level.getConeInches();
+            } else {
+                // System.out.println("its a cube!");
+                return level.getCubeInches();
+            }
         }
+    }
+
+    public CommandBase setGamePieceOverride(boolean isCone) {
+        return new InstantCommand(() -> isConeOveride = Optional.of(isCone));
+    }
+
+    public CommandBase disableGamePieceOverride() {
+        return new InstantCommand(() -> isConeOveride = Optional.empty());
     }
 
     /* Used by SwerveControllerCommand in Auto */

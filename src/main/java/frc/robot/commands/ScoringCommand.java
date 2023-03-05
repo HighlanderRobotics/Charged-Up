@@ -40,14 +40,14 @@ public class ScoringCommand extends SequentialCommandGroup {
     
     addCommands(
       new PrintCommand("scoring sequence woo" + swerveSubsystem.getPose().toString()),
-      swerveSubsystem.poseLockDriveCommand(
-        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
-        () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
-        () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        true, false)
+      // swerveSubsystem.poseLockDriveCommand(
+      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getX(), 
+      //   () -> swerveSubsystem.getNearestGoal().getTranslation2d().getY(), 
+      //   () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
+      //   true, false)
       // swerveSubsystem.driveCommand(() -> adjustmentSupplier.getAsDouble(), () -> 0, () -> 0, false, false)
-        .alongWith(
-          new WaitUntilCommand(() -> {return (swerveSubsystem.getNearestGoalDistance() < 0.03 && swerveSubsystem.headingController.atGoal());})//.alongWith(
+        // .alongWith(
+          new WaitUntilCommand(() -> true)//.alongWith(
             .andThen(
               grabberSubsystem.closeCommand(),
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
@@ -68,7 +68,7 @@ public class ScoringCommand extends SequentialCommandGroup {
                   // .withTimeout(1)
                   )
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-            )
+            // )
     );
   }
 }
