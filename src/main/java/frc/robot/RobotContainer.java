@@ -67,9 +67,9 @@ public class RobotContainer {
   public RobotContainer() {
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()) * (1 - (0.5 * controller.getLeftTriggerAxis())), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()) * (1 - (0.5 * controller.getLeftTriggerAxis())), 
-      () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()) * (1 - (0.5 * controller.getLeftTriggerAxis())), 
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()), 
       true, 
       true,
       true));
@@ -116,8 +116,8 @@ public class RobotContainer {
     new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
 
     new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()),  
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
       () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
       true, 
       true));
@@ -209,10 +209,17 @@ public class RobotContainer {
     SmartDashboard.putData("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
 
     SmartDashboard.putData("scoring sequence", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+    SmartDashboard.putData("driver assist tape allign", 
+      swerveSubsystem.tapeDriveAssistCommand(
+        () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis())));
   }
 
   private static Command run(Command ... commands) {
     return new ParallelCommandGroup(commands);
+  }
+
+  private double modifyJoystickAxis(double joystick, double fineTuneAxis) {
+    return -(Math.abs(Math.pow(joystick, 2)) + 0.05) * Math.signum(joystick) * (1 - (0.5 * fineTuneAxis));
   }
 
   /**

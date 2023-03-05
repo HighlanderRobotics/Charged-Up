@@ -75,6 +75,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private PhotonCamera leftCamera = null;
     private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
+    private boolean isInTapeMode = false;
+    private PIDController tapeDriveAssistController = new PIDController(Constants.AutoConstants.kPYController, 0, 0);
 
     public boolean hasResetOdometry = false;
 
@@ -165,7 +167,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
-    public Command driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
+    public CommandBase driveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier omega, boolean fieldRelative, boolean isOpenLoop, boolean useAlliance) {
         return new RunCommand(
             () -> drive(
                 new Translation2d(x.getAsDouble(), y.getAsDouble()).times(Constants.Swerve.maxSpeed), 
@@ -510,6 +512,18 @@ public class SwerveSubsystem extends SubsystemBase {
         return extensionLevel;
     }
 
+    public CommandBase tapeDriveAssistCommand(DoubleSupplier xSupplier) {
+        return driveCommand(
+            xSupplier, 
+            () -> tapeDriveAssistController.calculate(
+                leftResult.getBestTarget().getYaw() + rightResult.getBestTarget().getYaw()), 
+            () -> headingController.calculate(
+                getYaw().getRadians(), Math.PI), 
+            true, 
+            false, 
+            true);
+    }
+
     @Override
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
@@ -520,8 +534,10 @@ public class SwerveSubsystem extends SubsystemBase {
             } catch (Error e) {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
+        } else {
+            rightResult = null;
         }
-        if (rightResult != null && rightResult.hasTargets()) {
+        if (rightResult != null && rightResult.hasTargets() && !isInTapeMode) {
             addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
         }
 
@@ -531,8 +547,10 @@ public class SwerveSubsystem extends SubsystemBase {
             } catch (Error e) {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
+        } else {
+            leftResult = null;
         }
-        if (leftResult != null && leftResult.hasTargets()) {
+        if (leftResult != null && leftResult.hasTargets() && !isInTapeMode) {
             addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
         }
 
