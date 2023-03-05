@@ -548,12 +548,14 @@ public class SwerveSubsystem extends SubsystemBase {
         poseEstimator.update(getYaw(), getModulePositions()); 
         wheelOnlyOdo.update(getYaw(), getModulePositions());
         
-        if (rightCamera != null) {
+        if (rightCamera != null && rightCamera.isConnected()) {
             try {
                 rightResult = rightCamera.getLatestResult();
             } catch (Error e) {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
+        } else {
+            rightResult = null;
         }
         if (rightResult != null && rightResult.hasTargets()) {
             addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
@@ -561,12 +563,14 @@ public class SwerveSubsystem extends SubsystemBase {
         if (rightResult != null) {
             lastVisionFrameTimestamp = rightResult.getLatencyMillis();
         }
-        if (leftCamera != null) {
+        if (leftCamera != null && leftCamera.isConnected()) {
             try {
                 leftResult = leftCamera.getLatestResult();
             } catch (Error e) {
                 System.out.print("Error in camera processing " + e.getMessage());
             }
+        } else {
+            leftResult = null;
         }
         if (leftResult != null && leftResult.hasTargets()) {
             addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
@@ -605,11 +609,11 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
         SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
         SmartDashboard.putString("alliance", DriverStation.getAlliance().toString());
-        SmartDashboard.putNumber("vision latency", Timer.getFPGATimestamp() - rightResult.getTimestampSeconds());
         SmartDashboard.putNumber("gyro roll", gyro.getRoll());
         SmartDashboard.putNumber("gyro pitch", gyro.getPitch());
         SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
         SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
+        SmartDashboard.putBoolean("can see targets", hasTargets());
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }

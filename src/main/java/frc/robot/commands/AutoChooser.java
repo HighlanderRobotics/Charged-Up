@@ -64,6 +64,7 @@ public class AutoChooser {
           swerveSubsystem, 
           grabberSubsystem, 
           superstructureSubsystem).asProxy().andThen(
+            new InstantCommand(() -> elevatorSubsystem.getDefaultCommand().schedule()),
             new PrintCommand("bbbbbbbb"), 
             new InstantCommand(() -> {}, swerveSubsystem),
             new WaitCommand(1.0),
@@ -101,7 +102,7 @@ public class AutoChooser {
         chooser.addOption("2 + Park Middle Blue", parkMiddleBlue());
         chooser.addOption("NONE", new PrintCommand("owo"));
         chooser.addOption("1 + Park Bottom Blue", new PrintCommand("working"));
-        chooser.addOption("2 + Park Top Blue", new PrintCommand("yes"));
+        chooser.addOption("2 + Park Top Blue", twoParkTopBlue());
         chooser.addOption("1 + Park Top Blue", onePlusParkTopBlue());
         chooser.addOption("3 Piece Top Blue", new PrintCommand("Working again"));
         chooser.addOption("3 Piece Bottom Blue", new PrintCommand("Working again"));
@@ -156,7 +157,7 @@ public class AutoChooser {
       }
       private Command twoParkTopBlue(){
         List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
-          "2 + Park Top Blue", new PathConstraints(4, 3));
+          "2 + Park Top Blue", new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
       }
 
