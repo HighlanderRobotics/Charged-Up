@@ -116,7 +116,8 @@ public class RobotContainer {
     new Trigger(() -> DriverStation.isEnabled()).onTrue(
       new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
     // Reset odometry to vision measurement when we first see a vision target
-    new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry).onTrue(swerveSubsystem.resetIfTargets());
+    new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry)
+      .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
 
     new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
       () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 

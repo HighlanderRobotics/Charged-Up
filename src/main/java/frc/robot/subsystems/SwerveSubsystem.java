@@ -130,7 +130,7 @@ public class SwerveSubsystem extends SubsystemBase {
         resetModulesToAbsolute();
 
         Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
-        Vector<N3> visStdDevs = VecBuilder.fill(0.4, 0.4, 0.3);
+        Vector<N3> visStdDevs = VecBuilder.fill(0.6, 0.6, 0.3);
 
         poseEstimator = new SwerveDrivePoseEstimator(
             Constants.Swerve.swerveKinematics, 
@@ -356,7 +356,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Return the pose of the drivebase, as estimated by the pose estimator. */
     public Pose2d getPose() {
-        return wheelOnlyOdo.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     /** Resets the pose estimator to the given pose */
@@ -444,16 +444,24 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase resetIfTargets() {
     return new InstantCommand(() -> {
         try {
-            System.out.println(getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0).toString());
+            System.out.println("reset est pose right: " + getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0).toString());
             resetOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0));
-            
-            System.out.println(getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0).toString());
+            hasResetOdometry = true;
+        } catch (Exception e) {
+            // error handling is for nerds
+            // Also if we get an error we just try again next loop
+            System.out.println("vision odo reset error: " + e.getMessage());
+            SmartDashboard.putString("pose est error", e.getMessage());
+        }
+
+        try {
+            System.out.println("reset est pose left: " + getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0).toString());
             resetOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0));
             hasResetOdometry = true;
         } catch (Exception e) {
             // error handling is for nerds
             // Also if we get an error we just try again next loop
-            System.out.println(e.getMessage());
+            System.out.println("vision odo reset error: " + e.getMessage());
             SmartDashboard.putString("pose est error", e.getMessage());
         }
     }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
