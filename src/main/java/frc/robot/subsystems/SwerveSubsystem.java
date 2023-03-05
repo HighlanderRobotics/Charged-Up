@@ -47,6 +47,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -75,8 +77,8 @@ public class SwerveSubsystem extends SubsystemBase {
     private PhotonCamera leftCamera = null;
     private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
-    private boolean isInTapeMode = false;
-    private PIDController tapeDriveAssistController = new PIDController(Constants.AutoConstants.kPYController, 0, 0);
+    private boolean isInTapeMode = true;
+    private PIDController tapeDriveAssistController = new PIDController(-0.01, 0, 0);
 
     public boolean hasResetOdometry = false;
 
@@ -103,10 +105,10 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.setTolerance(0.1);
 
         rightCamera = new PhotonCamera("limelight-right");
-        rightCamera.setLED(VisionLEDMode.kOff);
+        // rightCamera.setLED(VisionLEDMode.kOff);
 
         leftCamera = new PhotonCamera("limelight-left");
-        leftCamera.setLED(VisionLEDMode.kOff);
+        // leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -515,10 +517,17 @@ public class SwerveSubsystem extends SubsystemBase {
     public CommandBase tapeDriveAssistCommand(DoubleSupplier xSupplier) {
         return driveCommand(
             xSupplier, 
-            () -> tapeDriveAssistController.calculate(
-                leftResult.getBestTarget().getYaw() + rightResult.getBestTarget().getYaw()), 
-            () -> headingController.calculate(
-                getYaw().getRadians(), Math.PI), 
+            () -> {
+                try{
+                    if (Timer.getFPGATimestamp()-leftResult.getTimestampSeconds() > .5){
+                        return 0;}
+                    else{ return tapeDriveAssistController.calculate(
+                        leftResult.getBestTarget().getYaw(),20);}
+                } catch(Exception e) {
+                    return 0;
+                }
+            }, 
+            () -> 0/*headingController.calculate(getYaw().getRadians(), Math.PI)*/, 
             true, 
             false, 
             true);
@@ -554,6 +563,14 @@ public class SwerveSubsystem extends SubsystemBase {
             addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
         }
 
+        if (isInTapeMode) {
+            NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(1);
+            NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(1);
+        } else {
+            NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(0);
+            NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
+        }
+
         // Log swerve module information
         // May want to disable to conserve bandwidth
         // for(SwerveModule mod : mSwerveMods){
@@ -582,6 +599,9 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
         SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
+       try{SmartDashboard.putNumber("tape allignment number", leftResult.getBestTarget().getYaw() + rightResult.getBestTarget().getYaw());}
+       catch(Exception e){}
+        
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     }
