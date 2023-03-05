@@ -527,7 +527,7 @@ public class SwerveSubsystem extends SubsystemBase {
                     return 0;
                 }
             }, 
-            () -> 0/*headingController.calculate(getYaw().getRadians(), Math.PI)*/, 
+            () -> headingController.calculate(getYaw().getRadians(), Math.PI), 
             true, 
             false, 
             true);

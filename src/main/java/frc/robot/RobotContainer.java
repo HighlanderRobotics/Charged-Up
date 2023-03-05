@@ -156,6 +156,9 @@ public class RobotContainer {
           .withTimeout(0.5)
           .andThen(swerveSubsystem.disableGamePieceOverride())
     );
+    controller.rightTrigger().whileTrue(swerveSubsystem.tapeDriveAssistCommand(
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis())));
+
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
