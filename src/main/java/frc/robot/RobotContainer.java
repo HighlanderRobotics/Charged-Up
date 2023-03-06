@@ -146,7 +146,7 @@ public class RobotContainer {
 
     controller.leftTrigger().whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
-      .alongWith(ledSubsystem.setRainbowCommand()))
+      .alongWith(ledSubsystem.setRainbowCommand(), grabberSubsystem.closeCommand()))
       .onFalse(
         new ConditionalCommand(
           grabberSubsystem.susL3Command()
