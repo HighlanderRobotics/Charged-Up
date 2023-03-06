@@ -79,13 +79,32 @@ public class AutoChooser {
                   .withTimeout(1.0),
               new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
             ).withTimeout(2.0)));
+        eventMap.put("Score L2 No Aim", new ProxyCommand(
+          superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.midConeLevel)
+          .andThen(
+              new PrintCommand("extended elevator"),
+              new WaitCommand(0.25),
+              grabberSubsystem.openCommand(),
+              new WaitCommand(0.5),
+              new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            ).withTimeout(2.0)));
+        eventMap.put("Score L2 No Aim Cube", new ProxyCommand(
+          superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.midCubeLevel)
+          .raceWith(grabberSubsystem.closeCommand())
+          .andThen(
+              new PrintCommand("extended elevator"),
+              new WaitCommand(0.25),
+              grabberSubsystem.outakeOpenCommand(),
+              new WaitCommand(0.5),
+              new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+            ).withTimeout(2.0)));
         eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand(), 
           routingSubsystem.runCommand(), 
           grabberSubsystem.intakeOpenCommand(),
-          armSubsystem.runToRoutingCommand()).asProxy()); 
+          armSubsystem.runToRoutingCommand()).withTimeout(4.0).asProxy()); 
         eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
             () -> 1.0,
             () -> 0.0,

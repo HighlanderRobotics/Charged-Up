@@ -37,7 +37,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void intake() {
-    grabber.setPercentOut(-0.75); // TODO: find best value
+    grabber.setPercentOut(-0.9); // TODO: find best value
   }
 
   private void outake() {

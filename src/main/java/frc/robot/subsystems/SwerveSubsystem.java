@@ -317,7 +317,7 @@ public class SwerveSubsystem extends SubsystemBase {
         return
             new SwerveAutoBuilder(
                 () -> getPose(), // Pose2d supplier
-                (Pose2d pose) -> {resetOdometry(pose); zeroGyro(pose.getRotation().getDegrees());}, // Pose2d consumer, used to reset odometry at the beginning of auto
+                (Pose2d pose) -> resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
                 Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
                 new PIDConstants(Constants.AutoConstants.kPXController, 0.0, 0.0), // PID constants to correct for translation error (used to create the X and Y PID controllers)
                 new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
@@ -356,16 +356,16 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Return the pose of the drivebase, as estimated by the pose estimator. */
     public Pose2d getPose() {
-        return poseEstimator.getEstimatedPosition();
+        return wheelOnlyOdo.getPoseMeters();
     }
 
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         hasResetOdometry = true;
-        poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
         // zeroGyro(pose.getRotation().getDegrees());
+        poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
         wheelOnlyOdo.resetPosition(getYaw(), getModulePositions(), pose);
-        System.out.println("odometry reset");
+        System.out.println("odometry reset " + pose.toString());
     }
 
     /** Updates the pose estimator from a (presumably vision) measurement
@@ -517,10 +517,6 @@ public class SwerveSubsystem extends SubsystemBase {
         return (Constants.Swerve.invertGyro) ? Rotation2d.fromDegrees(360 - gyro.getYaw()) : Rotation2d.fromDegrees(gyro.getYaw());
     }
 
-    public Rotation2d getAbsYaw() {
-        return Rotation2d.fromDegrees(gyro.getAbsoluteCompassHeading());
-    }
-
     /** Resets the encoders on all swerve modules to the cancoder values */
     public void resetModulesToAbsolute() {
         for (SwerveModule module: mSwerveMods) {
@@ -548,33 +544,33 @@ public class SwerveSubsystem extends SubsystemBase {
         poseEstimator.update(getYaw(), getModulePositions()); 
         wheelOnlyOdo.update(getYaw(), getModulePositions());
         
-        if (rightCamera != null && rightCamera.isConnected()) {
-            try {
-                rightResult = rightCamera.getLatestResult();
-            } catch (Error e) {
-                System.out.print("Error in camera processing " + e.getMessage());
-            }
-        } else {
-            rightResult = null;
-        }
-        if (rightResult != null && rightResult.hasTargets()) {
-            addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
-        }
-        if (rightResult != null) {
-            lastVisionFrameTimestamp = rightResult.getLatencyMillis();
-        }
-        if (leftCamera != null && leftCamera.isConnected()) {
-            try {
-                leftResult = leftCamera.getLatestResult();
-            } catch (Error e) {
-                System.out.print("Error in camera processing " + e.getMessage());
-            }
-        } else {
-            leftResult = null;
-        }
-        if (leftResult != null && leftResult.hasTargets()) {
-            addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
-        }
+        // if (rightCamera != null && rightCamera.isConnected()) {
+        //     try {
+        //         rightResult = rightCamera.getLatestResult();
+        //     } catch (Error e) {
+        //         System.out.print("Error in camera processing " + e.getMessage());
+        //     }
+        // } else {
+        //     rightResult = null;
+        // }
+        // if (rightResult != null && rightResult.hasTargets()) {
+        //     addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
+        // }
+        // if (rightResult != null) {
+        //     lastVisionFrameTimestamp = rightResult.getLatencyMillis();
+        // }
+        // if (leftCamera != null && leftCamera.isConnected()) {
+        //     try {
+        //         leftResult = leftCamera.getLatestResult();
+        //     } catch (Error e) {
+        //         System.out.print("Error in camera processing " + e.getMessage());
+        //     }
+        // } else {
+        //     leftResult = null;
+        // }
+        // if (leftResult != null && leftResult.hasTargets()) {
+        //     addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
+        // }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth

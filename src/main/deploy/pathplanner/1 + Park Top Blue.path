@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score No Aim"
+          "Score L2 No Aim"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -62,7 +62,7 @@
         "x": 5.758898134337622,
         "y": 4.892126175229795
       },
-      "holonomicAngle": 90.6510603802295,
+      "holonomicAngle": 43.09084756700364,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
