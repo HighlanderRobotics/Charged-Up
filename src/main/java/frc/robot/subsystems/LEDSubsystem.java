@@ -24,6 +24,8 @@ public class LEDSubsystem extends SubsystemBase {
   AddressableLED led;
   AddressableLEDBuffer buffer;
 
+  int rainbowStart = 0;
+
   // AddressableLEDSim sim;
   /** Creates a new LEDSubsystem. */
   public LEDSubsystem() {
@@ -106,6 +108,17 @@ public class LEDSubsystem extends SubsystemBase {
         buffer.setLED(i, Color.kBlack);
       }
     }
+  }
+
+  private void rainbow() {
+    for (int i = 0; i < buffer.getLength(); i++) {
+      buffer.setHSV(i, rainbowStart % 180 + i, 255, 255);
+    }
+    rainbowStart += 6;
+  }
+
+  public CommandBase setRainbowCommand() {
+    return new RunCommand(() -> rainbow(), this);
   }
 
   // public CommandBase setBatteryStatusCommand() {

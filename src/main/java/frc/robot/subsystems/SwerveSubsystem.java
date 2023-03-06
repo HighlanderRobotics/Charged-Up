@@ -29,6 +29,7 @@ import com.pathplanner.lib.PathPoint;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
@@ -78,7 +79,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
     private boolean isInTapeMode = true;
-    private PIDController tapeDriveAssistController = new PIDController(-0.01, 0, 0);
+    private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
 
     public boolean hasResetOdometry = false;
 
@@ -86,7 +87,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
-    public Optional<Boolean> isConeOveride = Optional.empty();
+    public boolean isConeOveride = false;
     public double extensionInches = 0;
     public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
 
@@ -102,7 +103,7 @@ public class SwerveSubsystem extends SubsystemBase {
         zeroGyro();
 
         headingController.enableContinuousInput(0, Math.PI * 2);
-        headingController.setTolerance(0.1);
+        headingController.setTolerance(0.15);
 
         rightCamera = new PhotonCamera("limelight-right");
         // rightCamera.setLED(VisionLEDMode.kOff);
@@ -293,39 +294,25 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public boolean checkIfConeGoalWithOverride() {
-        if (isConeOveride.isPresent()) {
-            return isConeOveride.get();
-        } else {
-            return checkIfConeGoal(getNearestGoal());
-        }
+        return isConeOveride;
     }
 
     public double getExtension(ElevatorSubsystem.ScoringLevels level) {
         // System.out.println(nearestGoalIsCone);
-        if (isConeOveride.isPresent()) {
-            if (isConeOveride.get()) {
-                return level.getConeInches();
-            } else {
-                return level.getCubeInches();
-            }
+        if (isConeOveride) {
+            return level.getConeInches();
         } else {
-            if (nearestGoalIsCone) {
-                // System.out.println("its a cone!");
-                return level.getConeInches();
-            } else {
-                // System.out.println("its a cube!");
-                return level.getCubeInches();
-            }
+            return level.getCubeInches();
         }
     }
 
     public CommandBase setGamePieceOverride(boolean isCone) {
-        return new InstantCommand(() -> isConeOveride = Optional.of(isCone));
+        return new InstantCommand(() -> isConeOveride = isCone);
     }
 
-    public CommandBase disableGamePieceOverride() {
-        return new InstantCommand(() -> isConeOveride = Optional.empty());
-    }
+    // public CommandBase disableGamePieceOverride() {
+    //     return new InstantCommand(() -> isConeOveride = Optional.empty());
+    // }
 
     /* Used by SwerveControllerCommand in Auto */
     public void setModuleStates(SwerveModuleState[] desiredStates) {
@@ -515,40 +502,50 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public CommandBase tapeDriveAssistCommand(DoubleSupplier xSupplier) {
-        return driveCommand(
-            xSupplier, 
-            () -> {
-                try{
-                    if (Timer.getFPGATimestamp()-leftResult.getTimestampSeconds() > .5){
-                        return 0;}
-                    else{ return tapeDriveAssistController.calculate(
-                        leftResult.getBestTarget().getYaw(),20);}
-                } catch(Exception e) {
-                    return 0;
-                }
-            }, 
-            () -> headingController.calculate(getYaw().getRadians(), Math.PI), 
+        return new InstantCommand(() -> {isInTapeMode = true; headingController.reset(getYaw().getRadians());}).andThen(driveCommand(
+            () -> 0,
+            () -> 0,
+            () -> MathUtil.clamp(headingController.calculate(getYaw().getRadians(), Math.PI), -0.5, 0.5),
             true, 
             false, 
-            true);
+            true
+        ).until(() -> headingController.atGoal())).andThen( new PrintCommand("heading aligned"),
+            driveCommand(
+                xSupplier, 
+                () -> {
+                    try{
+                        if (Timer.getFPGATimestamp() - leftResult.getTimestampSeconds() > .5){
+                            System.out.println("no worky :)))))))))");
+                            return 0;}
+                        else{ return tapeDriveAssistController.calculate(
+                            leftResult.getBestTarget().getYaw(),20);}
+                    } catch(Exception e) {
+                        System.out.println(e.getMessage());
+                        return 0;
+                    }
+                }, 
+                () -> headingController.calculate(getYaw().getRadians(), Math.PI), 
+                true, 
+                false, 
+                true)).andThen(new InstantCommand(() -> isInTapeMode = false));
     }
 
     @Override
     public void periodic(){
         poseEstimator.update(getYaw(), getModulePositions());  
         
-        if (rightCamera != null) {
-            try {
-                rightResult = rightCamera.getLatestResult();
-            } catch (Error e) {
-                System.out.print("Error in camera processing " + e.getMessage());
-            }
-        } else {
-            rightResult = null;
-        }
-        if (rightResult != null && rightResult.hasTargets() && !isInTapeMode) {
-            addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
-        }
+        // if (rightCamera != null) {
+        //     try {
+        //         rightResult = rightCamera.getLatestResult();
+        //     } catch (Error e) {
+        //         System.out.print("Error in camera processing " + e.getMessage());
+        //     }
+        // } else {
+        //     rightResult = null;
+        // }
+        // if (rightResult != null && rightResult.hasTargets() && !isInTapeMode) {
+        //     addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
+        // }
 
         if (leftCamera != null) {
             try {
@@ -559,16 +556,18 @@ public class SwerveSubsystem extends SubsystemBase {
         } else {
             leftResult = null;
         }
-        if (leftResult != null && leftResult.hasTargets() && !isInTapeMode) {
-            addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
-        }
+        // if (leftResult != null && leftResult.hasTargets() && !isInTapeMode) {
+        //     addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
+        // }
 
         if (isInTapeMode) {
             NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(1);
             NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(1);
+            leftCamera.setLED(VisionLEDMode.kOn);
         } else {
             NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(0);
             NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
+            leftCamera.setLED(VisionLEDMode.kOff);
         }
 
         // Log swerve module information

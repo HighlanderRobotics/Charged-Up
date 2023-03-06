@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -22,7 +23,7 @@ import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
 public class GrabberSubsystem extends SubsystemBase {
-  HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID);
+  HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID, 1, 2e-1, 0.0, 0.0);
   DoubleSolenoid solenoid = new DoubleSolenoid(
     PneumaticsModuleType.CTREPCM, 
     Constants.MechanismConstants.grabberSolenoidFrontID, 
@@ -41,7 +42,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void outake() {
-    grabber.set(ControlMode.PercentOutput, 0.18); // TODO: find best value
+    grabber.set(ControlMode.PercentOutput, 0.17); // TODO: find best value
   }
 
   private void stop() {
@@ -135,6 +136,13 @@ public class GrabberSubsystem extends SubsystemBase {
 
   public CommandBase stopAndClose(){
     return new RunCommand(() -> {stop(); close();}, this);
+  }
+
+  public CommandBase pcmCommand() {
+    return new InstantCommand(() -> grabber.setSelectedSensorPosition(0))
+      .andThen(new RunCommand(() -> grabber.set(ControlMode.Position, 2.0 * 2048), this)
+      .until(() -> grabber.getClosedLoopError() < 200)
+      .andThen(openCommand()));
   }
 
   @Override
