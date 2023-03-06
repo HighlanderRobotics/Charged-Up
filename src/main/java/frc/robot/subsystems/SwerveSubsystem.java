@@ -79,7 +79,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
     private boolean isInTapeMode = true;
-    private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
+    private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, 0);
 
     public boolean hasResetOdometry = false;
 

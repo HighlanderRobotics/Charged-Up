@@ -76,11 +76,12 @@ public class RobotContainer {
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(
       elevatorSubsystem.extendToInchesCommand(1.0)
-      .andThen(elevatorSubsystem.zeroElevator(),
-        new StartEndCommand(
-        () -> elevatorSubsystem.disable(), 
-        () -> elevatorSubsystem.enable(), 
-        elevatorSubsystem)));
+      .andThen(elevatorSubsystem.zeroElevator().repeatedly()
+        // new StartEndCommand(
+        // () -> elevatorSubsystem.disable(), 
+        // () -> elevatorSubsystem.enable(), 
+        // elevatorSubsystem)
+        ));
     armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
     intakeSubsystem.setDefaultCommand(new WaitCommand(0.7)
       .andThen(new ConditionalCommand(
@@ -125,7 +126,8 @@ public class RobotContainer {
     // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
     new Trigger(() -> swerveSubsystem.checkIfConeGoalWithOverride()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kYellow)));
     controller.leftBumper().whileTrue(
-      superstructureSubsystem.waitExtendToInches(30).andThen(new RunCommand(() -> {}, elevatorSubsystem)
+      superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
+      .andThen(new RunCommand(() -> {}, elevatorSubsystem)
       .alongWith(grabberSubsystem.intakeClosedCommand(), swerveSubsystem.setGamePieceOverride(true))));
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 
@@ -147,13 +149,13 @@ public class RobotContainer {
       .alongWith(ledSubsystem.setRainbowCommand()))
       .onFalse(
         new ConditionalCommand(
-          grabberSubsystem.pcmCommand()
+          grabberSubsystem.susL3Command()
           .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
-          .withTimeout(1.0)
-          .andThen(grabberSubsystem.openCommand())
+          .withTimeout(0.5)
+          .andThen(new WaitCommand(0.2), grabberSubsystem.openCommand())
           .andThen(new WaitCommand(0.2)), 
           new ConditionalCommand(
-            grabberSubsystem.openCommand(), 
+            grabberSubsystem.openCommand().andThen(new WaitCommand(0.2)), 
             grabberSubsystem.outakeOpenCommand().withTimeout(1.0), 
             () -> swerveSubsystem.isConeOveride), 
           () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3

@@ -398,5 +398,5 @@ public final class Constants {
     public static final double bottomLevel = 20;
   }
 
-  public static final double humanPlayerLevel = 37; //or substation idk what we're calling them
+  public static final double humanPlayerLevel = 31; //or substation idk what we're calling them
 }

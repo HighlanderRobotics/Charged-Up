@@ -23,7 +23,7 @@ import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
 public class GrabberSubsystem extends SubsystemBase {
-  HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID, 1, 2e-1, 0.0, 0.0);
+  HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID, 1, 5e-1, 0.0, 0.0);
   DoubleSolenoid solenoid = new DoubleSolenoid(
     PneumaticsModuleType.CTREPCM, 
     Constants.MechanismConstants.grabberSolenoidFrontID, 
@@ -138,11 +138,11 @@ public class GrabberSubsystem extends SubsystemBase {
     return new RunCommand(() -> {stop(); close();}, this);
   }
 
-  public CommandBase pcmCommand() {
-    return new InstantCommand(() -> grabber.setSelectedSensorPosition(0))
+  public CommandBase susL3Command() {
+    return new InstantCommand(() -> {grabber.setSelectedSensorPosition(0); neutral();})
       .andThen(new RunCommand(() -> grabber.set(ControlMode.Position, 2.0 * 2048), this)
-      .until(() -> grabber.getClosedLoopError() < 200)
-      .andThen(openCommand()));
+      // .until(() -> grabber.getClosedLoopError() < 200)
+      .andThen(openCommand(), stopCommand()));
   }
 
   @Override
