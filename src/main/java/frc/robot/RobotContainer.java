@@ -92,7 +92,7 @@ public class RobotContainer {
     routingSubsystem.setDefaultCommand(routingSubsystem.runCommand().withTimeout(0.7).andThen(routingSubsystem.stopCommand()));
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
     superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));
-    ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
+    ledSubsystem.setDefaultCommand(ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -124,7 +124,9 @@ public class RobotContainer {
       true));
     
     // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
-    new Trigger(() -> swerveSubsystem.checkIfConeGoalWithOverride()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kYellow)));
+    new Trigger(() -> swerveSubsystem.checkIfConeGoalWithOverride())
+      .whileTrue(
+        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
       .andThen(new RunCommand(() -> {}, elevatorSubsystem)

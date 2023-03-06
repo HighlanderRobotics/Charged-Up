@@ -121,14 +121,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public enum ScoringLevels {
-        L1(Constants.ScoringLevels.bottomLevel, Constants.ScoringLevels.bottomLevel),
-        L2(Constants.ScoringLevels.midConeLevel, Constants.ScoringLevels.midCubeLevel), 
-        L3(Constants.ScoringLevels.topConeLevel, Constants.ScoringLevels.topCubeLevel);
+        L1(Constants.ScoringLevels.bottomLevel, Constants.ScoringLevels.bottomLevel, 1),
+        L2(Constants.ScoringLevels.midConeLevel, Constants.ScoringLevels.midCubeLevel, 2), 
+        L3(Constants.ScoringLevels.topConeLevel, Constants.ScoringLevels.topCubeLevel, 3);
         public double extensionInchesCones;
         public double extensionInchesCubes;
-        ScoringLevels(double extensionInchesCones, double extensionInchesCubes) {
+        public int level;
+        ScoringLevels(double extensionInchesCones, double extensionInchesCubes, int level) {
             this.extensionInchesCones = extensionInchesCones;
             this.extensionInchesCubes = extensionInchesCubes;
+            this.level = level;
         }
 
         public double getConeInches() {

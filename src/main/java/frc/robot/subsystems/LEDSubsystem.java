@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.io.File;
+import java.util.function.DoubleSupplier;
 
 import javax.imageio.ImageIO;
 
@@ -67,6 +68,10 @@ public class LEDSubsystem extends SubsystemBase {
 
   public CommandBase setBlinkingCommand(Color8Bit color, double secOn) {
     return new RunCommand(() -> setBlinking(color, secOn), this);
+  }
+
+  public CommandBase setBlinkingCommand(Color8Bit color, DoubleSupplier secOn) {
+    return new RunCommand(() -> setBlinking(color, secOn.getAsDouble()), this);
   }
 
   public void setNoise(Color8Bit colorA, Color8Bit colorB, int value) {

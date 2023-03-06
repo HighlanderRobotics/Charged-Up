@@ -105,7 +105,7 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.enableContinuousInput(0, Math.PI * 2);
         headingController.setTolerance(0.15);
 
-        rightCamera = new PhotonCamera("limelight-right");
+        // rightCamera = new PhotonCamera("limelight-right");
         // rightCamera.setLED(VisionLEDMode.kOff);
 
         leftCamera = new PhotonCamera("limelight-left");
@@ -561,12 +561,12 @@ public class SwerveSubsystem extends SubsystemBase {
         // }
 
         if (isInTapeMode) {
-            NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(1);
-            NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(1);
+            // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(1);
+            // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(1);
             leftCamera.setLED(VisionLEDMode.kOn);
         } else {
-            NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(0);
-            NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
+            // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(0);
+            // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
             leftCamera.setLED(VisionLEDMode.kOff);
         }
 
@@ -598,8 +598,7 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
         SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
-       try{SmartDashboard.putNumber("tape allignment number", leftResult.getBestTarget().getYaw() + rightResult.getBestTarget().getYaw());}
-       catch(Exception e){}
+        SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
         
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
