@@ -53,8 +53,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         new Color8Bit(Color.kLavender)));
 
     public ElevatorSubsystem() {
-        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
-        elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
+        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, "CANivore", 5.45 / 1.0);
+        elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID, "CANivore");
         elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));

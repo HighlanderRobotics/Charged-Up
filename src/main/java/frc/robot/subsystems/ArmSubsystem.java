@@ -22,7 +22,7 @@ public class ArmSubsystem extends SubsystemBase{
     boolean enabled = true;
     DutyCycleEncoder absEncoder;
     public ArmSubsystem () {
-        armMotor = new HighlanderFalcon(Constants.ArmConstants.armMotorID);
+        armMotor = new HighlanderFalcon(Constants.ArmConstants.armMotorID, "CANivore");
         armMotor.setNeutralMode(NeutralMode.Brake);
         armMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(
             true, 

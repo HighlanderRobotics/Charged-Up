@@ -31,6 +31,12 @@ public class HighlanderFalcon extends TalonFX {
         bandWithLimitMotorCAN(this);
     }
 
+    public HighlanderFalcon(int id, String canbus, double gearing) {
+        super(id, canbus);
+        gearRatio = gearing;
+        bandWithLimitMotorCAN(this);
+    }
+
     public HighlanderFalcon(int id, String canbus) {
         super(id, canbus);
         bandWithLimitMotorCAN(this);
@@ -39,6 +45,16 @@ public class HighlanderFalcon extends TalonFX {
     /**Makes a new HighlanderFalcon with a PID controller built in */
     public HighlanderFalcon(int id, double gearing, double p, double i, double d) {
         super(id);
+        gearRatio = gearing;
+        this.config_kP(0, p);
+        this.config_kI(0, i);
+        this.config_kD(0, d);
+        bandWithLimitMotorCAN(this);
+    }
+
+    /**Makes a new HighlanderFalcon with a PID controller built in */
+    public HighlanderFalcon(int id, String canbus, double gearing, double p, double i, double d) {
+        super(id, canbus);
         gearRatio = gearing;
         this.config_kP(0, p);
         this.config_kI(0, i);
