@@ -10,8 +10,10 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -26,6 +28,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
   RoutingSubsystem routingSubsystem;
   GrabberSubsystem grabberSubsystem;
   SwerveSubsystem swerveSubsystem;
+  LEDSubsystem ledSubsystem;
 
   ExtensionState mode = ExtensionState.RETRACT_AND_ROUTE;
 
@@ -40,7 +43,8 @@ public class SuperstructureSubsystem extends SubsystemBase {
     ArmSubsystem armSubsystem,
     RoutingSubsystem routingSubsystem,
     GrabberSubsystem grabberSubsystem,
-    SwerveSubsystem swerveSubsystem
+    SwerveSubsystem swerveSubsystem,
+    LEDSubsystem ledSubsystem
   ) {
     this.intakeSubsystem = intakeSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
@@ -48,6 +52,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
     this.routingSubsystem = routingSubsystem;
     this.grabberSubsystem = grabberSubsystem;
     this.swerveSubsystem = swerveSubsystem;
+    this.ledSubsystem = ledSubsystem;
   }
 
   public void setMode(ExtensionState mode) {
@@ -76,6 +81,27 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase waitExtendToGoal() {
     return waitExtendToGoal(swerveSubsystem.getLevel());
+  }
+
+  public CommandBase scoreNoAim() {
+    return 
+    this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
+    .raceWith(ledSubsystem.setRainbowCommand(), grabberSubsystem.closeCommand())
+    .andThen(
+      new ConditionalCommand(
+          grabberSubsystem.susL3Command()
+          .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
+          .withTimeout(0.5)
+          .andThen(new WaitCommand(0.2), grabberSubsystem.openCommand())
+          .andThen(new WaitCommand(0.2)), 
+          new ConditionalCommand(
+            grabberSubsystem.openCommand().andThen(new WaitCommand(0.2)), 
+            grabberSubsystem.outakeOpenCommand().withTimeout(1.0), 
+            () -> swerveSubsystem.isConeOveride), 
+          () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
+          )
+          .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)
+    );
   }
 
   @Override

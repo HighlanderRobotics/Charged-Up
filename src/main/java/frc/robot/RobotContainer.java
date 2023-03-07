@@ -53,7 +53,7 @@ public class RobotContainer {
   private LEDSubsystem ledSubsystem = new LEDSubsystem();
   
   private SuperstructureSubsystem superstructureSubsystem = 
-  new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem, swerveSubsystem);
+  new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, armSubsystem, routingSubsystem, grabberSubsystem, swerveSubsystem, ledSubsystem);
   // private LEDSubsystem ledSubsystem = new LEDSubsystem();
   private AutoChooser autoChooser = new AutoChooser(swerveSubsystem, intakeSubsystem, elevatorSubsystem, armSubsystem, grabberSubsystem, routingSubsystem, superstructureSubsystem);
   // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -79,10 +79,6 @@ public class RobotContainer {
     elevatorSubsystem.setDefaultCommand(
       elevatorSubsystem.extendToInchesCommand(1.0)
       .andThen(elevatorSubsystem.zeroElevator().repeatedly()
-        // new StartEndCommand(
-        // () -> elevatorSubsystem.disable(), 
-        // () -> elevatorSubsystem.enable(), 
-        // elevatorSubsystem)
         ));
     armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
     intakeSubsystem.setDefaultCommand(new WaitCommand(0.7)

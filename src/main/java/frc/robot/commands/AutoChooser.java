@@ -70,34 +70,15 @@ public class AutoChooser {
             new WaitCommand(1.0),
             new PrintCommand("ccccccccccccccccccccccc")));
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
-        eventMap.put("Score No Aim", new ProxyCommand(
-          superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.topConeLevel)
-          .andThen(
-              new PrintCommand("extended elevator"),
-              new WaitCommand(0.25),
-                grabberSubsystem.outakeNeutralCommand()
-                  .withTimeout(1.0),
-              new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-            ).withTimeout(2.0)));
-        eventMap.put("Score L2 No Aim", new ProxyCommand(
-          superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.midConeLevel)
-          .andThen(
-              new PrintCommand("extended elevator"),
-              new WaitCommand(0.25),
-              grabberSubsystem.openCommand(),
-              new WaitCommand(0.5),
-              new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-            ).withTimeout(2.0)));
-        eventMap.put("Score L2 No Aim Cube", new ProxyCommand(
-          superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.midCubeLevel)
-          .raceWith(grabberSubsystem.closeCommand())
-          .andThen(
-              new PrintCommand("extended elevator"),
-              new WaitCommand(0.25),
-              grabberSubsystem.outakeOpenCommand(),
-              new WaitCommand(0.5),
-              new PrintCommand("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-            ).withTimeout(2.0)));
+        eventMap.put("Score No Aim", 
+          new InstantCommand(() -> {swerveSubsystem.setLevel(ScoringLevels.L3); swerveSubsystem.setGamePieceOverride(true);})
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+        eventMap.put("Score L2 No Aim", 
+          new InstantCommand(() -> {swerveSubsystem.setLevel(ScoringLevels.L2); swerveSubsystem.setGamePieceOverride(true);})
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+        eventMap.put("Score L2 No Aim Cube", 
+          new InstantCommand(() -> {swerveSubsystem.setLevel(ScoringLevels.L2); swerveSubsystem.setGamePieceOverride(false);})
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Intake", run(
