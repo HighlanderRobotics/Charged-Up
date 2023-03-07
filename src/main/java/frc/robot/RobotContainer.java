@@ -128,7 +128,7 @@ public class RobotContainer {
       .whileTrue(
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     controller.leftBumper().whileTrue(
-      superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
+      superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.humanPlayerLevel)
       .andThen(new RunCommand(() -> {}, elevatorSubsystem)
       .alongWith(grabberSubsystem.intakeClosedCommand(), swerveSubsystem.setGamePieceOverride(true))));
     controller.rightBumper().whileTrue(run(

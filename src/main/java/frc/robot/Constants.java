@@ -11,6 +11,8 @@ import java.util.List;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.DifferentialDriveFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -22,6 +24,8 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -396,7 +400,97 @@ public final class Constants {
     public static final double midConeLevel = 38;
     public static final double midCubeLevel = 25;
     public static final double bottomLevel = 20;
+    public static final double humanPlayerLevel = 31; //or substation idk what we're calling them
   }
 
-  public static final double humanPlayerLevel = 31; //or substation idk what we're calling them
+  /** For 5026 vision code */
+  public static final class Vision {
+    public static record VisionSource(String name, Transform3d robotToCamera) {}
+
+    public static final List<VisionSource> VISION_SOURCES =
+        List.of(
+            new VisionSource(
+                "frontCam",
+                new Transform3d(
+                    // 9.867 in to the right looking from behind the front of the robot
+                    // 7 inch forward from center
+                    // up 17.422 inches
+                    new Translation3d(
+                        0.1778, // front/back
+                        0.2506218, // left/right
+                        0.4425188 // up/down
+                        ),
+                    new Rotation3d(
+                        0,
+                        Math.toRadians(-11.5), // angle up/down
+                        0))),
+            new VisionSource(
+                "backCam",
+                new Transform3d(
+                    // 9.867 in to the right looking from behind the front of the robot
+                    // 48.5 inches up
+                    // two inches forward
+                    new Translation3d(
+                        0.0508, // front/back
+                        -0.2506218, // left/right
+                        1.2319 // up/down
+                        ),
+                    new Rotation3d(0, Math.toRadians(17), Math.PI))));
+  }
+
+  /** For 5026 vision code */
+  public static final class PoseEstimator {
+    /**
+     * Standard deviations of model states. Increase these numbers to trust your model's state
+     * estimates less. This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
+     */
+    public static final Matrix<N3, N1> STATE_STANDARD_DEVIATIONS =
+        Matrix.mat(Nat.N3(), Nat.N1())
+            .fill(
+                0.1, // x
+                0.1, // y
+                0.1 // theta
+                );
+
+    /**
+     * Standard deviations of the vision measurements. Increase these numbers to trust global
+     * measurements from vision less. This matrix is in the form [x, y, theta]ᵀ, with units in
+     * meters and radians.
+     */
+    public static final Matrix<N3, N1> VISION_MEASUREMENT_STANDARD_DEVIATIONS =
+        Matrix.mat(Nat.N3(), Nat.N1())
+            .fill(
+                // if these numbers are less than one, multiplying will do bad things
+                1, // x
+                1, // y
+                1 * Math.PI // theta
+                );
+
+    /** The distance at which tag distance is factored into deviation */
+    public static final double NOISY_DISTANCE_METERS = 2.5;
+
+    /**
+     * The number to multiply by the smallest of the distance minus the above constant, clamped
+     * above 1 to be the numerator of the fraction.
+     */
+    public static final double DISTANCE_WEIGHT = 7;
+
+    /**
+     * The number to multiply by the number of tags beyond the first to get the denominator of the
+     * deviations matrix.
+     */
+    public static final double TAG_PRESENCE_WEIGHT = 10;
+
+    /** The amount to shift the pose ambiguity by before multiplying it. */
+    public static final double POSE_AMBIGUITY_SHIFTER = .2;
+
+    /** The amount to multiply the pose ambiguity by if there is only one tag. */
+    public static final double POSE_AMBIGUITY_MULTIPLIER = 4;
+
+    /** about one inch */
+    public static final double DRIVE_TO_POSE_XY_ERROR_MARGIN_METERS = .05;
+
+    public static final double DRIVE_TO_POSE_THETA_ERROR_MARGIN_DEGREES = 2;
+  }
+
 }

@@ -53,7 +53,7 @@ public class EatingCommand extends SequentialCommandGroup {
         () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
         false, false).alongWith(
           ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78))).alongWith(
-          superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)), 
+          superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.humanPlayerLevel)), 
       // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
       //we're only picking up cones from the substations
       new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal() && armSubsystem.isAtSetpoint()),
