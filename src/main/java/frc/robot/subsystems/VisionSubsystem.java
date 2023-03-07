@@ -52,15 +52,15 @@ public class VisionSubsystem {
     }
 
     for (Vision.VisionSource visionSource : Vision.VISION_SOURCES) {
-      var camera = new PhotonCamera(visionSource.name());
+      var camera = new PhotonCamera(visionSource.name);
       var estimator =
           new PhotonPoseEstimator(
               fieldLayout,
               PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,
               camera,
-              visionSource.robotToCamera());
+              visionSource.robotToCamera);
       estimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
-      cameraStatusList.addBoolean(visionSource.name(), camera::isConnected);
+      cameraStatusList.addBoolean(visionSource.name, camera::isConnected);
       estimators.add(estimator);
     }
 
@@ -70,8 +70,14 @@ public class VisionSubsystem {
           () -> String.format("%3.0f seconds", Timer.getFPGATimestamp() - lastDetection));
   }
 
-  public static record VisionMeasurement(
-      EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {}
+  public static class VisionMeasurement {
+        public EstimatedRobotPose estimation;
+        public Matrix<N3, N1> confidence;
+        public VisionMeasurement(EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {
+          this.estimation = estimation;
+          this.confidence = confidence;
+        }
+      }
 
   public List<VisionMeasurement> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
     if (fieldLayout == null) {

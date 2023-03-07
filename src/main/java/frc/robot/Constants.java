@@ -405,7 +405,14 @@ public final class Constants {
 
   /** For 5026 vision code */
   public static final class Vision {
-    public static record VisionSource(String name, Transform3d robotToCamera) {}
+    public static class VisionSource {
+      public String name;
+      public Transform3d robotToCamera;
+      public VisionSource (String name, Transform3d robotToCamera) {
+        this.name = name;
+        this.robotToCamera = robotToCamera;
+      }
+    }
 
     public static final List<VisionSource> VISION_SOURCES =
         List.of(
