@@ -69,31 +69,32 @@ public class RobotContainer {
       SmartDashboard.putData("autoBalance", swerveSubsystem.autoBalance());
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
-      () -> -(Math.abs(Math.pow(controller.getRightX(), 2)) + 0.05) * Math.signum(controller.getRightX()) * (1 - (0.25 * controller.getLeftTriggerAxis())), 
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()), 
       true, 
       true,
       true));
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(
       elevatorSubsystem.extendToInchesCommand(1.0)
-      .andThen(elevatorSubsystem.zeroElevator(),
-        new StartEndCommand(
-        () -> elevatorSubsystem.disable(), 
-        () -> elevatorSubsystem.enable(), 
-        elevatorSubsystem)));
-    armSubsystem.setDefaultCommand(armSubsystem.runToRoutingCommand());
-    intakeSubsystem.setDefaultCommand(new WaitCommand(0.3)
+      .andThen(elevatorSubsystem.zeroElevator().repeatedly()
+        // new StartEndCommand(
+        // () -> elevatorSubsystem.disable(), 
+        // () -> elevatorSubsystem.enable(), 
+        // elevatorSubsystem)
+        ));
+    armSubsystem.setDefaultCommand(new RunCommand(() -> armSubsystem.stop(), armSubsystem));
+    intakeSubsystem.setDefaultCommand(new WaitCommand(0.7)
       .andThen(new ConditionalCommand(
         intakeSubsystem.extendCommand(), 
         intakeSubsystem.stopCommand(), 
         () -> isExtended.getAsBoolean()
       ).repeatedly()));
-    routingSubsystem.setDefaultCommand(routingSubsystem.stopCommand());
+    routingSubsystem.setDefaultCommand(routingSubsystem.runCommand().withTimeout(0.7).andThen(routingSubsystem.stopCommand()));
     grabberSubsystem.setDefaultCommand(grabberSubsystem.stopCommand());
     superstructureSubsystem.setDefaultCommand(new InstantCommand(() -> {}, superstructureSubsystem));
-    ledSubsystem.setDefaultCommand(ledSubsystem.setSolidCommand(Constants.LEDConstants.defaultColor));
+    ledSubsystem.setDefaultCommand(ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
@@ -120,34 +121,64 @@ public class RobotContainer {
     //   .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
 
     new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
-      () -> -(Math.abs(Math.pow(controller.getLeftY(), 2)) + 0.05) * Math.signum(controller.getLeftY()), 
-      () -> -(Math.abs(Math.pow(controller.getLeftX(), 2)) + 0.05) * Math.signum(controller.getLeftX()),  
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
       () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
       true, 
       true));
     
-    new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
-
+    // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
+    new Trigger(() -> swerveSubsystem.checkIfConeGoalWithOverride())
+      .whileTrue(
+        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     controller.leftBumper().whileTrue(
-      superstructureSubsystem.waitExtendToInches(30).andThen(new RunCommand(() -> {}, elevatorSubsystem)
-      .alongWith(grabberSubsystem.intakeClosedCommand())));
+      superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
+      .andThen(new RunCommand(() -> {}, elevatorSubsystem)
+      .alongWith(grabberSubsystem.intakeClosedCommand(), swerveSubsystem.setGamePieceOverride(true))));
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 
       routingSubsystem.runCommand(), 
       grabberSubsystem.intakeOpenCommand(),
-      armSubsystem.runToRoutingCommand()));
+      armSubsystem.runToRoutingCommand(),
+      swerveSubsystem.setGamePieceOverride(false)));
     operator.y().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L3)));
     operator.b().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L2)));
     operator.a().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L1)));
-    
-    controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // operator.leftBumper().onTrue(swerveSubsystem.setGamePieceOverride(true));
+    // operator.rightBumper().onTrue(swerveSubsystem.setGamePieceOverride(false));
+    // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+
+    controller.leftTrigger().whileTrue(
+      superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
+      .alongWith(ledSubsystem.setRainbowCommand(), grabberSubsystem.closeCommand()))
+      .onFalse(
+        new ConditionalCommand(
+          grabberSubsystem.susL3Command()
+          .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
+          .withTimeout(0.5)
+          .andThen(new WaitCommand(0.2), grabberSubsystem.openCommand())
+          .andThen(new WaitCommand(0.2)), 
+          new ConditionalCommand(
+            grabberSubsystem.openCommand().andThen(new WaitCommand(0.2)), 
+            grabberSubsystem.outakeOpenCommand().withTimeout(1.0), 
+            () -> swerveSubsystem.isConeOveride), 
+          () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
+          )
+          .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)
+          // .andThen(swerveSubsystem.disableGamePieceOverride())
+    );
+    controller.rightTrigger().whileTrue(swerveSubsystem.tapeDriveAssistCommand(
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()))
+      .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
       .until(() -> elevatorSubsystem.limitSwitch.get())
       .andThen(new PrintCommand("reset elevator")));
+    controller.back().onTrue(grabberSubsystem.closeCommand());
 
     isExtended.whileFalse(new ConditionalCommand(
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 
@@ -194,10 +225,17 @@ public class RobotContainer {
     SmartDashboard.putData("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
 
     SmartDashboard.putData("scoring sequence", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+    SmartDashboard.putData("driver assist tape allign", 
+      swerveSubsystem.tapeDriveAssistCommand(
+        () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis())));
   }
 
   private static Command run(Command ... commands) {
     return new ParallelCommandGroup(commands);
+  }
+
+  private double modifyJoystickAxis(double joystick, double fineTuneAxis) {
+    return -(Math.abs(Math.pow(joystick, 2)) + 0.05) * Math.signum(joystick) * (1 - (0.5 * fineTuneAxis));
   }
 
   /**

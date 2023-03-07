@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -64,9 +65,13 @@ public class SuperstructureSubsystem extends SubsystemBase {
     return waitExtendToInches(() -> extensionInches);
   }
 
+  public CommandBase waitExtendToGoal(Supplier<ScoringLevels> level) {
+    return new PrintCommand("extension target " + swerveSubsystem.getExtension(level.get()))
+      .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level.get())));
+  }
+
   public CommandBase waitExtendToGoal(ScoringLevels level) {
-    return new PrintCommand("extension target " + swerveSubsystem.getExtension(level))
-      .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level)));
+    return waitExtendToGoal(() -> level);
   }
 
   public CommandBase waitExtendToGoal() {

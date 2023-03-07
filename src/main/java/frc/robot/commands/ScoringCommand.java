@@ -68,8 +68,8 @@ public class ScoringCommand extends SequentialCommandGroup {
                   .withTimeout(2),
                   new PrintCommand("aaaaaaaaaaaaaaa")
                   )
-                // .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-            )//.withTimeout(3.0)
-    );
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+            // )
+    ));
   }
 }
