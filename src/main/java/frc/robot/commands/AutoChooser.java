@@ -71,13 +71,16 @@ public class AutoChooser {
             new PrintCommand("ccccccccccccccccccccccc")));
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
         eventMap.put("Score No Aim", 
-          new InstantCommand(() -> {swerveSubsystem.setLevel(ScoringLevels.L3); swerveSubsystem.setGamePieceOverride(true);})
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
+          .alongWith(swerveSubsystem.setGamePieceOverride(true))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Score L2 No Aim", 
-          new InstantCommand(() -> {swerveSubsystem.setLevel(ScoringLevels.L2); swerveSubsystem.setGamePieceOverride(true);})
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
+          .alongWith(swerveSubsystem.setGamePieceOverride(true))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Score L2 No Aim Cube", 
-          new InstantCommand(() -> {swerveSubsystem.setLevel(ScoringLevels.L2); swerveSubsystem.setGamePieceOverride(false);})
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
+          .alongWith(swerveSubsystem.setGamePieceOverride(false))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
@@ -93,7 +96,7 @@ public class AutoChooser {
             false,
             false,
             false
-          ).withTimeout(1.0)
+          ).withTimeout(0.5)
           .finallyDo((boolean interrupt) -> swerveSubsystem.drive(new Translation2d(), 0, false, false, false)));
 
         chooser.setDefaultOption("none", new InstantCommand(() -> {}));

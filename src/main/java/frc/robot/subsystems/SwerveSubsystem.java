@@ -96,9 +96,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
-    public boolean isConeOveride = false;
+    public boolean isConeOveride = true;
     public double extensionInches = 0;
     public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
+
+    public boolean lockOutSwerve = false;
 
     private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
 
@@ -340,10 +342,13 @@ public class SwerveSubsystem extends SubsystemBase {
         return driveCommand(
                 () -> {
                     if (gyro.getRoll() > 10.0) {
+                        lockOutSwerve = false;
                         return -0.1;
                     } else if (gyro.getRoll() < -10.0) {
+                        lockOutSwerve = false;
                         return 0.1;
                     } else {
+                        lockOutSwerve = true;
                         return 0.0;
                     }
                 }, 
@@ -664,8 +669,11 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
         SmartDashboard.putBoolean("can see targets", hasTargets());
         SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
+        SmartDashboard.putBoolean("should lock out", lockOutSwerve);
+        SmartDashboard.putBoolean("is cone override", isConeOveride);
         
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
+
     }
 }

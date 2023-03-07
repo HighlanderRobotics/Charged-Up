@@ -112,6 +112,7 @@ public class RobotContainer {
     // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled()).onTrue(
       new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    new Trigger(() -> DriverStation.isEnabled()).onTrue(new InstantCommand(() -> swerveSubsystem.lockOutSwerve = false));
     // Reset odometry to vision measurement when we first see a vision target
     // new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry)
     //   .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
@@ -140,6 +141,7 @@ public class RobotContainer {
     operator.y().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L3)));
     operator.b().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L2)));
     operator.a().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L1)));
+    operator.x().whileTrue(swerveSubsystem.autoBalance());
     // operator.leftBumper().onTrue(swerveSubsystem.setGamePieceOverride(true));
     // operator.rightBumper().onTrue(swerveSubsystem.setGamePieceOverride(false));
     // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
