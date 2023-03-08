@@ -189,7 +189,7 @@ public class RobotContainer {
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),
-      armSubsystem.runToRoutingCommand()));
+      armSubsystem.runToRoutingCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)));
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand()

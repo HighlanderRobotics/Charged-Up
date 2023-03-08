@@ -29,9 +29,9 @@ public class IntakeSubsystem extends SubsystemBase {
     timeSinceExtended.start();
   }
 
-   private void run() {
-     intake.setPercentOut(0.5);
-   }
+  private void run() {
+    intake.setPercentOut(0.8);
+  }
 
   private void outake() {
     intake.setPercentOut(-0.5);

@@ -343,10 +343,10 @@ public class SwerveSubsystem extends SubsystemBase {
                 () -> {
                     if (gyro.getRoll() > 10.0) {
                         lockOutSwerve = false;
-                        return -0.1;
+                        return -0.15;
                     } else if (gyro.getRoll() < -10.0) {
                         lockOutSwerve = false;
-                        return 0.1;
+                        return 0.15;
                     } else {
                         lockOutSwerve = true;
                         return 0.0;

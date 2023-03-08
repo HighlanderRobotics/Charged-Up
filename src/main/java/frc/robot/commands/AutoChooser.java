@@ -74,6 +74,10 @@ public class AutoChooser {
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
           .alongWith(swerveSubsystem.setGamePieceOverride(true))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+        eventMap.put("Score L3 No Aim", 
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
+          .alongWith(swerveSubsystem.setGamePieceOverride(true))
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Score L2 No Aim", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
           .alongWith(swerveSubsystem.setGamePieceOverride(true))
@@ -98,6 +102,7 @@ public class AutoChooser {
             false
           ).withTimeout(0.5)
           .finallyDo((boolean interrupt) -> swerveSubsystem.drive(new Translation2d(), 0, false, false, false)));
+        eventMap.put("Zero Elevator", elevatorSubsystem.zeroElevator());
 
         chooser.setDefaultOption("none", new InstantCommand(() -> {}));
             //"Two Cone Auto", 
