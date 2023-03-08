@@ -1,0 +1,136 @@
+{
+  "waypoints": [
+    {
+      "anchorPoint": {
+        "x": 1.9315879233262236,
+        "y": 0.4520445131115837
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.8055406486752825,
+        "y": 0.7634529554773404
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Score L2 No Aim"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 4.392719161378173,
+        "y": 0.6730440528550239
+      },
+      "prevControl": {
+        "x": 3.4032439493450415,
+        "y": 0.733316654603235
+      },
+      "nextControl": {
+        "x": 5.382194373411304,
+        "y": 0.6127714511068132
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 7.11503167367237,
+        "y": 0.9040890262231663
+      },
+      "prevControl": {
+        "x": 6.064815337757901,
+        "y": 0.9040890262231663
+      },
+      "nextControl": {
+        "x": 6.064815337757901,
+        "y": 0.9040890262231663
+      },
+      "holonomicAngle": 4.484606009544594,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.190851780199801,
+        "y": 2.049268459439176
+      },
+      "prevControl": {
+        "x": 6.98993164903623,
+        "y": 2.0227168123509207
+      },
+      "nextControl": {
+        "x": 5.391771911363372,
+        "y": 2.0758201065274315
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 3.94067464826659,
+        "y": 2.079404760313281
+      },
+      "prevControl": {
+        "x": 4.631064262128524,
+        "y": 2.0474761325462505
+      },
+      "nextControl": null,
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Run Up Charge Station",
+          "Balance"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    }
+  ],
+  "markers": [
+    {
+      "position": 1.4,
+      "names": [
+        "Intake"
+      ]
+    }
+  ]
+}

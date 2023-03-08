@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Timer;
@@ -30,7 +32,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   private void run() {
-    intake.setPercentOut(0.8);
+    intake.set(ControlMode.PercentOutput, 0.8);
   }
 
   private void outake() {
@@ -38,7 +40,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   private void stop() {
-    intake.setPercentOut(0);
+    intake.set(ControlMode.PercentOutput, 0);
   }
 
   private void extend() {
@@ -46,8 +48,8 @@ public class IntakeSubsystem extends SubsystemBase {
     timeSinceExtended.reset();
   }
 
-   private void retract() {
-     solenoid.set(Value.kReverse);
+  private void retract() {
+    solenoid.set(Value.kReverse);
   }
 
   public CommandBase runCommand() {

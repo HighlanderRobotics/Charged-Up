@@ -178,15 +178,15 @@ public final class Constants {
     public static final double maxSpeedMetersPerSecond = 5.25;
     public static final double maxAccelerationMetersPerSecondSquared = 2;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
     public static final double kPYController = 1.5;
     public static final double kPXController = 1.5;
-    public static final double kPThetaController = 1.5;
-    public static final double kDThetaController = 0.2;
+    public static final double kPThetaController = 1.3;
+    public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
     public static final ProfiledPIDController yController = new ProfiledPIDController(kPYController, 0, 0, constraints);
