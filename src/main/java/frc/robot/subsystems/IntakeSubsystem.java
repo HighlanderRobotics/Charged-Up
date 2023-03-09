@@ -36,7 +36,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   private void outake() {
-    intake.setPercentOut(-0.5);
+    intake.set(ControlMode.PercentOutput, -0.5);
   }
 
   private void stop() {

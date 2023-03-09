@@ -110,6 +110,7 @@ public class AutoChooser {
         chooser.addOption("2 + Park Top Blue", twoParkTopBlue());
         chooser.addOption("1.5 + Park Top Blue", onePlusParkTopBlue());
         chooser.addOption("1 + Park Middle Blue", onePlusParkMiddle());
+        chooser.addOption("2 Park Top Blue", twoParkTopBlue());
 
         SmartDashboard.putData("autoChooser", chooser);
 
@@ -161,6 +162,12 @@ public class AutoChooser {
       private Command twoParkTopBlue(){
         List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
           "2 + Park Top Blue", new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
+      }
+
+      private Command twoTopBlue(){
+        List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
+          "2 Top Blue", new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
       }
 

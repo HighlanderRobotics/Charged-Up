@@ -52,6 +52,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -88,7 +89,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private PhotonPipelineResult leftResult = null;
     private AprilTagFieldLayout fieldLayout;
     private boolean isInTapeMode = true;
-    private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, 0);
+    private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
 
     public boolean hasResetOdometry = false;
 
@@ -105,10 +106,10 @@ public class SwerveSubsystem extends SubsystemBase {
     private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
 
     public ProfiledPIDController headingController = new ProfiledPIDController(
-        Constants.AutoConstants.kPThetaController, 
+        1.2, 
         0, 
-        Constants.AutoConstants.kDThetaController,
-        Constants.AutoConstants.thetaControllerConstraints);
+        0.0,
+        new Constraints(Math.PI * 2, Math.PI * 2));
 
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);

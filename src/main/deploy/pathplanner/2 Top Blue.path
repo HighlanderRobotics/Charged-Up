@@ -1,0 +1,141 @@
+{
+  "waypoints": [
+    {
+      "anchorPoint": {
+        "x": 1.941633356950925,
+        "y": 3.8474010782608037
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.092314861321453,
+        "y": 4.409945361244107
+      },
+      "holonomicAngle": 180.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Score L2 No Aim"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 3.528811869653815,
+        "y": 4.781626405358074
+      },
+      "prevControl": {
+        "x": 3.0265401884187235,
+        "y": 4.771580971733373
+      },
+      "nextControl": {
+        "x": 3.9206341908371125,
+        "y": 4.78946285178174
+      },
+      "holonomicAngle": 178.51213247117215,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 7.577121620408654,
+        "y": 4.480263396617019
+      },
+      "prevControl": {
+        "x": 5.52785316096948,
+        "y": 4.791671838982776
+      },
+      "nextControl": {
+        "x": 5.52785316096948,
+        "y": 4.791671838982776
+      },
+      "holonomicAngle": -10.619655276155147,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Intake"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 4.081310719012416,
+        "y": 4.731399237234565
+      },
+      "prevControl": {
+        "x": 5.2852342330792546,
+        "y": 4.795324379574397
+      },
+      "nextControl": {
+        "x": 2.9461767194211093,
+        "y": 4.671126635486354
+      },
+      "holonomicAngle": -178.74783262479613,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 1.4895888438393428,
+        "y": 3.957900848132524
+      },
+      "prevControl": {
+        "x": 2.3635415691884023,
+        "y": 3.9880371490066304
+      },
+      "nextControl": null,
+      "holonomicAngle": 174.50767544287254,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "minimum",
+        "waitTime": 0.5
+      }
+    }
+  ],
+  "markers": [
+    {
+      "position": 1.5999999999999703,
+      "names": [
+        "Intake"
+      ]
+    },
+    {
+      "position": 3.46,
+      "names": [
+        "Score L2 No Aim Cube"
+      ]
+    }
+  ]
+}

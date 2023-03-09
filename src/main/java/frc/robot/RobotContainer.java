@@ -172,11 +172,12 @@ public class RobotContainer {
       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
+    controller.y().whileTrue(swerveSubsystem.autoBalance());
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
       .until(() -> elevatorSubsystem.limitSwitch.get())
       .andThen(new PrintCommand("reset elevator")));
-    controller.back().onTrue(grabberSubsystem.closeCommand());
+    controller.back().whileTrue(grabberSubsystem.intakeClosedCommand().alongWith(swerveSubsystem.setGamePieceOverride(true)));
 
     isExtended.whileFalse(new ConditionalCommand(
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 
