@@ -26,22 +26,21 @@
     },
     {
       "anchorPoint": {
-        "x": 3.9004929137677826,
+        "x": 4.412810028627576,
         "y": 3.2245841935292905
       },
       "prevControl": {
-        "x": 2.9004929137677826,
+        "x": 3.412810028627576,
         "y": 3.2245841935292905
       },
       "nextControl": null,
-      "holonomicAngle": 0,
+      "holonomicAngle": -179.61023880468196,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Run Up Charge Station",
           "Balance"
         ],
         "executionBehavior": "sequential",

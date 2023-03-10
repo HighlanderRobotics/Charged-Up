@@ -61,7 +61,7 @@ public class ArmSubsystem extends SubsystemBase{
     }
 
     public CommandBase runToRoutingCommand() {
-        return runToRotationCommand(-1.25);
+        return runToRotationCommand(-1.4);
     }
 
     public void jogUp() {
