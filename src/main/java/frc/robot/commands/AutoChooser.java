@@ -107,10 +107,12 @@ public class AutoChooser {
         chooser.setDefaultOption("none", new InstantCommand(() -> {}));
             //"Two Cone Auto", 
             //new TwoConeAuto(swerveSubsystem, intakeSubsystem));
-        chooser.addOption("2 + Park Top Blue", twoParkTopBlue());
-        chooser.addOption("1.5 + Park Top Blue", onePlusParkTopBlue());
-        chooser.addOption("1 + Park Middle Blue", onePlusParkMiddle());
-        chooser.addOption("2 Park Top Blue", twoParkTopBlue());
+        chooser.addOption("2 + Charge Flat", twoParkTopBlue());
+        chooser.addOption("1.5 + Charge Flat", onePlusParkTopBlue());
+        chooser.addOption("1 + Charge Middle", onePlusParkMiddle());
+        chooser.addOption("1.5 Bump", oneAndAHalfBottom());
+        chooser.addOption("1.5 + Park Bump", onePlusParkBottom());
+        chooser.addOption("1 + Mobility", oneMobility());
 
         SmartDashboard.putData("autoChooser", chooser);
 
@@ -180,6 +182,18 @@ public class AutoChooser {
       private Command onePlusParkBottom() {
         List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
           "1.5 + Park Bottom Blue", new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
+      }
+
+      public Command oneAndAHalfBottom() {
+        List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
+          "1.5 Bottom", new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
+      }
+
+      public Command oneMobility() {
+        List<PathPlannerTrajectory> twoParkTopGroup = PathPlanner.loadPathGroup(
+          "1 + Mobility", new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(twoParkTopGroup);
       }
 
