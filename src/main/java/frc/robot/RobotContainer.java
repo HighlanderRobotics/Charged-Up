@@ -108,7 +108,7 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    controller.rightStick().and(controller.leftStick()).onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
     // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled()).onTrue(
       new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
@@ -234,7 +234,7 @@ public class RobotContainer {
   }
 
   private double modifyJoystickAxis(double joystick, double fineTuneAxis) {
-    return -(Math.abs(Math.pow(joystick, 2)) + 0.05) * Math.signum(joystick) * (1 - (0.5 * fineTuneAxis));
+    return -(Math.abs(Math.pow(joystick, 2)) + 0.05) * Math.signum(joystick) * (1 - (0.5 * fineTuneAxis)) * (1 - (0.5 * (controller.leftBumper().getAsBoolean() ? 0.4 : 0)));
   }
 
   /**
