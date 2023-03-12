@@ -96,7 +96,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
           .andThen(new WaitCommand(0.2)), 
           new ConditionalCommand(
             grabberSubsystem.openCommand().andThen(new WaitCommand(0.2)), 
-            grabberSubsystem.outakeOpenCommand().withTimeout(0.5), 
+            grabberSubsystem.outakeOpenCommand().withTimeout(0.3), 
             () -> swerveSubsystem.isConeOveride), 
           () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
           )

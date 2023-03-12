@@ -177,7 +177,7 @@ public class RobotContainer {
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
       .until(() -> elevatorSubsystem.limitSwitch.get())
       .andThen(new PrintCommand("reset elevator")));
-    controller.back().whileTrue(grabberSubsystem.intakeClosedCommand().alongWith(swerveSubsystem.setGamePieceOverride(true)));
+    controller.back().whileTrue(grabberSubsystem.intakeClosedCommand().alongWith(swerveSubsystem.setGamePieceOverride(true), armSubsystem.runToRoutingCommand()));
 
     isExtended.whileFalse(new ConditionalCommand(
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 

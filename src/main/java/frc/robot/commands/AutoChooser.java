@@ -113,6 +113,10 @@ public class AutoChooser {
         chooser.addOption("1.5 Bump", oneAndAHalfBottom());
         chooser.addOption("1.5 + Park Bump", onePlusParkBottom());
         chooser.addOption("1 + Mobility", oneMobility());
+        chooser.addOption("just score",  
+        new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
+        .alongWith(swerveSubsystem.setGamePieceOverride(true))
+        .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
 
         SmartDashboard.putData("autoChooser", chooser);
 
