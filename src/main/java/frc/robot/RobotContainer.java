@@ -186,7 +186,7 @@ public class RobotContainer {
 
     isExtended.whileTrue(run(
       intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming),
-      armSubsystem.runToHorizontalCommand()));
+      new WaitCommand(0.4).andThen(armSubsystem.runToHorizontalCommand())));
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),

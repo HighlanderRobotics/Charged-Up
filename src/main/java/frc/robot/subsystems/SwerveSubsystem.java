@@ -123,6 +123,8 @@ public class SwerveSubsystem extends SubsystemBase {
         // rightCamera.setLED(VisionLEDMode.kOff);
 
         leftCamera = new PhotonCamera("limelight-left");
+        leftCamera.setLED(VisionLEDMode.kOn);
+
         // leftCamera.setLED(VisionLEDMode.kOff);
 
         mSwerveMods = new SwerveModule[] {
@@ -628,7 +630,7 @@ public class SwerveSubsystem extends SubsystemBase {
         } else {
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(0);
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
-            leftCamera.setLED(VisionLEDMode.kOff);
+            // leftCamera.setLED(VisionLEDMode.kOff);
         }
 
         // Log swerve module information
