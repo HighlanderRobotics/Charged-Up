@@ -108,10 +108,11 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    controller.rightStick().onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    controller.rightStick().and(controller.leftStick()).onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
     // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled()).onTrue(
       new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
+    new Trigger(() -> DriverStation.isEnabled()).onTrue(new InstantCommand(() -> swerveSubsystem.lockOutSwerve = false));
     // Reset odometry to vision measurement when we first see a vision target
     // new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry)
     //   .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
@@ -140,6 +141,7 @@ public class RobotContainer {
     operator.y().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L3)));
     operator.b().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L2)));
     operator.a().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L1)));
+    operator.x().whileTrue(swerveSubsystem.autoBalance());
     // operator.leftBumper().onTrue(swerveSubsystem.setGamePieceOverride(true));
     // operator.rightBumper().onTrue(swerveSubsystem.setGamePieceOverride(false));
     // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -167,11 +169,12 @@ public class RobotContainer {
     );
 
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
+    controller.y().whileTrue(swerveSubsystem.autoBalance());
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
       .until(() -> elevatorSubsystem.limitSwitch.get())
       .andThen(new PrintCommand("reset elevator")));
-    controller.back().onTrue(grabberSubsystem.closeCommand());
+    controller.back().whileTrue(grabberSubsystem.intakeClosedCommand().alongWith(swerveSubsystem.setGamePieceOverride(true), armSubsystem.runToRoutingCommand()));
 
     isExtended.whileFalse(new ConditionalCommand(
         new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 
@@ -180,11 +183,11 @@ public class RobotContainer {
 
     isExtended.whileTrue(run(
       intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming),
-      armSubsystem.runToHorizontalCommand()));
+      new WaitCommand(0.4).andThen(armSubsystem.runToHorizontalCommand())));
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),
-      armSubsystem.runToRoutingCommand()));
+      armSubsystem.runToRoutingCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)));
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand()
@@ -224,7 +227,7 @@ public class RobotContainer {
   }
 
   private double modifyJoystickAxis(double joystick, double fineTuneAxis) {
-    return -(Math.abs(Math.pow(joystick, 2)) + 0.05) * Math.signum(joystick) * (1 - (0.5 * fineTuneAxis));
+    return -(Math.abs(Math.pow(joystick, 2)) + 0.05) * Math.signum(joystick) * (1 - (0.5 * fineTuneAxis)) * (1 - (0.5 * (controller.leftBumper().getAsBoolean() ? 0.4 : 0)));
   }
 
   /**

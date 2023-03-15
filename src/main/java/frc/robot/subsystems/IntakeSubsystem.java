@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
+
 import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Timer;
@@ -19,7 +21,7 @@ import frc.robot.Constants;
 public class IntakeSubsystem extends SubsystemBase {
   HighlanderFalcon intake = new HighlanderFalcon(Constants.MechanismConstants.intakeID, 1.0, 0.15, 0, 0);
   DoubleSolenoid solenoid = new DoubleSolenoid(
-    PneumaticsModuleType.CTREPCM, 
+    PneumaticsModuleType.REVPH, 
     Constants.MechanismConstants.intakeSolenoidForwardID, 
     Constants.MechanismConstants.intakeSolenoidBackwardID);
   // Timer to make sure that the intake has time to extend when we check if its out
@@ -29,16 +31,16 @@ public class IntakeSubsystem extends SubsystemBase {
     timeSinceExtended.start();
   }
 
-   private void run() {
-     intake.setPercentOut(0.5);
-   }
+  private void run() {
+    intake.set(ControlMode.PercentOutput, 0.5);
+  }
 
   private void outake() {
-    intake.setPercentOut(-0.5);
+    intake.set(ControlMode.PercentOutput, -0.4);
   }
 
   private void stop() {
-    intake.setPercentOut(0);
+    intake.set(ControlMode.PercentOutput, 0);
   }
 
   private void extend() {
@@ -46,8 +48,8 @@ public class IntakeSubsystem extends SubsystemBase {
     timeSinceExtended.reset();
   }
 
-   private void retract() {
-     solenoid.set(Value.kReverse);
+  private void retract() {
+    solenoid.set(Value.kReverse);
   }
 
   public CommandBase runCommand() {

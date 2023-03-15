@@ -53,6 +53,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -83,7 +84,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public Field2d field = new Field2d();
 
     private boolean isInTapeMode = true;
-    private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, 0);
+    private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
 
     private VisionSubsystem visionSubsystem = new VisionSubsystem();
 
@@ -93,17 +94,19 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
-    public boolean isConeOveride = false;
+    public boolean isConeOveride = true;
     public double extensionInches = 0;
     public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
+
+    public boolean lockOutSwerve = false;
 
     private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
 
     public ProfiledPIDController headingController = new ProfiledPIDController(
-        Constants.AutoConstants.kPThetaController, 
+        1.2, 
         0, 
-        Constants.AutoConstants.kDThetaController,
-        Constants.AutoConstants.thetaControllerConstraints);
+        0.0,
+        new Constraints(Math.PI * 2, Math.PI * 2));
 
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
@@ -154,7 +157,7 @@ public class SwerveSubsystem extends SubsystemBase {
                                     velTwist.dy / 0.02, 
                                     velTwist.dtheta /0.02, 
                                     useAlliance && DriverStation.getAlliance() == DriverStation.Alliance.Red
-                                        ? getYaw().plus(new Rotation2d(Math.PI)) : getYaw()
+                                        ? getYaw() : getYaw()
                                 )
                                 : new ChassisSpeeds(
                                     velTwist.dx / 0.02, 
@@ -328,10 +331,13 @@ public class SwerveSubsystem extends SubsystemBase {
         return driveCommand(
                 () -> {
                     if (gyro.getRoll() > 10.0) {
-                        return -0.1;
+                        lockOutSwerve = false;
+                        return -0.15;
                     } else if (gyro.getRoll() < -10.0) {
-                        return 0.1;
+                        lockOutSwerve = false;
+                        return 0.15;
                     } else {
+                        lockOutSwerve = true;
                         return 0.0;
                     }
                 }, 
@@ -499,8 +505,11 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
         SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
         SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
+        SmartDashboard.putBoolean("should lock out", lockOutSwerve);
+        SmartDashboard.putBoolean("is cone override", isConeOveride);
         
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
+
     }
 }

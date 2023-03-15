@@ -84,10 +84,10 @@ public class SuperstructureSubsystem extends SubsystemBase {
   }
 
   public CommandBase scoreNoAim() {
-    return 
-    this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
-    .raceWith(ledSubsystem.setRainbowCommand(), grabberSubsystem.closeCommand())
+    return this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
+    .deadlineWith(ledSubsystem.setRainbowCommand(), grabberSubsystem.closeCommand())
     .andThen(
+      new WaitCommand(0.1),
       new ConditionalCommand(
           grabberSubsystem.susL3Command()
           .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
@@ -96,7 +96,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
           .andThen(new WaitCommand(0.2)), 
           new ConditionalCommand(
             grabberSubsystem.openCommand().andThen(new WaitCommand(0.2)), 
-            grabberSubsystem.outakeOpenCommand().withTimeout(1.0), 
+            grabberSubsystem.outakeOpenCommand().withTimeout(0.3), 
             () -> swerveSubsystem.isConeOveride), 
           () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
           )
