@@ -165,9 +165,6 @@ public class RobotContainer {
           .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)
           // .andThen(swerveSubsystem.disableGamePieceOverride())
     );
-    controller.rightTrigger().whileTrue(swerveSubsystem.tapeDriveAssistCommand(
-      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()))
-      .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), grabberSubsystem.outakeCommand())));
     
@@ -210,7 +207,6 @@ public class RobotContainer {
     SmartDashboard.putData("jog arm up", new RunCommand(() -> armSubsystem.jogUp(), armSubsystem));
     SmartDashboard.putData("jog arm down", new RunCommand(() -> armSubsystem.jogDown(), armSubsystem));
     
-    SmartDashboard.putData("reset to vision", swerveSubsystem.resetIfTargets());
     SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
   
     SmartDashboard.putData("arm to -0.5", armSubsystem.runToRotationCommand(-0.5));
@@ -221,9 +217,6 @@ public class RobotContainer {
     SmartDashboard.putData("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
 
     SmartDashboard.putData("scoring sequence", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
-    SmartDashboard.putData("driver assist tape allign", 
-      swerveSubsystem.tapeDriveAssistCommand(
-        () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis())));
   }
 
   private static Command run(Command ... commands) {
