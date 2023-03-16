@@ -11,17 +11,27 @@ import java.util.List;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
 
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.DifferentialDriveFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.LinearQuadraticRegulator;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.estimator.KalmanFilter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.LinearSystemLoop;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -313,12 +323,46 @@ public final class Constants {
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,40.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/7, 0.0, 0.0139/2, elevatorConstraints);
+        static {
+          PIDController.setTolerance(
+            2.0, //TODO: is this good?
+            2.0);
+        }
 
-    static {
-      PIDController.setTolerance(
-        2.0, //TODO: is this good?
-        2.0);
-    }
+    public static final LinearSystem<N2, N1, N1> elevatorPlant = LinearSystemId.createElevatorSystem(
+      DCMotor.getFalcon500(2), 
+      10.0, 
+      1.75, // Do we need to multiple b/c cascading elevator?
+      elevatorGearRatio);
+
+    public static final KalmanFilter<N2, N1, N1> elevatorEstimator = 
+      new KalmanFilter<>(
+        Nat.N2(),
+        Nat.N1(),
+        elevatorPlant,
+        VecBuilder.fill(2, 40), // How accurate we
+        // think our model is, in inches and inches/second.
+        VecBuilder.fill(0.001), // How accurate we think our encoder position
+        // data is. In this case we very highly trust our encoder position reading.
+        0.020);
+
+    public static final LinearQuadraticRegulator<N2, N1, N1> elevatorController = 
+        new LinearQuadraticRegulator<>(
+          elevatorPlant, VecBuilder.fill(1.0, 10.0), // qelms. Position
+          // and velocity error tolerances, in inches and inches per second. Decrease this to more
+          // heavily penalize state excursion, or make the controller behave more aggressively.
+          VecBuilder.fill(12.0), // relms. Control effort (voltage) tolerance. Decrease this to more
+          // heavily penalize control effort, or make the controller less aggressive. 12 is a good
+          // starting point because that is the (approximate) maximum voltage of a battery.
+          0.020);
+    
+    public static final LinearSystemLoop<N2, N1, N1> elevatorLoop = 
+      new LinearSystemLoop<>(
+        elevatorPlant, 
+        elevatorController, 
+        elevatorEstimator, 
+        12.0, 
+        0.020);
 
     public static final double elevatorAngleRad = Math.toRadians(41);
     public static final double maxExtensionInches = 49.5;

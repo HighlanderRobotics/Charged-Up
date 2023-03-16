@@ -9,11 +9,14 @@ import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
@@ -37,6 +40,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorFollower;
     boolean enabled = true;
     public ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
+    TrapezoidProfile.State lastState = new TrapezoidProfile.State();
+    TrapezoidProfile.State goal = new TrapezoidProfile.State();
+    
     Mechanism2d mech2d = new Mechanism2d(70, 60);
     MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
     MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
@@ -76,18 +82,34 @@ public class ElevatorSubsystem extends SubsystemBase {
             pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
     }
 
+    public void updateStateSpaceController() {
+        lastState = 
+            (new TrapezoidProfile(Constants.ElevatorConstants.elevatorConstraints, goal, lastState))
+            .calculate(0.020);
+        Constants.ElevatorConstants.elevatorLoop.setNextR(lastState.position, lastState.velocity);
+
+        Constants.ElevatorConstants.elevatorLoop.correct(VecBuilder.fill(getExtensionInches()));
+
+        Constants.ElevatorConstants.elevatorLoop.predict(0.020);
+
+        double voltage = Constants.ElevatorConstants.elevatorLoop.getU(0);
+        SmartDashboard.putNumber("elevator state space voltage out", voltage);
+
+        elevatorMotor.set(ControlMode.PercentOutput, voltage / 12.0);
+    }
+
     private void setGoal(double position) {
         Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
         Constants.ElevatorConstants.PIDController.setGoal(position);
+
+        goal = new TrapezoidProfile.State(position, 0);
     }
 
     private void setGoal(double position, double velocity) {
         Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
         Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
-    }
 
-    private double getMeasurement() {
-       return 0; //elevatorMotor.getSelectedSensorPosition();
+        goal = new TrapezoidProfile.State(position, velocity);
     }
 
     public double getExtensionInches() {
@@ -375,7 +397,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (enabled) {
-            updatePID();
+            updateStateSpaceController();
         } else {
             elevatorMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, 0);
         }
@@ -386,7 +408,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
         SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
-        SmartDashboard.putNumber("elevator native position", getMeasurement());
         // We might have accidentaly tuned elevator pid with this call on, which modifies the state of the pid controller
         // Basically, dont remove this line it's load bearing
         SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
