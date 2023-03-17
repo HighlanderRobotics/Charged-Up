@@ -180,15 +180,15 @@ public final class Constants {
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 5.25;
-    public static final double maxAccelerationMetersPerSecondSquared = 2;
+    public static final double maxAccelerationMetersPerSecondSquared = 5;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPYController = 1.5;
-    public static final double kPXController = 1.5;
+    public static final double kPYController = 2.5;
+    public static final double kPXController = 2.5;
     public static final double kPThetaController = 1.3;
     public static final double kDThetaController = 0.0;
 

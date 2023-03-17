@@ -83,7 +83,7 @@ public class AutoChooser {
         eventMap.put("Score L2 No Aim", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
           .alongWith(swerveSubsystem.setGamePieceOverride(true))
-          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()).withTimeout(2));
         eventMap.put("Score L2 No Aim Cube", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
           .alongWith(swerveSubsystem.setGamePieceOverride(false))
@@ -115,6 +115,7 @@ public class AutoChooser {
         chooser.addOption("1.5 Bump", oneAndAHalfBottom());
         chooser.addOption("1.5 + Park Bump", onePlusParkBottom());
         chooser.addOption("1 + Mobility", oneMobility());
+        chooser.addOption("Apriltags Test", apriltagsTest());
         chooser.addOption("just score",  
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
         .alongWith(swerveSubsystem.setGamePieceOverride(true))
@@ -130,7 +131,9 @@ public class AutoChooser {
     public Command getAutoCommand(){
       return chooser.getSelected();
     }
-
+      private Command apriltagsTest() {
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("Apriltags Test", "Apriltags Test"));
+      }
       private Command onePlusParkTop(){
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("1 + Park Top Blue", "1 + Park Top Red"));
       }
