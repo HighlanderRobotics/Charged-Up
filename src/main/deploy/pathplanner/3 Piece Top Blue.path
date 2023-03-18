@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L3"
+          "Score L3 No Aim"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -71,7 +71,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "Score L3"
+          "Score L3 No Aim Cube"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -80,18 +80,18 @@
     },
     {
       "anchorPoint": {
-        "x": 6.733305195933701,
-        "y": 3.6866741402655747
+        "x": 6.984441036551245,
+        "y": 3.616356104892662
       },
       "prevControl": {
-        "x": 5.497716860095374,
-        "y": 4.540535998365231
+        "x": 6.331487850945627,
+        "y": 5.193489183970851
       },
       "nextControl": {
-        "x": 5.497716860095374,
-        "y": 4.540535998365231
+        "x": 6.331487850945627,
+        "y": 5.193489183970851
       },
-      "holonomicAngle": -32.09259132873418,
+      "holonomicAngle": -48.91824886406721,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
@@ -147,7 +147,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L3"
+          "Score L2 No Aim Cube"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -155,5 +155,8 @@
       }
     }
   ],
+  "maxVelocity": 5.0,
+  "maxAcceleration": 5.0,
+  "isReversed": null,
   "markers": []
 }

@@ -88,6 +88,10 @@ public class AutoChooser {
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
           .alongWith(swerveSubsystem.setGamePieceOverride(false))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+        eventMap.put("Score L3 No Aim Cube", 
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
+          .alongWith(swerveSubsystem.setGamePieceOverride(false))
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Intake", run(
@@ -155,6 +159,10 @@ public class AutoChooser {
 
       public Command oneMobility() {
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("1 + Mobility Blue", "1 + Mobility Red"));
+      }
+
+      public Command threeTop() {
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Top Blue", "3 Piece Top Red"));
       }
 
       private static Command run(Command ... commands) {
