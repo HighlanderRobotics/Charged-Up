@@ -55,6 +55,11 @@ public class SuperstructureSubsystem extends SubsystemBase {
     this.ledSubsystem = ledSubsystem;
   }
 
+  public SuperstructureSubsystem(IntakeSubsystem intakeSubsystem2, ElevatorSubsystem elevatorSubsystem2,
+      RoutingSubsystem routingSubsystem2, GreybotsGrabberSubsystem greybotsGrabberSubsystem,
+      SwerveSubsystem swerveSubsystem2, LEDSubsystem ledSubsystem2) {
+  }
+
   public void setMode(ExtensionState mode) {
     this.mode = mode;
   }

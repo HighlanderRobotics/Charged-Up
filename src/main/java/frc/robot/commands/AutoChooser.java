@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.GreybotsGrabberSubsystem;
 import frc.robot.subsystems.RollerClawGrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.RoutingSubsystem;
@@ -36,7 +37,7 @@ public class AutoChooser {
     IntakeSubsystem intakeSubsystem;
     ElevatorSubsystem elevatorSubsystem;
     ArmSubsystem armSubsystem;
-    RollerClawGrabberSubsystem grabberSubsystem;
+    GreybotsGrabberSubsystem greybotsGrabberSubsystem;
     RoutingSubsystem routingSubsystem;
     HashMap<String, Command> eventMap = new HashMap<>();
     
@@ -45,16 +46,15 @@ public class AutoChooser {
       SwerveSubsystem swerveSubsystem,
       IntakeSubsystem intakeSubsystem, 
       ElevatorSubsystem elevatorSubsystem, 
-      ArmSubsystem armSubsystem, 
-      RollerClawGrabberSubsystem grabberSubsystem, 
       RoutingSubsystem routingSubsystem,
+      GreybotsGrabberSubsystem greybotsGrabberSubsystem,
       SuperstructureSubsystem superstructureSubsystem){
       
         this.intakeSubsystem = intakeSubsystem;
         this.swerveSubsystem = swerveSubsystem;
         this.elevatorSubsystem = elevatorSubsystem; 
         this.armSubsystem = armSubsystem;
-        this.grabberSubsystem = grabberSubsystem;
+        this.greybotsGrabberSubsystem = greybotsGrabberSubsystem;
         this.routingSubsystem = routingSubsystem;
 
         eventMap.put("Score", new ScoringCommand(
@@ -62,14 +62,14 @@ public class AutoChooser {
           () -> 0, 
           elevatorSubsystem, 
           swerveSubsystem, 
-          grabberSubsystem, 
+          greybotsGrabberSubsystem, 
           superstructureSubsystem).asProxy().andThen(
             new InstantCommand(() -> elevatorSubsystem.getDefaultCommand().schedule()),
             new PrintCommand("bbbbbbbb"), 
             new InstantCommand(() -> {}, swerveSubsystem),
             new WaitCommand(1.0),
             new PrintCommand("ccccccccccccccccccccccc")));
-        eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
+        eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, greybotsGrabberSubsystem, superstructureSubsystem));
         eventMap.put("Score No Aim", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
           .alongWith(swerveSubsystem.setGamePieceOverride(true))
@@ -91,8 +91,8 @@ public class AutoChooser {
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand(), 
           routingSubsystem.runCommand(), 
-          grabberSubsystem.intakeOpenCommand(),
-          armSubsystem.runToRoutingCommand()).withTimeout(4.0).asProxy()); 
+          greybotsGrabberSubsystem.intakeCubeCommand())
+          .withTimeout(4.0).asProxy()); 
         eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
             () -> 1.0,
             () -> 0.0,
