@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.RollerClawGrabberSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -32,7 +32,7 @@ public class ScoringCommand extends SequentialCommandGroup {
     DoubleSupplier adjustmentSupplier,
     ElevatorSubsystem elevatorSubsystem, 
     SwerveSubsystem swerveSubsystem,
-    GrabberSubsystem grabberSubsystem,
+    RollerClawGrabberSubsystem grabberSubsystem,
     SuperstructureSubsystem superstructureSubsystem) {
     // LEDSubsystem ledSubsystem) {
     // Add your commands in the addCommands() call, e.g.

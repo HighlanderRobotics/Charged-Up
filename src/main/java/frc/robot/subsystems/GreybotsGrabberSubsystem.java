@@ -18,13 +18,13 @@ import frc.lib.components.HighlanderFalcon;
 
 import frc.robot.Constants;
 
-public class GrabberSubsystemNew extends SubsystemBase {
+public class GreybotsGrabberSubsystem extends SubsystemBase {
   HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID, "CANivore", 1, 5e-1, 0.0, 0.0);
 
 
   
   /** Creates a new GrabberSubsystem. */
-  public GrabberSubsystemNew() {
+  public GreybotsGrabberSubsystem() {
     grabber.configVoltageCompSaturation(10);
   }
 

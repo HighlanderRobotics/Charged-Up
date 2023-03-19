@@ -23,7 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.RollerClawGrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
@@ -36,7 +36,7 @@ public class AutoChooser {
     IntakeSubsystem intakeSubsystem;
     ElevatorSubsystem elevatorSubsystem;
     ArmSubsystem armSubsystem;
-    GrabberSubsystem grabberSubsystem;
+    RollerClawGrabberSubsystem grabberSubsystem;
     RoutingSubsystem routingSubsystem;
     HashMap<String, Command> eventMap = new HashMap<>();
     
@@ -46,7 +46,7 @@ public class AutoChooser {
       IntakeSubsystem intakeSubsystem, 
       ElevatorSubsystem elevatorSubsystem, 
       ArmSubsystem armSubsystem, 
-      GrabberSubsystem grabberSubsystem, 
+      RollerClawGrabberSubsystem grabberSubsystem, 
       RoutingSubsystem routingSubsystem,
       SuperstructureSubsystem superstructureSubsystem){
       

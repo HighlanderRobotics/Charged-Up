@@ -26,7 +26,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
   ElevatorSubsystem elevatorSubsystem;
   ArmSubsystem armSubsystem;
   RoutingSubsystem routingSubsystem;
-  GrabberSubsystem grabberSubsystem;
+  RollerClawGrabberSubsystem grabberSubsystem;
   SwerveSubsystem swerveSubsystem;
   LEDSubsystem ledSubsystem;
 
@@ -42,7 +42,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
     ElevatorSubsystem elevatorSubsystem,
     ArmSubsystem armSubsystem,
     RoutingSubsystem routingSubsystem,
-    GrabberSubsystem grabberSubsystem,
+    RollerClawGrabberSubsystem grabberSubsystem,
     SwerveSubsystem swerveSubsystem,
     LEDSubsystem ledSubsystem
   ) {

@@ -7,7 +7,7 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.RollerClawGrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.commands.ScoringCommand;
@@ -49,7 +49,7 @@ public class RobotContainer {
   private ArmSubsystem armSubsystem = new ArmSubsystem();
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
-  private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
+  private RollerClawGrabberSubsystem grabberSubsystem = new RollerClawGrabberSubsystem();
   private LEDSubsystem ledSubsystem = new LEDSubsystem();
   
   private SuperstructureSubsystem superstructureSubsystem = 
