@@ -7,10 +7,10 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
-
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -20,7 +20,7 @@ import frc.robot.Constants;
 
 public class GreybotsGrabberSubsystem extends SubsystemBase {
   HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID, "CANivore", 1, 5e-1, 0.0, 0.0);
-
+  LinearFilter filter = LinearFilter.singlePoleIIR(0.1, 0.020);
 
   
   /** Creates a new GrabberSubsystem. */
@@ -51,7 +51,9 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
   
   public CommandBase intakeCubeCommand(){
-    return new RunCommand(() -> {intakeCube();}, this);
+    return new InstantCommand(() -> filter.reset()).andThen(
+      new RunCommand(() -> {intakeCube();}, this))
+      .until(() -> filter.calculate(grabber.getStatorCurrent()) > 20.0);
   }
 
   public CommandBase intakeConeCommand(){
