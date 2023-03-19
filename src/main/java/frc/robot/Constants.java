@@ -381,6 +381,12 @@ public final class Constants {
 
     public static final int grabberLimitSwitch = 1;
     public static final boolean isGrabberSwitchReversed = true; 
+
+    public static final double grabberScoringRotation = 1.0; //TODO: FIND BEFORE RUNNING
+    public static final double grabberSingleSubstationRotation = 1.0; //TODO: FIND BEFORE RUNNING
+    public static final double grabberDoubleSubstatoinRotation = 1.0; //TODO: FIND BEFORE RUNNING
+    public static final double grabberRoutingRotation = 1.0; //TODO: FIND BEFORE RUNNING
+    public static final double grabberStoringRotation = 1.0; //TODO: FIND BEFORE RUNNING
   }
 
   public static final class LEDConstants {

@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
+@Deprecated
 public class ArmSubsystem extends SubsystemBase{
     HighlanderFalcon armMotor;
     boolean enabled = true;

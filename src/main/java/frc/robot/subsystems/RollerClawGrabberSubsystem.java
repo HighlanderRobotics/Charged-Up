@@ -22,6 +22,7 @@ import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
+@Deprecated
 public class RollerClawGrabberSubsystem extends SubsystemBase {
   HighlanderFalcon grabber = new HighlanderFalcon(Constants.MechanismConstants.grabberID, "CANivore", 1, 5e-1, 0.0, 0.0);
   DoubleSolenoid solenoid = new DoubleSolenoid(
