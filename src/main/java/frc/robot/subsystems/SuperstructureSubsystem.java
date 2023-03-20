@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
@@ -24,9 +23,8 @@ import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 public class SuperstructureSubsystem extends SubsystemBase {
   IntakeSubsystem intakeSubsystem;
   ElevatorSubsystem elevatorSubsystem;
-  ArmSubsystem armSubsystem;
   RoutingSubsystem routingSubsystem;
-  RollerClawGrabberSubsystem grabberSubsystem;
+  GreybotsGrabberSubsystem grabberSubsystem;
   SwerveSubsystem swerveSubsystem;
   LEDSubsystem ledSubsystem;
 
@@ -40,15 +38,13 @@ public class SuperstructureSubsystem extends SubsystemBase {
   public SuperstructureSubsystem(
     IntakeSubsystem intakeSubsystem,
     ElevatorSubsystem elevatorSubsystem,
-    ArmSubsystem armSubsystem,
     RoutingSubsystem routingSubsystem,
-    RollerClawGrabberSubsystem grabberSubsystem,
+    GreybotsGrabberSubsystem grabberSubsystem,
     SwerveSubsystem swerveSubsystem,
     LEDSubsystem ledSubsystem
   ) {
     this.intakeSubsystem = intakeSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
-    this.armSubsystem = armSubsystem;
     this.routingSubsystem = routingSubsystem;
     this.grabberSubsystem = grabberSubsystem;
     this.swerveSubsystem = swerveSubsystem;
@@ -85,23 +81,15 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase scoreNoAim() {
     return this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
-    .deadlineWith(ledSubsystem.setRainbowCommand(), grabberSubsystem.closeCommand())
+    .deadlineWith(ledSubsystem.setRainbowCommand())
     .andThen(
       new WaitCommand(0.1),
       new ConditionalCommand(
-          grabberSubsystem.susL3Command()
-          .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
-          .withTimeout(0.5)
-          .andThen(new WaitCommand(0.2), grabberSubsystem.openCommand())
-          .andThen(new WaitCommand(0.2)), 
-          new ConditionalCommand(
-            grabberSubsystem.openCommand().andThen(new WaitCommand(0.2)), 
-            grabberSubsystem.outakeOpenCommand().withTimeout(0.3), 
-            () -> swerveSubsystem.isConeOveride), 
-          () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
-          )
-          .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)
-    );
+        grabberSubsystem.outakeConeCommand().andThen(new WaitCommand(0.2)), 
+        grabberSubsystem.outakeCubeCommand().withTimeout(0.3), 
+        () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
+      ));
+         // .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0);
   }
 
   @Override

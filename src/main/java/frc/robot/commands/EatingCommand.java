@@ -12,9 +12,8 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
-import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.RollerClawGrabberSubsystem;
+import frc.robot.subsystems.GreybotsGrabberSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -26,10 +25,9 @@ public class EatingCommand extends SequentialCommandGroup {
   /** Creates a new EatingCommand. */
   public EatingCommand(
     SuperstructureSubsystem superstructureSubsystem,
-    ElevatorSubsystem elevatorSubsystem, 
-    ArmSubsystem armSubsystem, 
+    ElevatorSubsystem elevatorSubsystem,
     SwerveSubsystem swerveSubsystem,
-    RollerClawGrabberSubsystem grabberSubsystem,
+    GreybotsGrabberSubsystem grabberSubsystem,
     LEDSubsystem ledSubsystem) 
    {
     // Add your commands in the addCommands() call, e.g.
@@ -56,8 +54,8 @@ public class EatingCommand extends SequentialCommandGroup {
           superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)), 
       // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
       //we're only picking up cones from the substations
-      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal() && armSubsystem.isAtSetpoint()),
-      grabberSubsystem.closeCommand()
+      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal())
+      //TODO: basically fix all of this + add both substations + differentiate between cones n cubes
     );
   }
 }

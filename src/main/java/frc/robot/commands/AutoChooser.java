@@ -11,19 +11,13 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
-import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.RollerClawGrabberSubsystem;
+import frc.robot.subsystems.GreybotsGrabberSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
@@ -35,8 +29,7 @@ public class AutoChooser {
     SwerveSubsystem swerveSubsystem;
     IntakeSubsystem intakeSubsystem;
     ElevatorSubsystem elevatorSubsystem;
-    ArmSubsystem armSubsystem;
-    RollerClawGrabberSubsystem grabberSubsystem;
+    GreybotsGrabberSubsystem grabberSubsystem;
     RoutingSubsystem routingSubsystem;
     HashMap<String, Command> eventMap = new HashMap<>();
     
@@ -44,16 +37,14 @@ public class AutoChooser {
     public AutoChooser(
       SwerveSubsystem swerveSubsystem,
       IntakeSubsystem intakeSubsystem, 
-      ElevatorSubsystem elevatorSubsystem, 
-      ArmSubsystem armSubsystem, 
-      RollerClawGrabberSubsystem grabberSubsystem, 
+      ElevatorSubsystem elevatorSubsystem,
+      GreybotsGrabberSubsystem grabberSubsystem, 
       RoutingSubsystem routingSubsystem,
       SuperstructureSubsystem superstructureSubsystem){
       
         this.intakeSubsystem = intakeSubsystem;
         this.swerveSubsystem = swerveSubsystem;
         this.elevatorSubsystem = elevatorSubsystem; 
-        this.armSubsystem = armSubsystem;
         this.grabberSubsystem = grabberSubsystem;
         this.routingSubsystem = routingSubsystem;
 
@@ -68,7 +59,7 @@ public class AutoChooser {
             new PrintCommand("bbbbbbbb"), 
             new InstantCommand(() -> {}, swerveSubsystem),
             new WaitCommand(1.0),
-            new PrintCommand("ccccccccccccccccccccccc")));
+            new PrintCommand("ccccccccccccccccccccccc"))); //bro who made these print commands
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem));
         eventMap.put("Score No Aim", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
@@ -91,8 +82,8 @@ public class AutoChooser {
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand(), 
           routingSubsystem.runCommand(), 
-          grabberSubsystem.intakeOpenCommand(),
-          armSubsystem.runToRoutingCommand()).withTimeout(4.0).asProxy()); 
+          //grabberSubsystem.intakeOpenCommand(), im not really sure what the equivalent of this would be
+          grabberSubsystem.runToRoutingCommand()).withTimeout(4.0).asProxy()); 
         eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
             () -> 1.0,
             () -> 0.0,
@@ -124,7 +115,7 @@ public class AutoChooser {
     //("TwoCone", new PathConstraints(4, 3));
     //HashMap<String, Command> Constants.eventMap = new HashMap<>();  
     }
-    
+
     public Command getAutoCommand(){
       return chooser.getSelected();
     }

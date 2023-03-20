@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -72,7 +71,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
     grabberRotation.set(ControlMode.Position, Constants.MechanismConstants.grabberStoringRotation);
   }
 
-  private void stop() {
+  public void stop() {
     // grabber.set(ControlMode.Velocity, 0); // might want to use PID hold
     grabberIntake.setPercentOut(0);
   }
@@ -106,6 +105,10 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   
   public CommandBase runToRoutingCommand() {
     return new InstantCommand(() -> goToRoutingRotation()).andThen(new RunCommand(() -> {}));
+  }
+
+  public boolean hasGamePiece() {
+	  return true; //TODO
   }
 
   @Override

@@ -255,7 +255,6 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public static CommandBase followLineCommand(
             ElevatorSubsystem elevatorSubsystem, 
-            ArmSubsystem armSubsystem, 
             double xStart, 
             double yStart, 
             double xEnd, 
@@ -283,7 +282,6 @@ public class ElevatorSubsystem extends SubsystemBase {
                     yState.position);
                 if (setpoint.isPresent()) {
                     elevatorSubsystem.setGoal(setpoint.get().getFirst());
-                    armSubsystem.setGoal(setpoint.get().getSecond());
                     // elevatorSubsystem.updateMech2d(setpoint.get());
                     SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
                     SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
@@ -293,14 +291,12 @@ public class ElevatorSubsystem extends SubsystemBase {
                 }
                 SmartDashboard.putNumber("t", timer.get());
             },
-            elevatorSubsystem, 
-            armSubsystem))
+            elevatorSubsystem))
             .until(() -> timer.get() > xProfile.totalTime() && timer.get() > yProfile.totalTime());
     }
 
     public static CommandBase followSplineCommand(
         ElevatorSubsystem elevatorSubsystem,
-        ArmSubsystem armSubsystem,
         Spline[] splines
     ) {
         Timer timer = new Timer();
@@ -318,7 +314,6 @@ public class ElevatorSubsystem extends SubsystemBase {
                     yState);
                 if (setpoint.isPresent()) {
                     elevatorSubsystem.setGoal(setpoint.get().getFirst());
-                    armSubsystem.setGoal(setpoint.get().getSecond());
                     // elevatorSubsystem.updateMech2d(setpoint.get());
                     SmartDashboard.putNumber("Elevator setpoint", setpoint.get().getFirst());
                     SmartDashboard.putNumber("Arm setpoint", setpoint.get().getSecond());
@@ -329,7 +324,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 SmartDashboard.putNumber("X target", xState);
                 SmartDashboard.putNumber("Y target", yState);
                 SmartDashboard.putNumber("t", timer.get());
-            }, elevatorSubsystem, armSubsystem));
+            }, elevatorSubsystem));
         }
         return new InstantCommand(() -> {
             timer.reset();
@@ -340,13 +335,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public static CommandBase followLinearTrajectoryCommand(
         ElevatorSubsystem elevatorSubsystem, 
-        ArmSubsystem armSubsystem, 
         List<Pair<Translation2d, Double>> p) {
         var sequence = new SequentialCommandGroup();
         for (int i = 0; i < p.size() - 1; i++) {
             sequence.addCommands(followLineCommand(
                 elevatorSubsystem, 
-                armSubsystem, 
                 p.get(i).getFirst().getX(), 
                 p.get(i).getFirst().getY(), 
                 p.get(i + 1).getFirst().getX(), 
@@ -356,7 +349,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         return sequence;
     }
 
-    public static CommandBase goToPoseCommand(ElevatorSubsystem elevatorSubsystem, ArmSubsystem armSubsystem, Translation2d endPose) {
+    public static CommandBase goToPoseCommand(ElevatorSubsystem elevatorSubsystem, Translation2d endPose) {
         SmartDashboard.putString("target pose", endPose.toString());
         Pair<Double, Double> goal;
         try {
@@ -368,8 +361,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("goal rotation", goal.getSecond());
         return new RunCommand(() -> {
             elevatorSubsystem.setGoal(goal.getFirst());
-            armSubsystem.setGoal(goal.getSecond());
-        }, elevatorSubsystem, armSubsystem);
+        }, elevatorSubsystem);
     }
     
     @Override
