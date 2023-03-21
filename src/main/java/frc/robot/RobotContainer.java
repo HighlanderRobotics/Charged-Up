@@ -137,7 +137,7 @@ public class RobotContainer {
       intakeSubsystem.runCommand(), 
       routingSubsystem.runCommand(), 
       greybotsGrabberSubsystem.intakeCubeCommand(),
-      greybotsGrabberSubsystem.goToRoutingRotation(),
+      greybotsGrabberSubsystem.runToRoutingCommand(),
       swerveSubsystem.setGamePieceOverride(false)));
     operator.y().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L3)));
     operator.b().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L2)));
@@ -154,17 +154,10 @@ public class RobotContainer {
       .alongWith(ledSubsystem.setRainbowCommand(), greybotsGrabberSubsystem.intakeConeDoubleCommand()))
       .onFalse(
         new ConditionalCommand(
-          greybotsGrabberSubsystem.goToScoringSubstationRotation()
-          .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
-          .withTimeout(0.5)
-          .andThen(new WaitCommand(0.2), greybotsGrabberSubsystem.intakeConeDoubleCommand())
-          .andThen(new WaitCommand(0.2)), 
-          new ConditionalCommand(
-            greybotsGrabberSubsystem.intakeConeDoubleCommand().andThen(new WaitCommand(0.2)), 
-            greybotsGrabberSubsystem.outakeConeCommand().withTimeout(1.0), 
-            () -> swerveSubsystem.isConeOveride), 
-          () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
-          )
+          greybotsGrabberSubsystem.scoreConeCommand(),
+          greybotsGrabberSubsystem.scoreCubeCommand(),
+          () -> swerveSubsystem.checkIfConeGoalWithOverride()
+        )
           .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
           // .andThen(swerveSubsystem.disableGamePieceOverride())
     ;
@@ -186,12 +179,11 @@ public class RobotContainer {
       
 
     isExtended.whileTrue(run(
-      intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming),
-      new WaitCommand(0.4).andThen(greybotsGrabberSubsystem.goToScoringSubstationRotation())));
+      intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming)));
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),
-      GreybotsGrabberSubsystem.runToRoutingCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)));
+      greybotsGrabberSubsystem.runToStorageCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)));
 
     superstructureSubsystem.storeTrigger.whileTrue(run(
       routingSubsystem.stopCommand()
@@ -220,6 +212,18 @@ public class RobotContainer {
     SmartDashboard.putData("driver assist tape allign", 
       swerveSubsystem.tapeDriveAssistCommand(
         () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis())));
+
+    SmartDashboard.putData("Rezero Grabber", greybotsGrabberSubsystem.resetPivotCommand());
+
+    SmartDashboard.putData("Run grabber to storage", greybotsGrabberSubsystem.runToStorageCommand());
+    SmartDashboard.putData("Run grabber to routing", greybotsGrabberSubsystem.runToRoutingCommand());
+    SmartDashboard.putData("Run grabber to scoring", greybotsGrabberSubsystem.runToScoringCommand());
+    SmartDashboard.putData("Run grabber to double substation", greybotsGrabberSubsystem.runToDoubleSubstationCommand());
+    SmartDashboard.putData("Run grabber to single substation", greybotsGrabberSubsystem.runToSingleSubstationCommand());
+
+    SmartDashboard.putData("Grabber intake cone single substation no extend", greybotsGrabberSubsystem.intakeConeSingleCommand());
+    SmartDashboard.putData("Grabber intake cone double substation no extend", greybotsGrabberSubsystem.intakeConeDoubleCommand());
+    SmartDashboard.putData("Grabber intake cube no extend", greybotsGrabberSubsystem.intakeCubeCommand());
   }
 
   private static Command run(Command ... commands) {

@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -21,20 +22,34 @@ import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
 public class GreybotsGrabberSubsystem extends SubsystemBase {
-  static HighlanderFalcon grabberIntake = new HighlanderFalcon(Constants.MechanismConstants.grabberID, "CANivore", 1, 5e-1, 0.0, 0.0);
-  static HighlanderFalcon grabberRotation = new HighlanderFalcon(Constants.MechanismConstants.grabberID, 1.0, 1.0, 0.0, 0.0);
-  ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(Constants.MechanismConstants.grabberLimitSwitch, false);
+  static HighlanderFalcon grabberIntake = new HighlanderFalcon(Constants.MechanismConstants.grabberIntakeID, "CANivore", 1, 5e-1, 0.0, 0.0);
+  static HighlanderFalcon grabberPivot = new HighlanderFalcon(
+    Constants.MechanismConstants.grabberPivotID, 
+    1.0, 
+    1.0e-2, 
+    0.0, 
+    0.0);
+  ReversibleDigitalInput resetLimitSwitch = new ReversibleDigitalInput(Constants.MechanismConstants.grabberLimitSwitch, false);
+  ReversibleDigitalInput cubeBeambreak = new ReversibleDigitalInput(Constants.MechanismConstants.grabberBeambreak, false);
   DutyCycleEncoder absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
-  LinearFilter filter = LinearFilter.singlePoleIIR(0.1, 0.020);
+  LinearFilter currentFilter = LinearFilter.singlePoleIIR(0.1, 0.020);
 
   /** Creates a new GrabberSubsystem. */
   public GreybotsGrabberSubsystem() {
     grabberIntake.configVoltageCompSaturation(10);
-    resetEncoderToAbs();
+    grabberIntake.setNeutralMode(NeutralMode.Brake);
+    grabberPivot.setNeutralMode(NeutralMode.Brake);
+    grabberPivot.setInverted(TalonFXInvertType.CounterClockwise);
+    grabberPivot.setSensorPhase(true);
   }
 
+  /** dont use. gonna just ignore the abs sensor for now, since teeth can skip */
   public void resetEncoderToAbs() {
-    grabberRotation.setSelectedSensorPosition(absEncoder.get() * 2048 * 20);
+    grabberPivot.setSelectedSensorPosition(absEncoder.get() * 2048 * 20);
+  }
+
+  public void resetEncoderToZero() {
+    grabberPivot.setSelectedSensorPosition(0);
   }
 
   private void intakeCube() {
@@ -54,42 +69,49 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   private void goToSingleSubstationRotation() {
-    grabberRotation.set(ControlMode.Position, Constants.MechanismConstants.grabberSingleSubstationRotation);
+    // grabberPivot.set(ControlMode.Position, Constants.MechanismConstants.grabberSingleSubstationRotation);
   }
 
   private void goToDoubleSubstationRotation() {
-    grabberRotation.set(ControlMode.Position, Constants.MechanismConstants.grabberDoubleSubstatoinRotation);
+    // grabberPivot.set(ControlMode.Position, Constants.MechanismConstants.grabberDoubleSubstationRotation);
   }
 
-  public CommandBase goToScoringSubstationRotation() {
-    return new RunCommand (() -> grabberRotation.set(ControlMode.Position, Constants.MechanismConstants.grabberScoringRotation));
+  private void goToScoringRotation() {
+    // grabberPivot.set(ControlMode.Position, Constants.MechanismConstants.grabberScoringRotation);
   }
 
-  public static CommandBase goToRoutingRotation() {
-    return new RunCommand(() -> grabberRotation.set(ControlMode.Position, Constants.MechanismConstants.grabberRoutingRotation));
+  private void goToRoutingRotation() {
+    // grabberPivot.set(ControlMode.Position, Constants.MechanismConstants.grabberRoutingRotation);
   }
 
   private void goToStorageRotation() {
-    grabberRotation.set(ControlMode.Position, Constants.MechanismConstants.grabberStoringRotation);
+    // grabberPivot.set(ControlMode.Position, Constants.MechanismConstants.grabberStoringRotation);
   }
 
   public void stop() {
     // grabber.set(ControlMode.Velocity, 0); // might want to use PID hold
     grabberIntake.setPercentOut(0);
+    grabberPivot.setPercentOut(0);
   }
 
   public CommandBase intakeCubeCommand(){
-    return new InstantCommand(() -> filter.reset()).andThen(
-      new RunCommand(() -> {intakeCube(); goToRoutingRotation();}, this))
-      .until(() -> filter.calculate(grabberIntake.getStatorCurrent()) > 20.0);
+    return new RunCommand(() -> {intakeCube(); goToRoutingRotation();}, this)
+      .until(() -> cubeBeambreak.get())
+      .finallyDo((boolean interrupt) -> stop());
   }
 
   public CommandBase intakeConeDoubleCommand(){
-    return new RunCommand(() -> {intakeCone(); goToDoubleSubstationRotation();}, this);
+    return new InstantCommand(() -> currentFilter.reset()).andThen(
+      new RunCommand(() -> {intakeCone(); goToDoubleSubstationRotation();}, this))
+      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 20.0)
+      .finallyDo((boolean interrupt) -> stop());
   }
   
   public CommandBase intakeConeSingleCommand(){
-    return new RunCommand(() -> {intakeCone(); goToSingleSubstationRotation();}, this);
+    return new InstantCommand(() -> currentFilter.reset()).andThen(
+      new RunCommand(() -> {intakeCone(); goToSingleSubstationRotation();}, this))
+      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 20.0)
+      .finallyDo((boolean interrupt) -> stop());
   }
 
   public CommandBase outakeCubeCommand(){
@@ -103,31 +125,52 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   public CommandBase runToStorageCommand() {
     return new InstantCommand(() -> goToStorageRotation()).andThen(new RunCommand(() -> {}));
   }
-  public CommandBase runL3(){
-    return new InstantCommand(() -> goToScoringSubstationRotation()).andThen(new RunCommand(() -> {}));
-  }
 
-  
- 
-  public static CommandBase runToRoutingCommand() {
+  public CommandBase runToRoutingCommand() {
     return new InstantCommand(() -> goToRoutingRotation()).andThen(new RunCommand(() -> {}));
   }
+
+  public CommandBase runToScoringCommand() {
+    return new InstantCommand(() -> goToScoringRotation()).andThen(new RunCommand(() -> {}));
+  }
+
+  public CommandBase runToSingleSubstationCommand() {
+    return new InstantCommand(() -> goToSingleSubstationRotation()).andThen(new RunCommand(() -> {}));
+  }
+
+  public CommandBase runToDoubleSubstationCommand() {
+    return new InstantCommand(() -> goToDoubleSubstationRotation()).andThen(new RunCommand(() -> {}));
+  }
+
+  public CommandBase scoreConeCommand() {
+    return runToScoringCommand().until(() -> grabberIntake.getClosedLoopError() < 1000.0)
+      .andThen(
+        outakeConeCommand()
+      );
+  }
+
+  public CommandBase scoreCubeCommand() {
+    return runToRoutingCommand().until(() -> grabberIntake.getClosedLoopError() < 1000.0)
+      .andThen(
+        outakeCubeCommand()
+      );
+  }
+
   public Command stopCommand() {
     return new RunCommand(() -> {stop();}, this);
   }
 
+  public CommandBase resetPivotCommand() {
+    return new RunCommand(() -> grabberPivot.set(ControlMode.PercentOutput, -0.1), this)
+      .until(() -> resetLimitSwitch.get())
+      .finallyDo((boolean interrupt) -> resetEncoderToZero());
+  }
+
   @Override
- public void periodic() {
+  public void periodic() {
     // This method will be called once per scheduler run
 
     SmartDashboard.putNumber("grabber output", grabberIntake.getMotorOutputPercent());
-
+    SmartDashboard.putNumber("grabber pivot angle", grabberPivot.getSelectedSensorPosition());
   }
-
-public Command openCommand() {
-    return null;
-}
-
-
-
 }

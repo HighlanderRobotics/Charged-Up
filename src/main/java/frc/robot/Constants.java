@@ -375,18 +375,20 @@ public final class Constants {
     public static final double routingKP = 1; // TODO: tune
     public static final double conveyerKP = 1; // TODO: tune
 
-    public static final int grabberID = 24;
+    public static final int grabberIntakeID = 24;
+    public static final int grabberPivotID = 27;
     public static final int grabberSolenoidFrontID = 2;
     public static final int grabberSolenoidBackID = 1;
 
     public static final int grabberLimitSwitch = 1;
-    public static final boolean isGrabberSwitchReversed = true; 
+    public static final int grabberBeambreak = 0;
 
-    public static final double grabberScoringRotation = 1.0; //TODO: FIND BEFORE RUNNING
-    public static final double grabberSingleSubstationRotation = 1.0; //TODO: FIND BEFORE RUNNING
-    public static final double grabberDoubleSubstatoinRotation = 1.0; //TODO: FIND BEFORE RUNNING
-    public static final double grabberRoutingRotation = 1.0; //TODO: FIND BEFORE RUNNING
-    public static final double grabberStoringRotation = 1.0; //TODO: FIND BEFORE RUNNING
+    // In falcon native units, before reduction because i was too lazy to do conversions
+    public static final double grabberScoringRotation = 8192; //TODO: FIND BEFORE RUNNING
+    public static final double grabberSingleSubstationRotation = 8192; //TODO: FIND BEFORE RUNNING
+    public static final double grabberDoubleSubstationRotation = 4096; //TODO: FIND BEFORE RUNNING
+    public static final double grabberRoutingRotation = 2048; //TODO: FIND BEFORE RUNNING
+    public static final double grabberStoringRotation = 1024; //TODO: FIND BEFORE RUNNING
   }
 
   public static final class LEDConstants {
