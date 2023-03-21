@@ -172,5 +172,6 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
 
     SmartDashboard.putNumber("grabber output", grabberIntake.getMotorOutputPercent());
     SmartDashboard.putNumber("grabber pivot angle", grabberPivot.getSelectedSensorPosition());
+    SmartDashboard.putBoolean("grabber reset limit switch", resetLimitSwitch.get());
   }
 }

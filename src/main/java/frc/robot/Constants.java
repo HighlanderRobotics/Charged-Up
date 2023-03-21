@@ -380,7 +380,7 @@ public final class Constants {
     public static final int grabberSolenoidFrontID = 2;
     public static final int grabberSolenoidBackID = 1;
 
-    public static final int grabberLimitSwitch = 1;
+    public static final int grabberLimitSwitch = 3;
     public static final int grabberBeambreak = 0;
 
     // In falcon native units, before reduction because i was too lazy to do conversions
