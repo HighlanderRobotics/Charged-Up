@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
@@ -111,6 +111,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   public CommandBase intakeCubeCommand(){
     return new RunCommand(() -> {intakeCube(); goToRoutingRotation();}, this)
       .until(() -> cubeBeambreak.get())
+      .andThen(new WaitCommand(0.25))
       .finallyDo((boolean interrupt) -> {stop(); gamePiece = GamePiece.Cube;});
   }
 
@@ -160,9 +161,11 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
 
   public CommandBase runToRoutingStopCommand() {
     return runToRoutingCommand()
-      .alongWith(
-        new RunCommand(() -> intakeCone()).withTimeout(1.0).unless(() -> gamePiece != GamePiece.Cone), 
-        new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0)).unless(() -> gamePiece == GamePiece.Cone));
+      .alongWith(new ConditionalCommand(
+        new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0.2))
+          .withTimeout(0.5).andThen(new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0))), 
+        new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0)),
+        () -> gamePiece == GamePiece.Cone));
   }
 
   public CommandBase scoreConeCommand() {

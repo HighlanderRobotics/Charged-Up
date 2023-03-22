@@ -127,7 +127,10 @@ public class RobotContainer {
     // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
     new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)
       .whileTrue(
-        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
+        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), new Color8Bit(Color.kGreen), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
+    new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube)
+      .whileTrue(
+        ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kGreen), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
       .andThen(new RunCommand(() -> {}, elevatorSubsystem)
@@ -140,6 +143,10 @@ public class RobotContainer {
     operator.b().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L2, greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
     operator.a().whileTrue(new InstantCommand (() -> swerveSubsystem.setLevel(ElevatorSubsystem.ScoringLevels.L1, greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
     operator.x().whileTrue(swerveSubsystem.autoBalance());
+
+    operator.povDown().onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone));
+    operator.povCenter().onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.None));
+    operator.povUp().onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube));
     // operator.leftBumper().onTrue(swerveSubsystem.setGamePieceOverride(true));
     // operator.rightBumper().onTrue(swerveSubsystem.setGamePieceOverride(false));
     // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -148,7 +155,8 @@ public class RobotContainer {
 
     controller.leftTrigger().whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
-      .alongWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.5).andThen(greybotsGrabberSubsystem.runToScoringCommand())))
+        .alongWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.2)
+        .andThen(greybotsGrabberSubsystem.runToScoringCommand().unless(() -> greybotsGrabberSubsystem.gamePiece != GamePiece.Cone))))
       .onFalse(
         new ConditionalCommand(
           greybotsGrabberSubsystem.scoreConeCommand(),
