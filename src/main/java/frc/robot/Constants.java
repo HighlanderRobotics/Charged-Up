@@ -320,8 +320,8 @@ public final class Constants {
     public static final int elevatorLimitSwitchID = 0;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.01);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(40.0,40.0);
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/5, 0.01);
+    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(60.0,80.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.19522/7, 0.0, 0.0139/2, elevatorConstraints);
         static {
           PIDController.setTolerance(
@@ -331,7 +331,7 @@ public final class Constants {
 
     public static final LinearSystem<N2, N1, N1> elevatorPlant = LinearSystemId.createElevatorSystem(
       DCMotor.getFalcon500(2), 
-      10.0, 
+      Units.lbsToKilograms(7.5), 
       1.75, // Do we need to multiple b/c cascading elevator?
       elevatorGearRatio);
 

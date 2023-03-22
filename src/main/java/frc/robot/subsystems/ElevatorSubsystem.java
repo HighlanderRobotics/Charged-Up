@@ -117,7 +117,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     
     public CommandBase zeroElevator() {
-        return new RunCommand(() -> setGoal(-1), this)
+        return new RunCommand(() -> setGoal(0), this)
             .until(() -> limitSwitch.get())
             .andThen(() -> elevatorMotor.setSelectedSensorPosition(0));
     }
@@ -176,7 +176,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (enabled) {
-            updateStateSpaceController();
+            updatePID();
         } else {
             elevatorMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, 0);
         }
