@@ -36,7 +36,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   ReversibleDigitalInput resetLimitSwitch = new ReversibleDigitalInput(Constants.MechanismConstants.grabberLimitSwitch, true);
   ReversibleDigitalInput cubeBeambreak = new ReversibleDigitalInput(Constants.MechanismConstants.grabberBeambreak, true);
   DutyCycleEncoder absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
-  LinearFilter currentFilter = LinearFilter.movingAverage(50);
+  LinearFilter currentFilter = LinearFilter.movingAverage(75);
 
   public GamePiece gamePiece = GamePiece.None;
 
@@ -116,8 +116,8 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   public CommandBase intakeConeDoubleCommand(){
-    return new InstantCommand(() -> currentFilter.reset()).andThen(
-      new RunCommand(() -> {intakeCone(); goToDoubleSubstationRotation();}, this))
+    return new InstantCommand(() -> {currentFilter.reset(); goToDoubleSubstationRotation();}).andThen(
+      new RunCommand(() -> intakeCone(), this))
       .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 50.0)
       .finallyDo((boolean interrupt) -> {stop(); gamePiece = GamePiece.Cone;})
       .andThen(new RunCommand(() -> intakeCone(), this).withTimeout(0.4));

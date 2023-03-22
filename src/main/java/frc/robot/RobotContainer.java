@@ -134,7 +134,7 @@ public class RobotContainer {
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
       .andThen(new RunCommand(() -> {}, elevatorSubsystem)
-      .alongWith(new WaitCommand(0.4).andThen(greybotsGrabberSubsystem.intakeConeDoubleCommand()))));
+      .alongWith(greybotsGrabberSubsystem.intakeConeDoubleCommand())));
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 
       routingSubsystem.runCommand(), 
