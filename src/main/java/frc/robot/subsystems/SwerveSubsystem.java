@@ -97,7 +97,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
-    public boolean isConeOveride = true;
     public double extensionInches = 0;
     public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
 
@@ -123,7 +122,7 @@ public class SwerveSubsystem extends SubsystemBase {
         // rightCamera.setLED(VisionLEDMode.kOff);
 
         leftCamera = new PhotonCamera("limelight-left");
-        leftCamera.setLED(VisionLEDMode.kOn);
+        leftCamera.setLED(VisionLEDMode.kOff);
 
         // leftCamera.setLED(VisionLEDMode.kOff);
 
@@ -312,13 +311,9 @@ public class SwerveSubsystem extends SubsystemBase {
         }
     }
 
-    public boolean checkIfConeGoalWithOverride() {
-        return isConeOveride;
-    }
-
-    public double getExtension(ElevatorSubsystem.ScoringLevels level) {
+    public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
         // System.out.println(nearestGoalIsCone);
-        if (isConeOveride) {
+        if (isCone) {
             return level.getConeInches();
         } else {
             return level.getCubeInches();
@@ -360,9 +355,6 @@ public class SwerveSubsystem extends SubsystemBase {
                 false,
                 false,
                 false);
-    }
-    public CommandBase setGamePieceOverride(boolean isCone) {
-        return new InstantCommand(() -> isConeOveride = isCone);
     }
 
     // public CommandBase disableGamePieceOverride() {
@@ -555,9 +547,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
         return value;
     }
-    public void setLevel(ElevatorSubsystem.ScoringLevels level){
+    public void setLevel(ElevatorSubsystem.ScoringLevels level, boolean isCone){
         extensionLevel = level;
-        extensionInches = getExtension(level);
+        extensionInches = getExtension(level, isCone);
     }
     public ElevatorSubsystem.ScoringLevels getLevel(){
         return extensionLevel;
@@ -626,7 +618,7 @@ public class SwerveSubsystem extends SubsystemBase {
         if (isInTapeMode) {
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(1);
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(1);
-            leftCamera.setLED(VisionLEDMode.kOn);
+            leftCamera.setLED(VisionLEDMode.kOff);
         } else {
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(0);
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
@@ -664,7 +656,7 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Heading error", headingController.getPositionError());
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
-        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2));
+        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, true));
         SmartDashboard.putString("alliance", DriverStation.getAlliance().toString());
         SmartDashboard.putNumber("gyro roll", gyro.getRoll());
         SmartDashboard.putNumber("gyro pitch", gyro.getPitch());
@@ -673,7 +665,6 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("can see targets", hasTargets());
         SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
         SmartDashboard.putBoolean("should lock out", lockOutSwerve);
-        SmartDashboard.putBoolean("is cone override", isConeOveride);
         
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());

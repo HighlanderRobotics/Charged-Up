@@ -30,6 +30,7 @@ import frc.robot.subsystems.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
+import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
 
 public class AutoChooser {
     SendableChooser<Command> chooser = new SendableChooser<Command>();
@@ -71,20 +72,20 @@ public class AutoChooser {
             new PrintCommand("ccccccccccccccccccccccc")));
         eventMap.put("Score L3", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, greybotsGrabberSubsystem, superstructureSubsystem));
         eventMap.put("Score No Aim", 
-          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
-          .alongWith(swerveSubsystem.setGamePieceOverride(true))
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Score L3 No Aim", 
-          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3))
-          .alongWith(swerveSubsystem.setGamePieceOverride(true))
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Score L2 No Aim", 
-          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
-          .alongWith(swerveSubsystem.setGamePieceOverride(true))
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Score L2 No Aim Cube", 
-          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
-          .alongWith(swerveSubsystem.setGamePieceOverride(false))
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
@@ -114,8 +115,8 @@ public class AutoChooser {
         chooser.addOption("1.5 + Park Bump", onePlusParkBottom());
         chooser.addOption("1 + Mobility", oneMobility());
         chooser.addOption("just score",  
-        new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2))
-        .alongWith(swerveSubsystem.setGamePieceOverride(true))
+        new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
+        .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
         .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
 
         SmartDashboard.putData("autoChooser", chooser);
