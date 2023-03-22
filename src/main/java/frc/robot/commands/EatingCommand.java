@@ -14,7 +14,7 @@ import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.GrabberSubsystem;
+import frc.robot.subsystems.RollerClawGrabberSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -29,7 +29,7 @@ public class EatingCommand extends SequentialCommandGroup {
     ElevatorSubsystem elevatorSubsystem, 
     ArmSubsystem armSubsystem, 
     SwerveSubsystem swerveSubsystem,
-    GrabberSubsystem grabberSubsystem,
+    RollerClawGrabberSubsystem grabberSubsystem,
     LEDSubsystem ledSubsystem) 
    {
     // Add your commands in the addCommands() call, e.g.

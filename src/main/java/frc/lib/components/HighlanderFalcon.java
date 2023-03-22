@@ -10,6 +10,8 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
+import edu.wpi.first.wpilibj2.command.CommandBase;
+
 /** A talonfx wrapper. Lazy talon functionality is taken from 254 */
 public class HighlanderFalcon extends TalonFX {
     private double lastSet = 0.0;

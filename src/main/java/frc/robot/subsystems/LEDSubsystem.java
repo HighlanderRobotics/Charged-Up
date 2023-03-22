@@ -74,6 +74,10 @@ public class LEDSubsystem extends SubsystemBase {
     return new RunCommand(() -> setBlinking(color, secOn.getAsDouble()), this);
   }
 
+  public CommandBase setBlinkingCommand(Color8Bit colorOn, Color8Bit colorOff, DoubleSupplier secOn) {
+    return new RunCommand(() -> setBlinking(colorOn, colorOff, secOn.getAsDouble(), secOn.getAsDouble()), this);
+  }
+
   public void setNoise(Color8Bit colorA, Color8Bit colorB, int value) {
     try {
       var image = ImageIO.read(new File(Filesystem.getDeployDirectory() + "/ledNoise.png"));

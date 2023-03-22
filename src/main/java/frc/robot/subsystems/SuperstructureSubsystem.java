@@ -20,14 +20,14 @@ import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
+import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
 
 public class SuperstructureSubsystem extends SubsystemBase {
   IntakeSubsystem intakeSubsystem;
   ElevatorSubsystem elevatorSubsystem;
-  ArmSubsystem armSubsystem;
   RoutingSubsystem routingSubsystem;
-  GrabberSubsystem grabberSubsystem;
   SwerveSubsystem swerveSubsystem;
+  GreybotsGrabberSubsystem greybotsGrabberSubsystem;
   LEDSubsystem ledSubsystem;
 
   ExtensionState mode = ExtensionState.RETRACT_AND_ROUTE;
@@ -40,17 +40,15 @@ public class SuperstructureSubsystem extends SubsystemBase {
   public SuperstructureSubsystem(
     IntakeSubsystem intakeSubsystem,
     ElevatorSubsystem elevatorSubsystem,
-    ArmSubsystem armSubsystem,
     RoutingSubsystem routingSubsystem,
-    GrabberSubsystem grabberSubsystem,
     SwerveSubsystem swerveSubsystem,
+    GreybotsGrabberSubsystem greybotsGrabberSubsystem,
     LEDSubsystem ledSubsystem
   ) {
     this.intakeSubsystem = intakeSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
-    this.armSubsystem = armSubsystem;
     this.routingSubsystem = routingSubsystem;
-    this.grabberSubsystem = grabberSubsystem;
+    this.greybotsGrabberSubsystem = greybotsGrabberSubsystem;
     this.swerveSubsystem = swerveSubsystem;
     this.ledSubsystem = ledSubsystem;
   }
@@ -71,8 +69,8 @@ public class SuperstructureSubsystem extends SubsystemBase {
   }
 
   public CommandBase waitExtendToGoal(Supplier<ScoringLevels> level) {
-    return new PrintCommand("extension target " + swerveSubsystem.getExtension(level.get()))
-      .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level.get())));
+    return new PrintCommand("extension target " + swerveSubsystem.getExtension(level.get(), greybotsGrabberSubsystem.gamePiece == GamePiece.Cone))
+      .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level.get(), greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
   }
 
   public CommandBase waitExtendToGoal(ScoringLevels level) {
@@ -85,20 +83,13 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase scoreNoAim() {
     return this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
-    .deadlineWith(ledSubsystem.setRainbowCommand(), grabberSubsystem.closeCommand())
+    .deadlineWith(ledSubsystem.setRainbowCommand())
     .andThen(
       new WaitCommand(0.1),
       new ConditionalCommand(
-          grabberSubsystem.susL3Command()
-          .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
-          .withTimeout(0.5)
-          .andThen(new WaitCommand(0.2), grabberSubsystem.openCommand())
-          .andThen(new WaitCommand(0.2)), 
-          new ConditionalCommand(
-            grabberSubsystem.openCommand().andThen(new WaitCommand(0.2)), 
-            grabberSubsystem.outakeOpenCommand().withTimeout(0.3), 
-            () -> swerveSubsystem.isConeOveride), 
-          () -> swerveSubsystem.isConeOveride && swerveSubsystem.getLevel() == ScoringLevels.L3
+          greybotsGrabberSubsystem.scoreConeCommand(),
+          greybotsGrabberSubsystem.scoreCubeCommand(), 
+          () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone
           )
           .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)
     );

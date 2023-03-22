@@ -317,7 +317,7 @@ public final class Constants {
   public static final class ElevatorConstants {
     public static final int elevatorMotorID = 25;
     public static final int elevatorFollowerID = 26;
-    public static final int elevatorLimitSwitchID = 2;
+    public static final int elevatorLimitSwitchID = 0;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/4, 0.01);
@@ -388,7 +388,7 @@ public final class Constants {
 
   public static final class ArmConstants {
     public static final int armMotorID = 27;
-    public static final int armEncoderID = 0;
+    public static final int armEncoderID = 1;
     // TODO: Check with actual robot
     public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
@@ -419,12 +419,20 @@ public final class Constants {
     public static final double routingKP = 1; // TODO: tune
     public static final double conveyerKP = 1; // TODO: tune
 
-    public static final int grabberID = 24;
+    public static final int grabberIntakeID = 24;
+    public static final int grabberPivotID = 27;
     public static final int grabberSolenoidFrontID = 2;
     public static final int grabberSolenoidBackID = 1;
 
-    public static final int grabberLimitSwitch = 1;
-    public static final boolean isGrabberSwitchReversed = true; 
+    public static final int grabberLimitSwitch = 3;
+    public static final int grabberBeambreak = 2;
+
+    // In falcon native units, before reduction because i was too lazy to do conversions
+    public static final double grabberScoringRotation = 3.8e4;
+    public static final double grabberSingleSubstationRotation = 4.2e4;
+    public static final double grabberDoubleSubstationRotation = 3.6e4;
+    public static final double grabberRoutingRotation = 2e3;
+    public static final double grabberStoringRotation = 1e3;
   }
 
   public static final class LEDConstants {
