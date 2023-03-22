@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
@@ -36,7 +37,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   ReversibleDigitalInput resetLimitSwitch = new ReversibleDigitalInput(Constants.MechanismConstants.grabberLimitSwitch, true);
   ReversibleDigitalInput cubeBeambreak = new ReversibleDigitalInput(Constants.MechanismConstants.grabberBeambreak, true);
   DutyCycleEncoder absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
-  LinearFilter currentFilter = LinearFilter.movingAverage(75);
+  LinearFilter currentFilter = LinearFilter.movingAverage(50);
 
   public GamePiece gamePiece = GamePiece.None;
 
@@ -57,6 +58,14 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
     goToStorageRotation();
   }
 
+  public boolean getBeambreak() {
+    return cubeBeambreak.get();
+  }
+
+  public boolean getIsExtended() {
+    return grabberPivot.getSelectedSensorPosition() > 1.0e4;
+  }
+
   /** dont use. gonna just ignore the abs sensor for now, since teeth can skip */
   public void resetEncoderToAbs() {
     grabberPivot.setSelectedSensorPosition(absEncoder.get() * 2048 * 20);
@@ -67,7 +76,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   private void intakeCube() {
-    grabberIntake.setPercentOut(-0.9); // TODO: find best value
+    grabberIntake.setPercentOut(-0.7); // TODO: find best value
   }
 
   private void outakeCube() {
@@ -79,7 +88,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   private static void outakeCone() {
-    grabberIntake.setPercentOut(-0.9);
+    grabberIntake.setPercentOut(-0.3);
   }
 
   private void goToSingleSubstationRotation() {
@@ -118,15 +127,18 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   public CommandBase intakeConeDoubleCommand(){
     return new InstantCommand(() -> {currentFilter.reset(); goToDoubleSubstationRotation();}).andThen(
       new RunCommand(() -> intakeCone(), this))
-      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 50.0)
-      .finallyDo((boolean interrupt) -> {stop(); gamePiece = GamePiece.Cone;})
-      .andThen(new RunCommand(() -> intakeCone(), this).withTimeout(0.4));
+      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
+      .andThen(
+        new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
+        new InstantCommand(() -> stop()), 
+        new InstantCommand(() -> gamePiece = GamePiece.Cone),
+        runToRoutingCommand());
   }
   
   public CommandBase intakeConeSingleCommand(){
     return new InstantCommand(() -> currentFilter.reset()).andThen(
       new RunCommand(() -> {intakeCone(); goToSingleSubstationRotation();}, this))
-      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 50.0)
+      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
       .finallyDo((boolean interrupt) -> {stop(); gamePiece = GamePiece.Cone;})
       .andThen(new RunCommand(() -> intakeCone(), this).withTimeout(0.4));
   }
@@ -169,16 +181,17 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   public CommandBase scoreConeCommand() {
-    return runToScoringCommand().until(() -> grabberIntake.getClosedLoopError() < 1000.0)
+    return runToScoringCommand().raceWith(new RunCommand(() -> grabberIntake.setPercentOut(0)))
+      .raceWith(new WaitCommand(0.2).andThen(new WaitUntilCommand(() -> grabberIntake.getClosedLoopError() < 500.0)))
       .andThen(
-        outakeConeCommand()
+        outakeConeCommand().withTimeout(0.5)
       );
   }
 
   public CommandBase scoreCubeCommand() {
     return runToRoutingCommand().until(() -> grabberIntake.getClosedLoopError() < 1000.0)
       .andThen(
-        outakeCubeCommand()
+        outakeCubeCommand().withTimeout(0.5)
       );
   }
 
@@ -188,7 +201,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
 
   public CommandBase resetPivotCommand() {
     return new FunctionalCommand(
-      () -> {}, 
+      () -> grabberIntake.set(ControlMode.PercentOutput, 0.0), 
       () -> grabberPivot.set(ControlMode.PercentOutput, -0.1), 
       (interrupt) -> {if (!interrupt) {resetEncoderToZero();} stop();}, 
       () -> {return resetLimitSwitch.get();},

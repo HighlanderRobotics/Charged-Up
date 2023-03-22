@@ -63,7 +63,10 @@ public class RobotContainer {
   private final CommandXboxController operator =
       new CommandXboxController(OperatorConstants.operatorControllerPort);
 
-  Trigger isExtended = new Trigger(() -> elevatorSubsystem.getExtensionInches() > 4.5 || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5);
+  Trigger isExtended = new Trigger(() -> 
+    elevatorSubsystem.getExtensionInches() > 4.5 || 
+    Constants.ElevatorConstants.PIDController.getGoal().position > 4.5 || 
+    greybotsGrabberSubsystem.getIsExtended());
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -79,9 +82,14 @@ public class RobotContainer {
     // this is a little sus, might have to change logic to use subsystems separately or combine routing and intake subsystem
     elevatorSubsystem.setDefaultCommand(
       elevatorSubsystem.extendToInchesCommand(1.0)
-      .andThen(elevatorSubsystem.zeroElevator().repeatedly()
+      .andThen(
+        elevatorSubsystem.zeroElevator(),
+        new StartEndCommand(() -> elevatorSubsystem.disable(), () -> elevatorSubsystem.enable(), elevatorSubsystem)
         ));
-    greybotsGrabberSubsystem.setDefaultCommand(greybotsGrabberSubsystem.runToRoutingStopCommand());
+    greybotsGrabberSubsystem.setDefaultCommand(
+      greybotsGrabberSubsystem.resetPivotCommand().unless(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone).andThen(
+      greybotsGrabberSubsystem.runToRoutingStopCommand()
+    ));
     intakeSubsystem.setDefaultCommand(new WaitCommand(0.7)
       .andThen(new ConditionalCommand(
         intakeSubsystem.extendCommand(), 
@@ -128,13 +136,14 @@ public class RobotContainer {
     new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)
       .whileTrue(
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), new Color8Bit(Color.kGreen), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
-    new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube)
+    new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube && greybotsGrabberSubsystem.getBeambreak())
       .whileTrue(
         ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kGreen), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     controller.leftBumper().whileTrue(
       superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
-      .andThen(new RunCommand(() -> {}, elevatorSubsystem)
-      .alongWith(greybotsGrabberSubsystem.intakeConeDoubleCommand())));
+      .andThen(new RunCommand(() -> {}, elevatorSubsystem))).onTrue(
+        greybotsGrabberSubsystem.intakeConeDoubleCommand().raceWith(
+        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 
       routingSubsystem.runCommand(), 
@@ -155,14 +164,13 @@ public class RobotContainer {
 
     controller.leftTrigger().whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
-        .alongWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.2)
-        .andThen(greybotsGrabberSubsystem.runToScoringCommand().unless(() -> greybotsGrabberSubsystem.gamePiece != GamePiece.Cone))))
+        .alongWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.4).andThen(greybotsGrabberSubsystem.runToScoringCommand())))
       .onFalse(
         new ConditionalCommand(
-          greybotsGrabberSubsystem.scoreConeCommand(),
           greybotsGrabberSubsystem.scoreCubeCommand(),
-          () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone
-        ).alongWith(new RunCommand(() -> {}, elevatorSubsystem)).withTimeout(0.5)
+          greybotsGrabberSubsystem.scoreConeCommand(),
+          () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
+        ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
         .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
     controller.rightTrigger().whileTrue(swerveSubsystem.tapeDriveAssistCommand(
       () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()))
