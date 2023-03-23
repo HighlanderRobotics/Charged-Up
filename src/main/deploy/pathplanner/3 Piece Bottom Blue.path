@@ -26,22 +26,22 @@
     },
     {
       "anchorPoint": {
-        "x": 6.264835164835164,
-        "y": 0.6989010989010981
+        "x": 6.944259302052438,
+        "y": 0.7734983891020438
       },
       "prevControl": {
-        "x": 5.580494505494506,
-        "y": 0.5532967032967028
+        "x": 6.25991864271178,
+        "y": 0.6278939934976485
       },
       "nextControl": {
-        "x": 5.580494505494506,
-        "y": 0.5532967032967028
+        "x": 6.25991864271178,
+        "y": 0.6278939934976485
       },
       "holonomicAngle": 14.620873988631653,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": true,
+      "isStopPoint": false,
       "stopEvent": {
         "names": [
           "Intake"
@@ -80,22 +80,22 @@
     },
     {
       "anchorPoint": {
-        "x": 6.556043956043956,
-        "y": 1.6307692307692299
+        "x": 6.954304735677139,
+        "y": 1.968904990441561
       },
       "prevControl": {
-        "x": 6.250274725274726,
-        "y": 0.7425824175824173
+        "x": 6.648535504907909,
+        "y": 1.0807181772547485
       },
       "nextControl": {
-        "x": 6.250274725274726,
-        "y": 0.7425824175824173
+        "x": 6.648535504907909,
+        "y": 1.0807181772547485
       },
       "holonomicAngle": 49.707852244372276,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": true,
+      "isStopPoint": false,
       "stopEvent": {
         "names": [
           "Intake"

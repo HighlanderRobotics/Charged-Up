@@ -52,7 +52,7 @@ public class RobotContainer {
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
   private LEDSubsystem ledSubsystem = new LEDSubsystem();
-  private static GreybotsGrabberSubsystem greybotsGrabberSubsystem = new GreybotsGrabberSubsystem();
+  private GreybotsGrabberSubsystem greybotsGrabberSubsystem = new GreybotsGrabberSubsystem();
   
   private SuperstructureSubsystem superstructureSubsystem = 
     new SuperstructureSubsystem(intakeSubsystem, elevatorSubsystem, routingSubsystem, swerveSubsystem, greybotsGrabberSubsystem, ledSubsystem);
@@ -68,7 +68,7 @@ public class RobotContainer {
     Constants.ElevatorConstants.PIDController.getGoal().position > 4.5 || 
     greybotsGrabberSubsystem.getIsExtended());
   
-  boolean shouldUseChute = false;
+  boolean shouldUseChute = true;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {

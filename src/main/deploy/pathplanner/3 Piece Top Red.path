@@ -206,5 +206,18 @@
   "maxVelocity": 5.0,
   "maxAcceleration": 5.0,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 1.6969696969696508,
+      "names": [
+        "Intake"
+      ]
+    },
+    {
+      "position": 4.412121212121118,
+      "names": [
+        "Intake"
+      ]
+    }
+  ]
 }

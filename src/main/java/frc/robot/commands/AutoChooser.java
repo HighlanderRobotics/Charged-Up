@@ -39,7 +39,6 @@ public class AutoChooser {
     SwerveSubsystem swerveSubsystem;
     IntakeSubsystem intakeSubsystem;
     ElevatorSubsystem elevatorSubsystem;
-    ArmSubsystem armSubsystem;
     GreybotsGrabberSubsystem greybotsGrabberSubsystem;
     RoutingSubsystem routingSubsystem;
     HashMap<String, Command> eventMap = new HashMap<>();
@@ -56,7 +55,6 @@ public class AutoChooser {
         this.intakeSubsystem = intakeSubsystem;
         this.swerveSubsystem = swerveSubsystem;
         this.elevatorSubsystem = elevatorSubsystem; 
-        this.armSubsystem = armSubsystem;
         this.greybotsGrabberSubsystem = greybotsGrabberSubsystem;
         this.routingSubsystem = routingSubsystem;
 
@@ -120,6 +118,8 @@ public class AutoChooser {
         chooser.addOption("1.5 + Park Bump", onePlusParkBottom());
         chooser.addOption("1 + Mobility", oneMobility());
         chooser.addOption("Apriltags Test", apriltagsTest());
+        chooser.addOption("3 Piece Flat", threeTop());
+        chooser.addOption("3 Piece Bump", threeBottom());
         chooser.addOption("just score",  
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
@@ -163,6 +163,10 @@ public class AutoChooser {
 
       public Command threeTop() {
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Top Blue", "3 Piece Top Red"));
+      }
+
+      public Command threeBottom() {
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Bottom Blue", "3 Piece Bottom Red"));
       }
 
       private static Command run(Command ... commands) {

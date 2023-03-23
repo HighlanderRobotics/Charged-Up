@@ -115,17 +115,7 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.enableContinuousInput(0, Math.PI * 2);
         headingController.setTolerance(0.15);
 
-<<<<<<< HEAD
-        // rightCamera = new PhotonCamera("limelight-right");
-        // rightCamera.setLED(VisionLEDMode.kOff);
-
-        leftCamera = new PhotonCamera("limelight-left");
-        leftCamera.setLED(VisionLEDMode.kOff);
-
-        // leftCamera.setLED(VisionLEDMode.kOff);
-=======
         
->>>>>>> apriltags-5026-code
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -327,7 +317,7 @@ public class SwerveSubsystem extends SubsystemBase {
                 new PIDConstants(Constants.AutoConstants.kPThetaController, 0.0, 0.0), // PID constants to correct for rotation error (used to create the rotation controller)
                 this::setModuleStates, // Module states consumer used to output to the drive subsystem
                 eventMap,
-                true, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
+                false, // Should the path be automatically mirrored depending on alliance color. Optional, defaults to true
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
     }
@@ -374,30 +364,11 @@ public class SwerveSubsystem extends SubsystemBase {
     /** Resets the pose estimator to the given pose */
     public void resetOdometry(Pose2d pose) {
         hasResetOdometry = true;
-        // zeroGyro(pose.getRotation().getDegrees());
+        zeroGyro(pose.getRotation().getDegrees());
         poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
         wheelOnlyOdo.resetPosition(getYaw(), getModulePositions(), pose);
         System.out.println("odometry reset " + pose.toString());
     }
-
-
-    
-  /**Processes the vision result.
-   * 
-   * @return a pair of the list of poses from each target, and the timestamp of the result
-   */
-  
-
-    /**
-     * Estimates the pose of the robot in the field coordinate system, given the id of the fiducial, the robot relative to the
-     * camera, and the target relative to the camera.
-     * Stolen from mdurrani834
-     * @param tagPose Pose3d the field relative pose of the target
-     * @param robotToCamera Transform3d of the robot relative to the camera. Origin of the robot is defined as the center.
-     * @param cameraToTarget Transform3d of the target relative to the camera, returned by PhotonVision
-     * @return Pose Robot position relative to the field.
-     */
-
 
     /** @return the current state of each of the swerve modules, including current speed */
     public SwerveModuleState[] getModuleStates(){
@@ -462,24 +433,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
         List<VisionMeasurement> visionMeasurements = visionSubsystem.getEstimatedGlobalPose(pose);
 
-<<<<<<< HEAD
-        if (isInTapeMode) {
-            // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(1);
-            // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(1);
-            leftCamera.setLED(VisionLEDMode.kOff);
-        } else {
-            // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(0);
-            // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
-            // leftCamera.setLED(VisionLEDMode.kOff);
-        }
-=======
         for (VisionMeasurement measurement : visionMeasurements) {
             poseEstimator.addVisionMeasurement(
                 measurement.estimation.estimatedPose.toPose2d(),
                 measurement.estimation.timestampSeconds,
                 measurement.confidence);
           }
->>>>>>> apriltags-5026-code
 
         // Log swerve module information
         // May want to disable to conserve bandwidth

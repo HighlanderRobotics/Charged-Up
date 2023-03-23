@@ -83,15 +83,15 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase scoreNoAim() {
     return this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
-    .deadlineWith(ledSubsystem.setRainbowCommand())
-    .andThen(
-      new WaitCommand(0.1),
-      new ConditionalCommand(
-          greybotsGrabberSubsystem.scoreConeCommand(),
-          greybotsGrabberSubsystem.scoreCubeCommand(), 
-          () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone
-          )
-          .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)
+      .deadlineWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.4).andThen(greybotsGrabberSubsystem.runToScoringCommand()))
+      .withTimeout(1.0)
+    .andThen(new ConditionalCommand(
+      greybotsGrabberSubsystem.scoreCubeCommand(),
+      greybotsGrabberSubsystem.scoreConeCommand(),
+      () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
+    ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
+    .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0),
+    elevatorSubsystem.extendToInchesCommand(1.0)
     );
   }
 

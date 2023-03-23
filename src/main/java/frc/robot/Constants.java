@@ -136,7 +136,7 @@ public final class Constants {
 
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 3; //TODO: This must be tuned to specific robot
+    public static final double maxSpeed = 4; //TODO: This must be tuned to specific robot
     /** Radians per Second */
     public static final double maxAngularVelocity = 10.0; //TODO: This must be tuned to specific robot
 
@@ -187,7 +187,7 @@ public final class Constants {
   }
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
-    public static final double maxSpeedMetersPerSecond = 5.25;
+    public static final double maxSpeedMetersPerSecond = 3;
     public static final double maxAccelerationMetersPerSecondSquared = 5;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
@@ -195,8 +195,8 @@ public final class Constants {
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPYController = 2.5;
-    public static final double kPXController = 2.5;
+    public static final double kPXController = 4.0;
+    public static final double kPYController = 4.0;
     public static final double kPThetaController = 1.3;
     public static final double kDThetaController = 0.0;
 
@@ -469,14 +469,14 @@ public final class Constants {
 
     public static final List<VisionSource> VISION_SOURCES =
         List.of(
-            new VisionSource(
-                "limelight-right",
-                new Transform3d(
-                  new Translation3d(
-                    Units.inchesToMeters(-8),
-                    Units.inchesToMeters(-9.75), 
-                    Units.inchesToMeters(-22.75)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(-5)))),
+            // new VisionSource(
+            //     "limelight-right",
+            //     new Transform3d(
+            //       new Translation3d(
+            //         Units.inchesToMeters(-8),
+            //         Units.inchesToMeters(-9.75), 
+            //         Units.inchesToMeters(-22.75)),
+            //       new Rotation3d(0, 0, Units.degreesToRadians(-5)))),
             new VisionSource(
                 "limelight-left",
                 new Transform3d(
@@ -516,7 +516,7 @@ public final class Constants {
                 );
 
     /** The distance at which tag distance is factored into deviation */
-    public static final double NOISY_DISTANCE_METERS = 2.5;
+    public static final double NOISY_DISTANCE_METERS = 1.5;
 
     /**
      * The number to multiply by the smallest of the distance minus the above constant, clamped

@@ -175,7 +175,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        enabled = false;
         if (enabled) {
             updatePID();
         } else {
@@ -192,10 +191,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Basically, dont remove this line it's load bearing
         SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
 
-        // SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
-        // SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
+        SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+        SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
         // SmartDashboard.putNumber("elevator native position", getMeasurement());
-        // SmartDashboard.putBoolean("elevator enable", enabled);
+        SmartDashboard.putBoolean("elevator enable", enabled);
         SmartDashboard.putBoolean("elevator limit switch", limitSwitch.get());
         // SmartDashboard.putBoolean("elevator is at goal", isAtGoal());
     }
