@@ -13,6 +13,7 @@ import com.pathplanner.lib.PathConstraints;
 
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.DifferentialDriveFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
@@ -32,6 +33,7 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
@@ -186,15 +188,15 @@ public final class Constants {
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 5.25;
-    public static final double maxAccelerationMetersPerSecondSquared = 2;
+    public static final double maxAccelerationMetersPerSecondSquared = 5;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPYController = 1.5;
-    public static final double kPXController = 1.5;
+    public static final double kPYController = 2.5;
+    public static final double kPXController = 2.5;
     public static final double kPThetaController = 1.3;
     public static final double kDThetaController = 0.0;
 
@@ -453,4 +455,91 @@ public final class Constants {
   }
 
   public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them
+
+  /** For 5026 vision code */
+  public static final class Vision {
+    public static class VisionSource {
+      public String name;
+      public Transform3d robotToCamera;
+      public VisionSource (String name, Transform3d robotToCamera) {
+        this.name = name;
+        this.robotToCamera = robotToCamera;
+      }
+    }
+
+    public static final List<VisionSource> VISION_SOURCES =
+        List.of(
+            new VisionSource(
+                "limelight-right",
+                new Transform3d(
+                  new Translation3d(
+                    Units.inchesToMeters(-8),
+                    Units.inchesToMeters(-9.75), 
+                    Units.inchesToMeters(-22.75)),
+                  new Rotation3d(0, 0, Units.degreesToRadians(-5)))),
+            new VisionSource(
+                "limelight-left",
+                new Transform3d(
+                  new Translation3d(
+                    Units.inchesToMeters(-8),
+                    Units.inchesToMeters(9.75), 
+                    Units.inchesToMeters(-22.75)),
+                  new Rotation3d(0, 0, Units.degreesToRadians(5)))));
+  }
+
+  /** For 5026 vision code */
+  public static final class PoseEstimator {
+    /**
+     * Standard deviations of model states. Increase these numbers to trust your model's state
+     * estimates less. This matrix is in the form [x, y, theta]ᵀ, with units in meters and radians.
+     */
+    public static final Matrix<N3, N1> STATE_STANDARD_DEVIATIONS =
+        Matrix.mat(Nat.N3(), Nat.N1())
+            .fill(
+                0.1, // x
+                0.1, // y
+                0.1 // theta
+                );
+
+    /**
+     * Standard deviations of the vision measurements. Increase these numbers to trust global
+     * measurements from vision less. This matrix is in the form [x, y, theta]ᵀ, with units in
+     * meters and radians.
+     */
+    public static final Matrix<N3, N1> VISION_MEASUREMENT_STANDARD_DEVIATIONS =
+        Matrix.mat(Nat.N3(), Nat.N1())
+            .fill(
+                // if these numbers are less than one, multiplying will do bad things
+                1, // x
+                1, // y
+                1 * Math.PI // theta
+                );
+
+    /** The distance at which tag distance is factored into deviation */
+    public static final double NOISY_DISTANCE_METERS = 2.5;
+
+    /**
+     * The number to multiply by the smallest of the distance minus the above constant, clamped
+     * above 1 to be the numerator of the fraction.
+     */
+    public static final double DISTANCE_WEIGHT = 7;
+
+    /**
+     * The number to multiply by the number of tags beyond the first to get the denominator of the
+     * deviations matrix.
+     */
+    public static final double TAG_PRESENCE_WEIGHT = 10;
+
+    /** The amount to shift the pose ambiguity by before multiplying it. */
+    public static final double POSE_AMBIGUITY_SHIFTER = .2;
+
+    /** The amount to multiply the pose ambiguity by if there is only one tag. */
+    public static final double POSE_AMBIGUITY_MULTIPLIER = 4;
+
+    /** about one inch */
+    public static final double DRIVE_TO_POSE_XY_ERROR_MARGIN_METERS = .05;
+
+    public static final double DRIVE_TO_POSE_THETA_ERROR_MARGIN_DEGREES = 2;
+  }
+
 }

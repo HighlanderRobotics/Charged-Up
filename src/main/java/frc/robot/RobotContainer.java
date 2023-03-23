@@ -184,9 +184,6 @@ public class RobotContainer {
           () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
         ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
         .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
-    controller.rightTrigger().whileTrue(swerveSubsystem.tapeDriveAssistCommand(
-      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()))
-      .withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), greybotsGrabberSubsystem.outakeCubeCommand())));
     controller.y().whileTrue(swerveSubsystem.autoBalance());
@@ -229,16 +226,12 @@ public class RobotContainer {
 
     SmartDashboard.putData("reset elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem).ignoringDisable(true));
     
-    SmartDashboard.putData("reset to vision", swerveSubsystem.resetIfTargets());
     SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
   
 
     SmartDashboard.putData("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
 
     SmartDashboard.putData("scoring sequence", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, greybotsGrabberSubsystem, superstructureSubsystem));
-    SmartDashboard.putData("driver assist tape allign", 
-      swerveSubsystem.tapeDriveAssistCommand(
-        () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis())));
 
     SmartDashboard.putData("Rezero Grabber", greybotsGrabberSubsystem.resetPivotCommand().alongWith(intakeSubsystem.extendCommand()));
 

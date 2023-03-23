@@ -175,6 +175,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        enabled = false;
         if (enabled) {
             updatePID();
         } else {

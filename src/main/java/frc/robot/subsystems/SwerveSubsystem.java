@@ -5,6 +5,7 @@ import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
+import frc.robot.subsystems.VisionSubsystem.VisionMeasurement;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -82,14 +83,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public Field2d field = new Field2d();
 
-    private PhotonCamera rightCamera = null;
-    private PhotonPipelineResult rightResult = null;
-    private double lastVisionFrameTimestamp = 0;
-    private PhotonCamera leftCamera = null;
-    private PhotonPipelineResult leftResult = null;
-    private AprilTagFieldLayout fieldLayout;
     private boolean isInTapeMode = true;
     private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
+
+    private VisionSubsystem visionSubsystem = new VisionSubsystem();
 
     public boolean hasResetOdometry = false;
 
@@ -118,6 +115,7 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.enableContinuousInput(0, Math.PI * 2);
         headingController.setTolerance(0.15);
 
+<<<<<<< HEAD
         // rightCamera = new PhotonCamera("limelight-right");
         // rightCamera.setLED(VisionLEDMode.kOff);
 
@@ -125,6 +123,9 @@ public class SwerveSubsystem extends SubsystemBase {
         leftCamera.setLED(VisionLEDMode.kOff);
 
         // leftCamera.setLED(VisionLEDMode.kOff);
+=======
+        
+>>>>>>> apriltags-5026-code
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -152,11 +153,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
         wheelOnlyOdo = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
         
-        try {
-            fieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2023ChargedUp.m_resourceFile);
-        } catch (Exception e) {
-            System.out.print("Failed to initialize apriltag layout");
-        }
     }
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
@@ -372,7 +368,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Return the pose of the drivebase, as estimated by the pose estimator. */
     public Pose2d getPose() {
-        return wheelOnlyOdo.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     /** Resets the pose estimator to the given pose */
@@ -384,104 +380,13 @@ public class SwerveSubsystem extends SubsystemBase {
         System.out.println("odometry reset " + pose.toString());
     }
 
-    /** Updates the pose estimator from a (presumably vision) measurement
-     * Input is in the form of a list of pose2ds and a latency measurement
-     */
-    public void addVisionMeasurement(Pair<List<Pose2d>, Double> data){
-        if (data != null) {
-            SmartDashboard.putNumber("tinestamp", data.getSecond());
-            field.getObject("Latest Vision Pose").setPoses(data.getFirst());
-            for (Pose2d pose : data.getFirst()){
-                // Data is in milliseconds, need to convert to seconds
-                poseEstimator.addVisionMeasurement(pose, data.getSecond());
-                zeroGyro(pose.getRotation().getDegrees());
-            }
-        }
-    }
 
     
   /**Processes the vision result.
    * 
    * @return a pair of the list of poses from each target, and the timestamp of the result
    */
-  public Pair<List<Pose2d>, Double> getEstimatedPose(Transform3d cameraToRobot, PhotonPipelineResult result){
-    // Only do work if we actually have targets, if we don't return null
-    if (result.hasTargets()){
-      // List that we're going to return later
-      List<Pose2d> poses = new ArrayList<Pose2d>();
-      // Loop through all the targets
-      for (PhotonTrackedTarget target : result.getTargets()){
-        if (2.5 < target.getBestCameraToTarget().getTranslation().getDistance(new Translation3d(0, new Rotation3d()))){
-            System.out.println("Too far from apriltag");
-            continue;
-        }
-        // Use a switch statement to lookup the pose of the marker
-        // Later will switch this to use wpilibs json file to lookup pose of marker
-        Pose3d targetPose3d = new Pose3d();
-        if (fieldLayout != null && fieldLayout.getTagPose(target.getFiducialId()).isPresent()) {
-            targetPose3d = fieldLayout.getTagPose(target.getFiducialId()).get();
-        } else if (fieldLayout == null) {
-            System.out.println("No field layout");
-            continue;
-        } else {
-            System.out.println("No tag found with that ID");
-            continue;
-        }
-        // Reject targets with a high ambiguity. Threshold should be tuned
-        if (target.getPoseAmbiguity() < 0.1) {
-          // Calculate and add the pose to our list of poses
-          // May need to invert the camera to robot transform?
-          poses.add(getFieldToRobot(targetPose3d, cameraToRobot, target.getBestCameraToTarget()).toPose2d());
-        }
-        // Return the list of poses and the latency
-        if (poses == null || poses.isEmpty()) {
-            return null;
-        }
-        return new Pair<>(poses, result.getTimestampSeconds());
-      }
-    }
-    // Returns null if no targets are found
-    return null;
-  }
-
-  public boolean hasTargets() {
-    if (leftResult != null && rightResult != null) {
-        return leftResult.hasTargets() || rightResult.hasTargets();
-    }
-    if (rightResult != null) {
-        return rightResult.hasTargets();
-    }
-    if (leftResult != null) {
-        return leftResult.hasTargets();
-    }
-    return false;
-  }
-
-  public CommandBase resetIfTargets() {
-    return new InstantCommand(() -> {
-        try {
-            System.out.println("reset est pose right: " + getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0).toString());
-            resetOdometry(getEstimatedPose(Constants.rightCameraToRobot, rightResult).getFirst().get(0));
-            hasResetOdometry = true;
-        } catch (Exception e) {
-            // error handling is for nerds
-            // Also if we get an error we just try again next loop
-            System.out.println("vision odo reset error: " + e.getMessage());
-            SmartDashboard.putString("pose est error", e.getMessage());
-        }
-
-        try {
-            System.out.println("reset est pose left: " + getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0).toString());
-            resetOdometry(getEstimatedPose(Constants.leftCameraToRobot, leftResult).getFirst().get(0));
-            hasResetOdometry = true;
-        } catch (Exception e) {
-            // error handling is for nerds
-            // Also if we get an error we just try again next loop
-            System.out.println("vision odo reset error: " + e.getMessage());
-            SmartDashboard.putString("pose est error", e.getMessage());
-        }
-    }).withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
-  }
+  
 
     /**
      * Estimates the pose of the robot in the field coordinate system, given the id of the fiducial, the robot relative to the
@@ -492,13 +397,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * @param cameraToTarget Transform3d of the target relative to the camera, returned by PhotonVision
      * @return Pose Robot position relative to the field.
      */
-     private Pose3d getFieldToRobot(Pose3d tagPose, Transform3d robotToCamera, Transform3d cameraToTarget) {
-         return tagPose.plus(cameraToTarget.inverse()).plus(robotToCamera.inverse()); 
-     }   
 
-    public double getCameraResultLatency(){
-        return rightResult.getLatencyMillis();
-    }
 
     /** @return the current state of each of the swerve modules, including current speed */
     public SwerveModuleState[] getModuleStates(){
@@ -555,66 +454,15 @@ public class SwerveSubsystem extends SubsystemBase {
         return extensionLevel;
     }
 
-    public CommandBase tapeDriveAssistCommand(DoubleSupplier xSupplier) {
-        return new InstantCommand(() -> {isInTapeMode = true; headingController.reset(getYaw().getRadians());}).andThen(driveCommand(
-            () -> 0,
-            () -> 0,
-            () -> MathUtil.clamp(headingController.calculate(getYaw().getRadians(), Math.PI), -0.5, 0.5),
-            true, 
-            false, 
-            true
-        ).until(() -> headingController.atGoal())).andThen( new PrintCommand("heading aligned"),
-            driveCommand(
-                xSupplier, 
-                () -> {
-                    try{
-                        if (Timer.getFPGATimestamp() - leftResult.getTimestampSeconds() > .5){
-                            System.out.println("no worky :)))))))))");
-                            return 0;}
-                        else{ return tapeDriveAssistController.calculate(
-                            leftResult.getBestTarget().getYaw(),20);}
-                    } catch(Exception e) {
-                        System.out.println(e.getMessage());
-                        return 0;
-                    }
-                }, 
-                () -> headingController.calculate(getYaw().getRadians(), Math.PI), 
-                true, 
-                false, 
-                true)).andThen(new InstantCommand(() -> isInTapeMode = false));
-    }
-
     @Override
     public void periodic(){
-        poseEstimator.update(getYaw(), getModulePositions()); 
+        pose = poseEstimator.update(getYaw(), getModulePositions()); 
         wheelOnlyOdo.update(getYaw(), getModulePositions());
         
-        // if (rightCamera != null) {
-        //     try {
-        //         rightResult = rightCamera.getLatestResult();
-        //     } catch (Error e) {
-        //         System.out.print("Error in camera processing " + e.getMessage());
-        //     }
-        // } else {
-        //     rightResult = null;
-        // }
-        // if (rightResult != null && rightResult.hasTargets() && !isInTapeMode) {
-        //     addVisionMeasurement(getEstimatedPose(Constants.rightCameraToRobot, rightResult));
-        // }
 
-        if (leftCamera != null) {
-            try {
-                leftResult = leftCamera.getLatestResult();
-            } catch (Error e) {
-                System.out.print("Error in camera processing " + e.getMessage());
-            }
-        } else {
-            leftResult = null;
-        }
-        // if (leftResult != null && leftResult.hasTargets() && !isInTapeMode) {
-        //     addVisionMeasurement(getEstimatedPose(Constants.leftCameraToRobot, leftResult));
-        // }
+        List<VisionMeasurement> visionMeasurements = visionSubsystem.getEstimatedGlobalPose(pose);
 
+<<<<<<< HEAD
         if (isInTapeMode) {
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledModeRequest").setInteger(1);
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(1);
@@ -624,6 +472,14 @@ public class SwerveSubsystem extends SubsystemBase {
             // NetworkTableInstance.getDefault().getEntry("photonvision/ledMode").setInteger(0);
             // leftCamera.setLED(VisionLEDMode.kOff);
         }
+=======
+        for (VisionMeasurement measurement : visionMeasurements) {
+            poseEstimator.addVisionMeasurement(
+                measurement.estimation.estimatedPose.toPose2d(),
+                measurement.estimation.timestampSeconds,
+                measurement.confidence);
+          }
+>>>>>>> apriltags-5026-code
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
@@ -662,7 +518,6 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("gyro pitch", gyro.getPitch());
         SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
         SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
-        SmartDashboard.putBoolean("can see targets", hasTargets());
         SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
         SmartDashboard.putBoolean("should lock out", lockOutSwerve);
         
