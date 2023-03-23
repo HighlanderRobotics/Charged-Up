@@ -176,7 +176,13 @@ public class RobotContainer {
 
     controller.leftTrigger().whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
-        .alongWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.4).andThen(greybotsGrabberSubsystem.runToScoringCommand())))
+        .alongWith(ledSubsystem.setRainbowCommand(), 
+        new ConditionalCommand(
+          new WaitCommand(0.4),
+            new RunCommand(() -> greybotsGrabberSubsystem.intakeCone()).withTimeout(0.2),
+            () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
+          ).withTimeout(0.5)
+          .andThen(greybotsGrabberSubsystem.runToScoringCommand())))
       .onFalse(
         new ConditionalCommand(
           greybotsGrabberSubsystem.scoreCubeCommand(),
@@ -192,8 +198,10 @@ public class RobotContainer {
       .until(() -> elevatorSubsystem.limitSwitch.get())
       .andThen(new PrintCommand("reset elevator")));
     controller.back().whileTrue(run(
-        new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone), 
-        greybotsGrabberSubsystem.runToRoutingCommand()));
+        greybotsGrabberSubsystem.intakeConeSingleCommand()));
+
+    operator.back().whileTrue(run(
+      greybotsGrabberSubsystem.intakeConeSingleCommand()));
 
     isExtended.whileFalse(new ConditionalCommand(  
       new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 

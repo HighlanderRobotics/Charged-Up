@@ -445,13 +445,13 @@ public final class Constants {
   }
 
   public static final class ScoringLevels {
-    public static final double topConeLevel = 49; //this is in inches
+    public static final double topConeLevel = 48; //this is in inches
     public static final double topCubeLevel = 48;
-    public static final double midConeLevel = 31;
-    public static final double midCubeLevel = 27;
+    public static final double midConeLevel = 30.5;
+    public static final double midCubeLevel = 29;
     public static final double bottomLevel = 20;
 
-    public static final double chuteLevel = 13.0;
+    public static final double chuteLevel = 15.0;
   }
 
   public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them

@@ -83,7 +83,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
     grabberIntake.setPercentOut(0.9); // TODO: find best value
   }
 
-  private void intakeCone() {
+  public void intakeCone() {
     grabberIntake.setPercentOut(0.9);
   }
 
@@ -205,7 +205,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   public CommandBase resetPivotCommand() {
     return new FunctionalCommand(
       () -> grabberIntake.set(ControlMode.PercentOutput, 0.0), 
-      () -> grabberPivot.set(ControlMode.PercentOutput, -0.1), 
+      () -> grabberPivot.set(ControlMode.PercentOutput, -0.4), 
       (interrupt) -> {if (!interrupt) {resetEncoderToZero();} stop();}, 
       () -> {return resetLimitSwitch.get();},
       this);
