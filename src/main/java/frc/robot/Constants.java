@@ -429,7 +429,7 @@ public final class Constants {
 
     // In falcon native units, before reduction because i was too lazy to do conversions
     public static final double grabberScoringRotation = 3.0e4;
-    public static final double grabberSingleSubstationRotation = 4.2e4;
+    public static final double grabberSingleSubstationRotation = 1e3;
     public static final double grabberDoubleSubstationRotation = 2.5e4;
     public static final double grabberRoutingRotation = 2e3;
     public static final double grabberStoringRotation = 1e3;
@@ -448,6 +448,8 @@ public final class Constants {
     public static final double midConeLevel = 31;
     public static final double midCubeLevel = 27;
     public static final double bottomLevel = 20;
+
+    public static final double chuteLevel = 13.0;
   }
 
   public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them

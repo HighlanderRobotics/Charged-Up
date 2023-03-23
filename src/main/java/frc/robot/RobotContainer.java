@@ -67,6 +67,8 @@ public class RobotContainer {
     elevatorSubsystem.getExtensionInches() > 4.5 || 
     Constants.ElevatorConstants.PIDController.getGoal().position > 4.5 || 
     greybotsGrabberSubsystem.getIsExtended());
+  
+  boolean shouldUseChute = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -139,11 +141,21 @@ public class RobotContainer {
     new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube && greybotsGrabberSubsystem.getBeambreak())
       .whileTrue(
         ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kGreen), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
-    controller.leftBumper().whileTrue(
+
+    controller.leftBumper().and(() -> !shouldUseChute).whileTrue(
       superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
       .andThen(new RunCommand(() -> {}, elevatorSubsystem))).onTrue(
         greybotsGrabberSubsystem.intakeConeDoubleCommand().raceWith(
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
+
+    controller.leftBumper().and(() -> shouldUseChute).whileTrue(
+      superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
+        .andThen(new RunCommand(() -> {}, elevatorSubsystem))
+    ).onFalse(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0))
+    .onTrue(
+        greybotsGrabberSubsystem.intakeConeSingleCommand().raceWith(
+        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));;
+
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 
       routingSubsystem.runCommand(), 
@@ -156,8 +168,8 @@ public class RobotContainer {
     operator.povDown().onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone));
     operator.povCenter().onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.None));
     operator.povUp().onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube));
-    // operator.leftBumper().onTrue(swerveSubsystem.setGamePieceOverride(true));
-    // operator.rightBumper().onTrue(swerveSubsystem.setGamePieceOverride(false));
+    operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
+    operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
     // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));

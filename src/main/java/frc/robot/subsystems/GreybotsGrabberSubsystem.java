@@ -136,11 +136,14 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
   
   public CommandBase intakeConeSingleCommand(){
-    return new InstantCommand(() -> currentFilter.reset()).andThen(
-      new RunCommand(() -> {intakeCone(); goToSingleSubstationRotation();}, this))
+    return new InstantCommand(() -> {currentFilter.reset(); goToSingleSubstationRotation();}).andThen(
+      new RunCommand(() -> intakeCone(), this))
       .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
-      .finallyDo((boolean interrupt) -> {stop(); gamePiece = GamePiece.Cone;})
-      .andThen(new RunCommand(() -> intakeCone(), this).withTimeout(0.4));
+      .andThen(
+        new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
+        new InstantCommand(() -> stop()), 
+        new InstantCommand(() -> gamePiece = GamePiece.Cone),
+        runToRoutingCommand());
   }
 
   public CommandBase outakeCubeCommand(){
