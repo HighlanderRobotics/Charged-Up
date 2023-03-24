@@ -187,10 +187,10 @@ public final class Constants {
   }
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
-    public static final double maxSpeedMetersPerSecond = 3;
-    public static final double maxAccelerationMetersPerSecondSquared = 5;
-    public static final double maxAngularSpeedRadiansPerSecond = Math.PI;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI / 2;
+    public static final double maxSpeedMetersPerSecond = 2.5;
+    public static final double maxAccelerationMetersPerSecondSquared = 4;
+    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 2;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);

@@ -85,7 +85,8 @@ public class SuperstructureSubsystem extends SubsystemBase {
     return this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
       .deadlineWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.4).andThen(greybotsGrabberSubsystem.runToScoringCommand()))
       .withTimeout(1.0)
-    .andThen(new ConditionalCommand(
+    .andThen( new WaitCommand(.2),
+      new ConditionalCommand(
       greybotsGrabberSubsystem.scoreCubeCommand(),
       greybotsGrabberSubsystem.scoreConeCommand(),
       () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube

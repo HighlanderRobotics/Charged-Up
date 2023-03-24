@@ -86,6 +86,7 @@ public class RobotContainer {
       elevatorSubsystem.extendToInchesCommand(1.0)
       .andThen(
         elevatorSubsystem.zeroElevator(),
+        new PrintCommand("Working"),
         new StartEndCommand(() -> elevatorSubsystem.disable(), () -> elevatorSubsystem.enable(), elevatorSubsystem)
         ));
     greybotsGrabberSubsystem.setDefaultCommand(

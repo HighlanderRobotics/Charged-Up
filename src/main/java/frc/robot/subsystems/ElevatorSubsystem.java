@@ -39,6 +39,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     HighlanderFalcon elevatorMotor;
     HighlanderFalcon elevatorFollower;
     boolean enabled = true;
+    boolean isZeroing; 
     public ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
     TrapezoidProfile.State lastState = new TrapezoidProfile.State();
     TrapezoidProfile.State goal = new TrapezoidProfile.State();
@@ -117,7 +118,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     
     public CommandBase zeroElevator() {
-        return new RunCommand(() -> setGoal(0), this)
+        return new RunCommand(() -> 
+            {
+                isZeroing = true ;
+                enabled = false ;
+            }, this)
+        .finallyDo((boolean i) -> 
+            {
+            isZeroing = false;
+            enabled = true; 
+            })
             .until(() -> limitSwitch.get())
             .andThen(() -> elevatorMotor.setSelectedSensorPosition(0));
     }
@@ -135,11 +145,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void enable() {
-       // enabled = true;
+        enabled = true;
     }
 
     public void disable() {
-       // enabled = false;
+        enabled = false;
     }
 
     public enum ScoringLevels {
@@ -177,7 +187,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic() {
         if (enabled) {
             updatePID();
-        } else {
+        }
+        else if (isZeroing){
+            elevatorMotor.set(ControlMode.PercentOutput, -0.1, DemandType.ArbitraryFeedForward, 0);
+            System.out.println("Is zeroing");
+        }
+        else {
             elevatorMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, 0);
         }
 
