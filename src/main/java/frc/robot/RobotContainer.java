@@ -69,6 +69,7 @@ public class RobotContainer {
     greybotsGrabberSubsystem.getIsExtended());
   
   boolean shouldUseChute = true;
+  boolean isUsingChute = false;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -151,8 +152,9 @@ public class RobotContainer {
 
     controller.leftBumper().and(() -> shouldUseChute).whileTrue(
       superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
-        .andThen(new RunCommand(() -> {}, elevatorSubsystem))
-    ).onFalse(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0))
+        .andThen(new InstantCommand(() -> isUsingChute = true), 
+          new RunCommand(() -> {}, elevatorSubsystem).alongWith(intakeSubsystem.stopCommand()))
+    ).onFalse(new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0)))
     .onTrue(
         greybotsGrabberSubsystem.intakeConeSingleCommand().raceWith(
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));;
@@ -210,8 +212,9 @@ public class RobotContainer {
       () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone));
       
 
-    isExtended.whileTrue(run(
-      intakeSubsystem.extendCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming)));
+    // isExtended.whileTrue(
+    //   intakeSubsystem.extendCommand().unless(() -> isUsingChute).repeatedly()//.withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+    //   );
 
     superstructureSubsystem.retractAndRouteTrigger.whileTrue(run(
       //elevatorSubsystem.extendToInchesCommand(0.0),
