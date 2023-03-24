@@ -324,7 +324,7 @@ public final class Constants {
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/5, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(60.0,40.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.15/7, 0.0, 0.0139/2, elevatorConstraints);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.2/7, 0.0, 0.0139/2, elevatorConstraints);
         static {
           PIDController.setTolerance(
             2.0, //TODO: is this good?
@@ -431,7 +431,7 @@ public final class Constants {
 
     // In falcon native units, before reduction because i was too lazy to do conversions
     public static final double grabberScoringRotation = 3.0e4;
-    public static final double grabberSingleSubstationRotation = 1e3;
+    public static final double grabberSingleSubstationRotation = 1.1e4;
     public static final double grabberDoubleSubstationRotation = 2.5e4;
     public static final double grabberRoutingRotation = 2e3;
     public static final double grabberStoringRotation = 1e3;
@@ -445,13 +445,13 @@ public final class Constants {
   }
 
   public static final class ScoringLevels {
-    public static final double topConeLevel = 48; //this is in inches
+    public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 48;
-    public static final double midConeLevel = 30.5;
+    public static final double midConeLevel = 35.0;
     public static final double midCubeLevel = 29;
     public static final double bottomLevel = 20;
 
-    public static final double chuteLevel = 15.0;
+    public static final double chuteLevel = 16.0;
   }
 
   public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them

@@ -157,7 +157,8 @@ public class RobotContainer {
     ).onFalse(new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0)))
     .onTrue(
         greybotsGrabberSubsystem.intakeConeSingleCommand().raceWith(
-        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));;
+        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)))
+        .until(() -> !controller.leftBumper().getAsBoolean() && greybotsGrabberSubsystem.gamePiece != GamePiece.Cone));
 
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 

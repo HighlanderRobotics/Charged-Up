@@ -39,7 +39,7 @@ public class RollerClawGrabberSubsystem extends SubsystemBase {
   }
 
   private void intake() {
-    grabber.setPercentOut(-0.9); // TODO: find best value
+    grabber.setPercentOut(-1); // TODO: find best value
   }
 
   private void outake() {

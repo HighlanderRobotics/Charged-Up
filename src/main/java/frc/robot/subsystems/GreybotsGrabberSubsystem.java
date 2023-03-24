@@ -84,7 +84,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   public void intakeCone() {
-    grabberIntake.setPercentOut(0.9);
+    grabberIntake.setPercentOut(0.6);
   }
 
   private static void outakeCone() {
