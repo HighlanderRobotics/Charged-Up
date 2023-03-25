@@ -357,7 +357,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Return the pose of the drivebase, as estimated by the pose estimator. */
     public Pose2d getPose() {
-        return poseEstimator.getEstimatedPosition();
+        return wheelOnlyOdo.getPoseMeters();
+        // return poseEstimator.getEstimatedPosition();
     }
 
     /** Resets the pose estimator to the given pose */

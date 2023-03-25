@@ -65,7 +65,7 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   public CommandBase extendCommand() {
-    return new InstantCommand(() -> this.extend(), this);
+    return new InstantCommand(() -> {this.extend(); stop();}, this);
   }
 
   public CommandBase outakeCommand() {

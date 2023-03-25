@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -174,16 +175,26 @@ public class RobotContainer {
     operator.povUp().onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube));
     operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
     operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
+    operator.start().whileTrue(greybotsGrabberSubsystem.resetPivotCommand());
     // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-
+    
+    controller.leftTrigger().whileTrue(
+      swerveSubsystem.driveCommand(
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()), 
+      true, 
+      false,
+      true)
+    );
     controller.leftTrigger().whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
         .alongWith(ledSubsystem.setRainbowCommand(), 
         new ConditionalCommand(
-          new WaitCommand(0.4),
-            new RunCommand(() -> greybotsGrabberSubsystem.intakeCone()).withTimeout(0.2),
+          new WaitCommand(0.2).raceWith(new RunCommand(() -> {}, greybotsGrabberSubsystem)),
+            new RunCommand(() -> greybotsGrabberSubsystem.intakeCone(), greybotsGrabberSubsystem).withTimeout(0.2),
             () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
           ).withTimeout(0.5)
           .andThen(greybotsGrabberSubsystem.runToScoringCommand())))
@@ -280,14 +291,15 @@ public class RobotContainer {
       return autoChooser.getAutoCommand();
   }
 
-
-    
-      
-    
-
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
     // ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20));
-    ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
+    if (DriverStation.getAlliance() == Alliance.Invalid) {
+      ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
+    } else if (DriverStation.getAlliance() == Alliance.Red) {
+      ledSubsystem.setSolid(new Color8Bit(Color.kRed));
+    } else {
+      ledSubsystem.setSolid(new Color8Bit(Color.kBlue));
+    }
   }
 }

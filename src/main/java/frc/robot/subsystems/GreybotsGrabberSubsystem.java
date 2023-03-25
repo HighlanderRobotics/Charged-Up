@@ -81,7 +81,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   private void outakeCube() {
-    grabberIntake.setPercentOut(0.9); // TODO: find best value
+    grabberIntake.setPercentOut(0.4); // TODO: find best value
   }
 
   public void intakeCone() {
@@ -121,7 +121,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   public CommandBase intakeCubeCommand(){
     return new RunCommand(() -> {intakeCube(); goToRoutingRotation();}, this)
       .until(() -> cubeBeambreak.get())
-      .andThen(new WaitCommand(0.25))
+      .andThen(new WaitCommand(0.4))
       .finallyDo((boolean interrupt) -> {stop(); gamePiece = GamePiece.Cube;});
   }
 
@@ -141,9 +141,9 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
       new RunCommand(() -> intakeCone(), this))
       .until(() -> intakeCurrentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
       .andThen(
+        new InstantCommand(() -> gamePiece = GamePiece.Cone),
         new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
         new InstantCommand(() -> stop()), 
-        new InstantCommand(() -> gamePiece = GamePiece.Cone),
         runToRoutingCommand());
   }
 
@@ -152,7 +152,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   public CommandBase outakeConeCommand(){
-    return new RunCommand(() -> {outakeCone(); gamePiece = GamePiece.None;});
+    return new RunCommand(() -> {outakeCone(); gamePiece = GamePiece.None;}, this);
   }
 
   public CommandBase runToStorageCommand() {
@@ -208,7 +208,7 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
       () -> grabberIntake.set(ControlMode.PercentOutput, 0.0), 
       () -> grabberPivot.set(ControlMode.PercentOutput, -0.2), 
       (interrupt) -> {if (!interrupt) {resetEncoderToZero();} stop();}, 
-      () -> {return pivotCurrentFilter.calculate(grabberPivot.getStatorCurrent()) > 10.0;},
+      () -> resetLimitSwitch.get(),
       this);
   }
 
