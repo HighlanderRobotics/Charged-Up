@@ -60,6 +60,7 @@ public class AutoChooser {
         this.greybotsGrabberSubsystem = greybotsGrabberSubsystem;
         this.routingSubsystem = routingSubsystem;
 
+        eventMap.put("Rezero Grabber", greybotsGrabberSubsystem.resetPivotCommand().asProxy());
         eventMap.put("Score", new ScoringCommand(
           ScoringLevels.L3, 
           () -> 0, 
@@ -120,7 +121,8 @@ public class AutoChooser {
         chooser.addOption("1.5 + Park Bump", onePlusParkBottom());
         chooser.addOption("1 + Mobility", oneMobility());
         chooser.addOption("Apriltags Test", apriltagsTest());
-        chooser.addOption("2 + Park Bottom Red", twoPlusParkBottomRed());
+        // chooser.addOption("2 + Park Bottom Red", twoPlusParkBottomRed());
+        chooser.addOption("2 Bump", twoPieceBump());
         chooser.addOption("just score",  
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
@@ -169,9 +171,13 @@ public class AutoChooser {
         return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Top Blue", "2 + Park Bottom Red"));
       }
 
+      public Command twoPieceBump() {
+        return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("2 Bottom Blue", "2 Bottom Red"));
+      }
+
       private static Command run(Command ... commands) {
         return new ParallelCommandGroup(commands);
-      }
+      } 
 
       private List<PathPlannerTrajectory> chooseAutoAlliance(String nameBlue, String nameRed) {
         if (DriverStation.getAlliance() == Alliance.Blue) {

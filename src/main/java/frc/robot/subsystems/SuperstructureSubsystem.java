@@ -83,7 +83,9 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase scoreNoAim() {
     return this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
-      .deadlineWith(ledSubsystem.setRainbowCommand(), new WaitCommand(0.4).andThen(greybotsGrabberSubsystem.runToScoringCommand()))
+      .deadlineWith(ledSubsystem.setRainbowCommand(), 
+        new WaitCommand(0.4)
+          .andThen(greybotsGrabberSubsystem.runToScoringCommand()))
       .withTimeout(1.0)
     .andThen( new WaitCommand(.2),
       new ConditionalCommand(

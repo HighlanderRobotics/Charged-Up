@@ -306,7 +306,6 @@ public class SwerveSubsystem extends SubsystemBase {
         }
     }
 
-
     public SwerveAutoBuilder autoBuilder(Map<String, Command> eventMap){
         return
             new SwerveAutoBuilder(
@@ -365,8 +364,8 @@ public class SwerveSubsystem extends SubsystemBase {
     public void resetOdometry(Pose2d pose) {
         hasResetOdometry = true;
         zeroGyro(pose.getRotation().getDegrees());
-        poseEstimator.resetPosition(getYaw(), getModulePositions(), pose);
-        wheelOnlyOdo.resetPosition(getYaw(), getModulePositions(), pose);
+        poseEstimator.resetPosition(pose.getRotation(), getModulePositions(), pose);
+        wheelOnlyOdo.resetPosition(pose.getRotation(), getModulePositions(), pose);
         System.out.println("odometry reset " + pose.toString());
     }
 

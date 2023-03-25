@@ -37,7 +37,8 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   ReversibleDigitalInput resetLimitSwitch = new ReversibleDigitalInput(Constants.MechanismConstants.grabberLimitSwitch, true);
   ReversibleDigitalInput cubeBeambreak = new ReversibleDigitalInput(Constants.MechanismConstants.grabberBeambreak, true);
   DutyCycleEncoder absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
-  LinearFilter currentFilter = LinearFilter.movingAverage(50);
+  LinearFilter intakeCurrentFilter = LinearFilter.movingAverage(50);
+  LinearFilter pivotCurrentFilter = LinearFilter.movingAverage(10);
 
   public GamePiece gamePiece = GamePiece.None;
 
@@ -125,9 +126,9 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   public CommandBase intakeConeDoubleCommand(){
-    return new InstantCommand(() -> {currentFilter.reset(); goToDoubleSubstationRotation();}).andThen(
+    return new InstantCommand(() -> {intakeCurrentFilter.reset(); goToDoubleSubstationRotation();}).andThen(
       new RunCommand(() -> intakeCone(), this))
-      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
+      .until(() -> intakeCurrentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
       .andThen(
         new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
         new InstantCommand(() -> stop()), 
@@ -136,9 +137,9 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
   
   public CommandBase intakeConeSingleCommand(){
-    return new InstantCommand(() -> {currentFilter.reset(); goToSingleSubstationRotation();}).andThen(
+    return new InstantCommand(() -> {intakeCurrentFilter.reset(); goToSingleSubstationRotation();}).andThen(
       new RunCommand(() -> intakeCone(), this))
-      .until(() -> currentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
+      .until(() -> intakeCurrentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
       .andThen(
         new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
         new InstantCommand(() -> stop()), 
@@ -205,9 +206,9 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   public CommandBase resetPivotCommand() {
     return new FunctionalCommand(
       () -> grabberIntake.set(ControlMode.PercentOutput, 0.0), 
-      () -> grabberPivot.set(ControlMode.PercentOutput, -0.4), 
+      () -> grabberPivot.set(ControlMode.PercentOutput, -0.2), 
       (interrupt) -> {if (!interrupt) {resetEncoderToZero();} stop();}, 
-      () -> {return resetLimitSwitch.get();},
+      () -> {return pivotCurrentFilter.calculate(grabberPivot.getStatorCurrent()) > 10.0;},
       this);
   }
 

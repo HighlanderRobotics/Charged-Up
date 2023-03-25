@@ -136,7 +136,7 @@ public final class Constants {
 
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 4; //TODO: This must be tuned to specific robot
+    public static final double maxSpeed = 6; //TODO: This must be tuned to specific robot
     /** Radians per Second */
     public static final double maxAngularVelocity = 10.0; //TODO: This must be tuned to specific robot
 
@@ -190,14 +190,14 @@ public final class Constants {
     public static final double maxSpeedMetersPerSecond = 2.5;
     public static final double maxAccelerationMetersPerSecondSquared = 4;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 2;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 4;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
-    public static final double kPXController = 4.0;
-    public static final double kPYController = 4.0;
-    public static final double kPThetaController = 1.3;
+    public static final double kPXController = 7.0;
+    public static final double kPYController = 7.0;
+    public static final double kPThetaController = 1.7;
     public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
