@@ -26,6 +26,7 @@ public class LEDSubsystem extends SubsystemBase {
   AddressableLEDBuffer buffer;
 
   int rainbowStart = 0;
+  int dashStart = 0;
 
   // AddressableLEDSim sim;
   /** Creates a new LEDSubsystem. */
@@ -124,6 +125,15 @@ public class LEDSubsystem extends SubsystemBase {
       buffer.setHSV(i, rainbowStart % 180 + i, 255, 255);
     }
     rainbowStart += 6;
+  }
+
+  public void runColorAlong(Color colorDash, Color8Bit colorBg, int dashLength, int speed) {
+    setSolid(colorBg);
+    for (int i = dashStart; i < dashStart + dashLength; i++) {
+        buffer.setLED(i % buffer.getLength(), colorDash);
+    }
+    dashStart += speed;
+    dashStart %= buffer.getLength();
   }
 
   public CommandBase setRainbowCommand() {
