@@ -82,7 +82,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
   }
 
   public CommandBase scoreNoAim() {
-    return this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
+    return routingSubsystem.stopCommand().raceWith(this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
       .deadlineWith(ledSubsystem.setRainbowCommand(), 
         new WaitCommand(0.4)
           .andThen(greybotsGrabberSubsystem.stopCommand().withTimeout(0.1), greybotsGrabberSubsystem.runToScoringCommand()))
@@ -95,7 +95,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
     ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
     .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0),
     elevatorSubsystem.extendToInchesCommand(1.0)
-    );
+    ));
   }
 
   @Override

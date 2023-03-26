@@ -132,8 +132,13 @@ public class LEDSubsystem extends SubsystemBase {
     for (int i = dashStart; i < dashStart + dashLength; i++) {
         buffer.setLED(i % buffer.getLength(), colorDash);
     }
+
+    for (int i = dashStart; i < dashStart + dashLength; i++) {
+      buffer.setLED(((i % buffer.getLength()) + 70) % buffer.getLength(), colorDash);
+    }
+
     dashStart += speed;
-    dashStart %= buffer.getLength();
+    dashStart %= buffer.getLength() / 2;
   }
 
   public CommandBase setRainbowCommand() {

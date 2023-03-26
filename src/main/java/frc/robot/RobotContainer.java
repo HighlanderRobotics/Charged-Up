@@ -297,9 +297,9 @@ public class RobotContainer {
     if (DriverStation.getAlliance() == Alliance.Invalid) {
       ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
     } else if (DriverStation.getAlliance() == Alliance.Red) {
-      ledSubsystem.runColorAlong(Color.kRed, Constants.LEDConstants.defaultColor, 12, 3);
+      ledSubsystem.runColorAlong(Color.kRed, Constants.LEDConstants.defaultColor, 12, 2);
     } else {
-      ledSubsystem.runColorAlong(Color.kBlue, Constants.LEDConstants.defaultColor, 12, 3);
+      ledSubsystem.runColorAlong(Color.kBlue, Constants.LEDConstants.defaultColor, 12, 2);
     }
   }
 }

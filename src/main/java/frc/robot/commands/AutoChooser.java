@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
@@ -35,7 +36,7 @@ import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
 
 public class AutoChooser {
-    SendableChooser<Command> chooser = new SendableChooser<Command>();
+    SendableChooser<Supplier<Command>> chooser = new SendableChooser<Supplier<Command>>();
     SwerveSubsystem swerveSubsystem;
     IntakeSubsystem intakeSubsystem;
     ElevatorSubsystem elevatorSubsystem;
@@ -110,19 +111,19 @@ public class AutoChooser {
           .finallyDo((boolean interrupt) -> swerveSubsystem.drive(new Translation2d(), 0, false, false, false)));
         eventMap.put("Zero Elevator", elevatorSubsystem.zeroElevator());
 
-        chooser.setDefaultOption("none", new InstantCommand(() -> {}));
+        chooser.setDefaultOption("none", () -> new InstantCommand(() -> {}));
             //"Two Cone Auto", 
             //new TwoConeAuto(swerveSubsystem, intakeSubsystem));
-        chooser.addOption("2 + Charge Flat", twoParkTop());
-        chooser.addOption("1.5 + Charge Flat", onePlusParkTop());
-        chooser.addOption("1 + Charge Middle", onePlusParkMiddle());
-        chooser.addOption("1.5 Bump", oneAndAHalfBottom());
-        chooser.addOption("1.5 + Park Bump", onePlusParkBottom());
-        chooser.addOption("1 + Mobility", oneMobility());
-        chooser.addOption("Apriltags Test", apriltagsTest());
+        chooser.addOption("2 + Charge Flat", () -> twoParkTop());
+        chooser.addOption("1.5 + Charge Flat", () -> onePlusParkTop());
+        chooser.addOption("1 + Charge Middle", () -> onePlusParkMiddle());
+        chooser.addOption("1.5 Bump", () -> oneAndAHalfBottom());
+        chooser.addOption("1.5 + Park Bump", () -> onePlusParkBottom());
+        chooser.addOption("1 + Mobility", () -> oneMobility());
+        chooser.addOption("Apriltags Test", () -> apriltagsTest());
         // chooser.addOption("2 + Park Bottom Red", twoPlusParkBottomRed());
-        chooser.addOption("2 Bump", twoPieceBump());
-        chooser.addOption("just score",  
+        chooser.addOption("2 Bump", () -> twoPieceBump());
+        chooser.addOption("just score", () ->  
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
         .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
@@ -135,7 +136,7 @@ public class AutoChooser {
     }
     
   public Command getAutoCommand(){
-    return chooser.getSelected();
+    return chooser.getSelected().get();
   }
   private Command apriltagsTest() {
     return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("Apriltags Test", "Apriltags Test"));

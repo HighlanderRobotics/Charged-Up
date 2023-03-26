@@ -447,7 +447,7 @@ public final class Constants {
   public static final class ScoringLevels {
     public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 47;
-    public static final double midConeLevel = 35.0;
+    public static final double midConeLevel = 33.0;
     public static final double midCubeLevel = 29;
     public static final double bottomLevel = 20;
 
