@@ -59,6 +59,10 @@ public class RoutingSubsystem extends SubsystemBase {
     return new RunCommand(() -> stop(), this);
   }
 
+  public CommandBase slowRunCommand() {
+    return new RunCommand(() -> {routingLeft.setPercentOut(0.3); routingRight.setPercentOut(-0.3);}, this);
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run

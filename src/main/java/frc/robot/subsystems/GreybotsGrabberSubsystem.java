@@ -80,6 +80,10 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
     grabberIntake.setPercentOut(-0.65); // TODO: find best value
   }
 
+  public void holdCube() {
+    grabberIntake.setPercentOut(-0.2);
+  }
+
   private void outakeCube() {
     grabberIntake.setPercentOut(0.4); // TODO: find best value
   }

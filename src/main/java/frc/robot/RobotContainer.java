@@ -196,8 +196,9 @@ public class RobotContainer {
     controller.leftTrigger().whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
         .alongWith(ledSubsystem.setRainbowCommand(), 
+        routingSubsystem.slowRunCommand(),
         new ConditionalCommand(
-          new WaitCommand(0.2).raceWith(new RunCommand(() -> {}, greybotsGrabberSubsystem)),
+            new RunCommand(() -> greybotsGrabberSubsystem.holdCube(), greybotsGrabberSubsystem).withTimeout(0.5),
             new RunCommand(() -> greybotsGrabberSubsystem.intakeCone(), greybotsGrabberSubsystem).withTimeout(0.2),
             () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
           ).withTimeout(0.5)
