@@ -123,6 +123,7 @@ public class AutoChooser {
         chooser.addOption("Apriltags Test", () -> apriltagsTest());
         // chooser.addOption("2 + Park Bottom Red", twoPlusParkBottomRed());
         chooser.addOption("2 Bump", () -> twoPieceBump());
+        chooser.addOption("3 Piece Flat", () -> threeTop());
         chooser.addOption("just score", () ->  
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
