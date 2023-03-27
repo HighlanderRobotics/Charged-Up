@@ -124,6 +124,7 @@ public class AutoChooser {
         // chooser.addOption("2 + Park Bottom Red", twoPlusParkBottomRed());
         chooser.addOption("2 Bump", () -> twoPieceBump());
         chooser.addOption("3 Piece Flat", () -> threeTop());
+        chooser.addOption("2 Piece Middle", () -> twoPieceMiddle());
         chooser.addOption("just score", () ->  
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
@@ -174,6 +175,10 @@ public class AutoChooser {
 
   public Command twoPieceBump() {
     return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("2 Bottom Blue", "2 Bottom Red"));
+  }
+
+  public Command twoPieceMiddle() {
+    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("2 + Park Middle Blue", "2 + Park Middle Red"));
   }
 
   private static Command run(Command ... commands) {
