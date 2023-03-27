@@ -17,10 +17,10 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L2"
+          "Score L3 No Aim"
         ],
         "executionBehavior": "sequential",
-        "waitBehavior": "after",
+        "waitBehavior": "none",
         "waitTime": 1.0
       }
     },
@@ -121,7 +121,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3 No Aim Cube"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "before",
@@ -153,5 +153,12 @@
       }
     }
   ],
-  "markers": []
+  "markers": [
+    {
+      "position": 1.7454545454544779,
+      "names": [
+        "Intake"
+      ]
+    }
+  ]
 }

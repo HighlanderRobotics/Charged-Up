@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L2"
+          "Score L3 No Aim"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "after",
@@ -66,7 +66,7 @@
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": true,
+      "isStopPoint": false,
       "stopEvent": {
         "names": [
           "Intake"
@@ -103,16 +103,16 @@
     },
     {
       "anchorPoint": {
-        "x": 1.7156540295986575,
-        "y": 2.6264086716207613
+        "x": 1.8092227910561378,
+        "y": 2.6758971634919013
       },
       "prevControl": {
-        "x": 2.2180974276478462,
-        "y": 2.6264086716207613
+        "x": 2.3116661891053267,
+        "y": 2.6758971634919013
       },
       "nextControl": {
-        "x": 2.2180974276478462,
-        "y": 2.6264086716207613
+        "x": 2.3116661891053267,
+        "y": 2.6758971634919013
       },
       "holonomicAngle": 180.0,
       "isReversal": true,
@@ -121,7 +121,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "Score"
+          "Score L3 No Aim Cube"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "before",
@@ -130,12 +130,12 @@
     },
     {
       "anchorPoint": {
-        "x": 4.022325993369936,
-        "y": 2.1239652735715735
+        "x": 3.9933952621114934,
+        "y": 2.6187198736736983
       },
       "prevControl": {
-        "x": 3.382852577670968,
-        "y": 2.512216990245946
+        "x": 3.250090494474854,
+        "y": 2.6758971634919013
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -155,9 +155,9 @@
   ],
   "markers": [
     {
-      "position": 1.969696969696966,
+      "position": 1.5636363636363673,
       "names": [
-        "event"
+        "Intake"
       ]
     }
   ]

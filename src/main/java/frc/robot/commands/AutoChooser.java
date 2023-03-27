@@ -126,6 +126,7 @@ public class AutoChooser {
         chooser.addOption("3 Piece Flat", () -> threeTop());
         chooser.addOption("2 Piece Middle", () -> twoPieceMiddle());
         chooser.addOption("just score", () ->  
+        
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
         .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
