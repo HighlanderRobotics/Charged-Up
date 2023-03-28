@@ -60,7 +60,7 @@ public class RoutingSubsystem extends SubsystemBase {
   }
 
   public CommandBase slowRunCommand() {
-    return new RunCommand(() -> {routingLeft.setPercentOut(0.3); routingRight.setPercentOut(-0.3);}, this);
+    return new RunCommand(() -> {routingLeft.setPercentOut(-0.1); routingRight.setPercentOut(0.1);}, this);
   }
 
   @Override
