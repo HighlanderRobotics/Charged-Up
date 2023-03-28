@@ -95,7 +95,7 @@ public class RobotContainer {
       greybotsGrabberSubsystem.resetPivotCommand().unless(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone).andThen(
       greybotsGrabberSubsystem.runToRoutingStopCommand()
     ));
-    intakeSubsystem.setDefaultCommand(new WaitCommand(0.7)
+    intakeSubsystem.setDefaultCommand(new WaitCommand(0.6)
       .andThen(new ConditionalCommand(
         intakeSubsystem.extendCommand(), 
         intakeSubsystem.stopCommand(), 
@@ -156,14 +156,15 @@ public class RobotContainer {
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
 
     controller.leftBumper().and(() -> shouldUseChute).whileTrue(
+      greybotsGrabberSubsystem.intakeConeSingleCommand().alongWith(
+      ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
+        .until(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone),
       superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
         .andThen(new InstantCommand(() -> isUsingChute = true), 
-          new RunCommand(() -> {}, elevatorSubsystem).alongWith(intakeSubsystem.stopCommand()))
-    ).onFalse(new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.5)))
-    .onTrue(
-        greybotsGrabberSubsystem.intakeConeSingleCommand().raceWith(
-        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)))
-        .until(() -> !controller.leftBumper().getAsBoolean() && greybotsGrabberSubsystem.gamePiece != GamePiece.Cone));
+          new RunCommand(() -> {}, elevatorSubsystem).alongWith(intakeSubsystem.stopCommand())))
+    ).onFalse(
+      new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.6))
+      .raceWith(greybotsGrabberSubsystem.intakeConeSingleCommand().unless(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
 
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 
