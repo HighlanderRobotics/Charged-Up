@@ -159,7 +159,7 @@ public class RobotContainer {
       superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
         .andThen(new InstantCommand(() -> isUsingChute = true), 
           new RunCommand(() -> {}, elevatorSubsystem).alongWith(intakeSubsystem.stopCommand()))
-    ).onFalse(new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0)))
+    ).onFalse(new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.5)))
     .onTrue(
         greybotsGrabberSubsystem.intakeConeSingleCommand().raceWith(
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)))
