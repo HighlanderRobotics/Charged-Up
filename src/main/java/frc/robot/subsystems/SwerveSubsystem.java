@@ -437,7 +437,7 @@ public class SwerveSubsystem extends SubsystemBase {
             poseEstimator.addVisionMeasurement(
                 measurement.estimation.estimatedPose.toPose2d(),
                 measurement.estimation.timestampSeconds,
-                measurement.confidence);
+                measurement.confidence.times(2.0));
           }
 
         // Log swerve module information

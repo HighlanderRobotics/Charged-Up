@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
@@ -189,8 +190,8 @@ public final class Constants {
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 2.5;
     public static final double maxAccelerationMetersPerSecondSquared = 4;
-    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 2;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 4;
+    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 3;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 6;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
@@ -540,6 +541,10 @@ public final class Constants {
     public static final double DRIVE_TO_POSE_XY_ERROR_MARGIN_METERS = .05;
 
     public static final double DRIVE_TO_POSE_THETA_ERROR_MARGIN_DEGREES = 2;
-  }
 
+    public static final int MAX_FRAME_FIDS = 4;
+    
+    public static final List<Set<Integer>> POSSIBLE_FRAME_FID_COMBOS =
+        List.of(Set.of(1, 2, 3, 4), Set.of(5, 6, 7, 8));
+  }
 }

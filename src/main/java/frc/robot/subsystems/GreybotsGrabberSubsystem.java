@@ -151,6 +151,10 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
         runToRoutingCommand());
   }
 
+  public CommandBase intakeConeSingleContinuousCommand() {
+    return new RunCommand(() -> intakeCone()).alongWith(runToSingleSubstationCommand());
+  }
+
   public CommandBase outakeCubeCommand(){
     return new RunCommand(() -> {outakeCube(); gamePiece = GamePiece.None;}, this);
   }

@@ -95,7 +95,7 @@ public class RobotContainer {
       greybotsGrabberSubsystem.resetPivotCommand().unless(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone).andThen(
       greybotsGrabberSubsystem.runToRoutingStopCommand()
     ));
-    intakeSubsystem.setDefaultCommand(new WaitCommand(0.6)
+    intakeSubsystem.setDefaultCommand(new WaitCommand(0.7)
       .andThen(new ConditionalCommand(
         intakeSubsystem.extendCommand(), 
         intakeSubsystem.stopCommand(), 
@@ -156,15 +156,15 @@ public class RobotContainer {
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
 
     controller.leftBumper().and(() -> shouldUseChute).whileTrue(
-      greybotsGrabberSubsystem.intakeConeSingleCommand().alongWith(
+      greybotsGrabberSubsystem.intakeConeSingleContinuousCommand().alongWith(
       ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
         .until(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone),
       superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
         .andThen(new InstantCommand(() -> isUsingChute = true), 
           new RunCommand(() -> {}, elevatorSubsystem).alongWith(intakeSubsystem.stopCommand())))
     ).onFalse(
-      new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.6))
-      .raceWith(greybotsGrabberSubsystem.intakeConeSingleCommand().unless(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
+      new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0))
+      .raceWith(greybotsGrabberSubsystem.intakeConeSingleCommand()));
 
     controller.rightBumper().whileTrue(run(
       intakeSubsystem.runCommand(), 

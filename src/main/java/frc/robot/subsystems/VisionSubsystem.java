@@ -19,9 +19,12 @@ import frc.robot.Constants.Vision;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.targeting.PhotonPipelineResult;
 
 public class VisionSubsystem {
   /** If shuffleboard should be used--important for unit testing. */
@@ -78,6 +81,20 @@ public class VisionSubsystem {
           this.confidence = confidence;
         }
       }
+
+  private static boolean ignoreFrame(PhotonPipelineResult frame) {
+    if (!frame.hasTargets() || frame.getTargets().size() > PoseEstimator.MAX_FRAME_FIDS)
+      return true;
+
+    boolean possibleCombination = false;
+    List<Integer> ids = frame.targets.stream().map(t -> t.getFiducialId()).toList();
+    for (Set<Integer> possibleFIDCombo : PoseEstimator.POSSIBLE_FRAME_FID_COMBOS) {
+      possibleCombination = possibleFIDCombo.containsAll(ids);
+      if (possibleCombination) break;
+    }
+    if (!possibleCombination) System.out.println("Ignoring frame with FIDs: " + ids);
+    return !possibleCombination;
+  }    
 
   public List<VisionMeasurement> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
     if (fieldLayout == null) {
