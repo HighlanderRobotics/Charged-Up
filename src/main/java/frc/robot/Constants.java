@@ -190,8 +190,8 @@ public final class Constants {
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 2.5;
     public static final double maxAccelerationMetersPerSecondSquared = 4;
-    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 3;
-    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 6;
+    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 4;
+    public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 12;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
     public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
@@ -413,7 +413,7 @@ public final class Constants {
   public static final class MechanismConstants {
     public static final int intakeID = 20;
     public static final int intakeSolenoidForwardID = 3;
-    public static final int intakeSolenoidBackwardID = 1;
+    public static final int intakeSolenoidBackwardID = 4;
     public static final double intakeTimeToExtend = 0.1; // TODO: find
 
     public static final int routingLeftID = 21;
