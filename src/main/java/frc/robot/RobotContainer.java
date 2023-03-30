@@ -156,7 +156,7 @@ public class RobotContainer {
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
 
     controller.leftBumper().and(() -> shouldUseChute).whileTrue(
-      greybotsGrabberSubsystem.intakeConeSingleContinuousCommand().alongWith(
+      greybotsGrabberSubsystem.intakeConeSingleContinuousCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming).alongWith(
       ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
         .until(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone),
       superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
@@ -213,7 +213,7 @@ public class RobotContainer {
         .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
 
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), greybotsGrabberSubsystem.outakeCubeCommand())));
-    controller.y().whileTrue(swerveSubsystem.autoBalance());
+    controller.y().whileTrue(swerveSubsystem.autoBalance().alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.5)));
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
       .until(() -> elevatorSubsystem.limitSwitch.get())
