@@ -42,6 +42,7 @@ import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -69,6 +70,7 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 /** SDS Mk4i Drivetrain */
@@ -95,6 +97,9 @@ public class SwerveSubsystem extends SubsystemBase {
     public Pose2d pose = new Pose2d();
     public boolean nearestGoalIsCone = true;
     public double extensionInches = 0;
+    private double lastRoll = 0;
+    private double rollRate = 0;
+    private LinearFilter rollFilter = LinearFilter.singlePoleIIR(0.5, 0.020);
     public ElevatorSubsystem.ScoringLevels extensionLevel = ElevatorSubsystem.ScoringLevels.L2;
 
     public boolean lockOutSwerve = false;
@@ -320,16 +325,21 @@ public class SwerveSubsystem extends SubsystemBase {
                 this // The drive subsystem. Used to properly set the requirements of path following commands
                 );
     }
+
+    public CommandBase autoBalanceVelocity() {
+        return autoBalance().until(() -> {return Math.abs(rollRate) > 2.0;})
+            .andThen(new WaitCommand(0.5).raceWith(driveCommand(() -> 0, () -> 0, () -> 0, false, false, false))).repeatedly();
+    }
     
     public CommandBase autoBalance(){
         return driveCommand(
                 () -> {
                     if (gyro.getRoll() > 11.0) {
                         lockOutSwerve = false;
-                        return -0.12;
+                        return -0.1;
                     } else if (gyro.getRoll() < -11.0) {
                         lockOutSwerve = false;
-                        return 0.12;
+                        return 0.1;
                     } else {
                         lockOutSwerve = true;
                         return 0.0;
@@ -478,10 +488,12 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
         SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
         SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
-        SmartDashboard.putBoolean("should lock out", lockOutSwerve);
-        
+        SmartDashboard.putBoolean("should lock out", lockOutSwerve);        
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
+        double filteredRoll = rollFilter.calculate(gyro.getRoll());
+        rollRate = (filteredRoll - lastRoll) / 0.020;
+        lastRoll = filteredRoll;
 
     }
 }

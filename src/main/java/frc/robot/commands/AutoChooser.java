@@ -94,7 +94,7 @@ public class AutoChooser {
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Test Wait", new WaitCommand(2.0));
-        eventMap.put("Balance", swerveSubsystem.autoBalance());
+        eventMap.put("Balance", swerveSubsystem.autoBalanceVelocity());
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand().withTimeout(4.0), 
           routingSubsystem.runCommand(), 

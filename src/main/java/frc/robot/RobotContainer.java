@@ -213,7 +213,7 @@ public class RobotContainer {
         .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
 
     controller.x().whileTrue((run(intakeSubsystem.outakeCommand(), routingSubsystem.outakeCommand(), greybotsGrabberSubsystem.outakeCubeCommand())));
-    controller.y().whileTrue(swerveSubsystem.autoBalance().alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.5)));
+    controller.y().whileTrue(swerveSubsystem.autoBalanceVelocity().alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.5)));
     
     controller.start().whileTrue(elevatorSubsystem.extendToInchesCommand(-2)
       .until(() -> elevatorSubsystem.limitSwitch.get())
