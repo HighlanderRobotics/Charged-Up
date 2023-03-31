@@ -93,8 +93,9 @@ public class SuperstructureSubsystem extends SubsystemBase {
       greybotsGrabberSubsystem.scoreConeCommand(),
       () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
     ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
-    .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0),
-    elevatorSubsystem.extendToInchesCommand(1.0)
+    .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)//,
+    // new WaitCommand(0.25)
+    // elevatorSubsystem.extendToInchesCommand(1.0)
     ));
   }
 

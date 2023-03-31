@@ -76,23 +76,23 @@ public class AutoChooser {
         eventMap.put("Score No Aim", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
-          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
         eventMap.put("Score L3 No Aim", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
-          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
         eventMap.put("Score L2 No Aim", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
-          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
         eventMap.put("Score L2 No Aim Cube", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
-          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
         eventMap.put("Score L3 No Aim Cube", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, false))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
-          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
         eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalanceVelocity());
         eventMap.put("Intake", run(
