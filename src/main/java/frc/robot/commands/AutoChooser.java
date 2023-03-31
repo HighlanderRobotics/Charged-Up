@@ -96,10 +96,10 @@ public class AutoChooser {
         eventMap.put("Test Wait", new WaitCommand(2.0));
         eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Intake", run(
-          intakeSubsystem.runCommand(), 
+          intakeSubsystem.runCommand().withTimeout(4.0), 
           routingSubsystem.runCommand(), 
           greybotsGrabberSubsystem.intakeCubeCommand())
-          .withTimeout(4.0).asProxy()); 
+          .withTimeout(5.0).asProxy()); 
         eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
             () -> 1.0,
             () -> 0.0,

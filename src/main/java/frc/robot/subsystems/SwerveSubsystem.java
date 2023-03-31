@@ -324,12 +324,12 @@ public class SwerveSubsystem extends SubsystemBase {
     public CommandBase autoBalance(){
         return driveCommand(
                 () -> {
-                    if (gyro.getRoll() > 10.0) {
+                    if (gyro.getRoll() > 11.0) {
                         lockOutSwerve = false;
-                        return -0.15;
-                    } else if (gyro.getRoll() < -10.0) {
+                        return -0.12;
+                    } else if (gyro.getRoll() < -11.0) {
                         lockOutSwerve = false;
-                        return 0.15;
+                        return 0.12;
                     } else {
                         lockOutSwerve = true;
                         return 0.0;
