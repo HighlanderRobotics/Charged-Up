@@ -190,7 +190,7 @@ public final class Constants {
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
     public static final double maxSpeedMetersPerSecond = 3.5;
     public static final double maxAccelerationMetersPerSecondSquared = 4;
-    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 4;
+    public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 5.5;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 12;
 
     public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
@@ -198,7 +198,7 @@ public final class Constants {
 
     public static final double kPXController = 7.0;
     public static final double kPYController = 7.0;
-    public static final double kPThetaController = 1.7;
+    public static final double kPThetaController = 1.9;
     public static final double kDThetaController = 0.0;
 
     public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
