@@ -148,7 +148,7 @@ public class AutoChooser {
     return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("1 + Park Top Blue", "1 + Park Top Red"));
   }
   private Command twoParkTop(){
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("2 + Park Top Blue", "2 + Park Top Red"));
+    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance(3.0, 5.0, "2 + Park Top Blue", "2 + Park Top Red"));
   }
 
   private Command onePlusParkMiddle() {
@@ -168,7 +168,7 @@ public class AutoChooser {
   }
 
   public Command threeTop() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Top Blue", "3 Piece Top Red"));
+    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance(3.0, 5.0, "3 Piece Top Blue", "3 Piece Top Red"));
   }
   public Command twoPlusParkBottomRed(){
     return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Top Blue", "2 + Park Bottom Red"));
@@ -187,11 +187,19 @@ public class AutoChooser {
   } 
 
   private List<PathPlannerTrajectory> chooseAutoAlliance(String nameBlue, String nameRed) {
+    return chooseAutoAlliance(Constants.AutoConstants.autoConstraints, nameBlue, nameRed);
+  }
+
+  private List<PathPlannerTrajectory> chooseAutoAlliance(double maxVel, double maxAcc, String nameBlue, String nameRed) {
+    return chooseAutoAlliance(new PathConstraints(maxVel, maxAcc), nameBlue, nameRed);
+  }
+
+  private List<PathPlannerTrajectory> chooseAutoAlliance(PathConstraints constraints, String nameBlue, String nameRed) {
     if (DriverStation.getAlliance() == Alliance.Blue) {
-      List<PathPlannerTrajectory> pathBlue = PathPlanner.loadPathGroup(nameBlue, new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
+      List<PathPlannerTrajectory> pathBlue = PathPlanner.loadPathGroup(nameBlue, constraints);
       return pathBlue;
     } else {
-      List<PathPlannerTrajectory> pathRed = PathPlanner.loadPathGroup(nameRed, new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
+      List<PathPlannerTrajectory> pathRed = PathPlanner.loadPathGroup(nameRed, constraints);
       return pathRed;
     }
   }
