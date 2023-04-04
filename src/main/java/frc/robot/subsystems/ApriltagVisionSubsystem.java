@@ -26,7 +26,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-public class VisionSubsystem {
+public class ApriltagVisionSubsystem {
   /** If shuffleboard should be used--important for unit testing. */
   private static boolean useShuffleboard = true;
 
@@ -43,7 +43,7 @@ public class VisionSubsystem {
   private double lastDetection = 0;
 
   /** Creates a new VisionSubsystem. */
-  public VisionSubsystem() {
+  public ApriltagVisionSubsystem() {
     // loading the 2023 field arrangement
     try {
       fieldLayout =

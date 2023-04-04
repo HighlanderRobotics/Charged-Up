@@ -1,11 +1,9 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ScoringPositions;
-import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
-import frc.robot.subsystems.VisionSubsystem.VisionMeasurement;
+import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -16,13 +14,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
-
-import org.photonvision.PhotonCamera;
-import org.photonvision.common.hardware.VisionLEDMode;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.pathplanner.lib.PathConstraints;
@@ -32,10 +24,6 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.PathPoint;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -44,19 +32,12 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -71,7 +52,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -88,7 +68,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean isInTapeMode = true;
     private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
 
-    private VisionSubsystem visionSubsystem = new VisionSubsystem();
+    private ApriltagVisionSubsystem visionSubsystem = new ApriltagVisionSubsystem();
 
     public boolean hasResetOdometry = false;
 
@@ -111,6 +91,8 @@ public class SwerveSubsystem extends SubsystemBase {
         0, 
         0.0,
         new Constraints(Math.PI * 2, Math.PI * 2));
+
+    public TapeVisionSubsystem tapeVisionSubsystem = new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
 
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);

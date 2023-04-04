@@ -2,7 +2,8 @@
   "HALProvider": {
     "Addressable LEDs": {
       "0": {
-        "columns": 50
+        "columns": 50,
+        "serpentine": true
       },
       "window": {
         "visible": true
@@ -13,11 +14,31 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
+      "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
+      "/SmartDashboard/Grabber intake cube no extend": "Command",
+      "/SmartDashboard/Grabber outake cone": "Command",
       "/SmartDashboard/Path 1": "Command",
       "/SmartDashboard/Path 2": "Command",
+      "/SmartDashboard/Rezero Grabber": "Command",
+      "/SmartDashboard/Run grabber to double substation": "Command",
+      "/SmartDashboard/Run grabber to routing": "Command",
+      "/SmartDashboard/Run grabber to scoring": "Command",
+      "/SmartDashboard/Run grabber to single substation": "Command",
+      "/SmartDashboard/Run grabber to storage": "Command",
       "/SmartDashboard/Sequence": "Command",
       "/SmartDashboard/Spline": "Command",
-      "/SmartDashboard/elevatorsim": "Mechanism2d"
+      "/SmartDashboard/autoBalance": "Command",
+      "/SmartDashboard/autoChooser": "String Chooser",
+      "/SmartDashboard/elevatorsim": "Mechanism2d",
+      "/SmartDashboard/extend to 0": "Command",
+      "/SmartDashboard/extend to 12": "Command",
+      "/SmartDashboard/extend to 36": "Command",
+      "/SmartDashboard/intake toggle": "Command",
+      "/SmartDashboard/reset elevator": "Command",
+      "/SmartDashboard/reset to 0": "Command",
+      "/SmartDashboard/rezero elevator": "Command",
+      "/SmartDashboard/scoring sequence": "Command"
     },
     "windows": {
       "/SmartDashboard/Path 1": {
