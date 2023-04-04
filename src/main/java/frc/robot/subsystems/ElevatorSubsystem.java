@@ -1,34 +1,19 @@
 package frc.robot.subsystems;
 
-import java.util.List;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.spline.Spline;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
@@ -43,31 +28,23 @@ public class ElevatorSubsystem extends SubsystemBase {
     public ReversibleDigitalInput limitSwitch = new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
     TrapezoidProfile.State lastState = new TrapezoidProfile.State();
     TrapezoidProfile.State goal = new TrapezoidProfile.State();
-    
-    Mechanism2d mech2d = new Mechanism2d(70, 60);
-    MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
-    MechanismLigament2d elevatorLig2d = root2d.append(new MechanismLigament2d(
-        "Elevator",
-        20, 
-        Math.toDegrees(Constants.ElevatorConstants.elevatorAngleRad),
-        15,
-        new Color8Bit(Color.kPurple)));
-    MechanismLigament2d armLig2d = elevatorLig2d.append(new MechanismLigament2d(
-        "Arm", 
-        Constants.ArmConstants.armLengthInches,
-        90,
-        15,
-        new Color8Bit(Color.kLavender)));
 
     public ElevatorSubsystem() {
-        elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
+        elevatorMotor = new HighlanderFalcon(
+            Constants.ElevatorConstants.elevatorMotorID, 
+            5.45 / 1.0, 
+            0.0, 
+            0.0, 
+            0.0);
+        elevatorMotor.configMotionCruiseVelocity(inchesToTicks(Constants.ElevatorConstants.elevatorConstraints.maxVelocity) / 10.0);
+        elevatorMotor.configMotionAcceleration(inchesToTicks(Constants.ElevatorConstants.elevatorConstraints.maxAcceleration) / 10.0);
+        elevatorMotor.configMotionSCurveStrength(2);
         elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
         elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configVoltageCompSaturation(10);
         elevatorFollower.configVoltageCompSaturation(10);
-        SmartDashboard.putData("elevatorsim", mech2d);
         zeroMotor();
     }
 
@@ -97,6 +74,15 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("elevator state space voltage out", voltage);
 
         elevatorMotor.set(ControlMode.PercentOutput, voltage / 12.0);
+    }
+
+    public void updateTalonPID() {
+        SmartDashboard.putNumber("Elevator trajectory velocity", ticksToInches(elevatorMotor.getActiveTrajectoryVelocity()) * 10);
+        elevatorMotor.set(
+            ControlMode.MotionMagic, 
+            inchesToTicks(goal.position), 
+            DemandType.ArbitraryFeedForward, 
+            Constants.ElevatorConstants.feedforward.calculate(ticksToInches(elevatorMotor.getActiveTrajectoryVelocity()) * 10));
     }
 
     private void setGoal(double position) {
@@ -139,11 +125,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Math.abs(Constants.ElevatorConstants.PIDController.getGoal().position - getExtensionInches()) < 3.0;
     }
 
-    public void updateMech2d(Pair<Double, Double> state) {
-      //  elevatorLig2d.setLength(state.getFirst());
-       // armLig2d.setAngle(Math.toDegrees(state.getSecond()));
-    }
-
     public void enable() {
         enabled = true;
     }
@@ -183,10 +164,18 @@ public class ElevatorSubsystem extends SubsystemBase {
         return extendToInchesCommand(() -> extensionInches);
     }
 
+    static double ticksToInches(double ticks) {
+        return (ticks / 2048) * Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5;
+    }
+
+    static int inchesToTicks(double inches) {
+        return (int) ((inches / (Constants.ElevatorConstants.elevatorSpoolCircumference * 2.5)) * 2048);
+    }
+
     @Override
     public void periodic() {
         if (enabled) {
-            updatePID();
+            updateTalonPID();
         }
         else if (isZeroing){
             elevatorMotor.set(ControlMode.PercentOutput, -0.1, DemandType.ArbitraryFeedForward, 0);

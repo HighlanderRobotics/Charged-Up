@@ -109,13 +109,6 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   }
 
-  @Override
-  public void simulationPeriodic() {
-    elevatorSubsystem.updateMech2d(new Pair<Double,Double>(
-      Constants.ElevatorConstants.PIDController.getSetpoint().position, 
-      Constants.ArmConstants.PIDController.getSetpoint().position));
-  }
-
   public static enum ExtensionState {
     RETRACT_AND_ROUTE,
     STORE,
