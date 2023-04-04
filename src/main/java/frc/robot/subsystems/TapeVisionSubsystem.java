@@ -13,10 +13,10 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 
@@ -28,14 +28,6 @@ public class TapeVisionSubsystem {
     public TapeVisionSubsystem(String cameraName, Transform3d cameraPose) {
         camera = new PhotonCamera(cameraName);
         this.cameraPose = cameraPose;
-
-        for (Translation3d trans : Constants.Grids.mid3dTranslations) {
-            System.out.println(trans.toString());
-        }
-
-        for (Translation3d trans : Constants.Grids.high3dTranslations) {
-            System.out.println(trans.toString());
-        }
     }
 
     public Pair<List<Pose2d>, Double> getEstimatedPoses(Pose2d previousPose) {
@@ -49,10 +41,13 @@ public class TapeVisionSubsystem {
             double distanceMid = (Grids.midConeZ - cameraPose.getZ()) / Math.tan(target.getPitch());
             Translation2d translationMid = previousPose.getTranslation()
                 .plus(new Translation2d(distanceMid, previousPose.getRotation().plus(Rotation2d.fromDegrees(target.getYaw()))));
+            SmartDashboard.putNumber("tag mid distance", distanceMid);
+
             // Pose if we're looking at a high goal
             double distanceHigh = (Grids.highConeZ - cameraPose.getZ()) / Math.tan(target.getPitch());
             Translation2d translationHigh = previousPose.getTranslation()
                 .plus(new Translation2d(distanceHigh, previousPose.getRotation().plus(Rotation2d.fromDegrees(target.getYaw()))));
+            SmartDashboard.putNumber("tag high distance", distanceHigh);
             
             Translation2d bestGoal = null;
             double bestDistance = Double.POSITIVE_INFINITY;
