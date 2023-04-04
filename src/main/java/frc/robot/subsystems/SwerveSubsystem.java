@@ -68,7 +68,7 @@ public class SwerveSubsystem extends SubsystemBase {
     private boolean isInTapeMode = true;
     private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
 
-    private ApriltagVisionSubsystem visionSubsystem = new ApriltagVisionSubsystem();
+    private ApriltagVisionSubsystem apriltagVisionSubsystem = new ApriltagVisionSubsystem();
 
     public boolean hasResetOdometry = false;
 
@@ -85,6 +85,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public boolean lockOutSwerve = false;
 
     private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
+    private ArrayList<Pose2d> dashboardFieldTapePoses = new ArrayList<>();
 
     public ProfiledPIDController headingController = new ProfiledPIDController(
         1.2, 
@@ -422,15 +423,22 @@ public class SwerveSubsystem extends SubsystemBase {
         pose = poseEstimator.update(getYaw(), getModulePositions()); 
         wheelOnlyOdo.update(getYaw(), getModulePositions());
         
-
-        List<VisionMeasurement> visionMeasurements = visionSubsystem.getEstimatedGlobalPose(pose);
+        List<VisionMeasurement> visionMeasurements = apriltagVisionSubsystem.getEstimatedGlobalPose(pose);
 
         for (VisionMeasurement measurement : visionMeasurements) {
+            dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
             poseEstimator.addVisionMeasurement(
                 measurement.estimation.estimatedPose.toPose2d(),
                 measurement.estimation.timestampSeconds,
                 measurement.confidence.times(2.0));
           }
+        
+        var tapeVisionMeasurements = tapeVisionSubsystem.getEstimatedPoses(poseEstimator.getEstimatedPosition());
+
+        for (var measurement : tapeVisionMeasurements.getFirst()) {
+            dashboardFieldTapePoses.add(measurement);
+            poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond());
+        }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
@@ -444,8 +452,10 @@ public class SwerveSubsystem extends SubsystemBase {
         field.setRobotPose(getPose());
         field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
         field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
-        field.getObject("Latest Vision Pose").setPoses(dashboardFieldVisionPoses);
+        field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
+        field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
         dashboardFieldVisionPoses.clear();
+        dashboardFieldTapePoses.clear();
         SmartDashboard.putData(field);
         SmartDashboard.putBoolean("Has reset", hasResetOdometry);
 

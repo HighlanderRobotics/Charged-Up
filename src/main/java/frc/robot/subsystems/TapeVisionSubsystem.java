@@ -10,6 +10,7 @@ import java.util.List;
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
@@ -37,7 +38,7 @@ public class TapeVisionSubsystem {
         }
     }
 
-    public List<Pose2d> getEstimatedPoses(Pose2d previousPose) {
+    public Pair<List<Pose2d>, Double> getEstimatedPoses(Pose2d previousPose) {
         List<Pose2d> result = new ArrayList<>();
         var cameraResult = camera.getLatestResult();
 
@@ -74,6 +75,6 @@ public class TapeVisionSubsystem {
             result.add(new Pose2d(bestGoal, previousPose.getRotation()));
         }
 
-        return result;
+        return Pair.of(result, cameraResult.getTimestampSeconds());
     }
 }
