@@ -558,8 +558,8 @@ public final class Constants {
       public static final double midX = outerX - Units.inchesToMeters(22.75);
       public static final double highX = outerX - Units.inchesToMeters(39.75);
 
-      public static final double fieldWidthX = Units.inchesToMeters(648 + 3.5);
-  
+      public static final double fieldWidthX = Units.inchesToMeters(655.5);
+
       // Y layout
       public static final int nodeRowCount = 9;
       public static final double[] nodeY =

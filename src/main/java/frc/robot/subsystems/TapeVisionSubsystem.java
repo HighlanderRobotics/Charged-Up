@@ -28,13 +28,6 @@ public class TapeVisionSubsystem {
     public TapeVisionSubsystem(String cameraName, Transform3d cameraPose) {
         camera = new PhotonCamera(cameraName);
         this.cameraPose = cameraPose;
-    
-        for (var goal : Grids.midTranslations) {
-            System.out.println(goal.toString());
-        }
-        for (var goal : Grids.highTranslations) {
-            System.out.println(goal.toString());
-        }
     }
 
     public Pair<List<Pose2d>, Double> getEstimatedPoses(Pose2d previousPose) {

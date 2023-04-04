@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
+import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
@@ -103,8 +104,6 @@ public class SwerveSubsystem extends SubsystemBase {
         headingController.enableContinuousInput(0, Math.PI * 2);
         headingController.setTolerance(0.15);
 
-        
-
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
             new SwerveModule(1, Constants.Swerve.Mod1.constants),
@@ -131,6 +130,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
         wheelOnlyOdo = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
         
+        List<Pose2d> tapePoses = new ArrayList<>();
+
+        for (var goal : Grids.midTranslations) {
+            System.out.println(goal.toString());
+            tapePoses.add(new Pose2d(goal, new Rotation2d()));
+        }
+        for (var goal : Grids.highTranslations) {
+            System.out.println(goal.toString());
+            tapePoses.add(new Pose2d(goal, new Rotation2d()));
+        }
+
+        field.getObject("tape targets").setPoses(tapePoses);
     }
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
