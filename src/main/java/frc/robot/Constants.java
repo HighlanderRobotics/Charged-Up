@@ -557,6 +557,8 @@ public final class Constants {
           outerX - (Units.inchesToMeters(14.25) / 2.0); // Centered when under cube nodes
       public static final double midX = outerX - Units.inchesToMeters(22.75);
       public static final double highX = outerX - Units.inchesToMeters(39.75);
+
+      public static final double fieldWidthX = Units.inchesToMeters(648 + 3.5);
   
       // Y layout
       public static final int nodeRowCount = 9;
@@ -581,12 +583,12 @@ public final class Constants {
       public static final double midConeZ = Units.inchesToMeters(34.0);
   
       // Translations (all nodes in the same column/row have the same X/Y coordinate)
-      public static final Translation2d[] lowTranslations = new Translation2d[nodeRowCount];
-      public static final Translation3d[] low3dTranslations = new Translation3d[nodeRowCount];
-      public static final Translation2d[] midTranslations = new Translation2d[nodeRowCount];
-      public static final Translation3d[] mid3dTranslations = new Translation3d[nodeRowCount];
-      public static final Translation2d[] highTranslations = new Translation2d[nodeRowCount];
-      public static final Translation3d[] high3dTranslations = new Translation3d[nodeRowCount];
+      public static final Translation2d[] lowTranslations = new Translation2d[nodeRowCount * 2];
+      public static final Translation3d[] low3dTranslations = new Translation3d[nodeRowCount * 2];
+      public static final Translation2d[] midTranslations = new Translation2d[nodeRowCount * 2];
+      public static final Translation3d[] mid3dTranslations = new Translation3d[nodeRowCount * 2];
+      public static final Translation2d[] highTranslations = new Translation2d[nodeRowCount * 2];
+      public static final Translation3d[] high3dTranslations = new Translation3d[nodeRowCount * 2];
   
       static {
         for (int i = 0; i < nodeRowCount; i++) {
@@ -597,6 +599,16 @@ public final class Constants {
           mid3dTranslations[i] = new Translation3d(midX, nodeY[i], isCube ? midCubeZ : midConeZ);
           highTranslations[i] = new Translation2d(highX, nodeY[i]);
           high3dTranslations[i] = new Translation3d(highX, nodeY[i], isCube ? highCubeZ : highConeZ);
+        }
+
+        for (int i = nodeRowCount; i < 2 * nodeRowCount; i++) {
+          boolean isCube = i == 1 || i == 4 || i == 7;
+          lowTranslations[i] = new Translation2d(fieldWidthX - lowX, nodeY[i - 9]);
+          low3dTranslations[i] = new Translation3d(fieldWidthX - lowX, nodeY[i - 9], 0.0);
+          midTranslations[i] = new Translation2d(fieldWidthX - midX, nodeY[i - 9]);
+          mid3dTranslations[i] = new Translation3d(fieldWidthX - midX, nodeY[i - 9], isCube ? midCubeZ : midConeZ);
+          highTranslations[i] = new Translation2d(fieldWidthX - highX, nodeY[i - 9]);
+          high3dTranslations[i] = new Translation3d(fieldWidthX - highX, nodeY[i - 9], isCube ? highCubeZ : highConeZ);
         }
       }
     }
