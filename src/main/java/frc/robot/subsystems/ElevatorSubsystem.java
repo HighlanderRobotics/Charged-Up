@@ -33,12 +33,14 @@ public class ElevatorSubsystem extends SubsystemBase {
         elevatorMotor = new HighlanderFalcon(
             Constants.ElevatorConstants.elevatorMotorID, 
             5.45 / 1.0, 
-            0.0, 
+            -0.01, 
             0.0, 
             0.0);
+        elevatorMotor.config_kF(0, 5.0e-1);
         elevatorMotor.configMotionCruiseVelocity(inchesToTicks(Constants.ElevatorConstants.elevatorConstraints.maxVelocity) / 10.0);
         elevatorMotor.configMotionAcceleration(inchesToTicks(Constants.ElevatorConstants.elevatorConstraints.maxAcceleration) / 10.0);
-        elevatorMotor.configMotionSCurveStrength(2);
+        elevatorMotor.configMotionSCurveStrength(0);
+        elevatorMotor.configAllowableClosedloopError(0, 0);
         elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
         elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
@@ -78,6 +80,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void updateTalonPID() {
         SmartDashboard.putNumber("Elevator trajectory velocity", ticksToInches(elevatorMotor.getActiveTrajectoryVelocity()) * 10);
+        SmartDashboard.putNumber("Elevator FF out", Constants.ElevatorConstants.feedforward.calculate(ticksToInches(elevatorMotor.getActiveTrajectoryVelocity()) * 10));
+        SmartDashboard.putNumber("Elevator motor position setpoint", elevatorMotor.getActiveTrajectoryPosition());
+        SmartDashboard.putNumber("Elevator position goal native", elevatorMotor.getClosedLoopTarget());
         elevatorMotor.set(
             ControlMode.MotionMagic, 
             inchesToTicks(goal.position), 
@@ -122,7 +127,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public boolean isAtGoal() {
-        return Math.abs(Constants.ElevatorConstants.PIDController.getGoal().position - getExtensionInches()) < 3.0;
+        return Math.abs(goal.position - getExtensionInches()) < 3.0;
     }
 
     public void enable() {
@@ -195,11 +200,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         // Basically, dont remove this line it's load bearing
         SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
 
-        SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+        SmartDashboard.putNumber("elevator goal", goal.position);
         SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
         // SmartDashboard.putNumber("elevator native position", getMeasurement());
         SmartDashboard.putBoolean("elevator enable", enabled);
         SmartDashboard.putBoolean("elevator limit switch", limitSwitch.get());
+        SmartDashboard.putNumber("elevator current out", elevatorMotor.getSupplyCurrent());
         // SmartDashboard.putBoolean("elevator is at goal", isAtGoal());
     }
 }
