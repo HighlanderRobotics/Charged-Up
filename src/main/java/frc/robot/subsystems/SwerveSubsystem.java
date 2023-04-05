@@ -507,5 +507,6 @@ public class SwerveSubsystem extends SubsystemBase {
         Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters(180), 0.513, new Rotation2d(Math.PI));
         field.getObject("vis sim robot pose").setPose(visSimRobotPose);
         tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
+        tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose);
     }
 }
