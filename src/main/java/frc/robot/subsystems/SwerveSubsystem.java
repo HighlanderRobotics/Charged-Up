@@ -6,6 +6,7 @@ import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.VisionSubsystem.VisionMeasurement;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -453,19 +454,19 @@ public class SwerveSubsystem extends SubsystemBase {
         // Log swerve module information
         // May want to disable to conserve bandwidth
         // for(SwerveModule mod : mSwerveMods){
-        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
-        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
-        //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
+        //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Cancoder", mod.getCanCoder().getDegrees());
+        //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
+        //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         // }
 
-        SmartDashboard.putNumber("Heading", getYaw().getDegrees());
+        LoggingWrapper.shared.add("Heading", getYaw().getDegrees());
         field.setRobotPose(getPose());
         field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
         field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
         field.getObject("Latest Vision Pose").setPoses(dashboardFieldVisionPoses);
         dashboardFieldVisionPoses.clear();
-        SmartDashboard.putData(field);
-        SmartDashboard.putBoolean("Has reset", hasResetOdometry);
+        LoggingWrapper.shared.add("field", field);
+        LoggingWrapper.shared.add("Has reset", hasResetOdometry);
 
         if (DriverStation.isDisabled()) {
             hasResetOdometry = false;
@@ -473,22 +474,22 @@ public class SwerveSubsystem extends SubsystemBase {
         // getNearestGoal();
         // getPathToPoint(getNearestGoal());
 
-        SmartDashboard.putNumber("x error", Constants.AutoConstants.xController.getPositionError());
-        SmartDashboard.putNumber("y error", Constants.AutoConstants.yController.getPositionError());
-        SmartDashboard.putNumber("x goal", Constants.AutoConstants.xController.getGoal().position);
-        SmartDashboard.putNumber("Y goal", Constants.AutoConstants.yController.getGoal().position);
-        SmartDashboard.putNumber("Heading goal", headingController.getGoal().position);
-        SmartDashboard.putNumber("Heading error", headingController.getPositionError());
-        SmartDashboard.putNumber("total error", getNearestGoalDistance());
-        SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
-        SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, true));
-        SmartDashboard.putString("alliance", DriverStation.getAlliance().toString());
-        SmartDashboard.putNumber("gyro roll", gyro.getRoll());
-        SmartDashboard.putNumber("gyro pitch", gyro.getPitch());
-        SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
-        SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
-        SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
-        SmartDashboard.putBoolean("should lock out", lockOutSwerve);        
+        LoggingWrapper.shared.add("x error", Constants.AutoConstants.xController.getPositionError());
+        LoggingWrapper.shared.add("y error", Constants.AutoConstants.yController.getPositionError());
+        LoggingWrapper.shared.add("x goal", Constants.AutoConstants.xController.getGoal().position);
+        LoggingWrapper.shared.add("Y goal", Constants.AutoConstants.yController.getGoal().position);
+        LoggingWrapper.shared.add("Heading goal", headingController.getGoal().position);
+        LoggingWrapper.shared.add("Heading error", headingController.getPositionError());
+        LoggingWrapper.shared.add("total error", getNearestGoalDistance());
+        LoggingWrapper.shared.add("is cone goal", nearestGoalIsCone);
+        LoggingWrapper.shared.add("extension requested", getExtension(ScoringLevels.L2, true));
+        LoggingWrapper.shared.add("alliance", DriverStation.getAlliance().toString());
+        LoggingWrapper.shared.add("gyro roll", gyro.getRoll());
+        LoggingWrapper.shared.add("gyro pitch", gyro.getPitch());
+        LoggingWrapper.shared.add("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
+        LoggingWrapper.shared.add("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
+        LoggingWrapper.shared.add("is in tape mode", isInTapeMode);
+        LoggingWrapper.shared.add("should lock out", lockOutSwerve);        
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
         double filteredRoll = rollFilter.calculate(gyro.getRoll());

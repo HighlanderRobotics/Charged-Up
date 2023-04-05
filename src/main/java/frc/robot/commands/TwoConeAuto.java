@@ -5,6 +5,7 @@ import com.pathplanner.lib.PathPlanner;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -12,7 +13,7 @@ public class TwoConeAuto extends SequentialCommandGroup {
     
     public TwoConeAuto(SwerveSubsystem swerveSubsystem,
     IntakeSubsystem intakeSubsystem){
-        SmartDashboard.putNumber("start heading", 
+        LoggingWrapper.shared.add("start heading", 
             PathPlanner.loadPath("firstcone", 3, 3).getInitialPose().getRotation().getDegrees());
     addCommands(
         new InstantCommand( () -> {

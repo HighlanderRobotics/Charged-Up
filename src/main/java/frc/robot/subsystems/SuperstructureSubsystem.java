@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
@@ -105,7 +106,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
     if (elevatorSubsystem.getExtensionInches() > 4.5 || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5) { // TODO: Find good value for maximum extension before "extended"
       mode = ExtensionState.EXTEND;
     }
-    SmartDashboard.putString("Superstructure Mode", mode.toString());
+    LoggingWrapper.shared.add("Superstructure Mode", mode.toString());
 
   }
 

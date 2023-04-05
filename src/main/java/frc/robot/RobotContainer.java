@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -74,7 +75,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-      SmartDashboard.putData("autoBalance", swerveSubsystem.autoBalance());
+    LoggingWrapper.shared.add("autoBalance", swerveSubsystem.autoBalance());
     // Set default commands here
     swerveSubsystem.setDefaultCommand(swerveSubsystem.driveCommand(
       () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
@@ -248,34 +249,34 @@ public class RobotContainer {
 
   private void addDashboardCommands() {
 
-    SmartDashboard.putData("intake toggle", intakeSubsystem.extendCommand());
+    LoggingWrapper.shared.add("intake toggle", intakeSubsystem.extendCommand());
 
-    SmartDashboard.putData("extend to 0", superstructureSubsystem.waitExtendToInches(0));
-    SmartDashboard.putData("extend to 12", superstructureSubsystem.waitExtendToInches(12));
-    SmartDashboard.putData("extend to 36", superstructureSubsystem.waitExtendToInches(36));
+    LoggingWrapper.shared.add("extend to 0", superstructureSubsystem.waitExtendToInches(0));
+    LoggingWrapper.shared.add("extend to 12", superstructureSubsystem.waitExtendToInches(12));
+    LoggingWrapper.shared.add("extend to 36", superstructureSubsystem.waitExtendToInches(36));
 
-    SmartDashboard.putData("reset elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem).ignoringDisable(true));
+    LoggingWrapper.shared.add("reset elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem).ignoringDisable(true));
     
-    SmartDashboard.putData("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
+    LoggingWrapper.shared.add("reset to 0", new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
   
 
-    SmartDashboard.putData("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
+    LoggingWrapper.shared.add("rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
 
-    SmartDashboard.putData("scoring sequence", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, greybotsGrabberSubsystem, superstructureSubsystem));
+    LoggingWrapper.shared.add("scoring sequence", new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, greybotsGrabberSubsystem, superstructureSubsystem));
 
-    SmartDashboard.putData("Rezero Grabber", greybotsGrabberSubsystem.resetPivotCommand().alongWith(intakeSubsystem.extendCommand()));
+    LoggingWrapper.shared.add("Rezero Grabber", greybotsGrabberSubsystem.resetPivotCommand().alongWith(intakeSubsystem.extendCommand()));
 
-    SmartDashboard.putData("Run grabber to storage", greybotsGrabberSubsystem.runToStorageCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    SmartDashboard.putData("Run grabber to routing", greybotsGrabberSubsystem.runToRoutingCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    SmartDashboard.putData("Run grabber to scoring", greybotsGrabberSubsystem.runToScoringCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    SmartDashboard.putData("Run grabber to double substation", greybotsGrabberSubsystem.runToDoubleSubstationCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    SmartDashboard.putData("Run grabber to single substation", greybotsGrabberSubsystem.runToSingleSubstationCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
+    LoggingWrapper.shared.add("Run grabber to storage", greybotsGrabberSubsystem.runToStorageCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
+    LoggingWrapper.shared.add("Run grabber to routing", greybotsGrabberSubsystem.runToRoutingCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
+    LoggingWrapper.shared.add("Run grabber to scoring", greybotsGrabberSubsystem.runToScoringCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
+    LoggingWrapper.shared.add("Run grabber to double substation", greybotsGrabberSubsystem.runToDoubleSubstationCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
+    LoggingWrapper.shared.add("Run grabber to single substation", greybotsGrabberSubsystem.runToSingleSubstationCommand().alongWith(intakeSubsystem.extendCommand().repeatedly()));
 
-    SmartDashboard.putData("Grabber intake cone single substation no extend", greybotsGrabberSubsystem.intakeConeSingleCommand().alongWith(intakeSubsystem.extendCommand()));
-    SmartDashboard.putData("Grabber intake cone double substation no extend", greybotsGrabberSubsystem.intakeConeDoubleCommand().alongWith(intakeSubsystem.extendCommand()));
-    SmartDashboard.putData("Grabber intake cube no extend", greybotsGrabberSubsystem.intakeCubeCommand());
+    LoggingWrapper.shared.add("Grabber intake cone single substation no extend", greybotsGrabberSubsystem.intakeConeSingleCommand().alongWith(intakeSubsystem.extendCommand()));
+    LoggingWrapper.shared.add("Grabber intake cone double substation no extend", greybotsGrabberSubsystem.intakeConeDoubleCommand().alongWith(intakeSubsystem.extendCommand()));
+    LoggingWrapper.shared.add("Grabber intake cube no extend", greybotsGrabberSubsystem.intakeCubeCommand());
 
-    SmartDashboard.putData("Grabber outake cone", greybotsGrabberSubsystem.outakeConeCommand().alongWith(intakeSubsystem.extendCommand()).withTimeout(1.0));
+    LoggingWrapper.shared.add("Grabber outake cone", greybotsGrabberSubsystem.outakeConeCommand().alongWith(intakeSubsystem.extendCommand()).withTimeout(1.0));
   }
 
   private static Command run(Command ... commands) {
