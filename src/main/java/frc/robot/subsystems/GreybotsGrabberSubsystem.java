@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 
 public class GreybotsGrabberSubsystem extends SubsystemBase {
@@ -228,11 +229,11 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
       resetEncoderToZero();
     }
 
-    SmartDashboard.putNumber("grabber output", grabberIntake.getMotorOutputVoltage());
-    SmartDashboard.putNumber("grabber error", grabberIntake.getClosedLoopError(0));
-    SmartDashboard.putNumber("grabber pivot angle", grabberPivot.getSelectedSensorPosition());
-    SmartDashboard.putNumber("grabber pivot target", grabberPivot.getClosedLoopTarget());
-    SmartDashboard.putBoolean("grabber reset limit switch", resetLimitSwitch.get());
-    SmartDashboard.putBoolean("grabber beambreak", cubeBeambreak.get());
+    LoggingWrapper.shared.add("grabber output", grabberIntake.getMotorOutputVoltage());
+    LoggingWrapper.shared.add("grabber error", grabberIntake.getClosedLoopError(0));
+    LoggingWrapper.shared.add("grabber pivot angle", grabberPivot.getSelectedSensorPosition());
+    LoggingWrapper.shared.add("grabber pivot target", grabberPivot.getClosedLoopTarget());
+    LoggingWrapper.shared.add("grabber reset limit switch", resetLimitSwitch.get());
+    LoggingWrapper.shared.add("grabber beambreak", cubeBeambreak.get());
   }
 }

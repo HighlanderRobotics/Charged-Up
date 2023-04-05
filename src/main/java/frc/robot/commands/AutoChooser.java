@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -131,7 +132,7 @@ public class AutoChooser {
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
         .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
 
-        SmartDashboard.putData("autoChooser", chooser);
+        LoggingWrapper.shared.add("autoChooser", chooser);
 
         //List<PathPlannerTrajectory> twoConeGroup = PathPlanner.loadPathGroup
     //("TwoCone", new PathConstraints(4, 3));
