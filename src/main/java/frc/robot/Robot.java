@@ -4,9 +4,12 @@
 
 package frc.robot;
 
+import java.util.concurrent.TimeUnit;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.lib.logging.LoggingWrapper;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,6 +24,12 @@ public class Robot extends TimedRobot {
 
   public static CTREConfigs ctreConfigs;
 
+  public Robot() {
+    addPeriodic(() -> {
+      LoggingWrapper.shared.publishEntireQueue();
+    }, TimeUnit.MILLISECONDS.toSeconds(Constants.LOGGING_FREQUENCY));
+  }
+
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -29,7 +38,7 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate CTRE configurations, mainly for 364lib
     ctreConfigs = new CTREConfigs();
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our RobotContainer.  This will   form all our button bindings, and put our
     // autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
   }

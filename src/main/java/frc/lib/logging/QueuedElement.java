@@ -7,21 +7,29 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 class QueuedElement {
 
-    /// Timestamp in Milliseconds
+    /** Timestamp in Milliseconds */
     long timestamp;
 
-    /// The Key of the Queued Element. This should be unique and identifiable
+    /** The Key of the Queued Element. This should be unique and identifiable */
     String key;
 
-    /// The object that the key is associated with. This should be a Double, String, Sendable, or Boolean
+    /** The object that the key is associated with. This should be a Double, String,
+     *  Sendable, or Boolean
+     */
     Object data;
 
+    /** Constructor for a QueuedElement
+     * @param key The Key of the Queued Element. This should be unique and identifiable
+     * @param data The object that the key is associated with. This should be a Double, String,
+     * Sendable, or Boolean
+     */
     public QueuedElement(String key, Object data) {
         this.timestamp = new Date().getTime();
         this.key = key;
         this.data = data;
     }
-
+    
+    /** Publishes the Queued Element to the SmartDashboard */
     public void publish() throws Exception {
         if (data instanceof Double) {
             SmartDashboard.putNumber(key, ((Double) data));

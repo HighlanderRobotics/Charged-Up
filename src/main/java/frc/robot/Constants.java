@@ -456,6 +456,9 @@ public final class Constants {
   }
 
   public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them
+  
+  /** Logging Frequency in Milliseconds */
+  public static final long LOGGING_FREQUENCY = 100;
 
   /** For 5026 vision code */
   public static final class Vision {
