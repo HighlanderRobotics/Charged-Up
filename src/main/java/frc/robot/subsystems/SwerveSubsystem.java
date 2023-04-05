@@ -466,7 +466,7 @@ public class SwerveSubsystem extends SubsystemBase {
         field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
         field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
         field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
-        field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
+        // field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
         dashboardFieldVisionPoses.clear();
         dashboardFieldTapePoses.clear();
         SmartDashboard.putData(field);
@@ -504,9 +504,10 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters(180), 0.513, new Rotation2d(Math.PI));
+        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters(180), 0.513, new Rotation2d(3.3));
         field.getObject("vis sim robot pose").setPose(visSimRobotPose);
         tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
-        tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose);
+        field.getObject("vis sim est pose").setPose(tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst().get(0));
+        System.out.print("");
     }
 }

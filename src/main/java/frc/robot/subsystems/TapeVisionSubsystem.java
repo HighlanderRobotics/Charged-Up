@@ -71,25 +71,26 @@ public class TapeVisionSubsystem {
                     distanceMid * Math.cos(Math.toRadians(target.getYaw())), 
                     distanceMid * Math.sin(Math.toRadians(target.getYaw()))), 
                 Rotation2d.fromDegrees(target.getYaw()));
-            Transform2d robotToTapeMid = cameraToTapeMid.plus(
-                new Transform2d(
-                    cameraToRobot.getTranslation().toTranslation2d(), 
-                    new Rotation2d(cameraToRobot.getRotation().getAngle())).inverse());
+            Transform2d robotToTapeMid = new Transform2d(
+                cameraToRobot.getTranslation().toTranslation2d(), 
+                new Rotation2d(cameraToRobot.getRotation().getAngle())).inverse()
+                    .plus(cameraToTapeMid);
             Pose2d fieldToTapeMid = fieldToRobot.transformBy(robotToTapeMid);
             SmartDashboard.putNumber("tag mid distance", distanceMid);
 
             // Pose if we're looking at a high goal
-            double distanceHigh = (Grids.highConeZ - cameraToRobot.getZ()) / Math.tan(target.getPitch()); // Doesnt account for camera pitch, so have a level camera
+            // Doesnt account for camera pitch, so have a level camera
+            double distanceHigh = (Grids.highConeZ - cameraToRobot.getZ()) / Math.tan(Math.toRadians(target.getPitch())); 
             Transform2d cameraToTapeHigh = new Transform2d(
                 new Translation2d(
                     distanceMid * Math.cos(Math.toRadians(target.getYaw())), 
                     distanceMid * Math.sin(Math.toRadians(target.getYaw()))), 
-                Rotation2d.fromDegrees(target.getYaw()));
-            Transform2d robotToTapeHigh = cameraToTapeMid.plus(
+                    Rotation2d.fromDegrees(target.getYaw()));
+            Transform2d robotToTapeHigh = cameraToTapeHigh.plus(
                 new Transform2d(
                     cameraToRobot.getTranslation().toTranslation2d(), 
                     new Rotation2d(cameraToRobot.getRotation().getAngle())).inverse());
-            Pose2d fieldToTapeHigh = fieldToRobot.transformBy(robotToTapeMid);
+            Pose2d fieldToTapeHigh = fieldToRobot.transformBy(robotToTapeHigh);
             SmartDashboard.putNumber("tag high distance", distanceHigh);
             
             Translation2d bestGoal = null;
