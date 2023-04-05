@@ -39,6 +39,8 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -498,5 +500,12 @@ public class SwerveSubsystem extends SubsystemBase {
         rollRate = (filteredRoll - lastRoll) / 0.020;
         lastRoll = filteredRoll;
 
+    }
+
+    @Override
+    public void simulationPeriodic() {
+        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters(180), 0.513, new Rotation2d(Math.PI));
+        field.getObject("vis sim robot pose").setPose(visSimRobotPose);
+        tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
     }
 }

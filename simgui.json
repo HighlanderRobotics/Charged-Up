@@ -35,6 +35,7 @@
       "/SmartDashboard/extend to 12": "Command",
       "/SmartDashboard/extend to 36": "Command",
       "/SmartDashboard/intake toggle": "Command",
+      "/SmartDashboard/limelight-left Sim Field": "Field2d",
       "/SmartDashboard/reset elevator": "Command",
       "/SmartDashboard/reset to 0": "Command",
       "/SmartDashboard/rezero elevator": "Command",
@@ -42,6 +43,22 @@
     },
     "windows": {
       "/SmartDashboard/Field": {
+        "Robot": {
+          "color": [
+            0.0,
+            255.0,
+            29.999967575073242,
+            255.0
+          ]
+        },
+        "latest tape vision pose": {
+          "color": [
+            172.5000457763672,
+            0.0,
+            255.0,
+            255.0
+          ]
+        },
         "tape targets": {
           "arrows": false,
           "color": [
@@ -86,8 +103,17 @@
   },
   "NetworkTables": {
     "transitory": {
+      "Shuffleboard": {
+        "open": true
+      },
       "SmartDashboard": {
         "elevatorsim": {
+          "open": true
+        },
+        "open": true
+      },
+      "photonvision": {
+        "limelight-left": {
           "open": true
         },
         "open": true
