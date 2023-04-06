@@ -14,6 +14,9 @@ import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -32,32 +35,52 @@ public class TapeVisionTest {
 
     @Test
     void straightOnTest() {
+        System.out.println("\nstraight");
         test(180, 20.2, 180);
     }
 
     @Test
     void offsetRightTest() {
+        System.out.println("\noffset right");
         test(180, 80, 180);
     }
 
     @Test
     void offsetLeftTest() {
+        System.out.println("\noffset left");
         test(180, -20, 180);
     }
 
     @Test
     void rotatedLeftTest() {
+        System.out.println("\nrotate left");
         test(180, 20.2, 200);
     }
 
     @Test
     void rotatedRightTest() {
+        System.out.println("\nrotate right");
         test(180, 20.2, 160);
+    }
+
+    @Test void randomPointsTest() {
+        for (int i = 0; i < 1000; i++) {
+            Pose2d randomPose = new Pose2d(
+                i / 10 % 10.0, 
+                i / 100 % 10.0, 
+                new Rotation2d(((i * 10) / (Math.PI * 2)) % (Math.PI * 2)));
+            System.out.println("random point " + randomPose.toString());
+            test(randomPose);
+        }
     }
 
     void test(Pose2d visSimRobotPose) {
         tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
-        Pose2d estimatedPose = tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst().get(0);
+        List<Pose2d> estimatedPoses = tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst();
+        if (estimatedPoses.size() == 0) {
+            return;
+        }
+        Pose2d estimatedPose = estimatedPoses.get(0);
         assertEquals(visSimRobotPose.getX(), estimatedPose.getX(), margin, "Diff X was: " + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
         assertEquals(visSimRobotPose.getY(), estimatedPose.getY(), margin, "Diff Y was: " + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
     }

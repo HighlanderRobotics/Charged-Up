@@ -74,9 +74,11 @@ public class TapeVisionSubsystem {
             Transform2d robotToTapeMid = new Transform2d(
                 cameraToRobot.getTranslation().toTranslation2d(), 
                 new Rotation2d(cameraToRobot.getRotation().getAngle())).inverse()
-                    .plus(cameraToTapeMid);
+                    .plus(cameraToTapeMid).plus(new Transform2d(new Translation2d(), fieldToRobot.getRotation()));
             Pose2d fieldToTapeMid = fieldToRobot.transformBy(robotToTapeMid);
             SmartDashboard.putNumber("tag mid distance", distanceMid);
+
+            System.out.println("field to tape " + fieldToTapeMid.toString());
 
             // Pose if we're looking at a high goal
             // Doesnt account for camera pitch, so have a level camera
@@ -102,6 +104,15 @@ public class TapeVisionSubsystem {
                     bestDistance = midGoal.getDistance(fieldToTapeMid.getTranslation());
                     bestGoal = midGoal;
                     bestPose = bestGoal.plus(robotToTapeMid.getTranslation());
+                    // The above doesnt work if the robot isnt pointing straight ahead, this fixes that case
+                    double rotationNeeded = fieldToRobot.getRotation().minus(new Rotation2d(Math.PI)).getRadians();
+                    bestPose = new Translation2d(
+                        (((bestPose.getX() - bestGoal.getX()) * Math.cos(rotationNeeded))) 
+                            - (((bestPose.getY() - bestGoal.getY()) * Math.sin(rotationNeeded))) 
+                            + bestGoal.getX(),
+                        ((bestPose.getX() - bestGoal.getX()) * Math.sin(rotationNeeded))
+                            + ((bestPose.getY() - bestGoal.getY()) * Math.cos(rotationNeeded) )
+                            + bestGoal.getY());
                 }
             }
 
@@ -119,6 +130,10 @@ public class TapeVisionSubsystem {
 
             SmartDashboard.putNumber("Goal Pose X", bestGoal.getX());
             SmartDashboard.putNumber("Goal Pose Y", bestGoal.getY());
+            System.out.println("best goal " + bestGoal.toString());
+            System.out.println("best pose " + bestPose.toString());
+            System.out.println("actual pose " + fieldToRobot.getTranslation().toString());
+            System.out.println("robot to tape " + robotToTapeMid.toString());
 
             // Correct pose
             result.add(new Pose2d(bestPose, fieldToRobot.getRotation()));
