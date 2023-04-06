@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.logging.LoggingWrapper;
+import frc.lib.logging.VideoLogging;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -31,8 +32,12 @@ public class Robot extends TimedRobot {
     }, TimeUnit.MILLISECONDS.toSeconds(Constants.LOGGING_FREQUENCY));
 
     addPeriodic(() -> {
-      if (DriverStation.isEnabled()) {
+      if (!VideoLogging.shared.isRecording && DriverStation.isEnabled()) {
         // start recording
+        VideoLogging.shared.startRecording();
+      } else if (VideoLogging.shared.isRecording && !DriverStation.isEnabled()) {
+        // stop recording
+        VideoLogging.shared.stopRecording();
       }
     }, 0.5);
   }

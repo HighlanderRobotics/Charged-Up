@@ -11,11 +11,17 @@ import org.opencv.core.Mat;
 import org.opencv.videoio.VideoWriter;
 
 public class VideoLogging {
+
+    public final static VideoLogging shared = new VideoLogging();
+
+    private VideoLogging() { }
+
+    public boolean isRecording = false;
+
     private UsbCamera camera;
     private CvSink cvSink;
     private VideoWriter writer;
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm");
-
     /** 
     *Starts a Recording Capture and saves it to a specified filepath
     * @param filename The name of the file to save the video to
@@ -24,6 +30,8 @@ public class VideoLogging {
     * @param fps The frame rate of the video
      */
     public void startRecording(String filename, int width, int height, int fps) {
+        isRecording = true;
+        
         // Create a USB camera object
         camera = CameraServer.startAutomaticCapture();
 
