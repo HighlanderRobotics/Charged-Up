@@ -24,12 +24,6 @@ public class Robot extends TimedRobot {
 
   public static CTREConfigs ctreConfigs;
 
-  public Robot() {
-    addPeriodic(() -> {
-      LoggingWrapper.shared.publishEntireQueue();
-    }, TimeUnit.MILLISECONDS.toSeconds(Constants.LOGGING_FREQUENCY));
-  }
-
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -41,6 +35,11 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will   form all our button bindings, and put our
     // autonomous chooser on the dashboard.
     robotContainer = new RobotContainer();
+    // Start the Logging
+
+    LoggingWrapper.shared.startLogging();
+
+    addPeriodic(LoggingWrapper.shared::publishEntireQueue, Constants.LOGGING_FREQUENCY);
   }
 
   /**

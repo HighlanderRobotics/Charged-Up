@@ -8,12 +8,14 @@ public class LoggingWrapper {
 
     public static final LoggingWrapper shared = new LoggingWrapper();
 
-    /** Starts the WPILib DataLogManager */
-    private LoggingWrapper() {
-        DataLogManager.start();
-    }
+    private LoggingWrapper() { }
 
     private Hashtable<String, QueuedElement> queue = new Hashtable<String, QueuedElement>();
+
+    /** Starts the WPILib DataLogManager to the default directory location */
+    public void startLogging() {
+        DataLogManager.start();
+    }
 
     public void resetQueue() {
         queue = new Hashtable<String, QueuedElement>();
