@@ -89,7 +89,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Elevator closed loop error", elevatorMotor.getClosedLoopError());
         SmartDashboard.putNumber("Elevator percent out", elevatorMotor.getMotorOutputPercent());
         elevatorMotor.set(
-            ControlMode.Position, 
+            ControlMode.MotionMagic, 
             inchesToTicks(goal.position), 
             DemandType.ArbitraryFeedForward, 
             Constants.ElevatorConstants.feedforward.calculate(ticksToInches(elevatorMotor.getActiveTrajectoryVelocity()) * 10));
