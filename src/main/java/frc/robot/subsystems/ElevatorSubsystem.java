@@ -4,7 +4,10 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.RemoteFeedbackDevice;
+import com.ctre.phoenix.motorcontrol.RemoteSensorSource;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -32,11 +35,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(
             Constants.ElevatorConstants.elevatorMotorID, 
-            5.45 / 1.0, 
-            -0.01, 
-            0.0, 
-            0.0);
-        elevatorMotor.config_kF(0, 5.0e-1);
+            5.45 / 1.0);
+        elevatorMotor.config_kP(0, 0.001);
+        elevatorMotor.config_kF(0, 4.29e-1);
+        elevatorMotor.setInverted(false);
+        elevatorMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor.toFeedbackDevice());
         elevatorMotor.configMotionCruiseVelocity(inchesToTicks(Constants.ElevatorConstants.elevatorConstraints.maxVelocity) / 10.0);
         elevatorMotor.configMotionAcceleration(inchesToTicks(Constants.ElevatorConstants.elevatorConstraints.maxAcceleration) / 10.0);
         elevatorMotor.configMotionSCurveStrength(0);
@@ -83,8 +86,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Elevator FF out", Constants.ElevatorConstants.feedforward.calculate(ticksToInches(elevatorMotor.getActiveTrajectoryVelocity()) * 10));
         SmartDashboard.putNumber("Elevator motor position setpoint", elevatorMotor.getActiveTrajectoryPosition());
         SmartDashboard.putNumber("Elevator position goal native", elevatorMotor.getClosedLoopTarget());
+        SmartDashboard.putNumber("Elevator closed loop error", elevatorMotor.getClosedLoopError());
+        SmartDashboard.putNumber("Elevator percent out", elevatorMotor.getMotorOutputPercent());
         elevatorMotor.set(
-            ControlMode.MotionMagic, 
+            ControlMode.Position, 
             inchesToTicks(goal.position), 
             DemandType.ArbitraryFeedForward, 
             Constants.ElevatorConstants.feedforward.calculate(ticksToInches(elevatorMotor.getActiveTrajectoryVelocity()) * 10));
