@@ -31,7 +31,7 @@ public class VideoLogging {
      */
     public void startRecording(String filename, int width, int height, int fps) {
         isRecording = true;
-        
+
         // Create a USB camera object
         camera = CameraServer.startAutomaticCapture();
 
@@ -75,6 +75,8 @@ public class VideoLogging {
     }
 
     public void stopRecording() {
+        isRecording = false;
+
         // Interrupt the loop in the startRecording() method
         Thread.currentThread().interrupt();
     }
