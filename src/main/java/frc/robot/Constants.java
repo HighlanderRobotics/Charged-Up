@@ -323,9 +323,9 @@ public final class Constants {
     public static final int elevatorLimitSwitchID = 0;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/5, 0.01);
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(0.0, 0.11 / 2.0, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(60.0,40.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.2/7, 0.0, 0.0139/2, elevatorConstraints);
+    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.0, 0.0, 0.0, elevatorConstraints);
         static {
           PIDController.setTolerance(
             2.0, //TODO: is this good?
