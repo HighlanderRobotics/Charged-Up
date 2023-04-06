@@ -66,7 +66,7 @@ public class TapeVisionTest {
     @Test void randomPointsTest() {
         for (int i = 0; i < 1000; i++) {
             Pose2d randomPose = new Pose2d(
-                i / 10 % 10.0, 
+                (i / 10 % 10.0) + 2.0, 
                 i / 100 % 10.0, 
                 new Rotation2d(((i * 10) / (Math.PI * 2)) % (Math.PI * 2)));
             System.out.println("random point " + randomPose.toString());

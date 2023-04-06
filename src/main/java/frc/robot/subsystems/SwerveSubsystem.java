@@ -504,10 +504,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters(180), 0.513, new Rotation2d(3.3));
+        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters((60 + (Timer.getFPGATimestamp() * 15)) % 200), 0.513, new Rotation2d(3.3));
         field.getObject("vis sim robot pose").setPose(visSimRobotPose);
         tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
-        field.getObject("vis sim est pose").setPose(tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst().get(0));
+        try {
+            field.getObject("vis sim est pose").setPoses(tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst());
+        } catch (Exception exception) {
+            field.getObject("vis sim est pose").setPoses();
+        }
         System.out.print("");
     }
 }
