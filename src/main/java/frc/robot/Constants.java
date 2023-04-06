@@ -477,15 +477,7 @@ public final class Constants {
                     Units.inchesToMeters(-8),
                     Units.inchesToMeters(-9.75), 
                     Units.inchesToMeters(-22.75)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(-5)))),
-            new VisionSource(
-                "limelight-left",
-                new Transform3d(
-                  new Translation3d(
-                    Units.inchesToMeters(-8),
-                    Units.inchesToMeters(9.75), 
-                    Units.inchesToMeters(-22.75)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(5)))));
+                  new Rotation3d(0, 0, Units.degreesToRadians(-5)))));
   }
 
   /** For 5026 vision code */
