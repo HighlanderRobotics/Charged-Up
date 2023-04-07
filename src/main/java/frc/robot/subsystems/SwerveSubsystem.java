@@ -33,6 +33,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -448,14 +449,14 @@ public class SwerveSubsystem extends SubsystemBase {
             lastApriltagTime = measurement.estimation.timestampSeconds;
         }
         
-        // var tapeVisionMeasurements = tapeVisionSubsystem.getEstimatedPoses(poseEstimator.getEstimatedPosition());
+        var tapeVisionMeasurements = tapeVisionSubsystem.getEstimatedPoses(poseEstimator.getEstimatedPosition());
         
-        // if (Timer.getFPGATimestamp() - lastApriltagTime < 1.0) {
-        //     for (var measurement : tapeVisionMeasurements.getFirst()) {
-        //         dashboardFieldTapePoses.add(measurement);
-        //         poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond(), Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
-        //     }
-        // }
+        if (Timer.getFPGATimestamp() - lastApriltagTime < 1.0) {
+            for (var measurement : tapeVisionMeasurements.getFirst()) {
+                dashboardFieldTapePoses.add(measurement);
+                poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond(), Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
+            }
+        }
         // Log swerve module information
         // May want to disable to conserve bandwidth
         // for(SwerveModule mod : mSwerveMods){
@@ -470,6 +471,7 @@ public class SwerveSubsystem extends SubsystemBase {
         field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
         field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
         field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
+        SmartDashboard.putNumber("time since last apriltag", Timer.getFPGATimestamp() - lastApriltagTime);
         dashboardFieldVisionPoses.clear();
         dashboardFieldTapePoses.clear();
         SmartDashboard.putData(field);
@@ -496,7 +498,7 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
         SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
         SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
-        SmartDashboard.putBoolean("should lock out", lockOutSwerve);        
+        SmartDashboard.putBoolean("should lock out", lockOutSwerve);
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
         double filteredRoll = rollFilter.calculate(gyro.getRoll());

@@ -509,10 +509,10 @@ public final class Constants {
                 );
     
     public static final Matrix<N3, N1> TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS =
-    Matrix.mat(Nat.N3(), Nat.N1())
+      Matrix.mat(Nat.N3(), Nat.N1())
         .fill(
-            Units.inchesToMeters(2.5), // x
-            Units.inchesToMeters(2.5), // y
+            Units.inchesToMeters(5), // x
+            Units.inchesToMeters(5), // y
             Units.degreesToRadians(180) // theta
             );
 

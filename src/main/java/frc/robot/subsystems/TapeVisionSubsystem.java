@@ -62,6 +62,8 @@ public class TapeVisionSubsystem {
     }
 
     public Pair<List<Pose2d>, Double> getEstimatedPoses(Pose2d fieldToRobot) {
+        camera.setLED(VisionLEDMode.kOn);
+
         List<Pose2d> result = new ArrayList<>();
         var cameraResult = camera.getLatestResult();
 
@@ -102,7 +104,7 @@ public class TapeVisionSubsystem {
                     .plus(cameraToTapeHigh).plus(new Transform2d(new Translation2d(), fieldToRobot.getRotation()));
 
             Pose2d fieldToTapeHigh = fieldToRobot.transformBy(robotToTapeHigh);
-            SmartDashboard.putNumber("tag high distance", distanceHigh);
+            SmartDashboard.putNumber("tape high distance", distanceHigh);
             
             Translation2d bestGoal = null;
             double bestDistance = Double.POSITIVE_INFINITY;
@@ -148,6 +150,7 @@ public class TapeVisionSubsystem {
 
             SmartDashboard.putNumber("Goal Pose X", bestGoal.getX());
             SmartDashboard.putNumber("Goal Pose Y", bestGoal.getY());
+            SmartDashboard.putNumber("distance", bestDistance);
             if (Robot.isSimulation()) {
                 System.out.println("best goal " + bestGoal.toString());
                 System.out.println("best pose " + bestPose.toString());
