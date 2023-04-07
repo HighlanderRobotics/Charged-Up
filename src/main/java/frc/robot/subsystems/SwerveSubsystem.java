@@ -97,6 +97,7 @@ public class SwerveSubsystem extends SubsystemBase {
         new Constraints(Math.PI * 2, Math.PI * 2));
 
     public TapeVisionSubsystem tapeVisionSubsystem = new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
+    double lastApriltagTime = 0;
 
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
@@ -363,8 +364,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
     /** Return the pose of the drivebase, as estimated by the pose estimator. */
     public Pose2d getPose() {
-        return wheelOnlyOdo.getPoseMeters();
-        // return poseEstimator.getEstimatedPosition();
+        // return wheelOnlyOdo.getPoseMeters();
+        return poseEstimator.getEstimatedPosition();
     }
 
     /** Resets the pose estimator to the given pose */
@@ -443,16 +444,18 @@ public class SwerveSubsystem extends SubsystemBase {
             poseEstimator.addVisionMeasurement(
                 measurement.estimation.estimatedPose.toPose2d(),
                 measurement.estimation.timestampSeconds,
-                measurement.confidence.times(2.0));
-          }
-        
-        var tapeVisionMeasurements = tapeVisionSubsystem.getEstimatedPoses(poseEstimator.getEstimatedPosition());
-
-        for (var measurement : tapeVisionMeasurements.getFirst()) {
-            dashboardFieldTapePoses.add(measurement);
-            poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond(), Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
+                measurement.confidence.times(1.0));
+            lastApriltagTime = measurement.estimation.timestampSeconds;
         }
-
+        
+        // var tapeVisionMeasurements = tapeVisionSubsystem.getEstimatedPoses(poseEstimator.getEstimatedPosition());
+        
+        // if (Timer.getFPGATimestamp() - lastApriltagTime < 1.0) {
+        //     for (var measurement : tapeVisionMeasurements.getFirst()) {
+        //         dashboardFieldTapePoses.add(measurement);
+        //         poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond(), Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
+        //     }
+        // }
         // Log swerve module information
         // May want to disable to conserve bandwidth
         // for(SwerveModule mod : mSwerveMods){
@@ -466,7 +469,7 @@ public class SwerveSubsystem extends SubsystemBase {
         field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
         field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
         field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
-        // field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
+        field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
         dashboardFieldVisionPoses.clear();
         dashboardFieldTapePoses.clear();
         SmartDashboard.putData(field);

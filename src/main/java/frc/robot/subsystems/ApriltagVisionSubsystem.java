@@ -24,6 +24,7 @@ import java.util.Set;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 public class ApriltagVisionSubsystem {
@@ -33,6 +34,7 @@ public class ApriltagVisionSubsystem {
     public CameraEstimator (PhotonCamera camera, PhotonPoseEstimator estimator) {
       this.estimator = estimator;
       this.camera = camera;
+      camera.setLED(VisionLEDMode.kOff);
     }
   }
   /** If shuffleboard should be used--important for unit testing. */
@@ -113,12 +115,15 @@ public class ApriltagVisionSubsystem {
 
     for (CameraEstimator cameraEstimator : estimators) {
       var estimator = cameraEstimator.estimator;
-      var camera = cameraEstimator.camera;
+      var frame = cameraEstimator.camera.getLatestResult();
 
-      if (ignoreFrame(camera.getLatestResult())) continue;
+      if (ignoreFrame(frame)) {
+        System.out.println("throw away vision data");
+        continue;
+      }
 
       estimator.setReferencePose(prevEstimatedRobotPose);
-      var optEstimation = estimator.update();
+      var optEstimation = estimator.update(frame);
       if (optEstimation.isEmpty()) continue;
       var estimation = optEstimation.get();
       double smallestDistance = Double.POSITIVE_INFINITY;

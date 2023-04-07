@@ -11,6 +11,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.SimPhotonCamera;
 import org.photonvision.SimVisionSystem;
 import org.photonvision.SimVisionTarget;
+import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.Pair;
@@ -55,6 +56,8 @@ public class TapeVisionSubsystem {
             simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(target, new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), -1));
         }
 
+        camera.setLED(VisionLEDMode.kOn);
+
         // simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(Constants.Grids.mid3dTranslations[0], new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), 0));
     }
 
@@ -81,7 +84,7 @@ public class TapeVisionSubsystem {
                     .plus(cameraToTapeMid).plus(new Transform2d(new Translation2d(), fieldToRobot.getRotation()));
 
             Pose2d fieldToTapeMid = fieldToRobot.transformBy(robotToTapeMid);
-            System.out.println("field to tape mid " + fieldToTapeMid.toString());
+            // System.out.println("field to tape mid " + fieldToTapeMid.toString());
 
             // Pose if we're looking at a high goal
             // Doesnt account for camera pitch, so have a level camera

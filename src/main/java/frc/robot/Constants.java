@@ -505,7 +505,7 @@ public final class Constants {
                 // if these numbers are less than one, multiplying will do bad things
                 1, // x
                 1, // y
-                1 * Math.PI // theta
+                2 * Math.PI // theta
                 );
     
     public static final Matrix<N3, N1> TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS =
@@ -513,7 +513,7 @@ public final class Constants {
         .fill(
             Units.inchesToMeters(2.5), // x
             Units.inchesToMeters(2.5), // y
-            Units.degreesToRadians(10) // theta
+            Units.degreesToRadians(180) // theta
             );
 
     /** The distance at which tag distance is factored into deviation */
@@ -579,8 +579,8 @@ public final class Constants {
     public static final double cubeEdgeHigh = Units.inchesToMeters(3.0);
     public static final double highCubeZ = Units.inchesToMeters(35.5) - cubeEdgeHigh;
     public static final double midCubeZ = Units.inchesToMeters(23.5) - cubeEdgeHigh;
-    public static final double highConeZ = Units.inchesToMeters(46.0);
-    public static final double midConeZ = Units.inchesToMeters(34.0);
+    public static final double highConeZ = Units.inchesToMeters(44.0);
+    public static final double midConeZ = Units.inchesToMeters(25.0);
 
     // Translations (all nodes in the same column/row have the same X/Y coordinate)
     public static final Translation2d[] lowTranslations = new Translation2d[nodeRowCount * 2];
