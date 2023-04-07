@@ -90,6 +90,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
     private ArrayList<Pose2d> dashboardFieldTapePoses = new ArrayList<>();
+    private ArrayList<Pose2d> dashboardFieldTapeTargetPoses = new ArrayList<>();
 
     public ProfiledPIDController headingController = new ProfiledPIDController(
         1.2, 
@@ -452,9 +453,10 @@ public class SwerveSubsystem extends SubsystemBase {
         var tapeVisionMeasurements = tapeVisionSubsystem.getEstimatedPoses(poseEstimator.getEstimatedPosition());
         
         if (Timer.getFPGATimestamp() - lastApriltagTime < 1.0) {
-            for (var measurement : tapeVisionMeasurements.getFirst()) {
-                dashboardFieldTapePoses.add(measurement);
-                poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond(), Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
+            for (var measurement : tapeVisionMeasurements) {
+                dashboardFieldTapePoses.add(measurement.estimatedPose);
+                dashboardFieldTapeTargetPoses.add(new Pose2d(measurement.targetUsed.toTranslation2d(), new Rotation2d()));
+                poseEstimator.addVisionMeasurement(measurement.estimatedPose, measurement.timestamp, Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
             }
         }
         // Log swerve module information
@@ -464,16 +466,19 @@ public class SwerveSubsystem extends SubsystemBase {
         //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Integrated", mod.getPosition().angle.getDegrees());
         //     SmartDashboard.putNumber("Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);    
         // }
-
+        SmartDashboard.putString("used tape targets list", dashboardFieldTapeTargetPoses.toString());
         SmartDashboard.putNumber("Heading", getYaw().getDegrees());
+        SmartDashboard.putBoolean("has ll targets", tapeVisionMeasurements.size() > 0);
         field.setRobotPose(getPose());
         field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
         field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
         field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
         field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
+        field.getObject("used tape targets").setPoses(dashboardFieldTapeTargetPoses);
         SmartDashboard.putNumber("time since last apriltag", Timer.getFPGATimestamp() - lastApriltagTime);
         dashboardFieldVisionPoses.clear();
         dashboardFieldTapePoses.clear();
+        dashboardFieldTapeTargetPoses.clear();
         SmartDashboard.putData(field);
         SmartDashboard.putBoolean("Has reset", hasResetOdometry);
 
@@ -509,11 +514,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
     @Override
     public void simulationPeriodic() {
-        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters((60 + (Timer.getFPGATimestamp() * 15)) % 200), 0.513, new Rotation2d(3.3));
+        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters((60 + (Timer.getFPGATimestamp() * 15)) % 200), 0.6, new Rotation2d(3.3));
         field.getObject("vis sim robot pose").setPose(visSimRobotPose);
         tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
         try {
-            field.getObject("vis sim est pose").setPoses(tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst());
+            List<Pose2d> simEstPoses = new ArrayList<>();
+            List<Pose2d> simTapePoses = new ArrayList<>();
+            for (var measurement : tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose)) {
+                simEstPoses.add(measurement.estimatedPose);
+                simTapePoses.add(new Pose2d(measurement.targetUsed.toTranslation2d(), new Rotation2d()));
+            }
+            field.getObject("vis sim est pose").setPoses(simEstPoses);
+            field.getObject("vis sim target poses").setPoses(simTapePoses);
         } catch (Exception exception) {
             field.getObject("vis sim est pose").setPoses();
         }

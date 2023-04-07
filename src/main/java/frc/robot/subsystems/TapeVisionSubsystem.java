@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
@@ -35,6 +36,7 @@ public class TapeVisionSubsystem {
 
     SimVisionSystem simCamera;
 
+    
     public TapeVisionSubsystem(String cameraName, Transform3d cameraPose) {
         camera = new PhotonCamera(cameraName);
         this.cameraToRobot = cameraPose;
@@ -51,20 +53,41 @@ public class TapeVisionSubsystem {
         for (var target : Constants.Grids.mid3dTranslations) {
             simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(target, new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), -1));
         }
-
+        
         for (var target : Constants.Grids.high3dTranslations) {
             simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(target, new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), -1));
         }
-
+        
         camera.setLED(VisionLEDMode.kOn);
-
+        
         // simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(Constants.Grids.mid3dTranslations[0], new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), 0));
     }
+    
+    public static class TapeVisionResult {
+        public Pose2d estimatedPose;
+        public double timestamp;
+        public Translation3d targetUsed;
+        public boolean isTargetUsedHigh;
+        public double error;
+        public TapeVisionResult(
+            Pose2d estimatedPose,
+            double timestamp,
+            Translation3d targetUsed,
+            boolean isTargetUsedHigh,
+            double error
+        ) {
+            this.estimatedPose = estimatedPose;
+            this.timestamp = timestamp;
+            this.targetUsed = targetUsed;
+            this.isTargetUsedHigh = isTargetUsedHigh;
+            this.error = error;
+        }
+    }
 
-    public Pair<List<Pose2d>, Double> getEstimatedPoses(Pose2d fieldToRobot) {
+    public List<TapeVisionResult> getEstimatedPoses(Pose2d fieldToRobot) {
         camera.setLED(VisionLEDMode.kOn);
 
-        List<Pose2d> result = new ArrayList<>();
+        List<TapeVisionResult> result = new ArrayList<>();
         var cameraResult = camera.getLatestResult();
 
         // Find pose of each target
@@ -109,11 +132,13 @@ public class TapeVisionSubsystem {
             Translation2d bestGoal = null;
             double bestDistance = Double.POSITIVE_INFINITY;
             Translation2d bestPose = null;
+            boolean bestGoalIsHigh = false;
 
             for (var midGoal : Grids.midTranslations) {
                 if (midGoal.getDistance(fieldToTapeMid.getTranslation()) < bestDistance) {
                     bestDistance = midGoal.getDistance(fieldToTapeMid.getTranslation());
                     bestGoal = midGoal;
+                    bestGoalIsHigh = false;
                     bestPose = bestGoal.plus(robotToTapeMid.getTranslation());
                     // The above doesnt work if the robot isnt pointing straight ahead, this fixes that case
                     double rotationNeeded = fieldToRobot.getRotation().minus(new Rotation2d(Math.PI)).getRadians();
@@ -131,6 +156,7 @@ public class TapeVisionSubsystem {
                 if (highGoal.getDistance(fieldToTapeHigh.getTranslation()) < bestDistance) {
                     bestDistance = highGoal.getDistance(fieldToTapeHigh.getTranslation());
                     bestGoal = highGoal;
+                    bestGoalIsHigh = true;
                     bestPose = bestGoal.plus(robotToTapeHigh.getTranslation());
                     // The above doesnt work if the robot isnt pointing straight ahead, this fixes that case
                     double rotationNeeded = fieldToRobot.getRotation().minus(new Rotation2d(Math.PI)).getRadians();
@@ -158,10 +184,15 @@ public class TapeVisionSubsystem {
                 System.out.println("robot to tape " + robotToTapeMid.toString());
             }
             // Correct pose
-            result.add(new Pose2d(bestPose, fieldToRobot.getRotation()));
+            result.add( new TapeVisionResult(
+                new Pose2d(bestPose, fieldToRobot.getRotation()), 
+                cameraResult.getTimestampSeconds(), 
+                new Translation3d(bestGoal.getX(), bestGoal.getY(), bestGoalIsHigh ? Grids.highConeZ : Grids.midConeZ), 
+                bestGoalIsHigh, 
+                fieldToRobot.getTranslation().getDistance(bestPose)) );
         }
 
-        return Pair.of(result, cameraResult.getTimestampSeconds());
+        return result;
     }
 
     public void updateSimCamera(Pose2d pose) {

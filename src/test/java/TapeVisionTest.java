@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -76,7 +77,10 @@ public class TapeVisionTest {
 
     void test(Pose2d visSimRobotPose) {
         tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
-        List<Pose2d> estimatedPoses = tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst();
+        List<Pose2d> estimatedPoses = new ArrayList<>();
+        for (var measurement : tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose)) {
+            estimatedPoses.add(measurement.estimatedPose);
+        }
         if (estimatedPoses.size() == 0) {
             return;
         }
