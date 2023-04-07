@@ -50,17 +50,24 @@ public class TapeVisionSubsystem {
             240, 
             10);
         
-        for (var target : Constants.Grids.mid3dTranslations) {
+        for (int i = 0; i < Constants.Grids.mid3dTranslations.length; i++) {
+            var target = Grids.mid3dTranslations[i];
+            boolean isCube = i == 1 || i == 4 || i == 7;
+            if (isCube) continue;
             simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(target, new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), -1));
         }
         
-        for (var target : Constants.Grids.high3dTranslations) {
+        for (int i = 0; i < Constants.Grids.high3dTranslations.length; i++) {
+            var target = Grids.high3dTranslations[i];
+            boolean isCube = i == 1 || i == 4 || i == 7;
+            if (isCube) continue;
             simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(target, new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), -1));
         }
         
         camera.setLED(VisionLEDMode.kOn);
         
         // simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(Constants.Grids.mid3dTranslations[0], new Rotation3d()), Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), 0));
+        // System.out.println(new Pose3d(Constants.Grids.mid3dTranslations[0], new Rotation3d()).toString());
     }
     
     public static class TapeVisionResult {
@@ -92,20 +99,29 @@ public class TapeVisionSubsystem {
 
         // Find pose of each target
         for (PhotonTrackedTarget target : cameraResult.getTargets()) {
+            SmartDashboard.putNumber("vision target x", target.getYaw());
+            SmartDashboard.putNumber("vision target y", target.getPitch());
+            Rotation3d targetRotation = new Rotation3d(0, Math.toRadians(target.getPitch()), Math.toRadians(target.getYaw()));
             // Figure out which target we're looking at
             // Pose if we're looking at a mid goal
             // Doesnt account for camera pitch, so have a level camera
-            double distanceMid = (Grids.midConeZ + cameraToRobot.getZ()) / Math.tan(Math.toRadians(target.getPitch())); 
+            double distanceMid = (Grids.midConeZ + cameraToRobot.getZ()) / Math.tan(Math.toRadians(target.getPitch()) - cameraToRobot.getRotation().getY()); 
+
+            // Transform2d cameraToTapeMid = new Transform2d(
+            //     new Translation2d(
+            //         distanceMid * Math.cos(adjustedYaw), 
+            //         distanceMid * Math.sin(adjustedYaw)), 
+            //     new Rotation2d(adjustedYaw));
 
             Transform2d cameraToTapeMid = new Transform2d(
                 new Translation2d(
-                    distanceMid * Math.cos(Math.toRadians(target.getYaw())), 
-                    distanceMid * Math.sin(Math.toRadians(target.getYaw()))), 
-                Rotation2d.fromDegrees(target.getYaw()));
+                    target.getBestCameraToTarget().getX(), 
+                    target.getBestCameraToTarget().getY()), 
+                new Rotation2d(target.getBestCameraToTarget().getRotation().getZ()));
 
             Transform2d robotToTapeMid = new Transform2d(
                 cameraToRobot.getTranslation().toTranslation2d(), 
-                new Rotation2d(cameraToRobot.getRotation().getAngle())).inverse()
+                new Rotation2d(cameraToRobot.getRotation().getZ())).inverse()
                     .plus(cameraToTapeMid).plus(new Transform2d(new Translation2d(), fieldToRobot.getRotation()));
 
             Pose2d fieldToTapeMid = fieldToRobot.transformBy(robotToTapeMid);
@@ -113,17 +129,23 @@ public class TapeVisionSubsystem {
 
             // Pose if we're looking at a high goal
             // Doesnt account for camera pitch, so have a level camera
-            double distanceHigh = (Grids.highConeZ + cameraToRobot.getZ()) / Math.tan(Math.toRadians(target.getPitch())); 
+            double distanceHigh = (Grids.highConeZ + cameraToRobot.getZ()) / Math.tan(Math.toRadians(target.getPitch()) - cameraToRobot.getRotation().getY()); 
 
+            // Transform2d cameraToTapeHigh = new Transform2d(
+            //     new Translation2d(
+            //             distanceHigh * Math.cos(Math.toRadians(target.getYaw())), 
+            //             distanceHigh * Math.sin(Math.toRadians(target.getYaw()))), 
+            //         Rotation2d.fromDegrees(target.getYaw()));
+            
             Transform2d cameraToTapeHigh = new Transform2d(
                 new Translation2d(
-                        distanceHigh * Math.cos(Math.toRadians(target.getYaw())), 
-                        distanceHigh * Math.sin(Math.toRadians(target.getYaw()))), 
-                    Rotation2d.fromDegrees(target.getYaw()));
+                    target.getBestCameraToTarget().getX(), 
+                    target.getBestCameraToTarget().getY()), 
+                new Rotation2d(target.getBestCameraToTarget().getRotation().getZ()));
 
             Transform2d robotToTapeHigh = new Transform2d(
                 cameraToRobot.getTranslation().toTranslation2d(), 
-                new Rotation2d(cameraToRobot.getRotation().getAngle())).inverse()
+                new Rotation2d(cameraToRobot.getRotation().getZ())).inverse()
                     .plus(cameraToTapeHigh).plus(new Transform2d(new Translation2d(), fieldToRobot.getRotation()));
 
             Pose2d fieldToTapeHigh = fieldToRobot.transformBy(robotToTapeHigh);
@@ -170,7 +192,7 @@ public class TapeVisionSubsystem {
                 }
             }
 
-            if (bestPose == null || bestGoal == null || bestDistance > Units.inchesToMeters(5.0)) {
+            if (bestPose == null || bestGoal == null) {
                 continue;
             }
 
@@ -181,7 +203,10 @@ public class TapeVisionSubsystem {
                 System.out.println("best goal " + bestGoal.toString());
                 System.out.println("best pose " + bestPose.toString());
                 System.out.println("actual pose " + fieldToRobot.getTranslation().toString());
-                System.out.println("robot to tape " + robotToTapeMid.toString());
+                System.out.println("best distance " + fieldToRobot.getTranslation().getDistance(bestGoal));
+                System.out.println("actual distance " + fieldToRobot.getTranslation().getDistance(Constants.Grids.midTranslations[0]));
+                System.out.println("camera to tape " + cameraToTapeMid.toString());
+                System.out.println("robot to tape " + robotToTapeMid.toString() + "\n");
             }
             // Correct pose
             result.add( new TapeVisionResult(

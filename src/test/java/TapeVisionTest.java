@@ -27,7 +27,7 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public class TapeVisionTest {
     TapeVisionSubsystem tapeVisionSubsystem = new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
-    static final double margin = Units.inchesToMeters(2);
+    static final double margin = Units.inchesToMeters(2.75);
 
     @BeforeEach
     void setup() {

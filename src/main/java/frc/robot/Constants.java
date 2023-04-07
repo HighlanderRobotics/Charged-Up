@@ -67,8 +67,8 @@ public final class Constants {
     new Translation3d(
       Units.inchesToMeters(-8),
       Units.inchesToMeters(9.75), 
-      Units.inchesToMeters(-22.75)),
-    new Rotation3d(0, 0, Units.degreesToRadians(5)));
+      Units.inchesToMeters(-7.75)),
+    new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(0)));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
@@ -583,12 +583,12 @@ public final class Constants {
     public static final double midConeZ = Units.inchesToMeters(25.0);
 
     // Translations (all nodes in the same column/row have the same X/Y coordinate)
-    public static final Translation2d[] lowTranslations = new Translation2d[nodeRowCount * 2];
-    public static final Translation3d[] low3dTranslations = new Translation3d[nodeRowCount * 2];
-    public static final Translation2d[] midTranslations = new Translation2d[nodeRowCount * 2];
-    public static final Translation3d[] mid3dTranslations = new Translation3d[nodeRowCount * 2];
-    public static final Translation2d[] highTranslations = new Translation2d[nodeRowCount * 2];
-    public static final Translation3d[] high3dTranslations = new Translation3d[nodeRowCount * 2];
+    public static final Translation2d[] lowTranslations = new Translation2d[(nodeRowCount) * 2];
+    public static final Translation3d[] low3dTranslations = new Translation3d[(nodeRowCount) * 2];
+    public static final Translation2d[] midTranslations = new Translation2d[(nodeRowCount) * 2];
+    public static final Translation3d[] mid3dTranslations = new Translation3d[(nodeRowCount) * 2];
+    public static final Translation2d[] highTranslations = new Translation2d[(nodeRowCount) * 2];
+    public static final Translation3d[] high3dTranslations = new Translation3d[(nodeRowCount) * 2];
 
     static {
       for (int i = 0; i < nodeRowCount; i++) {
