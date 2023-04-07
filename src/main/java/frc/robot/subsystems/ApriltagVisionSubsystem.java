@@ -157,7 +157,7 @@ public class ApriltagVisionSubsystem {
       estimations.add(
           new VisionMeasurement(
               estimation,
-              PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS.times(confidenceMultiplier)));
+              PoseEstimator.TAG_VISION_MEASUREMENT_STANDARD_DEVIATIONS.times(confidenceMultiplier)));
     }
 
     if (!estimations.isEmpty()) {

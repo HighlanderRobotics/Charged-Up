@@ -499,7 +499,7 @@ public final class Constants {
      * measurements from vision less. This matrix is in the form [x, y, theta]ᵀ, with units in
      * meters and radians.
      */
-    public static final Matrix<N3, N1> VISION_MEASUREMENT_STANDARD_DEVIATIONS =
+    public static final Matrix<N3, N1> TAG_VISION_MEASUREMENT_STANDARD_DEVIATIONS =
         Matrix.mat(Nat.N3(), Nat.N1())
             .fill(
                 // if these numbers are less than one, multiplying will do bad things
@@ -507,6 +507,14 @@ public final class Constants {
                 1, // y
                 1 * Math.PI // theta
                 );
+    
+    public static final Matrix<N3, N1> TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS =
+    Matrix.mat(Nat.N3(), Nat.N1())
+        .fill(
+            Units.inchesToMeters(2.5), // x
+            Units.inchesToMeters(2.5), // y
+            Units.degreesToRadians(10) // theta
+            );
 
     /** The distance at which tag distance is factored into deviation */
     public static final double NOISY_DISTANCE_METERS = 1.5;

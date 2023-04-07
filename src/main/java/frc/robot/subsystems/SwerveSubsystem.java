@@ -450,7 +450,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
         for (var measurement : tapeVisionMeasurements.getFirst()) {
             dashboardFieldTapePoses.add(measurement);
-            poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond());
+            poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond(), Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
         }
 
         // Log swerve module information
