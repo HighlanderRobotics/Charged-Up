@@ -62,6 +62,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
+        elevatorMotor.config_kF(0, 0);
         elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
         elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
@@ -205,7 +206,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         LoggingWrapper.shared.add("elevator pose inches", getExtensionInches());
         // We might have accidentaly tuned elevator pid with this call on, which modifies the state of the pid controller
         // Basically, dont remove this line it's load bearing
-        LoggingWrapper.shared.add("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
+        SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
 
         LoggingWrapper.shared.add("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
         LoggingWrapper.shared.add("elevator pose inches", getExtensionInches());
