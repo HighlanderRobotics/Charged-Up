@@ -67,8 +67,8 @@ public final class Constants {
     new Translation3d(
       Units.inchesToMeters(-8),
       Units.inchesToMeters(9.75), 
-      Units.inchesToMeters(-7.75)),
-    new Rotation3d(0, Units.degreesToRadians(15), Units.degreesToRadians(0)));
+      Units.inchesToMeters(-22.75)),
+    new Rotation3d(0, Units.degreesToRadians(0), Units.degreesToRadians(5)));
 
   public static final class Swerve {
     public static final int pigeonID = 1;

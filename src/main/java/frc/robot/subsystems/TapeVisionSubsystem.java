@@ -14,7 +14,11 @@ import org.photonvision.SimVisionTarget;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.CoordinateAxis;
+import edu.wpi.first.math.geometry.CoordinateSystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,8 +27,11 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.lib.math.HRCoordinateSystem;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Constants.Grids;
@@ -35,11 +42,10 @@ public class TapeVisionSubsystem {
     Transform3d cameraToRobot;
 
     SimVisionSystem simCamera;
-
     
-    public TapeVisionSubsystem(String cameraName, Transform3d cameraPose) {
+    public TapeVisionSubsystem(String cameraName, Transform3d cameraToRobot) {
         camera = new PhotonCamera(cameraName);
-        this.cameraToRobot = cameraPose;
+        this.cameraToRobot = cameraToRobot;
 
         simCamera = new SimVisionSystem(
             cameraName, 
@@ -97,127 +103,54 @@ public class TapeVisionSubsystem {
         List<TapeVisionResult> result = new ArrayList<>();
         var cameraResult = camera.getLatestResult();
 
-        // Find pose of each target
-        for (PhotonTrackedTarget target : cameraResult.getTargets()) {
-            SmartDashboard.putNumber("vision target x", target.getYaw());
-            SmartDashboard.putNumber("vision target y", target.getPitch());
-            Rotation3d targetRotation = new Rotation3d(0, Math.toRadians(target.getPitch()), Math.toRadians(target.getYaw()));
-            // Figure out which target we're looking at
-            // Pose if we're looking at a mid goal
-            // Doesnt account for camera pitch, so have a level camera
-            double distanceMid = (Grids.midConeZ + cameraToRobot.getZ()) / Math.tan(Math.toRadians(target.getPitch()) - cameraToRobot.getRotation().getY()); 
+        // // Find pose of each target
+        // for (PhotonTrackedTarget target : cameraResult.getTargets()) {
+        //     Translation2d measuredTargetCameraSpace = new Translation2d(target.getYaw(), target.getPitch());
+        //     Translation3d bestGoal = null;
+        //     double bestDistance = Double.POSITIVE_INFINITY;
+        //     Translation2d bestEstimatedCameraSpace = null;
+        //     Translation3d goal = Grids.mid3dTranslations[17]
+        //     // for (var goal : Grids.mid3dTranslations) {
+        //         var estimatedTargetCameraSpace = calculateEstimatedCameraSpace(new Pose3d(goal, new Rotation3d()), new Pose3d(fieldToRobot));
+        //         double distance = measuredTargetCameraSpace.getDistance(estimatedTargetCameraSpace);
+        //         if (distance < bestDistance) {
+        //             bestDistance = distance;
+        //             bestGoal = goal;
+        //             bestEstimatedCameraSpace = estimatedTargetCameraSpace;
+        //         }
+        //     // }
+        //     SmartDashboard.putNumber("goal pose x", bestGoal.getX());
+        //     SmartDashboard.putNumber("goal pose y", bestGoal.getY());
+        //     SmartDashboard.putNumber("goal pose z", bestGoal.getZ());
 
-            // Transform2d cameraToTapeMid = new Transform2d(
-            //     new Translation2d(
-            //         distanceMid * Math.cos(adjustedYaw), 
-            //         distanceMid * Math.sin(adjustedYaw)), 
-            //     new Rotation2d(adjustedYaw));
+        //     SmartDashboard.putNumber("estimated target cam space yaw", Math.toDegrees(bestEstimatedCameraSpace.getX()));
+        //     SmartDashboard.putNumber("estimated target cam space pitch", Math.toDegrees(bestEstimatedCameraSpace.getY()));
+        // }
 
-            Transform2d cameraToTapeMid = new Transform2d(
-                new Translation2d(
-                    target.getBestCameraToTarget().getX(), 
-                    target.getBestCameraToTarget().getY()), 
-                new Rotation2d(target.getBestCameraToTarget().getRotation().getZ()));
-
-            Transform2d robotToTapeMid = new Transform2d(
-                cameraToRobot.getTranslation().toTranslation2d(), 
-                new Rotation2d(cameraToRobot.getRotation().getZ())).inverse()
-                    .plus(cameraToTapeMid).plus(new Transform2d(new Translation2d(), fieldToRobot.getRotation()));
-
-            Pose2d fieldToTapeMid = fieldToRobot.transformBy(robotToTapeMid);
-            // System.out.println("field to tape mid " + fieldToTapeMid.toString());
-
-            // Pose if we're looking at a high goal
-            // Doesnt account for camera pitch, so have a level camera
-            double distanceHigh = (Grids.highConeZ + cameraToRobot.getZ()) / Math.tan(Math.toRadians(target.getPitch()) - cameraToRobot.getRotation().getY()); 
-
-            // Transform2d cameraToTapeHigh = new Transform2d(
-            //     new Translation2d(
-            //             distanceHigh * Math.cos(Math.toRadians(target.getYaw())), 
-            //             distanceHigh * Math.sin(Math.toRadians(target.getYaw()))), 
-            //         Rotation2d.fromDegrees(target.getYaw()));
-            
-            Transform2d cameraToTapeHigh = new Transform2d(
-                new Translation2d(
-                    target.getBestCameraToTarget().getX(), 
-                    target.getBestCameraToTarget().getY()), 
-                new Rotation2d(target.getBestCameraToTarget().getRotation().getZ()));
-
-            Transform2d robotToTapeHigh = new Transform2d(
-                cameraToRobot.getTranslation().toTranslation2d(), 
-                new Rotation2d(cameraToRobot.getRotation().getZ())).inverse()
-                    .plus(cameraToTapeHigh).plus(new Transform2d(new Translation2d(), fieldToRobot.getRotation()));
-
-            Pose2d fieldToTapeHigh = fieldToRobot.transformBy(robotToTapeHigh);
-            SmartDashboard.putNumber("tape high distance", distanceHigh);
-            
-            Translation2d bestGoal = null;
-            double bestDistance = Double.POSITIVE_INFINITY;
-            Translation2d bestPose = null;
-            boolean bestGoalIsHigh = false;
-
-            for (var midGoal : Grids.midTranslations) {
-                if (midGoal.getDistance(fieldToTapeMid.getTranslation()) < bestDistance) {
-                    bestDistance = midGoal.getDistance(fieldToTapeMid.getTranslation());
-                    bestGoal = midGoal;
-                    bestGoalIsHigh = false;
-                    bestPose = bestGoal.plus(robotToTapeMid.getTranslation());
-                    // The above doesnt work if the robot isnt pointing straight ahead, this fixes that case
-                    double rotationNeeded = fieldToRobot.getRotation().minus(new Rotation2d(Math.PI)).getRadians();
-                    bestPose = new Translation2d(
-                        (((bestPose.getX() - bestGoal.getX()) * Math.cos(rotationNeeded))) 
-                            - (((bestPose.getY() - bestGoal.getY()) * Math.sin(rotationNeeded))) 
-                            + bestGoal.getX(),
-                        ((bestPose.getX() - bestGoal.getX()) * Math.sin(rotationNeeded))
-                            + ((bestPose.getY() - bestGoal.getY()) * Math.cos(rotationNeeded) )
-                            + bestGoal.getY());
-                }
-            }
-
-            for (var highGoal : Grids.highTranslations) {
-                if (highGoal.getDistance(fieldToTapeHigh.getTranslation()) < bestDistance) {
-                    bestDistance = highGoal.getDistance(fieldToTapeHigh.getTranslation());
-                    bestGoal = highGoal;
-                    bestGoalIsHigh = true;
-                    bestPose = bestGoal.plus(robotToTapeHigh.getTranslation());
-                    // The above doesnt work if the robot isnt pointing straight ahead, this fixes that case
-                    double rotationNeeded = fieldToRobot.getRotation().minus(new Rotation2d(Math.PI)).getRadians();
-                    bestPose = new Translation2d(
-                        (((bestPose.getX() - bestGoal.getX()) * Math.cos(rotationNeeded))) 
-                            - (((bestPose.getY() - bestGoal.getY()) * Math.sin(rotationNeeded))) 
-                            + bestGoal.getX(),
-                        ((bestPose.getX() - bestGoal.getX()) * Math.sin(rotationNeeded))
-                            + ((bestPose.getY() - bestGoal.getY()) * Math.cos(rotationNeeded) )
-                            + bestGoal.getY());
-                }
-            }
-
-            if (bestPose == null || bestGoal == null) {
-                continue;
-            }
-
-            SmartDashboard.putNumber("Goal Pose X", bestGoal.getX());
-            SmartDashboard.putNumber("Goal Pose Y", bestGoal.getY());
-            SmartDashboard.putNumber("distance", bestDistance);
-            if (Robot.isSimulation()) {
-                System.out.println("best goal " + bestGoal.toString());
-                System.out.println("best pose " + bestPose.toString());
-                System.out.println("actual pose " + fieldToRobot.getTranslation().toString());
-                System.out.println("best distance " + fieldToRobot.getTranslation().getDistance(bestGoal));
-                System.out.println("actual distance " + fieldToRobot.getTranslation().getDistance(Constants.Grids.midTranslations[0]));
-                System.out.println("camera to tape " + cameraToTapeMid.toString());
-                System.out.println("robot to tape " + robotToTapeMid.toString() + "\n");
-            }
-            // Correct pose
-            result.add( new TapeVisionResult(
-                new Pose2d(bestPose, fieldToRobot.getRotation()), 
-                cameraResult.getTimestampSeconds(), 
-                new Translation3d(bestGoal.getX(), bestGoal.getY(), bestGoalIsHigh ? Grids.highConeZ : Grids.midConeZ), 
-                bestGoalIsHigh, 
-                fieldToRobot.getTranslation().getDistance(bestPose)) );
-        }
+        var estimatedGoalPoseCamSpace = calculateEstimatedCameraSpace(
+            new Pose3d(Grids.mid3dTranslations[17], new Rotation3d()), 
+            new Pose3d(fieldToRobot));
+        SmartDashboard.putNumber("estimated target cam space yaw", Math.toDegrees(estimatedGoalPoseCamSpace.getX()));
+        SmartDashboard.putNumber("estimated target cam space pitch", Math.toDegrees(estimatedGoalPoseCamSpace.getY()));
 
         return result;
+    }
+
+    public Translation2d calculateEstimatedCameraSpace (Pose3d fieldPositionTarget, Pose3d robotPose) {
+        Transform3d fieldToRobot = new Transform3d(new Pose3d(), new Pose3d(robotPose.getTranslation(), new Rotation3d()));
+        SmartDashboard.putNumber("field to robot x", fieldToRobot.getX());
+        SmartDashboard.putNumber("field to robot y", fieldToRobot.getY());
+        SmartDashboard.putNumber("field to robot z", fieldToRobot.getZ());
+        Transform3d fieldToRobotRotated = fieldToRobot.plus(new Transform3d(new Translation3d(), robotPose.getRotation()));
+        SmartDashboard.putNumber("field to robot no trans x", fieldToRobotRotated.getX());
+        SmartDashboard.putNumber("field to robot no trans y", fieldToRobotRotated.getY());
+        SmartDashboard.putNumber("field to robot no trans z", fieldToRobotRotated.getZ());
+        Pose3d robotPositionTarget = fieldPositionTarget.transformBy(fieldToRobotRotated.inverse());
+        SmartDashboard.putNumber("robot rel pose target x", robotPositionTarget.getX());
+        SmartDashboard.putNumber("robot rel pose target y", robotPositionTarget.getY());
+        SmartDashboard.putNumber("robot rel pose target z", robotPositionTarget.getZ());
+        Translation3d cameraPositionTarget = robotPositionTarget.transformBy(cameraToRobot.inverse()).getTranslation();
+        return new Translation2d(Math.atan2(cameraPositionTarget.getY(), cameraPositionTarget.getX()), 0.0);
     }
 
     public void updateSimCamera(Pose2d pose) {
