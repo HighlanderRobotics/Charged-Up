@@ -172,7 +172,7 @@ public class TapeVisionSubsystem {
         System.out.println("field to robot " + fieldToRobot.toString());
 
         Matrix<N4, N4> robotToCameraTranslation = XMatrix.translationMatrix(robotToCameraTransfrom.getTranslation());
-        Matrix<N4, N4> robotToCameraRotation = XMatrix.zRotationMatrix(robotToCameraTransfrom.getRotation().getZ());
+        Matrix<N4, N4> robotToCameraRotation = XMatrix.zRotationMatrix(-robotToCameraTransfrom.getRotation().getZ());
 
         Matrix<N4, N4> robotToCamera = robotToCameraTranslation.times(robotToCameraRotation);
         System.out.println("robot to camera " + robotToCamera.toString());
@@ -198,22 +198,10 @@ public class TapeVisionSubsystem {
         Vector<N4> tapeCameraRotSpace = XMatrix.mulVector(tapeCameraTransSpace, robotToCameraRotation);
         System.out.println("tape to camera rot " + tapeCameraRotSpace.toString());
 
-        // Pose3d tapeRobotSpace = new Pose3d(tapeFieldSpace, new Rotation3d())
-        //     .relativeTo(new Pose3d(
-        //         robotFieldSpace.getX(), 
-        //         robotFieldSpace.getY(), 
-        //         0.0, 
-        //         new Rotation3d(0.0, 0.0, robotFieldSpace.getRotation().getRadians())));
-        // System.out.println("tape robot space " + tapeRobotSpace.toString());
-        // var robotRotationTransform = new Transform3d(
-        //     new Translation3d(), 
-        //     new Rotation3d(0.0, 0.0, robotFieldSpace.getRotation().getRadians()));
-        // Pose3d tapeCameraSpace = tapeRobotSpace.transformBy(
-        //     robotToCameraTransfrom.plus(robotRotationTransform));
-        // System.out.println("tape camera space " + tapeCameraSpace.toString());
-        // return tapeCameraSpace.getTranslation();
-
-        return null;
+        return new Translation3d(
+            tapeCameraRotSpace.get(0, 0), 
+            tapeCameraRotSpace.get(1, 0), 
+            tapeCameraRotSpace.get(2, 0));
     }
 
     public void updateSimCamera(Pose2d pose) {

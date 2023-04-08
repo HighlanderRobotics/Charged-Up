@@ -40,7 +40,7 @@ public class TapeVisionTest {
     void tapeToCameraSpaceTest() {
         System.out.println("\n tape to cam space test");
         System.out.println("camera to robot transform " + Constants.leftCameraToRobot.toString());
-        var robotPose = new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0));
+        var robotPose = new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(30));
         var tapePose = new Translation3d(14.0, 4.0, 0.6);
         var tapeCameraSpace = tapeVisionSubsystem.transformPointToCameraSpace(
             tapePose, 
