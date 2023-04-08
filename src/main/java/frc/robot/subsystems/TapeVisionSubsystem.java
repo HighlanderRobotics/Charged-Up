@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.SimPhotonCamera;
@@ -158,7 +159,7 @@ public class TapeVisionSubsystem {
         return new Translation2d(Math.atan2(cameraPositionTarget.getY(), cameraPositionTarget.getX()), 0.0);
     }
 
-    public Translation3d transformPointToCameraSpace(
+    public static Translation3d transformPointToCameraSpace(
             Translation3d tapeFieldSpace, 
             Pose2d robotFieldSpace, 
             Transform3d robotToCameraTransfrom) {
@@ -202,6 +203,18 @@ public class TapeVisionSubsystem {
             tapeCameraRotSpace.get(0, 0), 
             tapeCameraRotSpace.get(1, 0), 
             tapeCameraRotSpace.get(2, 0));
+    }
+
+    /** pair (yaw, pitch) */
+    public static Pair<Double, Double> cameraSpaceToAngles(Translation3d cameraSpaceTrans) {
+        double pitch = Math.atan2(cameraSpaceTrans.getZ(), cameraSpaceTrans.getX());
+        double yaw = -Math.atan2(cameraSpaceTrans.getY(), cameraSpaceTrans.getX());
+        return Pair.of(yaw, pitch);
+    }
+
+    public static Optional<Translation3d> findClosestTape(double pitch, double yaw) {
+        double bestDistance = Double.POSITIVE_INFINITY;
+        return Optional.empty();
     }
 
     public void updateSimCamera(Pose2d pose) {
