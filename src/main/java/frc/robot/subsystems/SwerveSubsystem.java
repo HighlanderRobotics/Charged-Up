@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import frc.robot.SwerveModule;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
 import frc.robot.Constants;
@@ -429,6 +430,12 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     public ElevatorSubsystem.ScoringLevels getLevel(){
         return extensionLevel;
+    }
+    public void getToGoal(){
+        double angle = 0; //TODO: this will be the angle the cameras at when the robots lined up
+        tapeDriveAssistController.calculate(getYaw().getDegrees(), tapeVisionSubsystem.getLatestResult().getBestTarget().getYaw());
+        tapeDriveAssistController.calculate(getPose().getX()+angle, tapeVisionSubsystem.getLatestResult().getBestTarget().getYaw());
+        tapeDriveAssistController.calculate(getPose().getY()+angle, tapeVisionSubsystem.getLatestResult().getBestTarget().getYaw());
     }
 
     @Override

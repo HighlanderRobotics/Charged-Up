@@ -11,6 +11,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.SimPhotonCamera;
 import org.photonvision.SimVisionSystem;
 import org.photonvision.SimVisionTarget;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.Pair;
@@ -156,6 +157,9 @@ public class TapeVisionSubsystem {
         }
 
         return Pair.of(result, cameraResult.getTimestampSeconds());
+    }
+    public PhotonPipelineResult getLatestResult(){
+        return camera.getLatestResult();
     }
 
     public void updateSimCamera(Pose2d pose) {
