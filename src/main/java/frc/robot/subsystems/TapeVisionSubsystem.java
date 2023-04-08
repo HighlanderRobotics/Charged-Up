@@ -15,7 +15,9 @@ import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.CoordinateAxis;
 import edu.wpi.first.math.geometry.CoordinateSystem;
@@ -29,9 +31,11 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N4;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.math.HRCoordinateSystem;
+import frc.lib.math.XMatrix;
 import frc.robot.Constants;
 import frc.robot.Robot;
 import frc.robot.Constants.Grids;
@@ -150,7 +154,66 @@ public class TapeVisionSubsystem {
         SmartDashboard.putNumber("robot rel pose target y", robotPositionTarget.getY());
         SmartDashboard.putNumber("robot rel pose target z", robotPositionTarget.getZ());
         Translation3d cameraPositionTarget = robotPositionTarget.transformBy(cameraToRobot.inverse()).getTranslation();
+        
         return new Translation2d(Math.atan2(cameraPositionTarget.getY(), cameraPositionTarget.getX()), 0.0);
+    }
+
+    public Translation3d transformPointToCameraSpace(
+            Translation3d tapeFieldSpace, 
+            Pose2d robotFieldSpace, 
+            Transform3d robotToCameraTransfrom) {
+        
+        Matrix<N4, N4> fieldToRobotTranslation = XMatrix.translationMatrix(
+            new Translation3d(-robotFieldSpace.getX(), -robotFieldSpace.getY(), 0)
+        );
+        Matrix<N4, N4> fieldToRobotRotation = XMatrix.zRotationMatrix(robotFieldSpace.getRotation().getRadians());
+
+        Matrix<N4, N4> fieldToRobot = fieldToRobotTranslation.times(fieldToRobotRotation);
+        System.out.println("field to robot " + fieldToRobot.toString());
+
+        Matrix<N4, N4> robotToCameraTranslation = XMatrix.translationMatrix(robotToCameraTransfrom.getTranslation());
+        Matrix<N4, N4> robotToCameraRotation = XMatrix.zRotationMatrix(robotToCameraTransfrom.getRotation().getZ());
+
+        Matrix<N4, N4> robotToCamera = robotToCameraTranslation.times(robotToCameraRotation);
+        System.out.println("robot to camera " + robotToCamera.toString());
+
+        Matrix<N4, N4> fieldToCamera = fieldToRobot.times(robotToCamera);
+        System.out.println("field to camera " + fieldToCamera.toString());
+
+        Vector<N4> tapeFieldSpaceVec = VecBuilder.fill(
+            tapeFieldSpace.getX(), 
+            tapeFieldSpace.getY(), 
+            tapeFieldSpace.getZ(), 
+            1.0);
+
+        Vector<N4> tapeRobotTransSpace = XMatrix.mulVector(tapeFieldSpaceVec, fieldToRobotTranslation);
+        System.out.println("tape to robot trans " + tapeRobotTransSpace.toString());
+
+        Vector<N4> tapeRobotRotSpace = XMatrix.mulVector(tapeRobotTransSpace, fieldToRobotRotation);
+        System.out.println("tape to robot rot " + tapeRobotRotSpace.toString());
+
+        Vector<N4> tapeCameraTransSpace = XMatrix.mulVector(tapeRobotRotSpace, robotToCameraTranslation);
+        System.out.println("tape to camera trans " + tapeCameraTransSpace.toString());
+
+        Vector<N4> tapeCameraRotSpace = XMatrix.mulVector(tapeCameraTransSpace, robotToCameraRotation);
+        System.out.println("tape to camera rot " + tapeCameraRotSpace.toString());
+
+        // Pose3d tapeRobotSpace = new Pose3d(tapeFieldSpace, new Rotation3d())
+        //     .relativeTo(new Pose3d(
+        //         robotFieldSpace.getX(), 
+        //         robotFieldSpace.getY(), 
+        //         0.0, 
+        //         new Rotation3d(0.0, 0.0, robotFieldSpace.getRotation().getRadians())));
+        // System.out.println("tape robot space " + tapeRobotSpace.toString());
+        // var robotRotationTransform = new Transform3d(
+        //     new Translation3d(), 
+        //     new Rotation3d(0.0, 0.0, robotFieldSpace.getRotation().getRadians()));
+        // Pose3d tapeCameraSpace = tapeRobotSpace.transformBy(
+        //     robotToCameraTransfrom.plus(robotRotationTransform));
+        // System.out.println("tape camera space " + tapeCameraSpace.toString());
+        // return tapeCameraSpace.getTranslation();
+
+        return null;
     }
 
     public void updateSimCamera(Pose2d pose) {

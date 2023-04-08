@@ -21,7 +21,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 
 /** Add your docs here. */
@@ -32,6 +34,19 @@ public class TapeVisionTest {
     @BeforeEach
     void setup() {
         assert HAL.initialize(1000, 0);
+    }
+
+    @Test
+    void tapeToCameraSpaceTest() {
+        System.out.println("\n tape to cam space test");
+        System.out.println("camera to robot transform " + Constants.leftCameraToRobot.toString());
+        var robotPose = new Pose2d(5.0, 3.0, Rotation2d.fromDegrees(0));
+        var tapePose = new Translation3d(14.0, 4.0, 0.6);
+        var tapeCameraSpace = tapeVisionSubsystem.transformPointToCameraSpace(
+            tapePose, 
+            robotPose,
+            Constants.leftCameraToRobot);
+        System.out.println("tape camera space " + tapeCameraSpace.toString());
     }
 
     @Test
@@ -64,16 +79,17 @@ public class TapeVisionTest {
         test(180, 20.2, 160);
     }
 
-    @Test void randomPointsTest() {
-        for (int i = 0; i < 1000; i++) {
-            Pose2d randomPose = new Pose2d(
-                (i / 10 % 10.0) + 2.0, 
-                i / 100 % 10.0, 
-                new Rotation2d(((i * 10) / (Math.PI * 2)) % (Math.PI * 2)));
-            System.out.println("random point " + randomPose.toString());
-            test(randomPose);
-        }
-    }
+    // @Test 
+    // void randomPointsTest() {
+    //     for (int i = 0; i < 1000; i++) {
+    //         Pose2d randomPose = new Pose2d(
+    //             (i / 10 % 10.0) + 2.0, 
+    //             i / 100 % 10.0, 
+    //             new Rotation2d(((i * 10) / (Math.PI * 2)) % (Math.PI * 2)));
+    //         System.out.println("random point " + randomPose.toString());
+    //         test(randomPose);
+    //     }
+    // }
 
     void test(Pose2d visSimRobotPose) {
         tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
