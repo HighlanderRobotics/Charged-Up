@@ -105,58 +105,43 @@ public class TapeVisionSubsystem {
     public List<TapeVisionResult> getEstimatedPoses(Pose2d fieldToRobot) {
         camera.setLED(VisionLEDMode.kOn);
 
+        // Figure out if close enough to run this
+        // not 100% sure if rotation culling here is good, remove if stuff breaks
+        if (fieldToRobot.getX() < Constants.Vision.maximumDistanceTapeEst 
+            || fieldToRobot.getX() > Constants.Grids.fieldWidthX - Constants.Vision.maximumDistanceTapeEst
+            || fieldToRobot.getRotation().getRadians() > Constants.Vision.maximumAngleTapeEst 
+                && fieldToRobot.getRotation().getRadians() < Math.PI - Constants.Vision.maximumAngleTapeEst) {
+            return List.of();
+        }
+
         List<TapeVisionResult> result = new ArrayList<>();
         var cameraResult = camera.getLatestResult();
 
-        // // Find pose of each target
-        // for (PhotonTrackedTarget target : cameraResult.getTargets()) {
-        //     Translation2d measuredTargetCameraSpace = new Translation2d(target.getYaw(), target.getPitch());
-        //     Translation3d bestGoal = null;
-        //     double bestDistance = Double.POSITIVE_INFINITY;
-        //     Translation2d bestEstimatedCameraSpace = null;
-        //     Translation3d goal = Grids.mid3dTranslations[17]
-        //     // for (var goal : Grids.mid3dTranslations) {
-        //         var estimatedTargetCameraSpace = calculateEstimatedCameraSpace(new Pose3d(goal, new Rotation3d()), new Pose3d(fieldToRobot));
-        //         double distance = measuredTargetCameraSpace.getDistance(estimatedTargetCameraSpace);
-        //         if (distance < bestDistance) {
-        //             bestDistance = distance;
-        //             bestGoal = goal;
-        //             bestEstimatedCameraSpace = estimatedTargetCameraSpace;
-        //         }
-        //     // }
-        //     SmartDashboard.putNumber("goal pose x", bestGoal.getX());
-        //     SmartDashboard.putNumber("goal pose y", bestGoal.getY());
-        //     SmartDashboard.putNumber("goal pose z", bestGoal.getZ());
-
-        //     SmartDashboard.putNumber("estimated target cam space yaw", Math.toDegrees(bestEstimatedCameraSpace.getX()));
-        //     SmartDashboard.putNumber("estimated target cam space pitch", Math.toDegrees(bestEstimatedCameraSpace.getY()));
-        // }
-
-        var estimatedGoalPoseCamSpace = calculateEstimatedCameraSpace(
-            new Pose3d(Grids.mid3dTranslations[17], new Rotation3d()), 
-            new Pose3d(fieldToRobot));
-        SmartDashboard.putNumber("estimated target cam space yaw", Math.toDegrees(estimatedGoalPoseCamSpace.getX()));
-        SmartDashboard.putNumber("estimated target cam space pitch", Math.toDegrees(estimatedGoalPoseCamSpace.getY()));
+        // Find pose of each target
+        for (PhotonTrackedTarget target : cameraResult.getTargets()) {
+            // Reject targets near edge of fov
+            if (Math.abs(target.getYaw()) > (59.6 - 2.0) / 2.0) continue;
+            // find tape we think we are looking at
+            var optBestTape = findClosestTape(target.getPitch(), target.getYaw(), fieldToRobot, cameraToRobot);
+            // if no tapes fit well, skip this target
+            if (optBestTape.isEmpty()) continue;
+            var bestTape = optBestTape.get();
+            // calculate where robot is based on the target and tape found
+            double cameraDistanceToTape = (bestTape.isHigh ? 
+                Constants.Grids.highConeZ + cameraToRobot.getZ() 
+                : Constants.Grids.midConeZ + cameraToRobot.getZ()) 
+                / Math.tan(target.getPitch());
+            
+            Pose2d correctedPose = new Pose2d();
+            result.add(new TapeVisionResult(
+                correctedPose, 
+                cameraResult.getLatencyMillis(), 
+                bestTape.translation, 
+                bestTape.isHigh, 
+                fieldToRobot.getTranslation().getDistance(correctedPose.getTranslation())));
+        }
 
         return result;
-    }
-
-    public Translation2d calculateEstimatedCameraSpace (Pose3d fieldPositionTarget, Pose3d robotPose) {
-        Transform3d fieldToRobot = new Transform3d(new Pose3d(), new Pose3d(robotPose.getTranslation(), new Rotation3d()));
-        SmartDashboard.putNumber("field to robot x", fieldToRobot.getX());
-        SmartDashboard.putNumber("field to robot y", fieldToRobot.getY());
-        SmartDashboard.putNumber("field to robot z", fieldToRobot.getZ());
-        Transform3d fieldToRobotRotated = fieldToRobot.plus(new Transform3d(new Translation3d(), robotPose.getRotation()));
-        SmartDashboard.putNumber("field to robot no trans x", fieldToRobotRotated.getX());
-        SmartDashboard.putNumber("field to robot no trans y", fieldToRobotRotated.getY());
-        SmartDashboard.putNumber("field to robot no trans z", fieldToRobotRotated.getZ());
-        Pose3d robotPositionTarget = fieldPositionTarget.transformBy(fieldToRobotRotated.inverse());
-        SmartDashboard.putNumber("robot rel pose target x", robotPositionTarget.getX());
-        SmartDashboard.putNumber("robot rel pose target y", robotPositionTarget.getY());
-        SmartDashboard.putNumber("robot rel pose target z", robotPositionTarget.getZ());
-        Translation3d cameraPositionTarget = robotPositionTarget.transformBy(cameraToRobot.inverse()).getTranslation();
-        
-        return new Translation2d(Math.atan2(cameraPositionTarget.getY(), cameraPositionTarget.getX()), 0.0);
     }
 
     public static Translation3d transformPointToCameraSpace(
@@ -212,9 +197,54 @@ public class TapeVisionSubsystem {
         return Pair.of(yaw, pitch);
     }
 
-    public static Optional<Translation3d> findClosestTape(double pitch, double yaw) {
+    public static class TapeSearchResult {
+        public Translation3d translation;
+        public boolean isHigh;
+        public double angleError;
+        public TapeSearchResult (
+            Translation3d translation,
+            boolean isHigh,
+            double angleError
+        ) {
+            this.translation = translation;
+            this.isHigh = isHigh;
+            this.angleError = angleError;
+        }
+    }
+
+    public static Optional<TapeSearchResult> findClosestTape(double pitch, double yaw, Pose2d robotPose, Transform3d cameraToRobot) {
         double bestDistance = Double.POSITIVE_INFINITY;
-        return Optional.empty();
+        Translation3d bestTape = null;
+        boolean isBestHigh = false;
+        for (Translation3d tape : Constants.Grids.mid3dTranslations) {
+            var pitchYawTape = cameraSpaceToAngles(transformPointToCameraSpace(tape, robotPose, cameraToRobot));
+            double distance = Math.sqrt(
+                pitchYawTape.getFirst() * pitchYawTape.getFirst() 
+                + pitchYawTape.getSecond() * pitchYawTape.getSecond());
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestTape = tape;
+                isBestHigh = false;
+            }
+        }
+
+        for (Translation3d tape : Constants.Grids.high3dTranslations) {
+            var pitchYawTape = cameraSpaceToAngles(transformPointToCameraSpace(tape, robotPose, cameraToRobot));
+            double distance = Math.sqrt(
+                pitchYawTape.getFirst() * pitchYawTape.getFirst() 
+                + pitchYawTape.getSecond() * pitchYawTape.getSecond());
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestTape = tape;
+                isBestHigh = true;
+            }
+        }
+
+        if (bestDistance > Constants.Vision.maxAllowableDistanceTapeEst) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new TapeSearchResult(bestTape, isBestHigh, bestDistance));
     }
 
     public void updateSimCamera(Pose2d pose) {

@@ -459,6 +459,11 @@ public final class Constants {
 
   /** For 5026 vision code */
   public static final class Vision {
+    public static final double maximumDistanceTapeEst = 4.0;
+    public static final double maximumAngleTapeEst = Math.toRadians(45);
+
+    public static final double maxAllowableDistanceTapeEst = 10.0;
+
     public static class VisionSource {
       public String name;
       public Transform3d robotToCamera;
