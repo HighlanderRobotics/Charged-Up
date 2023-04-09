@@ -1,12 +1,12 @@
 package frc.robot.subsystems;
 
 import frc.robot.SwerveModule;
-import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants.Swerve;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
-import frc.robot.subsystems.VisionSubsystem.VisionMeasurement;
 import frc.lib.logging.LoggingWrapper;
+import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
 import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -17,13 +17,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.DoubleSupplier;
-
-import org.photonvision.PhotonCamera;
-import org.photonvision.common.hardware.VisionLEDMode;
-import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.pathplanner.lib.PathConstraints;
@@ -33,10 +27,6 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.PathPoint;
 
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -45,24 +35,21 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.trajectory.Trajectory.State;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -72,7 +59,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -87,9 +74,12 @@ public class SwerveSubsystem extends SubsystemBase {
     public Field2d field = new Field2d();
 
     private boolean isInTapeMode = true;
-    private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
+    private PIDController tapeDriveAssistController = 
+        new PIDController(-0.018, 0, -0.01);
 
-    private VisionSubsystem visionSubsystem = new VisionSubsystem();
+    private ApriltagVisionSubsystem apriltagVisionSubsystem = new ApriltagVisionSubsystem();
+    private LinearFilter tapeYawFilter = LinearFilter.singlePoleIIR(0.2, 0.020);
+    private double tapeYawFilterVal = 0;
 
     public boolean hasResetOdometry = false;
 
@@ -106,6 +96,7 @@ public class SwerveSubsystem extends SubsystemBase {
     public boolean lockOutSwerve = false;
 
     private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
+    private ArrayList<Pose2d> dashboardFieldTapePoses = new ArrayList<>();
 
     public ProfiledPIDController headingController = new ProfiledPIDController(
         1.2, 
@@ -113,15 +104,15 @@ public class SwerveSubsystem extends SubsystemBase {
         0.0,
         new Constraints(Math.PI * 2, Math.PI * 2));
 
+    public TapeVisionSubsystem tapeVisionSubsystem = new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
+
     public SwerveSubsystem() {
         gyro = new Pigeon2(Constants.Swerve.pigeonID);
         gyro.configFactoryDefault();
         zeroGyro();
 
         headingController.enableContinuousInput(0, Math.PI * 2);
-        headingController.setTolerance(0.15);
-
-        
+        headingController.setTolerance(0.2);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -149,6 +140,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
         wheelOnlyOdo = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
         
+        List<Pose2d> tapePoses = new ArrayList<>();
+
+        for (var goal : Grids.midTranslations) {
+            System.out.println(goal.toString());
+            tapePoses.add(new Pose2d(goal, new Rotation2d()));
+        }
+        for (var goal : Grids.highTranslations) {
+            System.out.println(goal.toString());
+            tapePoses.add(new Pose2d(goal, new Rotation2d()));
+        }
+
+        field.getObject("tape targets").setPoses(tapePoses);
     }
 
     /** Set the modules to the correct state based on a desired translation and rotation, either field or robot relative and either open or closed loop */
@@ -197,7 +200,7 @@ public class SwerveSubsystem extends SubsystemBase {
             () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), 
             fieldRelative, 
             isOpenLoop,
-            true);
+            false);
     }
     public Command poseLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
         return new InstantCommand(
@@ -428,12 +431,35 @@ public class SwerveSubsystem extends SubsystemBase {
 
         return value;
     }
+
     public void setLevel(ElevatorSubsystem.ScoringLevels level, boolean isCone){
         extensionLevel = level;
         extensionInches = getExtension(level, isCone);
     }
+
     public ElevatorSubsystem.ScoringLevels getLevel(){
         return extensionLevel;
+    }
+    
+    public CommandBase simpleTapeAllignCommand (DoubleSupplier xSupplier, DoubleSupplier ySupplier, LEDSubsystem ledSubsystem) {
+        return new InstantCommand(() -> {
+            headingController.reset(getYaw().getRadians()); 
+            })
+            .andThen(headingLockDriveCommand(xSupplier, () -> 0, () -> Math.PI, true, false).raceWith(
+                ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.25),
+                new WaitUntilCommand(() -> headingController.atGoal())))
+            .andThen(
+                headingLockDriveCommand(
+                    xSupplier, 
+                    () -> tapeVisionSubsystem.hasTargets() ?
+                        tapeDriveAssistController.calculate(
+                            tapeYawFilterVal,
+                            Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
+                        : 0, 
+                    () -> Math.PI, 
+                    true, 
+                    false)
+            .alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kGreen), 0.25)));
     }
 
     @Override
@@ -441,10 +467,10 @@ public class SwerveSubsystem extends SubsystemBase {
         pose = poseEstimator.update(getYaw(), getModulePositions()); 
         wheelOnlyOdo.update(getYaw(), getModulePositions());
         
-
-        List<VisionMeasurement> visionMeasurements = visionSubsystem.getEstimatedGlobalPose(pose);
+        List<VisionMeasurement> visionMeasurements = apriltagVisionSubsystem.getEstimatedGlobalPose(pose);
 
         for (VisionMeasurement measurement : visionMeasurements) {
+            dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
             poseEstimator.addVisionMeasurement(
                 measurement.estimation.estimatedPose.toPose2d(),
                 measurement.estimation.timestampSeconds,
@@ -463,10 +489,14 @@ public class SwerveSubsystem extends SubsystemBase {
         field.setRobotPose(getPose());
         field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
         field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
-        field.getObject("Latest Vision Pose").setPoses(dashboardFieldVisionPoses);
+        field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
+        // field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
         dashboardFieldVisionPoses.clear();
         LoggingWrapper.shared.add("field", field);
         LoggingWrapper.shared.add("Has reset", hasResetOdometry);
+        dashboardFieldTapePoses.clear();
+        SmartDashboard.putData(field);
+        SmartDashboard.putBoolean("Has reset", hasResetOdometry);
 
         if (DriverStation.isDisabled()) {
             hasResetOdometry = false;
@@ -495,6 +525,19 @@ public class SwerveSubsystem extends SubsystemBase {
         double filteredRoll = rollFilter.calculate(gyro.getRoll());
         rollRate = (filteredRoll - lastRoll) / 0.020;
         lastRoll = filteredRoll;
+        tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());
+    }
 
+    @Override
+    public void simulationPeriodic() {
+        Pose2d visSimRobotPose = new Pose2d(Units.inchesToMeters((60 + (Timer.getFPGATimestamp() * 15)) % 200), 0.513, new Rotation2d(3.3));
+        field.getObject("vis sim robot pose").setPose(visSimRobotPose);
+        tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
+        try {
+            field.getObject("vis sim est pose").setPoses(tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst());
+        } catch (Exception exception) {
+            field.getObject("vis sim est pose").setPoses();
+        }
+        System.out.print("");
     }
 }

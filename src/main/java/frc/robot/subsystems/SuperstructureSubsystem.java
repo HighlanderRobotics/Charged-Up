@@ -60,7 +60,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase waitExtendToInches(DoubleSupplier extensionInches){
     return intakeSubsystem.extendCommand()//new InstantCommand(() -> mode = ExtensionState.EXTEND)
-      .andThen(new WaitCommand(0.35))
+      .andThen(new WaitCommand(0.3))
       .andThen(elevatorSubsystem.extendToInchesCommand(extensionInches))
       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
@@ -87,13 +87,13 @@ public class SuperstructureSubsystem extends SubsystemBase {
       .deadlineWith(ledSubsystem.setRainbowCommand(), 
         new WaitCommand(0.4)
           .andThen(greybotsGrabberSubsystem.stopCommand().withTimeout(0.1), greybotsGrabberSubsystem.runToScoringCommand()))
-      .withTimeout(1.0)
-    .andThen(new WaitCommand(.5),
+      .withTimeout(1.2)
+    .andThen(new WaitCommand(.15),
       new ConditionalCommand(
       greybotsGrabberSubsystem.scoreCubeCommand(),
       greybotsGrabberSubsystem.scoreConeCommand(),
       () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
-    ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
+    ).alongWith(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.35))
     .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)//,
     // new WaitCommand(0.25)
     // elevatorSubsystem.extendToInchesCommand(1.0)

@@ -26,7 +26,15 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-public class VisionSubsystem {
+public class ApriltagVisionSubsystem {
+  private class CameraEstimator {
+    public PhotonPoseEstimator estimator;
+    public PhotonCamera camera;
+    public CameraEstimator (PhotonCamera camera, PhotonPoseEstimator estimator) {
+      this.estimator = estimator;
+      this.camera = camera;
+    }
+  }
   /** If shuffleboard should be used--important for unit testing. */
   private static boolean useShuffleboard = true;
 
@@ -36,14 +44,14 @@ public class VisionSubsystem {
           .withPosition(11, 0)
           .withSize(2, 3);
 
-  private final List<PhotonPoseEstimator> estimators = new ArrayList<>();
+  private final List<CameraEstimator> estimators = new ArrayList<>();
 
   private AprilTagFieldLayout fieldLayout;
 
   private double lastDetection = 0;
 
   /** Creates a new VisionSubsystem. */
-  public VisionSubsystem() {
+  public ApriltagVisionSubsystem() {
     // loading the 2023 field arrangement
     try {
       fieldLayout =
@@ -64,7 +72,7 @@ public class VisionSubsystem {
               visionSource.robotToCamera);
       estimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
       cameraStatusList.addBoolean(visionSource.name, camera::isConnected);
-      estimators.add(estimator);
+      estimators.add(new CameraEstimator(camera, estimator));
     }
 
     if (useShuffleboard)
@@ -103,7 +111,12 @@ public class VisionSubsystem {
 
     List<VisionMeasurement> estimations = new ArrayList<>();
 
-    for (PhotonPoseEstimator estimator : estimators) {
+    for (CameraEstimator cameraEstimator : estimators) {
+      var estimator = cameraEstimator.estimator;
+      var camera = cameraEstimator.camera;
+
+      if (ignoreFrame(camera.getLatestResult())) continue;
+
       estimator.setReferencePose(prevEstimatedRobotPose);
       var optEstimation = estimator.update();
       if (optEstimation.isEmpty()) continue;

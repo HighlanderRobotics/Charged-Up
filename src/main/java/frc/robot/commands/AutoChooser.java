@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -128,7 +129,7 @@ public class AutoChooser {
         chooser.addOption("2 Piece Middle", () -> twoPieceMiddle());
         chooser.addOption("just score", () ->  
         
-        new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
+        new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
         .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
         .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
 
@@ -146,41 +147,38 @@ public class AutoChooser {
     return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("Apriltags Test", "Apriltags Test"));
   }
   private Command onePlusParkTop(){
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("1 + Park Top Blue", "1 + Park Top Red"));
+    return auto("1 + Park Top");
   }
   private Command twoParkTop(){
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("2 + Park Top Blue", "2 + Park Top Red"));
+    return auto("2 + Park Top", 3.0, 5.0);
   }
 
   private Command onePlusParkMiddle() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("Middle 1 + Balance Blue", "Middle 1 + Balance Red"));
+    return auto("Middle 1 + Balance");
   }
 
   private Command onePlusParkBottom() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("1.5 + Park Bottom Blue", "1.5 + Park Bottom Red"));
+    return auto("1.5 + Park Bottom");
   }
 
   public Command oneAndAHalfBottom() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("1.5 Bottom Blue", "1.5 Bottom Red"));
+    return auto("1.5 Bottom");
   }
 
   public Command oneMobility() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("1 + Mobility Blue", "1 + Mobility Red"));
+    return auto("1 + Mobility Blue");
   }
 
   public Command threeTop() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Top Blue", "3 Piece Top Red"));
-  }
-  public Command twoPlusParkBottomRed(){
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("3 Piece Top Blue", "2 + Park Bottom Red"));
+    return auto("3 Piece Top", 3.0, 5.0);
   }
 
   public Command twoPieceBump() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("2 Bottom Blue", "2 Bottom Red"));
+    return auto("2 Bottom");
   }
 
   public Command twoPieceMiddle() {
-    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("2 + Park Middle Blue", "2 + Park Middle Red"));
+    return auto("2 + Park Middle");
   }
 
   private static Command run(Command ... commands) {
@@ -188,12 +186,28 @@ public class AutoChooser {
   } 
 
   private List<PathPlannerTrajectory> chooseAutoAlliance(String nameBlue, String nameRed) {
+    return chooseAutoAlliance(Constants.AutoConstants.autoConstraints, nameBlue, nameRed);
+  }
+
+  private List<PathPlannerTrajectory> chooseAutoAlliance(double maxVel, double maxAcc, String nameBlue, String nameRed) {
+    return chooseAutoAlliance(new PathConstraints(maxVel, maxAcc), nameBlue, nameRed);
+  }
+
+  private List<PathPlannerTrajectory> chooseAutoAlliance(PathConstraints constraints, String nameBlue, String nameRed) {
     if (DriverStation.getAlliance() == Alliance.Blue) {
-      List<PathPlannerTrajectory> pathBlue = PathPlanner.loadPathGroup(nameBlue, new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
+      List<PathPlannerTrajectory> pathBlue = PathPlanner.loadPathGroup(nameBlue, constraints);
       return pathBlue;
     } else {
-      List<PathPlannerTrajectory> pathRed = PathPlanner.loadPathGroup(nameRed, new PathConstraints(Constants.AutoConstants.maxSpeedMetersPerSecond, Constants.AutoConstants.maxAccelerationMetersPerSecondSquared));
+      List<PathPlannerTrajectory> pathRed = PathPlanner.loadPathGroup(nameRed, constraints);
       return pathRed;
     }
+  }
+
+  private CommandBase auto(String name) {
+    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance(name + " Blue", name + " Red"));
+  }
+
+  private CommandBase auto(String name, double maxVel, double maxAcc) {
+    return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance(maxVel, maxAcc, name + " Blue", name + " Red"));
   }
 }

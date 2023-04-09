@@ -186,6 +186,13 @@ public class RobotContainer {
     // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     
+    controller.rightTrigger().whileTrue(
+      swerveSubsystem.simpleTapeAllignCommand(
+        () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+        () -> modifyJoystickAxis(operator.getLeftX(), controller.getLeftTriggerAxis()) * 8,
+        ledSubsystem)
+    );
+
     controller.leftTrigger().whileTrue(
       swerveSubsystem.driveCommand(
       () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
@@ -197,7 +204,7 @@ public class RobotContainer {
     );
     controller.leftTrigger().whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
-        .alongWith(ledSubsystem.setRainbowCommand(), 
+        .alongWith(//ledSubsystem.setRainbowCommand(), 
         routingSubsystem.slowRunCommand(),
         new ConditionalCommand(
             new RunCommand(() -> greybotsGrabberSubsystem.holdCube(), greybotsGrabberSubsystem).withTimeout(0.5),

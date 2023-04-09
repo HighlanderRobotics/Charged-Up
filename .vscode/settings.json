@@ -26,5 +26,6 @@
     },
   ],
   "java.test.defaultConfig": "WPIlibUnitTests",
-  "wpilib.autoStartRioLog": false
+  "wpilib.autoStartRioLog": false,
+  "wpilib.skipTests": false
 }
