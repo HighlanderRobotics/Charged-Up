@@ -49,8 +49,8 @@ public class TapeVisionTest {
         System.out.println("tape camera space " + tapeCameraSpace.toString());
         var tapeAngles = TapeVisionSubsystem.cameraSpaceToAngles(tapeCameraSpace);
         System.out.println(
-            "tape yaw " + Math.toDegrees(tapeAngles.getFirst()) 
-            + " tape pitch " + Math.toDegrees(tapeAngles.getSecond()));
+            "tape yaw " + Math.toDegrees(tapeAngles.yaw) 
+            + " tape pitch " + Math.toDegrees(tapeAngles.pitch));
     }
 
     @Test
@@ -102,9 +102,13 @@ public class TapeVisionTest {
             estimatedPoses.add(measurement.estimatedPose);
         }
         if (estimatedPoses.size() == 0) {
+            System.out.println("no targets");
+            assertEquals(false, true);
             return;
         }
         Pose2d estimatedPose = estimatedPoses.get(0);
+        System.out.println("actual pose " + visSimRobotPose.toString());
+        System.out.println("estimated pose " + estimatedPose.toString());
         assertEquals(visSimRobotPose.getX(), estimatedPose.getX(), margin, "Diff X was: " + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
         assertEquals(visSimRobotPose.getY(), estimatedPose.getY(), margin, "Diff Y was: " + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
     }

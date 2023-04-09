@@ -456,7 +456,7 @@ public class SwerveSubsystem extends SubsystemBase {
             for (var measurement : tapeVisionMeasurements) {
                 dashboardFieldTapePoses.add(measurement.estimatedPose);
                 dashboardFieldTapeTargetPoses.add(new Pose2d(measurement.targetUsed.toTranslation2d(), new Rotation2d()));
-                poseEstimator.addVisionMeasurement(measurement.estimatedPose, measurement.timestamp, Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
+                // poseEstimator.addVisionMeasurement(measurement.estimatedPose, measurement.timestamp, Constants.PoseEstimator.TAPE_VISION_MEASUREMENT_STANDARD_DEVIATIONS);
             }
         }
         // Log swerve module information
