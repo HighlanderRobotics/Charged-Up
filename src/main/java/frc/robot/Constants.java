@@ -328,8 +328,8 @@ public final class Constants {
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.2/7, 0.0, 0.0139/2, elevatorConstraints);
         static {
           PIDController.setTolerance(
-            2.0, //TODO: is this good?
-            2.0);
+            0.7, //TODO: is this good?
+            0.5);
         }
 
     public static final LinearSystem<N2, N1, N1> elevatorPlant = LinearSystemId.createElevatorSystem(
@@ -459,6 +459,7 @@ public final class Constants {
 
   /** For 5026 vision code */
   public static final class Vision {
+    public static final double simpleVisionSnapTarget = 20.0;
     public static class VisionSource {
       public String name;
       public Transform3d robotToCamera;

@@ -40,6 +40,7 @@ import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTablesJNI;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -47,6 +48,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -56,6 +58,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -70,9 +73,12 @@ public class SwerveSubsystem extends SubsystemBase {
     public Field2d field = new Field2d();
 
     private boolean isInTapeMode = true;
-    private PIDController tapeDriveAssistController = new PIDController(-0.02, 0, 0);
+    private PIDController tapeDriveAssistController = 
+        new PIDController(-0.018, 0, -0.01);
 
     private ApriltagVisionSubsystem apriltagVisionSubsystem = new ApriltagVisionSubsystem();
+    private LinearFilter tapeYawFilter = LinearFilter.singlePoleIIR(0.2, 0.020);
+    private double tapeYawFilterVal = 0;
 
     public boolean hasResetOdometry = false;
 
@@ -105,7 +111,7 @@ public class SwerveSubsystem extends SubsystemBase {
         zeroGyro();
 
         headingController.enableContinuousInput(0, Math.PI * 2);
-        headingController.setTolerance(0.15);
+        headingController.setTolerance(0.2);
 
         mSwerveMods = new SwerveModule[] {
             new SwerveModule(0, Constants.Swerve.Mod0.constants),
@@ -193,7 +199,7 @@ public class SwerveSubsystem extends SubsystemBase {
             () -> headingController.calculate(getYaw().getRadians(), theta.getAsDouble()), 
             fieldRelative, 
             isOpenLoop,
-            true);
+            false);
     }
     public Command poseLockDriveCommand(DoubleSupplier x, DoubleSupplier y, DoubleSupplier theta, boolean fieldRelative, boolean isOpenLoop) {
         return new InstantCommand(
@@ -424,18 +430,35 @@ public class SwerveSubsystem extends SubsystemBase {
 
         return value;
     }
+
     public void setLevel(ElevatorSubsystem.ScoringLevels level, boolean isCone){
         extensionLevel = level;
         extensionInches = getExtension(level, isCone);
     }
+
     public ElevatorSubsystem.ScoringLevels getLevel(){
         return extensionLevel;
     }
-    public void getToGoal(){
-        double angle = 0; //TODO: this will be the angle the cameras at when the robots lined up
-        tapeDriveAssistController.calculate(getYaw().getDegrees(), tapeVisionSubsystem.getLatestResult().getBestTarget().getYaw());
-        tapeDriveAssistController.calculate(getPose().getX()+angle, tapeVisionSubsystem.getLatestResult().getBestTarget().getYaw());
-        tapeDriveAssistController.calculate(getPose().getY()+angle, tapeVisionSubsystem.getLatestResult().getBestTarget().getYaw());
+    
+    public CommandBase simpleTapeAllignCommand (DoubleSupplier xSupplier, DoubleSupplier ySupplier, LEDSubsystem ledSubsystem) {
+        return new InstantCommand(() -> {
+            headingController.reset(getYaw().getRadians()); 
+            })
+            .andThen(headingLockDriveCommand(xSupplier, () -> 0, () -> Math.PI, true, false).raceWith(
+                ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.25),
+                new WaitUntilCommand(() -> headingController.atGoal())))
+            .andThen(
+                headingLockDriveCommand(
+                    xSupplier, 
+                    () -> tapeVisionSubsystem.hasTargets() ?
+                        tapeDriveAssistController.calculate(
+                            tapeYawFilterVal,
+                            Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
+                        : 0, 
+                    () -> Math.PI, 
+                    true, 
+                    false)
+            .alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kGreen), 0.25)));
     }
 
     @Override
@@ -452,13 +475,6 @@ public class SwerveSubsystem extends SubsystemBase {
                 measurement.estimation.timestampSeconds,
                 measurement.confidence.times(2.0));
           }
-        
-        var tapeVisionMeasurements = tapeVisionSubsystem.getEstimatedPoses(poseEstimator.getEstimatedPosition());
-
-        for (var measurement : tapeVisionMeasurements.getFirst()) {
-            dashboardFieldTapePoses.add(measurement);
-            poseEstimator.addVisionMeasurement(measurement, tapeVisionMeasurements.getSecond());
-        }
 
         // Log swerve module information
         // May want to disable to conserve bandwidth
@@ -491,6 +507,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Y goal", Constants.AutoConstants.yController.getGoal().position);
         SmartDashboard.putNumber("Heading goal", headingController.getGoal().position);
         SmartDashboard.putNumber("Heading error", headingController.getPositionError());
+        SmartDashboard.putNumber("Heading setpoint", headingController.getSetpoint().position);
+        SmartDashboard.putNumber("scoring heading err", Math.abs(Math.PI - getYaw().getRadians()));
         SmartDashboard.putNumber("total error", getNearestGoalDistance());
         SmartDashboard.putBoolean("is cone goal", nearestGoalIsCone);
         SmartDashboard.putNumber("extension requested", getExtension(ScoringLevels.L2, true));
@@ -500,13 +518,18 @@ public class SwerveSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
         SmartDashboard.putNumber("balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
         SmartDashboard.putBoolean("is in tape mode", isInTapeMode);
-        SmartDashboard.putBoolean("should lock out", lockOutSwerve);        
+        SmartDashboard.putBoolean("should lock out", lockOutSwerve);
+        SmartDashboard.putNumber("auto align setpoint", tapeDriveAssistController.getSetpoint());
+        SmartDashboard.putNumber("auto align pos err", tapeDriveAssistController.getPositionError());
+        SmartDashboard.putBoolean("has tape targets", tapeVisionSubsystem.hasTargets());
+        SmartDashboard.putNumber("Tape yaw", tapeVisionSubsystem.getYaw());
+        SmartDashboard.putNumber("tape yaw filter val", tapeYawFilterVal);
         pose = getPose();
         nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
         double filteredRoll = rollFilter.calculate(gyro.getRoll());
         rollRate = (filteredRoll - lastRoll) / 0.020;
         lastRoll = filteredRoll;
-
+        tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());
     }
 
     @Override

@@ -162,6 +162,23 @@ public class TapeVisionSubsystem {
         return camera.getLatestResult();
     }
 
+    public double getYaw() {
+        if (!camera.getLatestResult().hasTargets()) return Constants.Vision.simpleVisionSnapTarget;
+        double bestYaw = 0;
+        double bestDist = Double.POSITIVE_INFINITY;
+        for (var target : camera.getLatestResult().targets) {
+            if (Math.abs(target.getYaw() - Constants.Vision.simpleVisionSnapTarget) < bestDist) {
+                bestDist = Math.abs(target.getYaw() - Constants.Vision.simpleVisionSnapTarget);
+                bestYaw = target.getYaw();
+            }
+        }
+        return bestYaw;
+    }
+
+    public boolean hasTargets() {
+        return camera.getLatestResult().hasTargets();
+    }
+
     public void updateSimCamera(Pose2d pose) {
         simCamera.processFrame(pose);
     }
