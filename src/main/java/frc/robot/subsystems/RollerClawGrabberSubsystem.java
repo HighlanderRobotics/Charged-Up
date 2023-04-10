@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 
 @Deprecated
@@ -149,8 +150,8 @@ public class RollerClawGrabberSubsystem extends SubsystemBase {
   @Override
  public void periodic() {
     // This method will be called once per scheduler run
-    SmartDashboard.putBoolean("grabber sensor", limitSwitch.get());
-    SmartDashboard.putNumber("grabber output", grabber.getMotorOutputPercent());
-    SmartDashboard.putNumber("grabber vel falcon units", grabber.getSelectedSensorVelocity());
+    LoggingWrapper.shared.add("grabber sensor", limitSwitch.get());
+    LoggingWrapper.shared.add("grabber output", grabber.getMotorOutputPercent());
+    LoggingWrapper.shared.add("grabber vel falcon units", grabber.getSelectedSensorVelocity());
   }
 }
