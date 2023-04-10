@@ -188,8 +188,8 @@ public final class Constants {
   }
 
   public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
-    public static final double maxSpeedMetersPerSecond = 1.5;
-    public static final double maxAccelerationMetersPerSecondSquared = 4;
+    public static final double maxSpeedMetersPerSecond = 3.0;
+    public static final double maxAccelerationMetersPerSecondSquared = 4.0;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 5.5;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 12;
 
@@ -433,7 +433,7 @@ public final class Constants {
     // In falcon native units, before reduction because i was too lazy to do conversions
     public static final double grabberScoringRotation = 3.0e4;
     public static final double grabberSingleSubstationRotation = 1.1e4;
-    public static final double grabberDoubleSubstationRotation = 2.5e4;
+    public static final double grabberDoubleSubstationRotation = 2.7e4;
     public static final double grabberRoutingRotation = 2e3;
     public static final double grabberStoringRotation = 1e3;
   }
@@ -455,7 +455,7 @@ public final class Constants {
     public static final double chuteLevel = 16.0;
   }
 
-  public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them
+  public static final double humanPlayerLevel = 41.5; //or substation idk what we're calling them
 
   /** For 5026 vision code */
   public static final class Vision {

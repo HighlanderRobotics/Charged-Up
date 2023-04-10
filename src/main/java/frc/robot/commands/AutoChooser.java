@@ -77,7 +77,7 @@ public class AutoChooser {
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
-        eventMap.put("Score L3 No Aim", 
+        eventMap.put("Score L3 No Aim",
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
@@ -93,8 +93,9 @@ public class AutoChooser {
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, false))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
-        eventMap.put("Test Wait", new WaitCommand(2.0));
+        eventMap.put("Test Wait", new WaitCommand(1.0));
         eventMap.put("Balance", swerveSubsystem.autoBalanceVelocity());
+        eventMap.put("Outake Cube", new InstantCommand(() -> greybotsGrabberSubsystem.outakeCubeCommand().asProxy()));
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand().withTimeout(4.0), 
           routingSubsystem.runCommand(), 
