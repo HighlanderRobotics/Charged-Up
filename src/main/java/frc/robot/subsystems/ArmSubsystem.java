@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 
 @Deprecated
@@ -100,15 +101,15 @@ public class ArmSubsystem extends SubsystemBase{
     @Override
     public void periodic() {
         double pidOut = Constants.ArmConstants.PIDController.calculate(getRotation().getRadians());
-        SmartDashboard.putNumber("arm pidout", pidOut);
+        LoggingWrapper.shared.add("arm pidout", pidOut);
         if (enabled) {
             updatePID(pidOut, Constants.ArmConstants.PIDController.getSetpoint());
         }
 
-        SmartDashboard.putNumber("arm radians", getRotation().getRadians());
-        SmartDashboard.putNumber("arm encoder native", getMeasurement());
-        SmartDashboard.putNumber("arm current", armMotor.getSupplyCurrent());
-        SmartDashboard.putNumber("arm goal", Constants.ArmConstants.PIDController.getGoal().position);
-        SmartDashboard.putNumber("arm setpoint", Constants.ArmConstants.PIDController.getSetpoint().position);
+        LoggingWrapper.shared.add("arm radians", getRotation().getRadians());
+        LoggingWrapper.shared.add("arm encoder native", getMeasurement());
+        LoggingWrapper.shared.add("arm current", armMotor.getSupplyCurrent());
+        LoggingWrapper.shared.add("arm goal", Constants.ArmConstants.PIDController.getGoal().position);
+        LoggingWrapper.shared.add("arm setpoint", Constants.ArmConstants.PIDController.getSetpoint().position);
     }
 }

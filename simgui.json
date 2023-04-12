@@ -2,7 +2,8 @@
   "HALProvider": {
     "Addressable LEDs": {
       "0": {
-        "columns": 50
+        "columns": 50,
+        "serpentine": true
       },
       "window": {
         "visible": true
@@ -13,13 +14,92 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
+      "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
+      "/SmartDashboard/Grabber intake cube no extend": "Command",
+      "/SmartDashboard/Grabber outake cone": "Command",
+      "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
+      "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
+      "/SmartDashboard/Grabber intake cube no extend": "Command",
+      "/SmartDashboard/Grabber outake cone": "Command",
       "/SmartDashboard/Path 1": "Command",
       "/SmartDashboard/Path 2": "Command",
+      "/SmartDashboard/Rezero Grabber": "Command",
+      "/SmartDashboard/Run grabber to double substation": "Command",
+      "/SmartDashboard/Run grabber to routing": "Command",
+      "/SmartDashboard/Run grabber to scoring": "Command",
+      "/SmartDashboard/Run grabber to single substation": "Command",
+      "/SmartDashboard/Run grabber to storage": "Command",
+      "/SmartDashboard/Rezero Grabber": "Command",
+      "/SmartDashboard/Run grabber to double substation": "Command",
+      "/SmartDashboard/Run grabber to routing": "Command",
+      "/SmartDashboard/Run grabber to scoring": "Command",
+      "/SmartDashboard/Run grabber to single substation": "Command",
+      "/SmartDashboard/Run grabber to storage": "Command",
       "/SmartDashboard/Sequence": "Command",
       "/SmartDashboard/Spline": "Command",
-      "/SmartDashboard/elevatorsim": "Mechanism2d"
+      "/SmartDashboard/autoBalance": "Command",
+      "/SmartDashboard/autoChooser": "String Chooser",
+      "/SmartDashboard/elevatorsim": "Mechanism2d",
+      "/SmartDashboard/extend to 0": "Command",
+      "/SmartDashboard/extend to 12": "Command",
+      "/SmartDashboard/extend to 36": "Command",
+      "/SmartDashboard/intake toggle": "Command",
+      "/SmartDashboard/reset elevator": "Command",
+      "/SmartDashboard/reset to 0": "Command",
+      "/SmartDashboard/rezero elevator": "Command",
+      "/SmartDashboard/scoring sequence": "Command"
     },
     "windows": {
+      "/SmartDashboard/Field": {
+        "Robot": {
+          "color": [
+            0.0,
+            255.0,
+            29.999967575073242,
+            255.0
+          ]
+        },
+        "latest tape vision pose": {
+          "color": [
+            172.5000457763672,
+            0.0,
+            255.0,
+            255.0
+          ]
+        },
+        "tape targets": {
+          "arrows": false,
+          "color": [
+            32.278507232666016,
+            255.0,
+            0.0,
+            255.0
+          ],
+          "length": 0.10000000149011612,
+          "width": 0.10000000149011612
+        },
+        "vis sim est pose": {
+          "arrowColor": [
+            0.0,
+            174.30381774902344,
+            255.0,
+            255.0
+          ],
+          "arrowSize": 100,
+          "color": [
+            245.31642150878906,
+            0.0,
+            255.0,
+            255.0
+          ],
+          "length": 1.0,
+          "width": 0.800000011920929
+        },
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Path 1": {
         "window": {
           "visible": true
@@ -44,13 +124,27 @@
         "window": {
           "visible": true
         }
+      },
+      "/SmartDashboard/limelight-left Sim Field": {
+        "window": {
+          "visible": true
+        }
       }
     }
   },
   "NetworkTables": {
     "transitory": {
+      "Shuffleboard": {
+        "open": true
+      },
       "SmartDashboard": {
         "elevatorsim": {
+          "open": true
+        },
+        "open": true
+      },
+      "photonvision": {
+        "limelight-left": {
           "open": true
         },
         "open": true

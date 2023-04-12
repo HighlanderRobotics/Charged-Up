@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
@@ -59,7 +60,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase waitExtendToInches(DoubleSupplier extensionInches){
     return intakeSubsystem.extendCommand()//new InstantCommand(() -> mode = ExtensionState.EXTEND)
-      .andThen(new WaitCommand(0.35))
+      .andThen(new WaitCommand(0.3))
       .andThen(elevatorSubsystem.extendToInchesCommand(extensionInches))
       .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
   }
@@ -86,13 +87,13 @@ public class SuperstructureSubsystem extends SubsystemBase {
       .deadlineWith(ledSubsystem.setRainbowCommand(), 
         new WaitCommand(0.4)
           .andThen(greybotsGrabberSubsystem.stopCommand().withTimeout(0.1), greybotsGrabberSubsystem.runToScoringCommand()))
-      .withTimeout(1.0)
-    .andThen(new WaitCommand(.5),
+      .withTimeout(1.2)
+    .andThen(new WaitCommand(.15),
       new ConditionalCommand(
       greybotsGrabberSubsystem.scoreCubeCommand(),
       greybotsGrabberSubsystem.scoreConeCommand(),
       () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
-    ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
+    ).alongWith(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.35))
     .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)//,
     // new WaitCommand(0.25)
     // elevatorSubsystem.extendToInchesCommand(1.0)
@@ -107,7 +108,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
     if (elevatorSubsystem.getExtensionInches() > 4.5 || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5) { // TODO: Find good value for maximum extension before "extended"
       mode = ExtensionState.EXTEND;
     }
-    SmartDashboard.putString("Superstructure Mode", mode.toString());
+    LoggingWrapper.shared.add("Superstructure Mode", mode.toString());
 
   }
 

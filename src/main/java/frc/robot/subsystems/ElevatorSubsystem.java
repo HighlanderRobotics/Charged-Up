@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
+import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 
 public class ElevatorSubsystem extends SubsystemBase {
@@ -61,23 +62,24 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public ElevatorSubsystem() {
         elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
+        elevatorMotor.config_kF(0, 0);
         elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
         elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
         elevatorFollower.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
         elevatorMotor.configVoltageCompSaturation(10);
         elevatorFollower.configVoltageCompSaturation(10);
-        SmartDashboard.putData("elevatorsim", mech2d);
+        LoggingWrapper.shared.add("elevatorsim", mech2d);
         zeroMotor();
     }
 
     private void updatePID() {
         double pidOut = Constants.ElevatorConstants.PIDController.calculate(getExtensionInches());
         var setpoint = Constants.ElevatorConstants.PIDController.getSetpoint();
-        SmartDashboard.putNumber("elevator setpoint", setpoint.position);
-        SmartDashboard.putNumber("elevator setpoint velocity", setpoint.velocity);
-        SmartDashboard.putNumber("elevator pid out", pidOut);
-        SmartDashboard.putNumber("elevator ff out", Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
+        LoggingWrapper.shared.add("elevator setpoint", setpoint.position);
+        LoggingWrapper.shared.add("elevator setpoint velocity", setpoint.velocity);
+        LoggingWrapper.shared.add("elevator pid out", pidOut);
+        LoggingWrapper.shared.add("elevator ff out", Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
         elevatorMotor.set(
             ControlMode.PercentOutput, 
             pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
@@ -94,7 +96,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         Constants.ElevatorConstants.elevatorLoop.predict(0.020);
 
         double voltage = Constants.ElevatorConstants.elevatorLoop.getU(0);
-        SmartDashboard.putNumber("elevator state space voltage out", voltage);
+        LoggingWrapper.shared.add("elevator state space voltage out", voltage);
 
         elevatorMotor.set(ControlMode.PercentOutput, voltage / 12.0);
     }
@@ -200,17 +202,17 @@ public class ElevatorSubsystem extends SubsystemBase {
             zeroMotor();
         }
 
-        SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
-        SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
+        LoggingWrapper.shared.add("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+        LoggingWrapper.shared.add("elevator pose inches", getExtensionInches());
         // We might have accidentaly tuned elevator pid with this call on, which modifies the state of the pid controller
         // Basically, dont remove this line it's load bearing
         SmartDashboard.putNumber("elevator pid output", Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
 
-        SmartDashboard.putNumber("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
-        SmartDashboard.putNumber("elevator pose inches", getExtensionInches());
-        // SmartDashboard.putNumber("elevator native position", getMeasurement());
-        SmartDashboard.putBoolean("elevator enable", enabled);
-        SmartDashboard.putBoolean("elevator limit switch", limitSwitch.get());
-        // SmartDashboard.putBoolean("elevator is at goal", isAtGoal());
+        LoggingWrapper.shared.add("elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+        LoggingWrapper.shared.add("elevator pose inches", getExtensionInches());
+        // LoggingWrapper.shared.add("elevator native position", getMeasurement());
+        LoggingWrapper.shared.add("elevator enable", enabled);
+        LoggingWrapper.shared.add("elevator limit switch", limitSwitch.get());
+        // LoggingWrapper.shared.add("elevator is at goal", isAtGoal());
     }
 }

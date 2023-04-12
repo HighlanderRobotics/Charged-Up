@@ -323,13 +323,13 @@ public final class Constants {
     public static final int elevatorLimitSwitchID = 0;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.33984/5, 0.01);
+    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.07, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(60.0,40.0);
     public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.2/7, 0.0, 0.0139/2, elevatorConstraints);
         static {
           PIDController.setTolerance(
-            2.0, //TODO: is this good?
-            2.0);
+            0.7, //TODO: is this good?
+            0.5);
         }
 
     public static final LinearSystem<N2, N1, N1> elevatorPlant = LinearSystemId.createElevatorSystem(
@@ -448,17 +448,21 @@ public final class Constants {
   public static final class ScoringLevels {
     public static final double topConeLevel = 46; //this is in inches
     public static final double topCubeLevel = 47;
-    public static final double midConeLevel = 33.0;
+    public static final double midConeLevel = 31.0;
     public static final double midCubeLevel = 29.75;
     public static final double bottomLevel = 20;
 
     public static final double chuteLevel = 16.0;
   }
 
-  public static final double humanPlayerLevel = 41.5; //or substation idk what we're calling them
+  public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them
+  
+  /** Logging Frequency in Seconds */
+  public static final double LOGGING_FREQUENCY = 0.1;
 
   /** For 5026 vision code */
   public static final class Vision {
+    public static final double simpleVisionSnapTarget = 20.0;
     public static class VisionSource {
       public String name;
       public Transform3d robotToCamera;
@@ -477,15 +481,7 @@ public final class Constants {
                     Units.inchesToMeters(-8),
                     Units.inchesToMeters(-9.75), 
                     Units.inchesToMeters(-22.75)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(-5)))),
-            new VisionSource(
-                "limelight-left",
-                new Transform3d(
-                  new Translation3d(
-                    Units.inchesToMeters(-8),
-                    Units.inchesToMeters(9.75), 
-                    Units.inchesToMeters(-22.75)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(5)))));
+                  new Rotation3d(0, 0, Units.degreesToRadians(-5)))));
   }
 
   /** For 5026 vision code */
@@ -547,4 +543,69 @@ public final class Constants {
     public static final List<Set<Integer>> POSSIBLE_FRAME_FID_COMBOS =
         List.of(Set.of(1, 2, 3, 4), Set.of(5, 6, 7, 8));
   }
+
+    // Dimensions for grids and nodes
+    // Stolen from 6328
+    public static final class Grids {
+      // X layout
+      public static final double outerX = Units.inchesToMeters(54.25);
+      public static final double lowX =
+          outerX - (Units.inchesToMeters(14.25) / 2.0); // Centered when under cube nodes
+      public static final double midX = outerX - Units.inchesToMeters(22.75);
+      public static final double highX = outerX - Units.inchesToMeters(39.75);
+
+      public static final double fieldWidthX = Units.inchesToMeters(655.5);
+
+      // Y layout
+      public static final int nodeRowCount = 9;
+      public static final double[] nodeY =
+          new double[] {
+                Units.inchesToMeters(20.19 + 22.0 * 0),
+                Units.inchesToMeters(20.19 + 22.0 * 1),
+                Units.inchesToMeters(20.19 + 22.0 * 2),
+                Units.inchesToMeters(20.19 + 22.0 * 3),
+                Units.inchesToMeters(20.19 + 22.0 * 4),
+                Units.inchesToMeters(20.19 + 22.0 * 5),
+                Units.inchesToMeters(20.19 + 22.0 * 6),
+                Units.inchesToMeters(20.19 + 22.0 * 7),
+                Units.inchesToMeters(20.19 + 22.0 * 8)
+              };
+  
+      // Z layout
+      public static final double cubeEdgeHigh = Units.inchesToMeters(3.0);
+      public static final double highCubeZ = Units.inchesToMeters(35.5) - cubeEdgeHigh;
+      public static final double midCubeZ = Units.inchesToMeters(23.5) - cubeEdgeHigh;
+      public static final double highConeZ = Units.inchesToMeters(46.0);
+      public static final double midConeZ = Units.inchesToMeters(34.0);
+  
+      // Translations (all nodes in the same column/row have the same X/Y coordinate)
+      public static final Translation2d[] lowTranslations = new Translation2d[nodeRowCount * 2];
+      public static final Translation3d[] low3dTranslations = new Translation3d[nodeRowCount * 2];
+      public static final Translation2d[] midTranslations = new Translation2d[nodeRowCount * 2];
+      public static final Translation3d[] mid3dTranslations = new Translation3d[nodeRowCount * 2];
+      public static final Translation2d[] highTranslations = new Translation2d[nodeRowCount * 2];
+      public static final Translation3d[] high3dTranslations = new Translation3d[nodeRowCount * 2];
+  
+      static {
+        for (int i = 0; i < nodeRowCount; i++) {
+          boolean isCube = i == 1 || i == 4 || i == 7;
+          lowTranslations[i] = new Translation2d(lowX, nodeY[i]);
+          low3dTranslations[i] = new Translation3d(lowX, nodeY[i], 0.0);
+          midTranslations[i] = new Translation2d(midX, nodeY[i]);
+          mid3dTranslations[i] = new Translation3d(midX, nodeY[i], isCube ? midCubeZ : midConeZ);
+          highTranslations[i] = new Translation2d(highX, nodeY[i]);
+          high3dTranslations[i] = new Translation3d(highX, nodeY[i], isCube ? highCubeZ : highConeZ);
+        }
+
+        for (int i = nodeRowCount; i < 2 * nodeRowCount; i++) {
+          boolean isCube = i == 1 || i == 4 || i == 7;
+          lowTranslations[i] = new Translation2d(fieldWidthX - lowX, nodeY[i - 9]);
+          low3dTranslations[i] = new Translation3d(fieldWidthX - lowX, nodeY[i - 9], 0.0);
+          midTranslations[i] = new Translation2d(fieldWidthX - midX, nodeY[i - 9]);
+          mid3dTranslations[i] = new Translation3d(fieldWidthX - midX, nodeY[i - 9], isCube ? midCubeZ : midConeZ);
+          highTranslations[i] = new Translation2d(fieldWidthX - highX, nodeY[i - 9]);
+          high3dTranslations[i] = new Translation3d(fieldWidthX - highX, nodeY[i - 9], isCube ? highCubeZ : highConeZ);
+        }
+      }
+    }
 }
