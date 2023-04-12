@@ -2,15 +2,15 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.8713153215780125,
-        "y": 4.982535077852112
+        "x": 14.73,
+        "y": 4.98
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8749605613690874,
-        "y": 4.982535077852112
+        "x": 15.733645239791075,
+        "y": 4.98
       },
-      "holonomicAngle": -179.02897806892082,
+      "holonomicAngle": 0.7,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -130,17 +130,14 @@
     },
     {
       "anchorPoint": {
-        "x": 1.8512244543286085,
-        "y": 3.68
+        "x": 0.4549091804950537,
+        "y": 4.249218423248878
       },
       "prevControl": {
-        "x": 2.664904577929457,
-        "y": 3.68
+        "x": 1.2685893040959026,
+        "y": 4.249218423248878
       },
-      "nextControl": {
-        "x": 1.0375443307277599,
-        "y": 3.68
-      },
+      "nextControl": null,
       "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
@@ -154,69 +151,7 @@
         "waitBehavior": "after",
         "waitTime": 0.3
       }
-    },
-    {
-      "anchorPoint": {
-        "x": 3.2073579936633565,
-        "y": 4.319536458621791
-      },
-      "prevControl": {
-        "x": 2.122451162195558,
-        "y": 3.999768229310895
-      },
-      "nextControl": null,
-      "holonomicAngle": 0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
     }
   ],
-  "maxVelocity": 5.0,
-  "maxAcceleration": 5.0,
-  "isReversed": null,
-  "markers": [
-    {
-      "position": 0.7575757575757246,
-      "names": [
-        "Intake"
-      ]
-    },
-    {
-      "position": 2.8,
-      "names": [
-        "Intake"
-      ]
-    },
-    {
-      "position": 1.2,
-      "names": [
-        "Score L2 No Aim Cube"
-      ]
-    },
-    {
-      "position": 1.4,
-      "names": [
-        "Outake Cube"
-      ]
-    },
-    {
-      "position": 3.5,
-      "names": [
-        "Score L3 No Aim Cube"
-      ]
-    },
-    {
-      "position": 3.55,
-      "names": [
-        "Outake Cube"
-      ]
-    }
-  ]
+  "markers": []
 }
