@@ -124,6 +124,7 @@ public class AutoChooser {
         chooser.addOption("1.5 + Park Bump", () -> onePlusParkBottom());
         chooser.addOption("1 + Mobility", () -> oneMobility());
         chooser.addOption("Apriltags Test", () -> apriltagsTest());
+        chooser.addOption("2.5 Piece Top Red", () -> twoAndAHalfTopRed());
         // chooser.addOption("2 + Park Bottom Red", twoPlusParkBottomRed());
         chooser.addOption("2 Bump", () -> twoPieceBump());
         chooser.addOption("3 Piece Flat", () -> threeTop());
@@ -141,17 +142,21 @@ public class AutoChooser {
     //HashMap<String, Command> Constants.eventMap = new HashMap<>();  
     }
     
-  public Command getAutoCommand(){
+  public Command getAutoCommand() {
     return chooser.getSelected().get();
   }
   private Command apriltagsTest() {
     return swerveSubsystem.autoBuilder(eventMap).fullAuto(chooseAutoAlliance("Apriltags Test", "Apriltags Test"));
   }
-  private Command onePlusParkTop(){
+  private Command onePlusParkTop() {
     return auto("1 + Park Top");
   }
-  private Command twoParkTop(){
+  private Command twoParkTop() {
     return auto("2 + Park Top", 3.0, 5.0);
+  }
+
+  private Command twoAndAHalfTopRed() {
+    return auto("2.5 Piece Top");
   }
 
   private Command onePlusParkMiddle() {
