@@ -101,8 +101,8 @@ public class SwerveSubsystem extends SubsystemBase {
     public ProfiledPIDController headingController = new ProfiledPIDController(
         1.2, 
         0, 
-        0.0,
-        new Constraints(Math.PI * 2, Math.PI * 2));
+        0.1,
+        new Constraints(Math.PI * 4, Math.PI * 6));
 
     public TapeVisionSubsystem tapeVisionSubsystem = new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
 

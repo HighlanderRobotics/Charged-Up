@@ -23,6 +23,8 @@ import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -72,6 +74,8 @@ public class RobotContainer {
   
   boolean shouldUseChute = true;
   boolean isUsingChute = false;
+
+  double lastHeadingSnapAngle = 0;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -187,10 +191,43 @@ public class RobotContainer {
     // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     
     controller.rightTrigger().whileTrue(
-      swerveSubsystem.simpleTapeAllignCommand(
-        () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
-        () -> modifyJoystickAxis(operator.getLeftX(), controller.getLeftTriggerAxis()) * 8,
-        ledSubsystem)
+      swerveSubsystem.headingLockDriveCommand(
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
+      () -> {
+        var joystickRotation = new Rotation2d(controller.getRightX(), -controller.getRightY());
+        SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
+        SmartDashboard.putNumber("heading joystick rot", joystickRotation.getRotations());
+        if (Math.sqrt((controller.getRightX() * controller.getRightX()) + (controller.getRightY() * controller.getRightY())) < 0.2) {
+          return lastHeadingSnapAngle;
+        }
+
+        double correctedJoystickRot = joystickRotation.getRotations() > 0 ? 
+          joystickRotation.getRotations() 
+          : 1.0 + joystickRotation.getRotations();
+        SmartDashboard.putNumber("heading corrected joystick rot", correctedJoystickRot);
+
+        if (
+          correctedJoystickRot < 0.917
+          && correctedJoystickRot > 0.583) {
+            SmartDashboard.putString("heading snap id", "score");
+          lastHeadingSnapAngle = Math.PI;
+        } else if (
+          correctedJoystickRot < 0.583 
+          && correctedJoystickRot > 0.25) {
+            SmartDashboard.putString("heading snap id", "left");
+          lastHeadingSnapAngle = Math.PI / 2;
+        } else if (
+          correctedJoystickRot < 0.25 
+          || correctedJoystickRot > 0.917) {
+            SmartDashboard.putString("heading snap id", "right");
+          lastHeadingSnapAngle = Math.PI + (Math.PI / 2);
+        }
+
+        return lastHeadingSnapAngle;
+      }, 
+      true, 
+      true)
     );
 
     controller.leftTrigger().whileTrue(

@@ -11,6 +11,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.SimPhotonCamera;
 import org.photonvision.SimVisionSystem;
 import org.photonvision.SimVisionTarget;
+import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -38,6 +39,7 @@ public class TapeVisionSubsystem {
     public TapeVisionSubsystem(String cameraName, Transform3d cameraPose) {
         camera = new PhotonCamera(cameraName);
         this.cameraToRobot = cameraPose;
+        camera.setLED(VisionLEDMode.kOff);
 
         simCamera = new SimVisionSystem(
             cameraName, 
