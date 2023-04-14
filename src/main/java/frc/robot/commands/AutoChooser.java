@@ -79,6 +79,9 @@ public class AutoChooser {
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
+        eventMap.put("Extend L3", 
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true)).asProxy()
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube)));
         eventMap.put("Score L3 No Aim",
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
@@ -92,21 +95,33 @@ public class AutoChooser {
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
         eventMap.put("Score L2 No Aim Cube", 
-          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, fal))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
+        eventMap.put("Score L2 No Aim Cube No Wait", 
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, false))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
+        eventMap.put("Score L2 No Aim Cube Almost No Wait", 
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, false))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.25))));
         eventMap.put("Score L3 No Aim Cube", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, false))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
+        eventMap.put("Score L3 No Aim Cube No Wait", 
+          new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, false))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Test Wait", new WaitCommand(1.0));
         eventMap.put("Balance", swerveSubsystem.autoBalanceVelocity());
         eventMap.put("Outake Cube", new InstantCommand(() -> greybotsGrabberSubsystem.outakeCubeCommand().asProxy()));
         eventMap.put("Intake", run(
-          intakeSubsystem.runCommand().withTimeout(4.0), 
+          intakeSubsystem.runCommand().withTimeout(1.0), 
           routingSubsystem.runCommand(), 
           greybotsGrabberSubsystem.intakeCubeCommand())
-          .withTimeout(5.0).asProxy()); 
+          .withTimeout(1.0).asProxy()); 
         eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
             () -> 1.0,
             () -> 0.0,
@@ -132,6 +147,8 @@ public class AutoChooser {
         chooser.addOption("2 Bump", () -> twoPieceBump());
         chooser.addOption("3 Piece Flat", () -> threeTop());
         chooser.addOption("2 Piece Middle", () -> twoPieceMiddle());
+        chooser.addOption("3 Piece Bottom", () -> threeBottom());
+        chooser.addOption("Better 2 Bottom", () -> twoPieceBumpBetter());
         chooser.addOption("just score", () ->  
         
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
@@ -155,7 +172,7 @@ public class AutoChooser {
     return auto("1 + Park Top");
   }
   private Command twoParkTop(){
-    return auto("2 + Park Top", 3.0, 5.0);
+    return auto("2 + Park Top");
   }
 
   private Command onePlusParkMiddle() {
@@ -177,6 +194,9 @@ public class AutoChooser {
   public Command threeTop() {
     return auto("3 Piece Top", 3.0, 5.0);
   }
+  public Command threeBottom(){
+    return auto("3 Piece Bottom");
+  }
 
   public Command twoPieceBump() {
     return auto("2 Bottom");
@@ -184,6 +204,9 @@ public class AutoChooser {
 
   public Command twoPieceMiddle() {
     return auto("2 + Park Middle");
+  }
+  public Command twoPieceBumpBetter(){
+      return auto("Better 2 Bottom");
   }
 
   private static Command run(Command ... commands) {

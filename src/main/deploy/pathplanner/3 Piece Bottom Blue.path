@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L3 No Aim"
+          "Score L3 No Aim No Wait"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -51,25 +51,25 @@
     },
     {
       "anchorPoint": {
-        "x": 1.8384615384615384,
-        "y": 1.135714285714285
+        "x": 1.95,
+        "y": 1.215497468588923
       },
       "prevControl": {
-        "x": 2.8576923076923078,
-        "y": 0.8736263736263729
+        "x": 2.969230769230769,
+        "y": 0.9534095565010109
       },
       "nextControl": {
-        "x": 2.8576923076923078,
-        "y": 0.8736263736263729
+        "x": 2.969230769230769,
+        "y": 0.9534095565010109
       },
-      "holonomicAngle": 179.50178838738637,
+      "holonomicAngle": 180.0,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "Score L3 No Aim Cube"
+          "Score L2 No Aim Cube Almost No Wait"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -78,16 +78,16 @@
     },
     {
       "anchorPoint": {
-        "x": 6.954304735677139,
-        "y": 1.968904990441561
+        "x": 6.95,
+        "y": 2.3
       },
       "prevControl": {
-        "x": 6.648535504907909,
-        "y": 1.0807181772547485
+        "x": 6.317137681643785,
+        "y": 1.1548205667839897
       },
       "nextControl": {
-        "x": 6.648535504907909,
-        "y": 1.0807181772547485
+        "x": 6.317137681643785,
+        "y": 1.1548205667839897
       },
       "holonomicAngle": 49.707852244372276,
       "isReversal": true,
@@ -105,16 +105,16 @@
     },
     {
       "anchorPoint": {
-        "x": 3.6439560439560434,
-        "y": 0.8881868131868126
+        "x": 3.5790390377773242,
+        "y": 1.26
       },
       "prevControl": {
-        "x": 4.2409340659340655,
-        "y": 0.8736263736263729
+        "x": 4.176194599691461,
+        "y": 1.26
       },
       "nextControl": {
-        "x": 3.0469780219780214,
-        "y": 0.9027472527472523
+        "x": 3.2369038969606923,
+        "y": 1.26
       },
       "holonomicAngle": 179.54886145321277,
       "isReversal": false,
@@ -130,21 +130,23 @@
     },
     {
       "anchorPoint": {
-        "x": 1.8530219780219779,
-        "y": 1.7035714285714287
+        "x": 2.02,
+        "y": 1.7981326188216302
       },
       "prevControl": {
-        "x": 2.515521978021978,
-        "y": 1.33956043956044
+        "x": 2.6825000000000006,
+        "y": 1.4341216298106414
       },
       "nextControl": null,
-      "holonomicAngle": 178.81881108667332,
+      "holonomicAngle": 180.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Score L3 No Aim Cube"
+        ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -162,12 +164,6 @@
       "position": 2.75,
       "names": [
         "Intake"
-      ]
-    },
-    {
-      "position": 4.212121212121074,
-      "names": [
-        "Score L1 No Aim Cube"
       ]
     }
   ]
