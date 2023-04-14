@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L3 No Aim No Wait"
+          "Score L3 No Aim"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -27,7 +27,7 @@
     {
       "anchorPoint": {
         "x": 6.723259762309,
-        "y": 4.4.319536458621791
+        "y": 4.319536458621791
       },
       "prevControl": {
         "x": 5.166217550480214,
