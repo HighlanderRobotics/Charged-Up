@@ -37,7 +37,7 @@
         "x": 9.646480947097233,
         "y": 1.2657246367124324
       },
-      "holonomicAngle": -4.635463426902683,
+      "holonomicAngle": 176.72951207681643,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
@@ -189,6 +189,12 @@
     },
     {
       "position": 2.7272727272727364,
+      "names": [
+        "Intake"
+      ]
+    },
+    {
+      "position": 3.5999999999999885,
       "names": [
         "Intake"
       ]
