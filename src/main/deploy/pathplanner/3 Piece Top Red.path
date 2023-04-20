@@ -128,14 +128,17 @@
     },
     {
       "anchorPoint": {
-        "x": 14.568743423201132,
-        "y": 3.9
+        "x": 13.152337282118173,
+        "y": 4.20903668875007
       },
       "prevControl": {
-        "x": 12.150129979272304,
-        "y": 4.676431575085373
+        "x": 12.830883406127711,
+        "y": 4.329581892246492
       },
-      "nextControl": null,
+      "nextControl": {
+        "x": 13.449775825311768,
+        "y": 4.097497235052473
+      },
       "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
@@ -145,6 +148,28 @@
         "names": [
           "Outake Cube"
         ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 14.57,
+        "y": 3.9
+      },
+      "prevControl": {
+        "x": 13.885653936721406,
+        "y": 3.857446511885506
+      },
+      "nextControl": null,
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
