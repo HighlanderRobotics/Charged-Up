@@ -78,15 +78,15 @@
     },
     {
       "anchorPoint": {
-        "x": 14.576884509219255,
+        "x": 14.53,
         "y": 4.2
       },
       "prevControl": {
-        "x": 9.533481720991878,
+        "x": 9.486597211772622,
         "y": 4.105020663121895
       },
       "nextControl": {
-        "x": 9.533481720991878,
+        "x": 9.486597211772622,
         "y": 4.105020663121895
       },
       "holonomicAngle": 0,
@@ -199,19 +199,13 @@
       ]
     },
     {
-      "position": 2.5,
-      "names": [
-        "Outake Cube"
-      ]
-    },
-    {
-      "position": 4.6,
+      "position": 4.62,
       "names": [
         "Score L3 No Aim Cube"
       ]
     },
     {
-      "position": 4.65,
+      "position": 4.95,
       "names": [
         "Outake Cube"
       ]

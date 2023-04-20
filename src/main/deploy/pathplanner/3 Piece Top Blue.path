@@ -54,15 +54,15 @@
     {
       "anchorPoint": {
         "x": 1.9818150914497326,
-        "y": 4.229127555999474
+        "y": 4.05
       },
       "prevControl": {
         "x": 3.5964638183775173,
-        "y": 4.3620986276288205
+        "y": 4.182971071629346
       },
       "nextControl": {
         "x": 3.5964638183775173,
-        "y": 4.3620986276288205
+        "y": 4.182971071629346
       },
       "holonomicAngle": 180.0,
       "isReversal": true,
@@ -73,7 +73,7 @@
         "names": [],
         "executionBehavior": "sequential",
         "waitBehavior": "after",
-        "waitTime": 0.85
+        "waitTime": 1.0
       }
     },
     {
@@ -172,19 +172,13 @@
     {
       "position": 1.2,
       "names": [
-        "Score L2 No Aim Cube"
+        "Score L3 No Aim Cube"
       ]
     },
     {
       "position": 3.55,
       "names": [
-        "Score L3 No Aim Cube"
-      ]
-    },
-    {
-      "position": 4.272727272727289,
-      "names": [
-        "Outake Cube"
+        "Score L2 No Aim Cube"
       ]
     }
   ]
