@@ -117,11 +117,17 @@ public class AutoChooser {
         eventMap.put("Test Wait", new WaitCommand(1.0));
         eventMap.put("Balance", swerveSubsystem.autoBalanceVelocity());
         eventMap.put("Outake Cube", greybotsGrabberSubsystem.outakeCubeCommand().asProxy());
+        eventMap.put("Outake Cube Ground", run(
+          intakeSubsystem.outakeCommand(),
+          routingSubsystem.outakeCommand(),
+          greybotsGrabberSubsystem.outakeCubeCommand())
+        .withTimeout(1.0)
+        .asProxy());
         eventMap.put("Intake", run(
           intakeSubsystem.runCommand().withTimeout(1.0), 
           routingSubsystem.runCommand(), 
           greybotsGrabberSubsystem.intakeCubeCommand())
-          .withTimeout(1.0).asProxy()); 
+          .withTimeout(1.3).asProxy()); 
         eventMap.put("Run Up Charge Station", swerveSubsystem.driveCommand(
             () -> 1.0,
             () -> 0.0,
@@ -200,7 +206,7 @@ public class AutoChooser {
   }
 
   public Command twoPieceBump() {
-    return auto("2 Bottom");
+    return auto("2 Bottom", 2.0, 2.0);
   }
 
   public Command twoPieceMiddle() {

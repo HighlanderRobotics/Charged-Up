@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L3 No Aim"
+          "Score L2 No Aim"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -82,12 +82,12 @@
         "y": 4.2
       },
       "prevControl": {
-        "x": 9.486597211772622,
-        "y": 4.105020663121895
+        "x": 11.093023389054297,
+        "y": 4.399899927619405
       },
       "nextControl": {
-        "x": 9.486597211772622,
-        "y": 4.105020663121895
+        "x": 11.093023389054297,
+        "y": 4.399899927619405
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -95,10 +95,12 @@
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Score L2 No Aim Cube"
+        ],
         "executionBehavior": "sequential",
         "waitBehavior": "after",
-        "waitTime": 0.85
+        "waitTime": 0.5
       }
     },
     {
@@ -193,21 +195,9 @@
       ]
     },
     {
-      "position": 2.25,
+      "position": 4.7,
       "names": [
-        "Score L2 No Aim Cube"
-      ]
-    },
-    {
-      "position": 4.62,
-      "names": [
-        "Score L3 No Aim Cube"
-      ]
-    },
-    {
-      "position": 4.95,
-      "names": [
-        "Outake Cube"
+        "Outake Cube Ground"
       ]
     }
   ]

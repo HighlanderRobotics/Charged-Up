@@ -331,7 +331,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public CommandBase autoBalanceVelocity() {
-        return autoBalance().until(() -> {return Math.abs(rollRate) > 2.0;})
+        return autoBalance().until(() -> {return Math.abs(rollRate) > 2.5;})
             .andThen(new WaitCommand(0.5).raceWith(driveCommand(() -> 0, () -> 0, () -> 0, false, false, false))).repeatedly();
     }
     

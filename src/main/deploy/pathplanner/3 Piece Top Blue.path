@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L3 No Aim"
+          "Score L2 No Aim"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -70,10 +70,12 @@
       "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
-        "names": [],
+        "names": [
+          "Score L2 No Aim Cube"
+        ],
         "executionBehavior": "sequential",
         "waitBehavior": "after",
-        "waitTime": 1.0
+        "waitTime": 0.5
       }
     },
     {
@@ -105,16 +107,16 @@
     },
     {
       "anchorPoint": {
-        "x": 3.4886301351550077,
-        "y": 4.239172989624175
+        "x": 3.599129905026728,
+        "y": 4.349672759495896
       },
       "prevControl": {
-        "x": 3.7498114093972554,
-        "y": 4.239172989624175
+        "x": 3.8474797171429804,
+        "y": 4.430530837859328
       },
       "nextControl": {
-        "x": 3.27767602903627,
-        "y": 4.239172989624175
+        "x": 3.1671762591645485,
+        "y": 4.2090366887500705
       },
       "holonomicAngle": 180.0,
       "isReversal": false,
@@ -144,9 +146,7 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [
-          "Outake Cube"
-        ],
+        "names": [],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -170,15 +170,9 @@
       ]
     },
     {
-      "position": 1.2,
+      "position": 3.8,
       "names": [
-        "Score L3 No Aim Cube"
-      ]
-    },
-    {
-      "position": 3.55,
-      "names": [
-        "Score L2 No Aim Cube"
+        "Outake Cube Ground"
       ]
     }
   ]
