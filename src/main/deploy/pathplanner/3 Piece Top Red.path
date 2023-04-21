@@ -17,7 +17,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score L2 No Aim"
+          "Score L3 No Aim"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -130,15 +130,18 @@
     },
     {
       "anchorPoint": {
-        "x": 13.674699830602668,
-        "y": 4.20903668875007
+        "x": 12.127703052398584,
+        "y": 4.349672759495896
       },
       "prevControl": {
-        "x": 13.353245954612206,
-        "y": 4.329581892246492
+        "x": 11.784390162347417,
+        "y": 4.349672759495896
       },
-      "nextControl": null,
-      "holonomicAngle": 0,
+      "nextControl": {
+        "x": 12.569702131885466,
+        "y": 4.349672759495896
+      },
+      "holonomicAngle": 0.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -147,6 +150,28 @@
         "names": [
           "Outake Cube"
         ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 14.357789317082393,
+        "y": 4.168854954251263
+      },
+      "prevControl": {
+        "x": 14.056426308341338,
+        "y": 4.158809520626562
+      },
+      "nextControl": null,
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
