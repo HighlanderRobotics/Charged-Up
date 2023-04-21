@@ -52,7 +52,7 @@ public class ScoringCommand extends SequentialCommandGroup {
                 //ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
               new PrintCommand(level + " level"),
               new PrintCommand(swerveSubsystem.checkIfConeGoal(swerveSubsystem.getNearestGoal()) + " nearest goal is cone"),
-                superstructureSubsystem.waitExtendToGoal(level)
+                superstructureSubsystem.waitExtendToGoal(level, 0.0)
                 .andThen(
                     new PrintCommand("extended elevator"),
                     new WaitCommand(0.25),

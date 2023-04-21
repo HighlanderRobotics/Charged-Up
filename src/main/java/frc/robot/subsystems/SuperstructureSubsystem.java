@@ -69,21 +69,25 @@ public class SuperstructureSubsystem extends SubsystemBase {
     return waitExtendToInches(() -> extensionInches);
   }
 
-  public CommandBase waitExtendToGoal(Supplier<ScoringLevels> level) {
-    return new PrintCommand("extension target " + swerveSubsystem.getExtension(level.get(), greybotsGrabberSubsystem.gamePiece == GamePiece.Cone))
-      .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level.get(), greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
+  public CommandBase waitExtendToGoal(Supplier<ScoringLevels> level, double adjust) {
+    return new PrintCommand("extension target " + swerveSubsystem.getExtension(level.get(), greybotsGrabberSubsystem.gamePiece == GamePiece.Cone) + adjust)
+      .andThen(waitExtendToInches(() -> swerveSubsystem.getExtension(level.get(), greybotsGrabberSubsystem.gamePiece == GamePiece.Cone) + adjust));
   }
 
-  public CommandBase waitExtendToGoal(ScoringLevels level) {
-    return waitExtendToGoal(() -> level);
+  public CommandBase waitExtendToGoal(ScoringLevels level, double adjust) {
+    return waitExtendToGoal(() -> level, adjust);
+  }
+
+  public CommandBase waitExtendToGoal(double adjust) {
+    return waitExtendToGoal(swerveSubsystem.getLevel(), adjust);
   }
 
   public CommandBase waitExtendToGoal() {
-    return waitExtendToGoal(swerveSubsystem.getLevel());
+    return waitExtendToGoal(swerveSubsystem.getLevel(), 0);
   }
 
   public CommandBase scoreNoAim() {
-    return routingSubsystem.stopCommand().raceWith(this.waitExtendToGoal(() -> swerveSubsystem.getLevel())
+    return routingSubsystem.stopCommand().raceWith(this.waitExtendToGoal(() -> swerveSubsystem.getLevel(), -1.0)
       .deadlineWith(ledSubsystem.setRainbowCommand(), 
         new WaitCommand(0.4)
           .andThen(greybotsGrabberSubsystem.stopCommand().withTimeout(0.1), greybotsGrabberSubsystem.runToScoringCommand()))

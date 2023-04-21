@@ -240,7 +240,7 @@ public class RobotContainer {
       true)
     );
     controller.leftTrigger().whileTrue(
-      superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel()).andThen(new RunCommand(() -> {}))
+      superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel(), 0.0).andThen(new RunCommand(() -> {}))
         .alongWith(//ledSubsystem.setRainbowCommand(), 
         routingSubsystem.slowRunCommand(),
         new ConditionalCommand(
