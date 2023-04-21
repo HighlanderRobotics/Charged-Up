@@ -115,7 +115,7 @@ public class AutoChooser {
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Test Wait", new WaitCommand(1.0));
-        eventMap.put("Balance", swerveSubsystem.autoBalanceVelocity());
+        eventMap.put("Balance", swerveSubsystem.autoBalance());
         eventMap.put("Outake Cube", greybotsGrabberSubsystem.outakeCubeCommand().asProxy());
         eventMap.put("Outake Cube Ground", run(
           intakeSubsystem.outakeCommand(),
@@ -183,7 +183,7 @@ public class AutoChooser {
   }
 
   private Command onePlusParkMiddle() {
-    return auto("Middle 1 + Balance");
+    return auto("Middle 1 + Balance", 1.5, 2.0);
   }
 
   private Command onePlusParkBottom() {
@@ -199,7 +199,7 @@ public class AutoChooser {
   }
 
   public Command threeTop() {
-    return auto("3 Piece Top", 3.0, 5.0);
+    return auto("3 Piece Top", 3.5, 5.0);
   }
   public Command threeBottom(){
     return auto("3 Piece Bottom");

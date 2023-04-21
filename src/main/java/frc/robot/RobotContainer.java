@@ -268,6 +268,13 @@ public class RobotContainer {
 
     operator.back().whileTrue(run(
       greybotsGrabberSubsystem.intakeConeSingleCommand()));
+    
+    operator.leftTrigger().and(() -> operator.rightTrigger().getAsBoolean()).whileTrue(
+      superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
+        .andThen(new InstantCommand(() -> isUsingChute = true), 
+          new RunCommand(() -> {}, elevatorSubsystem).alongWith(intakeSubsystem.outakeCommand()))
+        .alongWith(routingSubsystem.outakeCommand())
+    );
 
     isExtended.whileFalse(new ConditionalCommand(  
       new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)), 
