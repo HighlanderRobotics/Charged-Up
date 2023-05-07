@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,18 +12,20 @@ import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class RoutingSubsystem extends SubsystemBase {
-  HighlanderFalcon routingLeft = new HighlanderFalcon(
-    Constants.MechanismConstants.routingLeftID, 
-    1.0,
-    Constants.MechanismConstants.routingKP, 
-    0, 
-    0);
-  HighlanderFalcon routingRight = new HighlanderFalcon(
-    Constants.MechanismConstants.routingRightID, 
-    1.0,
-    Constants.MechanismConstants.routingKP, 
-    0, 
-    0);
+  HighlanderFalcon routingLeft =
+      new HighlanderFalcon(
+          Constants.MechanismConstants.routingLeftID,
+          1.0,
+          Constants.MechanismConstants.routingKP,
+          0,
+          0);
+  HighlanderFalcon routingRight =
+      new HighlanderFalcon(
+          Constants.MechanismConstants.routingRightID,
+          1.0,
+          Constants.MechanismConstants.routingKP,
+          0,
+          0);
   // TODO: talk to routing subteam about logic and stuff
   /** Creates a new RoutingSubsystem. */
   public RoutingSubsystem() {
@@ -60,7 +61,12 @@ public class RoutingSubsystem extends SubsystemBase {
   }
 
   public CommandBase slowRunCommand() {
-    return new RunCommand(() -> {routingLeft.setPercentOut(-0.1); routingRight.setPercentOut(0.1);}, this);
+    return new RunCommand(
+        () -> {
+          routingLeft.setPercentOut(-0.1);
+          routingRight.setPercentOut(0.1);
+        },
+        this);
   }
 
   @Override

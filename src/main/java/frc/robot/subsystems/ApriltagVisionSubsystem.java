@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -30,7 +29,8 @@ public class ApriltagVisionSubsystem {
   private class CameraEstimator {
     public PhotonPoseEstimator estimator;
     public PhotonCamera camera;
-    public CameraEstimator (PhotonCamera camera, PhotonPoseEstimator estimator) {
+
+    public CameraEstimator(PhotonCamera camera, PhotonPoseEstimator estimator) {
       this.estimator = estimator;
       this.camera = camera;
     }
@@ -82,13 +82,14 @@ public class ApriltagVisionSubsystem {
   }
 
   public static class VisionMeasurement {
-        public EstimatedRobotPose estimation;
-        public Matrix<N3, N1> confidence;
-        public VisionMeasurement(EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {
-          this.estimation = estimation;
-          this.confidence = confidence;
-        }
-      }
+    public EstimatedRobotPose estimation;
+    public Matrix<N3, N1> confidence;
+
+    public VisionMeasurement(EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {
+      this.estimation = estimation;
+      this.confidence = confidence;
+    }
+  }
 
   private static boolean ignoreFrame(PhotonPipelineResult frame) {
     if (!frame.hasTargets() || frame.getTargets().size() > PoseEstimator.MAX_FRAME_FIDS)
@@ -102,7 +103,7 @@ public class ApriltagVisionSubsystem {
     }
     if (!possibleCombination) System.out.println("Ignoring frame with FIDs: " + ids);
     return !possibleCombination;
-  }    
+  }
 
   public List<VisionMeasurement> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
     if (fieldLayout == null) {

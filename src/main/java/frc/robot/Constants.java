@@ -4,19 +4,12 @@
 
 package frc.robot;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.pathplanner.lib.PathConstraints;
-
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.DifferentialDriveFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.LinearQuadraticRegulator;
 import edu.wpi.first.math.controller.ProfiledPIDController;
@@ -30,18 +23,21 @@ import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.lib.components.HighlanderFalcon;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -57,18 +53,16 @@ public final class Constants {
     public static final int operatorControllerPort = 1;
   }
 
-  public static final Transform3d rightCameraToRobot = new Transform3d(
-    new Translation3d(
-      Units.inchesToMeters(-8),
-      Units.inchesToMeters(-9.75), 
-      Units.inchesToMeters(-22.75)),
-    new Rotation3d(0, 0, Units.degreesToRadians(-5)));
-  public static final Transform3d leftCameraToRobot = new Transform3d(
-    new Translation3d(
-      Units.inchesToMeters(-8),
-      Units.inchesToMeters(9.75), 
-      Units.inchesToMeters(-22.75)),
-    new Rotation3d(0, 0, Units.degreesToRadians(5)));
+  public static final Transform3d rightCameraToRobot =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(-8), Units.inchesToMeters(-9.75), Units.inchesToMeters(-22.75)),
+          new Rotation3d(0, 0, Units.degreesToRadians(-5)));
+  public static final Transform3d leftCameraToRobot =
+      new Transform3d(
+          new Translation3d(
+              Units.inchesToMeters(-8), Units.inchesToMeters(9.75), Units.inchesToMeters(-22.75)),
+          new Rotation3d(0, 0, Units.degreesToRadians(5)));
 
   public static final class Swerve {
     public static final int pigeonID = 1;
@@ -82,13 +76,14 @@ public final class Constants {
     public static final double wheelBase = Units.inchesToMeters(24.5);
     public static final double wheelCircumference = chosenModule.wheelCircumference;
 
-    /* Swerve Kinematics 
+    /* Swerve Kinematics
      * No need to ever change this unless you are not doing a traditional rectangular/square 4 module swerve */
-     public static final SwerveDriveKinematics swerveKinematics = new SwerveDriveKinematics(
-      new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
-      new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
-      new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
-      new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
+    public static final SwerveDriveKinematics swerveKinematics =
+        new SwerveDriveKinematics(
+            new Translation2d(wheelBase / 2.0, trackWidth / 2.0),
+            new Translation2d(wheelBase / 2.0, -trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, trackWidth / 2.0),
+            new Translation2d(-wheelBase / 2.0, -trackWidth / 2.0));
 
     /* Module Gear Ratios */
     public static final double driveGearRatio = chosenModule.driveGearRatio;
@@ -124,22 +119,23 @@ public final class Constants {
     public static final double angleKF = chosenModule.angleKF;
 
     /* Drive Motor PID Values */
-    public static final double driveKP = 0.05; //TODO: This must be tuned to specific robot
+    public static final double driveKP = 0.05; // TODO: This must be tuned to specific robot
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.0;
     public static final double driveKF = 0.0;
 
-    /* Drive Motor Characterization Values 
+    /* Drive Motor Characterization Values
      * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
-    public static final double driveKS = (0.32 / 12); //TODO: This must be tuned to specific robot
+    public static final double driveKS = (0.32 / 12); // TODO: This must be tuned to specific robot
     public static final double driveKV = (1.51 / 12);
     public static final double driveKA = (0.27 / 12);
 
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 6; //TODO: This must be tuned to specific robot
+    public static final double maxSpeed = 6; // TODO: This must be tuned to specific robot
     /** Radians per Second */
-    public static final double maxAngularVelocity = 10.0; //TODO: This must be tuned to specific robot
+    public static final double maxAngularVelocity =
+        10.0; // TODO: This must be tuned to specific robot
 
     /* Neutral Modes */
     public static final NeutralMode angleNeutralMode = NeutralMode.Coast;
@@ -147,64 +143,71 @@ public final class Constants {
 
     /* Module Specific Constants */
     /* Front Left Module - Module 0 */
-    public static final class Mod0 { //TODO: This must be tuned to specific robot
-        public static final int driveMotorID = 3;
-        public static final int angleMotorID = 4;
-        public static final int canCoderID = 2;
-        public static final Rotation2d angleOffset = Rotation2d.fromDegrees(29.2 - 90);
-        public static final SwerveModuleConstants constants = 
-            new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+    public static final class Mod0 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 3;
+      public static final int angleMotorID = 4;
+      public static final int canCoderID = 2;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(29.2 - 90);
+      public static final SwerveModuleConstants constants =
+          new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
 
     /* Front Right Module - Module 1 */
-    public static final class Mod1 { //TODO: This must be tuned to specific robot
-        public static final int driveMotorID = 1;
-        public static final int angleMotorID = 2;
-        public static final int canCoderID = 1;
-        public static final Rotation2d angleOffset = Rotation2d.fromDegrees(76.3 + 90);
-        public static final SwerveModuleConstants constants = 
-            new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+    public static final class Mod1 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 1;
+      public static final int angleMotorID = 2;
+      public static final int canCoderID = 1;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(76.3 + 90);
+      public static final SwerveModuleConstants constants =
+          new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
-    
+
     /* Back Left Module - Module 2 */
-    public static final class Mod2 { //TODO: This must be tuned to specific robot
-        public static final int driveMotorID = 7;
-        public static final int angleMotorID = 8;
-        public static final int canCoderID = 4;
-        public static final Rotation2d angleOffset = Rotation2d.fromDegrees(24.6 - 90);
-        public static final SwerveModuleConstants constants = 
-            new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+    public static final class Mod2 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 7;
+      public static final int angleMotorID = 8;
+      public static final int canCoderID = 4;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(24.6 - 90);
+      public static final SwerveModuleConstants constants =
+          new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
 
     /* Back Right Module - Module 3 */
-    public static final class Mod3 { //TODO: This must be tuned to specific robot
-        public static final int driveMotorID = 5;
-        public static final int angleMotorID = 6;
-        public static final int canCoderID = 3;
-        public static final Rotation2d angleOffset = Rotation2d.fromDegrees(188.3);
-        public static final SwerveModuleConstants constants = 
-            new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
+    public static final class Mod3 { // TODO: This must be tuned to specific robot
+      public static final int driveMotorID = 5;
+      public static final int angleMotorID = 6;
+      public static final int canCoderID = 3;
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(188.3);
+      public static final SwerveModuleConstants constants =
+          new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
   }
 
-  public static final class AutoConstants { //TODO: The below constants are used in the example auto, and must be tuned to specific robot
+  public static final
+  class AutoConstants { // TODO: The below constants are used in the example auto, and must be tuned
+    // to specific robot
     public static final double maxSpeedMetersPerSecond = 3.0;
     public static final double maxAccelerationMetersPerSecondSquared = 4.0;
     public static final double maxAngularSpeedRadiansPerSecond = Math.PI * 5.5;
     public static final double maxAngularSpeedRadiansPerSecondSquared = Math.PI * 12;
 
-    public static final PathConstraints autoConstraints = new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
-    public static final Constraints constraints = new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
+    public static final PathConstraints autoConstraints =
+        new PathConstraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
+    public static final Constraints constraints =
+        new Constraints(maxSpeedMetersPerSecond, maxAccelerationMetersPerSecondSquared);
 
     public static final double kPXController = 7.0;
     public static final double kPYController = 7.0;
     public static final double kPThetaController = 1.9;
     public static final double kDThetaController = 0.0;
 
-    public static final ProfiledPIDController xController = new ProfiledPIDController(kPXController, 0, 0, constraints);
-    public static final ProfiledPIDController yController = new ProfiledPIDController(kPYController, 0, 0, constraints);
+    public static final ProfiledPIDController xController =
+        new ProfiledPIDController(kPXController, 0, 0, constraints);
+    public static final ProfiledPIDController yController =
+        new ProfiledPIDController(kPYController, 0, 0, constraints);
 
-    public static final SimpleMotorFeedforward thetaFeedForward = new SimpleMotorFeedforward(0.24, 1.0e+3);
+    public static final SimpleMotorFeedforward thetaFeedForward =
+        new SimpleMotorFeedforward(0.24, 1.0e+3);
     /* Constraint for the motion profilied robot angle controller */
     public static final TrapezoidProfile.Constraints thetaControllerConstraints =
         new TrapezoidProfile.Constraints(
@@ -212,27 +215,46 @@ public final class Constants {
   }
 
   public static final class ScoringPositions {
-    public static final PathPointOpen blue0 = new PathPointOpen (new Translation2d(1.7, 0.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue1 = new PathPointOpen (new Translation2d(1.7, 1.03), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue2 = new PathPointOpen (new Translation2d(1.7, 1.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue3 = new PathPointOpen (new Translation2d(1.7, 2.23), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue4 = new PathPointOpen (new Translation2d(1.7, 2.83), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue5 = new PathPointOpen (new Translation2d(1.7, 3.43), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue6 = new PathPointOpen (new Translation2d(1.7, 3.8), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue7 = new PathPointOpen (new Translation2d(1.7, 4.63), Rotation2d.fromDegrees(180));
-    public static final PathPointOpen blue8 = new PathPointOpen (new Translation2d(1.7, 5.23), Rotation2d.fromDegrees(180));  
-    
-    public static final PathPointOpen red0 = new PathPointOpen (new Translation2d(15.0, 0.52), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red1 = new PathPointOpen (new Translation2d(15.0, 1.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red2 = new PathPointOpen (new Translation2d(15.0, 1.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red3 = new PathPointOpen (new Translation2d(15.0, 2.23), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red4 = new PathPointOpen (new Translation2d(15.0, 2.83), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red5 = new PathPointOpen (new Translation2d(15.0, 3.3), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red6 = new PathPointOpen (new Translation2d(15.0, 4.03), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red7 = new PathPointOpen (new Translation2d(15.0, 4.63), Rotation2d.fromDegrees(0));
-    public static final PathPointOpen red8 = new PathPointOpen (new Translation2d(15.0, 5.23), Rotation2d.fromDegrees(0));  
+    public static final PathPointOpen blue0 =
+        new PathPointOpen(new Translation2d(1.7, 0.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue1 =
+        new PathPointOpen(new Translation2d(1.7, 1.03), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue2 =
+        new PathPointOpen(new Translation2d(1.7, 1.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue3 =
+        new PathPointOpen(new Translation2d(1.7, 2.23), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue4 =
+        new PathPointOpen(new Translation2d(1.7, 2.83), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue5 =
+        new PathPointOpen(new Translation2d(1.7, 3.43), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue6 =
+        new PathPointOpen(new Translation2d(1.7, 3.8), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue7 =
+        new PathPointOpen(new Translation2d(1.7, 4.63), Rotation2d.fromDegrees(180));
+    public static final PathPointOpen blue8 =
+        new PathPointOpen(new Translation2d(1.7, 5.23), Rotation2d.fromDegrees(180));
+
+    public static final PathPointOpen red0 =
+        new PathPointOpen(new Translation2d(15.0, 0.52), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red1 =
+        new PathPointOpen(new Translation2d(15.0, 1.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red2 =
+        new PathPointOpen(new Translation2d(15.0, 1.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red3 =
+        new PathPointOpen(new Translation2d(15.0, 2.23), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red4 =
+        new PathPointOpen(new Translation2d(15.0, 2.83), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red5 =
+        new PathPointOpen(new Translation2d(15.0, 3.3), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red6 =
+        new PathPointOpen(new Translation2d(15.0, 4.03), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red7 =
+        new PathPointOpen(new Translation2d(15.0, 4.63), Rotation2d.fromDegrees(0));
+    public static final PathPointOpen red8 =
+        new PathPointOpen(new Translation2d(15.0, 5.23), Rotation2d.fromDegrees(0));
 
     public static final HashMap<String, PathPointOpen> positions = new HashMap<>();
+
     static {
       positions.put("blue0", blue0);
       positions.put("blue1", blue1);
@@ -254,7 +276,9 @@ public final class Constants {
       positions.put("red7", red7);
       positions.put("red8", red8);
     }
+
     public static final List<PathPointOpen> bluePositionsList = new ArrayList<>();
+
     static {
       bluePositionsList.add(blue0);
       bluePositionsList.add(blue1);
@@ -266,7 +290,9 @@ public final class Constants {
       bluePositionsList.add(blue7);
       bluePositionsList.add(blue8);
     }
-    public static final List<PathPointOpen > redPositionsList = new ArrayList<>();
+
+    public static final List<PathPointOpen> redPositionsList = new ArrayList<>();
+
     static {
       redPositionsList.add(red0);
       redPositionsList.add(red1);
@@ -279,8 +305,9 @@ public final class Constants {
       redPositionsList.add(red8);
     }
   }
+
   public static final class ScoringLEDs {
-    public static final Color8Bit goal0 = new Color8Bit(255, 0, 0); //same for red and blue goals
+    public static final Color8Bit goal0 = new Color8Bit(255, 0, 0); // same for red and blue goals
     public static final Color8Bit goal1 = new Color8Bit(255, 125, 0);
     public static final Color8Bit goal2 = new Color8Bit(255, 255, 0);
     public static final Color8Bit goal3 = new Color8Bit(0, 255, 0);
@@ -288,11 +315,12 @@ public final class Constants {
     public static final Color8Bit goal5 = new Color8Bit(0, 0, 255);
     public static final Color8Bit goal6 = new Color8Bit(125, 0, 255);
     public static final Color8Bit goal7 = new Color8Bit(255, 0, 255);
-    public static final Color8Bit goal8 = new Color8Bit(255, 128, 84); //this color was handpicked by ava "design lead" grochowski
-
+    public static final Color8Bit goal8 =
+        new Color8Bit(255, 128, 84); // this color was handpicked by ava "design lead" grochowski
   }
-  
+
   public static final HashMap<PathPointOpen, Color8Bit> lights = new HashMap<>();
+
   static {
     lights.put(ScoringPositions.blue0, ScoringLEDs.goal0);
     lights.put(ScoringPositions.blue1, ScoringLEDs.goal1);
@@ -314,76 +342,83 @@ public final class Constants {
     lights.put(ScoringPositions.red7, ScoringLEDs.goal7);
     lights.put(ScoringPositions.red8, ScoringLEDs.goal8);
   }
-  public static final PathPointOpen blueSubstation = new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));
-  public static final PathPointOpen redSubstation = new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));
-  
+
+  public static final PathPointOpen blueSubstation =
+      new PathPointOpen(new Translation2d(0.85, 7.45), Rotation2d.fromDegrees(0));
+  public static final PathPointOpen redSubstation =
+      new PathPointOpen(new Translation2d(15.7, 7.45), Rotation2d.fromDegrees(0));
+
   public static final class ElevatorConstants {
     public static final int elevatorMotorID = 25;
     public static final int elevatorFollowerID = 26;
     public static final int elevatorLimitSwitchID = 0;
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
-    public static final ElevatorFeedforward feedforward = new ElevatorFeedforward(1.0e-2, 0.07, 0.01);
-    public static final TrapezoidProfile.Constraints elevatorConstraints = new TrapezoidProfile.Constraints(60.0,40.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(0.2/7, 0.0, 0.0139/2, elevatorConstraints);
-        static {
-          PIDController.setTolerance(
-            0.7, //TODO: is this good?
-            0.5);
-        }
+    public static final ElevatorFeedforward feedforward =
+        new ElevatorFeedforward(1.0e-2, 0.07, 0.01);
+    public static final TrapezoidProfile.Constraints elevatorConstraints =
+        new TrapezoidProfile.Constraints(60.0, 40.0);
+    public static final ProfiledPIDController PIDController =
+        new ProfiledPIDController(0.2 / 7, 0.0, 0.0139 / 2, elevatorConstraints);
 
-    public static final LinearSystem<N2, N1, N1> elevatorPlant = LinearSystemId.createElevatorSystem(
-      DCMotor.getFalcon500(2), 
-      Units.lbsToKilograms(7.5), 
-      1.75, // Do we need to multiple b/c cascading elevator?
-      elevatorGearRatio);
+    static {
+      PIDController.setTolerance(
+          0.7, // TODO: is this good?
+          0.5);
+    }
 
-    public static final KalmanFilter<N2, N1, N1> elevatorEstimator = 
-      new KalmanFilter<>(
-        Nat.N2(),
-        Nat.N1(),
-        elevatorPlant,
-        VecBuilder.fill(2, 40), // How accurate we
-        // think our model is, in inches and inches/second.
-        VecBuilder.fill(0.001), // How accurate we think our encoder position
-        // data is. In this case we very highly trust our encoder position reading.
-        0.020);
+    public static final LinearSystem<N2, N1, N1> elevatorPlant =
+        LinearSystemId.createElevatorSystem(
+            DCMotor.getFalcon500(2),
+            Units.lbsToKilograms(7.5),
+            1.75, // Do we need to multiple b/c cascading elevator?
+            elevatorGearRatio);
 
-    public static final LinearQuadraticRegulator<N2, N1, N1> elevatorController = 
+    public static final KalmanFilter<N2, N1, N1> elevatorEstimator =
+        new KalmanFilter<>(
+            Nat.N2(),
+            Nat.N1(),
+            elevatorPlant,
+            VecBuilder.fill(2, 40), // How accurate we
+            // think our model is, in inches and inches/second.
+            VecBuilder.fill(0.001), // How accurate we think our encoder position
+            // data is. In this case we very highly trust our encoder position reading.
+            0.020);
+
+    public static final LinearQuadraticRegulator<N2, N1, N1> elevatorController =
         new LinearQuadraticRegulator<>(
-          elevatorPlant, VecBuilder.fill(1.0, 10.0), // qelms. Position
-          // and velocity error tolerances, in inches and inches per second. Decrease this to more
-          // heavily penalize state excursion, or make the controller behave more aggressively.
-          VecBuilder.fill(12.0), // relms. Control effort (voltage) tolerance. Decrease this to more
-          // heavily penalize control effort, or make the controller less aggressive. 12 is a good
-          // starting point because that is the (approximate) maximum voltage of a battery.
-          0.020);
-    
-    public static final LinearSystemLoop<N2, N1, N1> elevatorLoop = 
-      new LinearSystemLoop<>(
-        elevatorPlant, 
-        elevatorController, 
-        elevatorEstimator, 
-        12.0, 
-        0.020);
+            elevatorPlant,
+            VecBuilder.fill(1.0, 10.0), // qelms. Position
+            // and velocity error tolerances, in inches and inches per second. Decrease this to more
+            // heavily penalize state excursion, or make the controller behave more aggressively.
+            VecBuilder.fill(
+                12.0), // relms. Control effort (voltage) tolerance. Decrease this to more
+            // heavily penalize control effort, or make the controller less aggressive. 12 is a good
+            // starting point because that is the (approximate) maximum voltage of a battery.
+            0.020);
+
+    public static final LinearSystemLoop<N2, N1, N1> elevatorLoop =
+        new LinearSystemLoop<>(elevatorPlant, elevatorController, elevatorEstimator, 12.0, 0.020);
 
     public static final double elevatorAngleRad = Math.toRadians(41);
     public static final double maxExtensionInches = 49.5;
-    public static final Translation2d elevatorOffset = new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
+    public static final Translation2d elevatorOffset =
+        new Translation2d(-5.1, 13.6); // TODO: find actual numbers for this
     // Positions that the end effector needs to be in to score
     // TODO: tune
-    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0); 
-    //x is distance forward from robot center, y is distance up from floor
+    public static final Translation2d l1Translation = new Translation2d(20.0, 12.0);
+    // x is distance forward from robot center, y is distance up from floor
 
     public static final Translation2d l2TranslationCones = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCones = new Translation2d(50.0, 46.0);
-    
+
     public static final Translation2d l2TranslationCubes = new Translation2d(34.0, 34.0);
     public static final Translation2d l3TranslationCubes = new Translation2d(50.0, 44.0);
 
-    public static final Translation2d humanPlayerTranslation = new Translation2d(30, 37.325); // TODO: Find i dont think the yval is right??
+    public static final Translation2d humanPlayerTranslation =
+        new Translation2d(30, 37.325); // TODO: Find i dont think the yval is right??
 
-    public static final Translation2d defaultPosition = new Translation2d(5, -5); //TODO: Find
+    public static final Translation2d defaultPosition = new Translation2d(5, -5); // TODO: Find
 
     public static final Constraints elevatorArmSystemConstraints = new Constraints(10.0, 10.0);
     public static final double elevatorSpoolCircumference = 1.751 * Math.PI;
@@ -395,20 +430,24 @@ public final class Constants {
     // TODO: Check with actual robot
     public static final double armGearRatio = (12.0 / 18.0) * (1.0 / 45.0) * (1.0 / 1.0);
     public static final ArmFeedforward feedforward = new ArmFeedforward(0.0, 0.0, 0.0);
-    public static final TrapezoidProfile.Constraints armConstraints = new TrapezoidProfile.Constraints(3.0,4.0);
-    public static final ProfiledPIDController PIDController = new ProfiledPIDController(-1.2, 0.0, 0.0, armConstraints);
+    public static final TrapezoidProfile.Constraints armConstraints =
+        new TrapezoidProfile.Constraints(3.0, 4.0);
+    public static final ProfiledPIDController PIDController =
+        new ProfiledPIDController(-1.2, 0.0, 0.0, armConstraints);
+
     static {
       PIDController.setTolerance(
-        0.1, //TODO: is this good?
-        0.2);
+          0.1, // TODO: is this good?
+          0.2);
     }
+
     public static final double armLengthInches = 12.5;
     public static final double armOffset = 1.1; // encoder native
 
     public static final double armMinimumAngle = -0.8;
     public static final double armMaximumAngle = -0.05;
   }
-  
+
   /** Constants for simple mechanisms like intake, routing, grabber */
   public static final class MechanismConstants {
     public static final int intakeID = 20;
@@ -440,13 +479,13 @@ public final class Constants {
 
   public static final class LEDConstants {
     public static final int ledPort = 1;
-    public static final int ledLength = 140; //TODO: find
+    public static final int ledLength = 140; // TODO: find
 
     public static final Color8Bit defaultColor = new Color8Bit(58 / 2, 11 / 2, 110 / 2);
   }
 
   public static final class ScoringLevels {
-    public static final double topConeLevel = 46; //this is in inches
+    public static final double topConeLevel = 46; // this is in inches
     public static final double topCubeLevel = 47;
     public static final double midConeLevel = 31.0;
     public static final double midCubeLevel = 29.75;
@@ -455,18 +494,20 @@ public final class Constants {
     public static final double chuteLevel = 16.0;
   }
 
-  public static final double humanPlayerLevel = 40.5; //or substation idk what we're calling them
-  
+  public static final double humanPlayerLevel = 40.5; // or substation idk what we're calling them
+
   /** Logging Frequency in Seconds */
   public static final double LOGGING_FREQUENCY = 0.1;
 
   /** For 5026 vision code */
   public static final class Vision {
     public static final double simpleVisionSnapTarget = 20.0;
+
     public static class VisionSource {
       public String name;
       public Transform3d robotToCamera;
-      public VisionSource (String name, Transform3d robotToCamera) {
+
+      public VisionSource(String name, Transform3d robotToCamera) {
         this.name = name;
         this.robotToCamera = robotToCamera;
       }
@@ -477,11 +518,11 @@ public final class Constants {
             new VisionSource(
                 "limelight-right",
                 new Transform3d(
-                  new Translation3d(
-                    Units.inchesToMeters(-8),
-                    Units.inchesToMeters(-9.75), 
-                    Units.inchesToMeters(-22.75)),
-                  new Rotation3d(0, 0, Units.degreesToRadians(-5)))));
+                    new Translation3d(
+                        Units.inchesToMeters(-8),
+                        Units.inchesToMeters(-9.75),
+                        Units.inchesToMeters(-22.75)),
+                    new Rotation3d(0, 0, Units.degreesToRadians(-5)))));
   }
 
   /** For 5026 vision code */
@@ -539,73 +580,75 @@ public final class Constants {
     public static final double DRIVE_TO_POSE_THETA_ERROR_MARGIN_DEGREES = 2;
 
     public static final int MAX_FRAME_FIDS = 4;
-    
+
     public static final List<Set<Integer>> POSSIBLE_FRAME_FID_COMBOS =
         List.of(Set.of(1, 2, 3, 4), Set.of(5, 6, 7, 8));
   }
 
-    // Dimensions for grids and nodes
-    // Stolen from 6328
-    public static final class Grids {
-      // X layout
-      public static final double outerX = Units.inchesToMeters(54.25);
-      public static final double lowX =
-          outerX - (Units.inchesToMeters(14.25) / 2.0); // Centered when under cube nodes
-      public static final double midX = outerX - Units.inchesToMeters(22.75);
-      public static final double highX = outerX - Units.inchesToMeters(39.75);
+  // Dimensions for grids and nodes
+  // Stolen from 6328
+  public static final class Grids {
+    // X layout
+    public static final double outerX = Units.inchesToMeters(54.25);
+    public static final double lowX =
+        outerX - (Units.inchesToMeters(14.25) / 2.0); // Centered when under cube nodes
+    public static final double midX = outerX - Units.inchesToMeters(22.75);
+    public static final double highX = outerX - Units.inchesToMeters(39.75);
 
-      public static final double fieldWidthX = Units.inchesToMeters(655.5);
+    public static final double fieldWidthX = Units.inchesToMeters(655.5);
 
-      // Y layout
-      public static final int nodeRowCount = 9;
-      public static final double[] nodeY =
-          new double[] {
-                Units.inchesToMeters(20.19 + 22.0 * 0),
-                Units.inchesToMeters(20.19 + 22.0 * 1),
-                Units.inchesToMeters(20.19 + 22.0 * 2),
-                Units.inchesToMeters(20.19 + 22.0 * 3),
-                Units.inchesToMeters(20.19 + 22.0 * 4),
-                Units.inchesToMeters(20.19 + 22.0 * 5),
-                Units.inchesToMeters(20.19 + 22.0 * 6),
-                Units.inchesToMeters(20.19 + 22.0 * 7),
-                Units.inchesToMeters(20.19 + 22.0 * 8)
-              };
-  
-      // Z layout
-      public static final double cubeEdgeHigh = Units.inchesToMeters(3.0);
-      public static final double highCubeZ = Units.inchesToMeters(35.5) - cubeEdgeHigh;
-      public static final double midCubeZ = Units.inchesToMeters(23.5) - cubeEdgeHigh;
-      public static final double highConeZ = Units.inchesToMeters(46.0);
-      public static final double midConeZ = Units.inchesToMeters(34.0);
-  
-      // Translations (all nodes in the same column/row have the same X/Y coordinate)
-      public static final Translation2d[] lowTranslations = new Translation2d[nodeRowCount * 2];
-      public static final Translation3d[] low3dTranslations = new Translation3d[nodeRowCount * 2];
-      public static final Translation2d[] midTranslations = new Translation2d[nodeRowCount * 2];
-      public static final Translation3d[] mid3dTranslations = new Translation3d[nodeRowCount * 2];
-      public static final Translation2d[] highTranslations = new Translation2d[nodeRowCount * 2];
-      public static final Translation3d[] high3dTranslations = new Translation3d[nodeRowCount * 2];
-  
-      static {
-        for (int i = 0; i < nodeRowCount; i++) {
-          boolean isCube = i == 1 || i == 4 || i == 7;
-          lowTranslations[i] = new Translation2d(lowX, nodeY[i]);
-          low3dTranslations[i] = new Translation3d(lowX, nodeY[i], 0.0);
-          midTranslations[i] = new Translation2d(midX, nodeY[i]);
-          mid3dTranslations[i] = new Translation3d(midX, nodeY[i], isCube ? midCubeZ : midConeZ);
-          highTranslations[i] = new Translation2d(highX, nodeY[i]);
-          high3dTranslations[i] = new Translation3d(highX, nodeY[i], isCube ? highCubeZ : highConeZ);
-        }
+    // Y layout
+    public static final int nodeRowCount = 9;
+    public static final double[] nodeY =
+        new double[] {
+          Units.inchesToMeters(20.19 + 22.0 * 0),
+          Units.inchesToMeters(20.19 + 22.0 * 1),
+          Units.inchesToMeters(20.19 + 22.0 * 2),
+          Units.inchesToMeters(20.19 + 22.0 * 3),
+          Units.inchesToMeters(20.19 + 22.0 * 4),
+          Units.inchesToMeters(20.19 + 22.0 * 5),
+          Units.inchesToMeters(20.19 + 22.0 * 6),
+          Units.inchesToMeters(20.19 + 22.0 * 7),
+          Units.inchesToMeters(20.19 + 22.0 * 8)
+        };
 
-        for (int i = nodeRowCount; i < 2 * nodeRowCount; i++) {
-          boolean isCube = i == 1 || i == 4 || i == 7;
-          lowTranslations[i] = new Translation2d(fieldWidthX - lowX, nodeY[i - 9]);
-          low3dTranslations[i] = new Translation3d(fieldWidthX - lowX, nodeY[i - 9], 0.0);
-          midTranslations[i] = new Translation2d(fieldWidthX - midX, nodeY[i - 9]);
-          mid3dTranslations[i] = new Translation3d(fieldWidthX - midX, nodeY[i - 9], isCube ? midCubeZ : midConeZ);
-          highTranslations[i] = new Translation2d(fieldWidthX - highX, nodeY[i - 9]);
-          high3dTranslations[i] = new Translation3d(fieldWidthX - highX, nodeY[i - 9], isCube ? highCubeZ : highConeZ);
-        }
+    // Z layout
+    public static final double cubeEdgeHigh = Units.inchesToMeters(3.0);
+    public static final double highCubeZ = Units.inchesToMeters(35.5) - cubeEdgeHigh;
+    public static final double midCubeZ = Units.inchesToMeters(23.5) - cubeEdgeHigh;
+    public static final double highConeZ = Units.inchesToMeters(46.0);
+    public static final double midConeZ = Units.inchesToMeters(34.0);
+
+    // Translations (all nodes in the same column/row have the same X/Y coordinate)
+    public static final Translation2d[] lowTranslations = new Translation2d[nodeRowCount * 2];
+    public static final Translation3d[] low3dTranslations = new Translation3d[nodeRowCount * 2];
+    public static final Translation2d[] midTranslations = new Translation2d[nodeRowCount * 2];
+    public static final Translation3d[] mid3dTranslations = new Translation3d[nodeRowCount * 2];
+    public static final Translation2d[] highTranslations = new Translation2d[nodeRowCount * 2];
+    public static final Translation3d[] high3dTranslations = new Translation3d[nodeRowCount * 2];
+
+    static {
+      for (int i = 0; i < nodeRowCount; i++) {
+        boolean isCube = i == 1 || i == 4 || i == 7;
+        lowTranslations[i] = new Translation2d(lowX, nodeY[i]);
+        low3dTranslations[i] = new Translation3d(lowX, nodeY[i], 0.0);
+        midTranslations[i] = new Translation2d(midX, nodeY[i]);
+        mid3dTranslations[i] = new Translation3d(midX, nodeY[i], isCube ? midCubeZ : midConeZ);
+        highTranslations[i] = new Translation2d(highX, nodeY[i]);
+        high3dTranslations[i] = new Translation3d(highX, nodeY[i], isCube ? highCubeZ : highConeZ);
+      }
+
+      for (int i = nodeRowCount; i < 2 * nodeRowCount; i++) {
+        boolean isCube = i == 1 || i == 4 || i == 7;
+        lowTranslations[i] = new Translation2d(fieldWidthX - lowX, nodeY[i - 9]);
+        low3dTranslations[i] = new Translation3d(fieldWidthX - lowX, nodeY[i - 9], 0.0);
+        midTranslations[i] = new Translation2d(fieldWidthX - midX, nodeY[i - 9]);
+        mid3dTranslations[i] =
+            new Translation3d(fieldWidthX - midX, nodeY[i - 9], isCube ? midCubeZ : midConeZ);
+        highTranslations[i] = new Translation2d(fieldWidthX - highX, nodeY[i - 9]);
+        high3dTranslations[i] =
+            new Translation3d(fieldWidthX - highX, nodeY[i - 9], isCube ? highCubeZ : highConeZ);
       }
     }
+  }
 }
