@@ -107,12 +107,12 @@
     },
     {
       "anchorPoint": {
-        "x": 3.3881757989079895,
-        "y": 4.249218423248878
+        "x": 4.241871199791783,
+        "y": 4.0545379856191825
       },
       "prevControl": {
-        "x": 3.820129444770167,
-        "y": 4.239172989624176
+        "x": 4.715004851897752,
+        "y": 4.051895909964661
       },
       "nextControl": null,
       "holonomicAngle": 180.0,
@@ -122,8 +122,8 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [],
-        "executionBehavior": "sequential",
-        "waitBehavior": "after",
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
         "waitTime": 2.0
       }
     }
@@ -145,7 +145,7 @@
       ]
     },
     {
-      "position": 3.8,
+      "position": 3.6,
       "names": [
         "Outake Cube Ground"
       ]

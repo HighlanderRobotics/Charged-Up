@@ -94,6 +94,10 @@ public class AutoChooser {
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
           .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
+        eventMap.put("Score L2 No Aim No Wait",
+        new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
+          .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
+          .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
         eventMap.put("Score L2 No Aim Cube", 
           new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, false))
           .alongWith(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
