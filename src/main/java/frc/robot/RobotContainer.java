@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
-import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.GreybotsGrabberSubsystem;
 import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
 import frc.robot.subsystems.IntakeSubsystem;
