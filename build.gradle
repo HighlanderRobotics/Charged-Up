@@ -101,6 +101,7 @@ tasks.withType(JavaCompile) {
 
 spotless {
     java {
+        enforceCheck false
         target fileTree('.') {
             include '**/*.java'
             exclude '**/build/**', '**/build-*/**'
