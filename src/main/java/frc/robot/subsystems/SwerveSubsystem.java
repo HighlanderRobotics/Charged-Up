@@ -42,14 +42,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.PathPointOpen;
 import frc.robot.SwerveModule;
 import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
-import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -563,23 +561,23 @@ public class SwerveSubsystem extends SubsystemBase {
     // Log swerve module information
     // May want to disable to conserve bandwidth
     // for(SwerveModule mod : mSwerveMods){
-    //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Cancoder",
+    //     //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Cancoder",
     // mod.getCanCoder().getDegrees());
-    //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Integrated",
+    //     //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Integrated",
     // mod.getPosition().angle.getDegrees());
-    //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Velocity",
+    //     //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Velocity",
     // mod.getState().speedMetersPerSecond);
     // }
 
-    LoggingWrapper.shared.add("Heading", getYaw().getDegrees());
+    // LoggingWrapper.shared.add("Heading", getYaw().getDegrees());
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
     field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
     field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
     // field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
     dashboardFieldVisionPoses.clear();
-    LoggingWrapper.shared.add("field", field);
-    LoggingWrapper.shared.add("Has reset", hasResetOdometry);
+    // LoggingWrapper.shared.add("field", field);
+    // LoggingWrapper.shared.add("Has reset", hasResetOdometry);
     dashboardFieldTapePoses.clear();
     SmartDashboard.putData(field);
     SmartDashboard.putBoolean("Has reset", hasResetOdometry);
@@ -590,23 +588,23 @@ public class SwerveSubsystem extends SubsystemBase {
     // getNearestGoal();
     // getPathToPoint(getNearestGoal());
 
-    LoggingWrapper.shared.add("x error", Constants.AutoConstants.xController.getPositionError());
-    LoggingWrapper.shared.add("y error", Constants.AutoConstants.yController.getPositionError());
-    LoggingWrapper.shared.add("x goal", Constants.AutoConstants.xController.getGoal().position);
-    LoggingWrapper.shared.add("Y goal", Constants.AutoConstants.yController.getGoal().position);
-    LoggingWrapper.shared.add("Heading goal", headingController.getGoal().position);
-    LoggingWrapper.shared.add("Heading error", headingController.getPositionError());
-    LoggingWrapper.shared.add("total error", getNearestGoalDistance());
-    LoggingWrapper.shared.add("is cone goal", nearestGoalIsCone);
-    LoggingWrapper.shared.add("extension requested", getExtension(ScoringLevels.L2, true));
-    LoggingWrapper.shared.add("alliance", DriverStation.getAlliance().toString());
-    LoggingWrapper.shared.add("gyro roll", gyro.getRoll());
-    LoggingWrapper.shared.add("gyro pitch", gyro.getPitch());
-    LoggingWrapper.shared.add("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
-    LoggingWrapper.shared.add(
-        "balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
-    LoggingWrapper.shared.add("is in tape mode", isInTapeMode);
-    LoggingWrapper.shared.add("should lock out", lockOutSwerve);
+    // LoggingWrapper.shared.add("x error", Constants.AutoConstants.xController.getPositionError());
+    // LoggingWrapper.shared.add("y error", Constants.AutoConstants.yController.getPositionError());
+    // LoggingWrapper.shared.add("x goal", Constants.AutoConstants.xController.getGoal().position);
+    // LoggingWrapper.shared.add("Y goal", Constants.AutoConstants.yController.getGoal().position);
+    // LoggingWrapper.shared.add("Heading goal", headingController.getGoal().position);
+    // LoggingWrapper.shared.add("Heading error", headingController.getPositionError());
+    // LoggingWrapper.shared.add("total error", getNearestGoalDistance());
+    // LoggingWrapper.shared.add("is cone goal", nearestGoalIsCone);
+    // LoggingWrapper.shared.add("extension requested", getExtension(ScoringLevels.L2, true));
+    // LoggingWrapper.shared.add("alliance", DriverStation.getAlliance().toString());
+    // LoggingWrapper.shared.add("gyro roll", gyro.getRoll());
+    // LoggingWrapper.shared.add("gyro pitch", gyro.getPitch());
+    // LoggingWrapper.shared.add("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
+    // LoggingWrapper.shared.add(
+    // "balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
+    // LoggingWrapper.shared.add("is in tape mode", isInTapeMode);
+    // LoggingWrapper.shared.add("should lock out", lockOutSwerve);
     pose = getPose();
     nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
     double filteredRoll = rollFilter.calculate(gyro.getRoll());

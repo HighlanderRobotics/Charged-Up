@@ -9,7 +9,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.components.HighlanderFalcon;
-import frc.lib.logging.LoggingWrapper;
 import frc.lib.math.Conversions;
 import frc.lib.util.CTREModuleState;
 import frc.lib.util.SwerveModuleConstants;
@@ -46,8 +45,8 @@ public class SwerveModule {
   public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
     /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
     desiredState = CTREModuleState.optimize(desiredState, getState().angle);
-    LoggingWrapper.shared.add(moduleNumber + " targ rot", desiredState.angle.getDegrees());
-    LoggingWrapper.shared.add(moduleNumber + " targ speed", desiredState.speedMetersPerSecond);
+    // LoggingWrapper.shared.add(moduleNumber + " targ rot", desiredState.angle.getDegrees());
+    // LoggingWrapper.shared.add(moduleNumber + " targ speed", desiredState.speedMetersPerSecond);
     setAngle(desiredState);
     setSpeed(desiredState, isOpenLoop);
   }

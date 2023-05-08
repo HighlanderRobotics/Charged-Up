@@ -6,14 +6,11 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
@@ -26,9 +23,11 @@ import frc.robot.subsystems.SwerveSubsystem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public class AutoChooser {
-  SendableChooser<Supplier<Command>> chooser = new SendableChooser<Supplier<Command>>();
+  LoggedDashboardChooser<Supplier<Command>> chooser =
+      new LoggedDashboardChooser<Supplier<Command>>("Auto Chooser");
   SwerveSubsystem swerveSubsystem;
   IntakeSubsystem intakeSubsystem;
   ElevatorSubsystem elevatorSubsystem;
@@ -51,31 +50,6 @@ public class AutoChooser {
     this.routingSubsystem = routingSubsystem;
 
     eventMap.put("Rezero Grabber", greybotsGrabberSubsystem.resetPivotCommand().asProxy());
-    eventMap.put(
-        "Score",
-        new ScoringCommand(
-                ScoringLevels.L3,
-                () -> 0,
-                elevatorSubsystem,
-                swerveSubsystem,
-                greybotsGrabberSubsystem,
-                superstructureSubsystem)
-            .asProxy()
-            .andThen(
-                new InstantCommand(() -> elevatorSubsystem.getDefaultCommand().schedule()),
-                new PrintCommand("bbbbbbbb"),
-                new InstantCommand(() -> {}, swerveSubsystem),
-                new WaitCommand(1.0),
-                new PrintCommand("ccccccccccccccccccccccc")));
-    eventMap.put(
-        "Score L3",
-        new ScoringCommand(
-            ScoringLevels.L3,
-            () -> 0,
-            elevatorSubsystem,
-            swerveSubsystem,
-            greybotsGrabberSubsystem,
-            superstructureSubsystem));
     eventMap.put(
         "Score No Aim",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
@@ -172,7 +146,7 @@ public class AutoChooser {
                     swerveSubsystem.drive(new Translation2d(), 0, false, false, false)));
     eventMap.put("Zero Elevator", elevatorSubsystem.zeroElevator());
 
-    chooser.setDefaultOption("none", () -> new InstantCommand(() -> {}));
+    chooser.addDefaultOption("none", () -> new InstantCommand(() -> {}));
     // "Two Cone Auto",
     // new TwoConeAuto(swerveSubsystem, intakeSubsystem));
     chooser.addOption("2 + Charge Flat", () -> twoParkTop());
@@ -197,7 +171,7 @@ public class AutoChooser {
                     new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
                 .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
 
-    LoggingWrapper.shared.add("autoChooser", chooser);
+    // LoggingWrapper.shared.add("autoChooser", chooser);
 
     // List<PathPlannerTrajectory> twoConeGroup = PathPlanner.loadPathGroup
     // ("TwoCone", new PathConstraints(4, 3));
@@ -205,7 +179,7 @@ public class AutoChooser {
   }
 
   public Command getAutoCommand() {
-    return chooser.getSelected().get();
+    return chooser.get().get();
   }
 
   private Command apriltagsTest() {

@@ -25,9 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
-import frc.robot.commands.ScoringCommand;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
 import frc.robot.subsystems.GreybotsGrabberSubsystem;
 import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -88,7 +86,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    LoggingWrapper.shared.add("autoBalance", swerveSubsystem.autoBalance());
+    // LoggingWrapper.shared.add("autoBalance", swerveSubsystem.autoBalance());
     // Set default commands here
     swerveSubsystem.setDefaultCommand(
         swerveSubsystem.driveCommand(
@@ -134,7 +132,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureBindings();
     // Add testing buttons to dashboard
-    addDashboardCommands();
+    // addDashboardCommands();
   }
 
   /**
@@ -431,6 +429,8 @@ public class RobotContainer {
             .withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
 
+  // Uses old logging system
+  @Deprecated
   private void addDashboardCommands() {
 
     LoggingWrapper.shared.add("intake toggle", intakeSubsystem.extendCommand());
@@ -450,16 +450,6 @@ public class RobotContainer {
 
     LoggingWrapper.shared.add(
         "rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
-
-    LoggingWrapper.shared.add(
-        "scoring sequence",
-        new ScoringCommand(
-            ScoringLevels.L3,
-            () -> 0,
-            elevatorSubsystem,
-            swerveSubsystem,
-            greybotsGrabberSubsystem,
-            superstructureSubsystem));
 
     LoggingWrapper.shared.add(
         "Rezero Grabber",

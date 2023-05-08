@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import java.io.File;
 import java.util.function.DoubleSupplier;
@@ -82,8 +81,8 @@ public class LEDSubsystem extends SubsystemBase {
   public void setNoise(Color8Bit colorA, Color8Bit colorB, int value) {
     try {
       var image = ImageIO.read(new File(Filesystem.getDeployDirectory() + "/ledNoise.png"));
-      LoggingWrapper.shared.add("huh", value);
-      LoggingWrapper.shared.add("test color", (image.getRGB(value, 0) & 0xFF) / 255.0);
+      // LoggingWrapper.shared.add("huh", value);
+      // LoggingWrapper.shared.add("test color", (image.getRGB(value, 0) & 0xFF) / 255.0);
       for (int i = 0; i < buffer.getLength(); i++) {
         double t = (image.getRGB(value, i) & 0xFF) / 255.0;
         buffer.setRGB(i, (int) (colorA.red * t), (int) (colorA.green * t), (int) (colorA.blue * t));
