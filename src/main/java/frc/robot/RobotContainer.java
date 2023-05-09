@@ -28,7 +28,7 @@ import frc.robot.commands.AutoChooser;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.GreybotsGrabberSubsystem;
 import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
-import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
