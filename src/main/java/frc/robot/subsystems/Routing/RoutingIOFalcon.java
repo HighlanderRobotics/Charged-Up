@@ -10,14 +10,14 @@ import frc.robot.Constants;
 
 /** Add your docs here. */
 public class RoutingIOFalcon implements RoutingIO {
-  HighlanderFalcon routingLeft =
+  HighlanderFalcon left =
       new HighlanderFalcon(
           Constants.MechanismConstants.routingLeftID,
           1.0,
           Constants.MechanismConstants.routingKP,
           0,
           0);
-  HighlanderFalcon routingRight =
+  HighlanderFalcon right =
       new HighlanderFalcon(
           Constants.MechanismConstants.routingRightID,
           1.0,
@@ -26,23 +26,23 @@ public class RoutingIOFalcon implements RoutingIO {
           0);
 
   public RoutingIOFalcon() {
-    routingLeft.setNeutralMode(NeutralMode.Brake);
-    routingRight.setNeutralMode(NeutralMode.Brake);
+    left.setNeutralMode(NeutralMode.Brake);
+    right.setNeutralMode(NeutralMode.Brake);
   }
 
   @Override
   public void updateInputs(RoutingIOInputs input) {
-    input.routingLeftPercentOut = routingLeft.getMotorOutputPercent();
-    input.routingLeftRPS = routingLeft.getSelectedSensorVelocity() * 10.0 / 2048;
-    input.routingRightPercentOut = routingRight.getMotorOutputPercent();
-    input.routingRightRPS = routingRight.getSelectedSensorVelocity() * 10.0 / 2048;
-    input.intakeCurrentAmps =
-        new double[] {routingLeft.getStatorCurrent(), routingRight.getStatorCurrent()};
+    input.leftPercentOut = left.getMotorOutputPercent();
+    input.speedLeftRPS = left.getSelectedSensorVelocity() * 10.0 / 2048;
+    input.leftCurrentAmps = left.getStatorCurrent();
+    input.rightPercentOut = right.getMotorOutputPercent();
+    input.speedRightRPS = right.getSelectedSensorVelocity() * 10.0 / 2048;
+    input.rightCurrentAmps = right.getStatorCurrent();
   }
 
   @Override
   public void setPercentOut(double percentOut) {
-    routingLeft.setPercentOut(percentOut);
-    routingRight.setPercentOut(-percentOut);
+    left.setPercentOut(percentOut);
+    right.setPercentOut(-percentOut);
   }
 }

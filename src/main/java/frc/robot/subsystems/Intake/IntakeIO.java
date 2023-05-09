@@ -11,9 +11,9 @@ public interface IntakeIO {
   @AutoLog
   public static class IntakeIOInputs {
     public boolean isExtended = false;
-    public double intakeRPS = 0.0;
-    public double intakePercentOut = 0.0;
-    public double intakeCurrentAmps = 0.0;
+    public double speedRPS = 0.0;
+    public double percentOut = 0.0;
+    public double currentAmps = 0.0;
   }
 
   public default void updateInputs(IntakeIOInputs input) {}

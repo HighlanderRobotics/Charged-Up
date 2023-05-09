@@ -26,9 +26,9 @@ public class IntakeIOFalcon implements IntakeIO {
   @Override
   public void updateInputs(IntakeIOInputs input) {
     input.isExtended = isExtended;
-    input.intakePercentOut = motor.getMotorOutputPercent();
-    input.intakeRPS = motor.getSelectedSensorVelocity() * 10 / 2048;
-    input.intakeCurrentAmps = motor.getStatorCurrent();
+    input.percentOut = motor.getMotorOutputPercent();
+    input.speedRPS = motor.getSelectedSensorVelocity() * 10 / 2048;
+    input.currentAmps = motor.getStatorCurrent();
   }
 
   @Override

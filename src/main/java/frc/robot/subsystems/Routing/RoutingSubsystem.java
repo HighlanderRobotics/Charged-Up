@@ -13,7 +13,6 @@ public class RoutingSubsystem extends SubsystemBase {
   RoutingIOFalcon io;
   RoutingIOInputs inputs;
 
-  // TODO: talk to routing subteam about logic and stuff
   /** Creates a new RoutingSubsystem. */
   public RoutingSubsystem() {
     io = new RoutingIOFalcon();
@@ -32,7 +31,7 @@ public class RoutingSubsystem extends SubsystemBase {
     io.setPercentOut(0.0);
   }
 
-  public CommandBase runCommand() { // TODO: this is probably the wrong logic, so fix
+  public CommandBase runCommand() {
     return new RunCommand(() -> run(), this).handleInterrupt(() -> stop());
   }
 

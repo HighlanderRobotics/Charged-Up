@@ -10,11 +10,12 @@ import org.littletonrobotics.junction.AutoLog;
 public interface RoutingIO {
   @AutoLog
   public static class RoutingIOInputs {
-    public double routingLeftRPS = 0.0;
-    public double routingLeftPercentOut = 0.0;
-    public double routingRightRPS = 0.0;
-    public double routingRightPercentOut = 0.0;
-    public double[] intakeCurrentAmps = new double[] {0, 0};
+    public double speedLeftRPS = 0.0;
+    public double leftPercentOut = 0.0;
+    public double leftCurrentAmps = 0.0;
+    public double speedRightRPS = 0.0;
+    public double rightPercentOut = 0.0;
+    public double rightCurrentAmps = 0.0;
   }
 
   public default void updateInputs(RoutingIOInputs input) {}
