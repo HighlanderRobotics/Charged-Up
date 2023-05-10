@@ -2,30 +2,27 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import frc.robot.Constants.PoseEstimator;
 import frc.robot.Constants.Vision;
+import frc.robot.subsystems.Vision.VisionIO.VisionMeasurement;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.targeting.PhotonPipelineResult;
 
-public class ApriltagVisionSubsystem {
+public class VisionIOApriltags implements VisionIO {
   private class CameraEstimator {
     public PhotonPoseEstimator estimator;
     public PhotonCamera camera;
@@ -51,7 +48,7 @@ public class ApriltagVisionSubsystem {
   private double lastDetection = 0;
 
   /** Creates a new VisionSubsystem. */
-  public ApriltagVisionSubsystem() {
+  public VisionIOApriltags() {
     // loading the 2023 field arrangement
     try {
       fieldLayout =
@@ -81,16 +78,6 @@ public class ApriltagVisionSubsystem {
           () -> String.format("%3.0f seconds", Timer.getFPGATimestamp() - lastDetection));
   }
 
-  public static class VisionMeasurement {
-    public EstimatedRobotPose estimation;
-    public Matrix<N3, N1> confidence;
-
-    public VisionMeasurement(EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {
-      this.estimation = estimation;
-      this.confidence = confidence;
-    }
-  }
-
   private static boolean ignoreFrame(PhotonPipelineResult frame) {
     if (!frame.hasTargets() || frame.getTargets().size() > PoseEstimator.MAX_FRAME_FIDS)
       return true;
@@ -105,7 +92,8 @@ public class ApriltagVisionSubsystem {
     return !possibleCombination;
   }
 
-  public List<VisionMeasurement> getEstimatedGlobalPose(Pose2d prevEstimatedRobotPose) {
+  @Override
+  public List<VisionMeasurement> getMeasurement(Pose2d prevEstimatedRobotPose) {
     if (fieldLayout == null) {
       return List.of();
     }

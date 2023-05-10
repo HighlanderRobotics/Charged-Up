@@ -47,9 +47,10 @@ import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.PathPointOpen;
 import frc.robot.SwerveModule;
-import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.LEDs.LEDSubsystem;
+import frc.robot.subsystems.Vision.VisionIOApriltags;
+import frc.robot.subsystems.Vision.VisionIOTape;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +71,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private boolean isInTapeMode = true;
   private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, -0.01);
 
-  private ApriltagVisionSubsystem apriltagVisionSubsystem = new ApriltagVisionSubsystem();
+  private VisionIOApriltags apriltagVisionSubsystem = new VisionIOApriltags();
   private LinearFilter tapeYawFilter = LinearFilter.singlePoleIIR(0.2, 0.020);
   private double tapeYawFilterVal = 0;
 
@@ -94,8 +95,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public ProfiledPIDController headingController =
       new ProfiledPIDController(1.2, 0, 0.1, new Constraints(Math.PI * 4, Math.PI * 6));
 
-  public TapeVisionSubsystem tapeVisionSubsystem =
-      new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
+  public VisionIOTape tapeVisionSubsystem =
+      new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
 
   public SwerveSubsystem() {
     gyro = new Pigeon2(Constants.Swerve.pigeonID);
@@ -549,10 +550,10 @@ public class SwerveSubsystem extends SubsystemBase {
     pose = poseEstimator.update(getYaw(), getModulePositions());
     wheelOnlyOdo.update(getYaw(), getModulePositions());
 
-    List<VisionMeasurement> visionMeasurements =
-        apriltagVisionSubsystem.getEstimatedGlobalPose(pose);
+    List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
+        apriltagVisionSubsystem.getMeasurement(pose);
 
-    for (VisionMeasurement measurement : visionMeasurements) {
+    for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements) {
       dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
       poseEstimator.addVisionMeasurement(
           measurement.estimation.estimatedPose.toPose2d(),
@@ -613,24 +614,5 @@ public class SwerveSubsystem extends SubsystemBase {
     rollRate = (filteredRoll - lastRoll) / 0.020;
     lastRoll = filteredRoll;
     tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    Pose2d visSimRobotPose =
-        new Pose2d(
-            Units.inchesToMeters((60 + (Timer.getFPGATimestamp() * 15)) % 200),
-            0.513,
-            new Rotation2d(3.3));
-    field.getObject("vis sim robot pose").setPose(visSimRobotPose);
-    tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
-    try {
-      field
-          .getObject("vis sim est pose")
-          .setPoses(tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst());
-    } catch (Exception exception) {
-      field.getObject("vis sim est pose").setPoses();
-    }
-    System.out.print("");
   }
 }

@@ -2,9 +2,8 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems;
+package frc.robot.subsystems.Vision;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,8 +16,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Robot;
+import frc.robot.subsystems.Vision.VisionIO.VisionMeasurement;
 import java.util.ArrayList;
 import java.util.List;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.SimVisionSystem;
 import org.photonvision.SimVisionTarget;
@@ -27,41 +28,18 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** Add your docs here. */
-public class TapeVisionSubsystem {
+public class VisionIOTape implements VisionIO {
   PhotonCamera camera;
   Transform3d cameraToRobot;
 
-  SimVisionSystem simCamera;
-
-  public TapeVisionSubsystem(String cameraName, Transform3d cameraPose) {
+  public VisionIOTape(String cameraName, Transform3d cameraPose) {
     camera = new PhotonCamera(cameraName);
     this.cameraToRobot = cameraPose;
     camera.setLED(VisionLEDMode.kOff);
-
-    simCamera =
-        new SimVisionSystem(
-            cameraName, 77.6, Constants.leftCameraToRobot.inverse(), 4.0, 320, 240, 10);
-
-    for (var target : Constants.Grids.mid3dTranslations) {
-      simCamera.addSimVisionTarget(
-          new SimVisionTarget(
-              new Pose3d(target, new Rotation3d()),
-              Units.inchesToMeters(2.0),
-              Units.inchesToMeters(4.0),
-              -1));
-    }
-
-    // for (var target : Constants.Grids.high3dTranslations) {
-    //     simCamera.addSimVisionTarget(new SimVisionTarget(new Pose3d(target, new Rotation3d()),
-    // Units.inchesToMeters(2.0), Units.inchesToMeters(4.0), -1));
-    // }
-
-    // simCamera.addSimVisionTarget(new SimVisionTarget(new
-    // Pose3d(Constants.Grids.mid3dTranslations[0], new Rotation3d()), Units.inchesToMeters(2.0),
-    // Units.inchesToMeters(4.0), 0));
   }
 
-  public Pair<List<Pose2d>, Double> getEstimatedPoses(Pose2d fieldToRobot) {
+  @Override
+  public List<VisionMeasurement> getMeasurement(Pose2d fieldToRobot) {
     List<Pose2d> result = new ArrayList<>();
     var cameraResult = camera.getLatestResult();
 
@@ -172,7 +150,16 @@ public class TapeVisionSubsystem {
       result.add(new Pose2d(bestPose, fieldToRobot.getRotation()));
     }
 
-    return Pair.of(result, cameraResult.getTimestampSeconds());
+    ArrayList<VisionMeasurement> measurements = new ArrayList<>();
+
+    for (var estimate : result) {
+      measurements.add(new VisionMeasurement( 
+        new EstimatedRobotPose(
+            new Pose3d(estimate), cameraResult.getTimestampSeconds(), List.of()),
+        Constants.PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS));
+    }
+
+    return measurements;
   }
 
   public PhotonPipelineResult getLatestResult() {
@@ -194,9 +181,5 @@ public class TapeVisionSubsystem {
 
   public boolean hasTargets() {
     return camera.getLatestResult().hasTargets();
-  }
-
-  public void updateSimCamera(Pose2d pose) {
-    simCamera.processFrame(pose);
   }
 }
