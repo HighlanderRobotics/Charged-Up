@@ -2,15 +2,12 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
 import frc.robot.subsystems.Vision.VisionIOTape;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -69,7 +66,8 @@ public class TapeVisionTest {
   }
 
   void test(Pose2d visSimRobotPose) {
-    // If we ever get back to this make a sim implementation of VisionIOTape to comply with advantagekit practices
+    // If we ever get back to this make a sim implementation of VisionIOTape to comply with
+    // advantagekit practices
     // tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
     // List<Pose2d> estimatedPoses = tapeVisionSubsystem.getMeasurement(visSimRobotPose).;
     // if (estimatedPoses.size() == 0) {

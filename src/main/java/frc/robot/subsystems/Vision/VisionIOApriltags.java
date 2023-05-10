@@ -13,7 +13,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardLayout;
 import frc.robot.Constants.PoseEstimator;
 import frc.robot.Constants.Vision;
-import frc.robot.subsystems.Vision.VisionIO.VisionMeasurement;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

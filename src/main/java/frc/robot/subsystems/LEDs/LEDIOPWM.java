@@ -26,10 +26,6 @@ public class LEDIOPWM implements LEDIO {
     for (int i = 0; i < buffer.getLength(); i++) {
       inputs.color[i] = buffer.getLED(i);
     }
-  }
-
-  @Override
-  public void updateLEDs() {
     led.setData(buffer);
   }
 

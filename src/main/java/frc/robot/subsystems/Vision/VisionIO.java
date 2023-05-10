@@ -36,8 +36,9 @@ public interface VisionIO {
   }
 
   public default List<VisionMeasurement> getMeasurement(Pose2d previousPose) {
-    return List.of(new VisionMeasurement(
-        new EstimatedRobotPose(new Pose3d(), 0, List.of()),
-        Constants.PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS));
+    return List.of(
+        new VisionMeasurement(
+            new EstimatedRobotPose(new Pose3d(), 0, List.of()),
+            Constants.PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS));
   }
 }

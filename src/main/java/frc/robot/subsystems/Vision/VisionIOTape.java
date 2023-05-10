@@ -7,7 +7,6 @@ package frc.robot.subsystems.Vision;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -16,13 +15,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Robot;
-import frc.robot.subsystems.Vision.VisionIO.VisionMeasurement;
 import java.util.ArrayList;
 import java.util.List;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
-import org.photonvision.SimVisionSystem;
-import org.photonvision.SimVisionTarget;
 import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -153,10 +149,11 @@ public class VisionIOTape implements VisionIO {
     ArrayList<VisionMeasurement> measurements = new ArrayList<>();
 
     for (var estimate : result) {
-      measurements.add(new VisionMeasurement( 
-        new EstimatedRobotPose(
-            new Pose3d(estimate), cameraResult.getTimestampSeconds(), List.of()),
-        Constants.PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS));
+      measurements.add(
+          new VisionMeasurement(
+              new EstimatedRobotPose(
+                  new Pose3d(estimate), cameraResult.getTimestampSeconds(), List.of()),
+              Constants.PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS));
     }
 
     return measurements;

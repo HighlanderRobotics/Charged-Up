@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Swerve;
 
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.pathplanner.lib.PathConstraints;
@@ -25,7 +25,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -46,9 +45,10 @@ import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.PathPointOpen;
-import frc.robot.SwerveModule;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.LEDs.LEDSubsystem;
+import frc.robot.subsystems.Swerve.GyroIO.GyroIOInputs;
+import frc.robot.subsystems.Swerve.SwerveModuleIO.SwerveModuleIOInputs;
 import frc.robot.subsystems.Vision.VisionIOApriltags;
 import frc.robot.subsystems.Vision.VisionIOTape;
 import java.util.ArrayList;
@@ -63,8 +63,10 @@ public class SwerveSubsystem extends SubsystemBase {
   public PIDController yBallanceController = new PIDController(1.0, 0, 0.5);
   public SwerveDrivePoseEstimator poseEstimator;
   public SwerveDriveOdometry wheelOnlyOdo;
-  public SwerveModule[] mSwerveMods;
-  public Pigeon2 gyro;
+  public SwerveModuleIO[] swerveMods;
+  public SwerveModuleIOInputs[] inputs;
+  public GyroIO gyroIO;
+  public GyroIOInputs gyroInputs = new GyroIOInputs();
 
   public Field2d field = new Field2d();
 
@@ -99,20 +101,25 @@ public class SwerveSubsystem extends SubsystemBase {
       new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
 
   public SwerveSubsystem() {
-    gyro = new Pigeon2(Constants.Swerve.pigeonID);
-    gyro.configFactoryDefault();
-    zeroGyro();
+    gyroIO = new GyroIOPigeon();
 
     headingController.enableContinuousInput(0, Math.PI * 2);
     headingController.setTolerance(0.2);
 
-    mSwerveMods =
-        new SwerveModule[] {
-          new SwerveModule(0, Constants.Swerve.Mod0.constants),
-          new SwerveModule(1, Constants.Swerve.Mod1.constants),
-          new SwerveModule(2, Constants.Swerve.Mod2.constants),
-          new SwerveModule(3, Constants.Swerve.Mod3.constants)
+    swerveMods =
+        new SwerveModuleIOFalcon[] {
+          new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
+          new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
+          new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
+          new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
         };
+    
+    inputs = new SwerveModuleIOInputs[] {
+      new SwerveModuleIOInputs(),
+      new SwerveModuleIOInputs(),
+      new SwerveModuleIOInputs(),
+      new SwerveModuleIOInputs()
+    };
 
     /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
      * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
@@ -175,8 +182,8 @@ public class SwerveSubsystem extends SubsystemBase {
                     velTwist.dx / 0.02, velTwist.dy / 0.02, velTwist.dtheta / 0.02));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
-    for (SwerveModule mod : mSwerveMods) {
-      mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
+    for (SwerveModuleIO mod : swerveMods) {
+      mod.setDesiredState(swerveModuleStates[mod.getModuleNumber()], isOpenLoop);
     }
 
     chassisSpeeds = new ChassisSpeeds(velTwist.dx, velTwist.dy, velTwist.dtheta);
@@ -408,10 +415,10 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase autoBalance() {
     return driveCommand(
         () -> {
-          if (gyro.getRoll() > 11.0) {
+          if (gyroIO.getRollDegrees() > 11.0) {
             lockOutSwerve = false;
             return -0.1;
-          } else if (gyro.getRoll() < -11.0) {
+          } else if (gyroIO.getRollDegrees() < -11.0) {
             lockOutSwerve = false;
             return 0.1;
           } else {
@@ -434,8 +441,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
 
-    for (SwerveModule mod : mSwerveMods) {
-      mod.setDesiredState(desiredStates[mod.moduleNumber], false);
+    for (SwerveModuleIO mod : swerveMods) {
+      mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
     }
   }
 
@@ -459,8 +466,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
-    for (SwerveModule mod : mSwerveMods) {
-      states[mod.moduleNumber] = mod.getState();
+    for (SwerveModuleIO mod : swerveMods) {
+      states[mod.getModuleNumber()] = mod.getState();
     }
     return states;
   }
@@ -470,8 +477,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
-    for (SwerveModule mod : mSwerveMods) {
-      positions[mod.moduleNumber] = mod.getPosition();
+    for (SwerveModuleIO mod : swerveMods) {
+      positions[mod.getModuleNumber()] = mod.getPosition();
     }
     return positions;
   }
@@ -483,7 +490,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Resets the gyro to a given heading */
   public void zeroGyro(double angle) {
-    gyro.setYaw(angle);
+    gyroIO.resetHeading(angle);
   }
 
   /**
@@ -491,13 +498,13 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Rotation2d getYaw() {
     return (Constants.Swerve.invertGyro)
-        ? Rotation2d.fromDegrees(360 - gyro.getYaw())
-        : Rotation2d.fromDegrees(gyro.getYaw());
+        ? Rotation2d.fromDegrees(360 - gyroIO.getHeading().getDegrees())
+        : Rotation2d.fromDegrees(gyroIO.getHeading().getDegrees());
   }
 
   /** Resets the encoders on all swerve modules to the cancoder values */
   public void resetModulesToAbsolute() {
-    for (SwerveModule module : mSwerveMods) {
+    for (SwerveModuleIO module : swerveMods) {
       module.resetToAbsolute();
     }
   }
@@ -547,6 +554,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    for (int i = 0; i < swerveMods.length; i++) {
+      swerveMods[i].updateInputs(inputs[i]);
+    }
+    gyroIO.updateInputs(gyroInputs);
+
     pose = poseEstimator.update(getYaw(), getModulePositions());
     wheelOnlyOdo.update(getYaw(), getModulePositions());
 
@@ -572,15 +584,11 @@ public class SwerveSubsystem extends SubsystemBase {
     // mod.getState().speedMetersPerSecond);
     // }
 
-    // LoggingWrapper.shared.add("Heading", getYaw().getDegrees());
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
     field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
     field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
-    // field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
     dashboardFieldVisionPoses.clear();
-    // LoggingWrapper.shared.add("field", field);
-    // LoggingWrapper.shared.add("Has reset", hasResetOdometry);
     dashboardFieldTapePoses.clear();
     SmartDashboard.putData(field);
     SmartDashboard.putBoolean("Has reset", hasResetOdometry);
@@ -588,29 +596,9 @@ public class SwerveSubsystem extends SubsystemBase {
     if (DriverStation.isDisabled()) {
       hasResetOdometry = false;
     }
-    // getNearestGoal();
-    // getPathToPoint(getNearestGoal());
-
-    // LoggingWrapper.shared.add("x error", Constants.AutoConstants.xController.getPositionError());
-    // LoggingWrapper.shared.add("y error", Constants.AutoConstants.yController.getPositionError());
-    // LoggingWrapper.shared.add("x goal", Constants.AutoConstants.xController.getGoal().position);
-    // LoggingWrapper.shared.add("Y goal", Constants.AutoConstants.yController.getGoal().position);
-    // LoggingWrapper.shared.add("Heading goal", headingController.getGoal().position);
-    // LoggingWrapper.shared.add("Heading error", headingController.getPositionError());
-    // LoggingWrapper.shared.add("total error", getNearestGoalDistance());
-    // LoggingWrapper.shared.add("is cone goal", nearestGoalIsCone);
-    // LoggingWrapper.shared.add("extension requested", getExtension(ScoringLevels.L2, true));
-    // LoggingWrapper.shared.add("alliance", DriverStation.getAlliance().toString());
-    // LoggingWrapper.shared.add("gyro roll", gyro.getRoll());
-    // LoggingWrapper.shared.add("gyro pitch", gyro.getPitch());
-    // LoggingWrapper.shared.add("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
-    // LoggingWrapper.shared.add(
-    // "balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
-    // LoggingWrapper.shared.add("is in tape mode", isInTapeMode);
-    // LoggingWrapper.shared.add("should lock out", lockOutSwerve);
     pose = getPose();
     nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
-    double filteredRoll = rollFilter.calculate(gyro.getRoll());
+    double filteredRoll = rollFilter.calculate(gyroIO.getRollDegrees());
     rollRate = (filteredRoll - lastRoll) / 0.020;
     lastRoll = filteredRoll;
     tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());

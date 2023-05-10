@@ -24,6 +24,4 @@ public interface LEDIO {
   public default void set(int i, Color color) {}
 
   public default void solid(Color color) {}
-
-  public default void updateLEDs() {}
 }
