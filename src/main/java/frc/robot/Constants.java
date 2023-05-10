@@ -31,6 +31,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
@@ -481,7 +482,7 @@ public final class Constants {
     public static final int ledPort = 1;
     public static final int ledLength = 140; // TODO: find
 
-    public static final Color8Bit defaultColor = new Color8Bit(58 / 2, 11 / 2, 110 / 2);
+    public static final Color defaultColor = new Color(58 / 2, 11 / 2, 110 / 2);
   }
 
   public static final class ScoringLevels {

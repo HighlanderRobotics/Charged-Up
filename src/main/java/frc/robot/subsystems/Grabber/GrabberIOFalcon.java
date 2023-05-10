@@ -7,7 +7,6 @@ package frc.robot.subsystems.Grabber;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-
 import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
@@ -35,31 +34,31 @@ public class GrabberIOFalcon implements GrabberIO {
 
   @Override
   public void updateInputs(GrabberIOInputs inputs) {
-      inputs.beambreakTriggered = cubeBeambreak.get();
-      inputs.switchPressed = resetLimitSwitch.get();
+    inputs.beambreakTriggered = cubeBeambreak.get();
+    inputs.switchPressed = resetLimitSwitch.get();
 
-      inputs.rollersPercentOut = rollers.getMotorOutputPercent();
-      inputs.rollersSpeedRPS = rollers.getSelectedSensorVelocity() * 10 / 2048;
-      inputs.rollersCurrentAmps = rollers.getStatorCurrent();
+    inputs.rollersPercentOut = rollers.getMotorOutputPercent();
+    inputs.rollersSpeedRPS = rollers.getSelectedSensorVelocity() * 10 / 2048;
+    inputs.rollersCurrentAmps = rollers.getStatorCurrent();
 
-      inputs.pivotPercentOut = rollers.getMotorOutputPercent();
-      inputs.pivotPositionTicks = rollers.getSelectedSensorPosition();
-      inputs.pivotCurrentAmps = rollers.getStatorCurrent();
+    inputs.pivotPercentOut = rollers.getMotorOutputPercent();
+    inputs.pivotPositionTicks = rollers.getSelectedSensorPosition();
+    inputs.pivotCurrentAmps = rollers.getStatorCurrent();
   }
 
   @Override
   public void setRollersPercentOut(double percentOut) {
-      rollers.setPercentOut(percentOut);
+    rollers.setPercentOut(percentOut);
   }
 
   @Override
   public void setPivotTarget(double encoderTicks) {
-      pivot.set(ControlMode.Position, encoderTicks);
+    pivot.set(ControlMode.Position, encoderTicks);
   }
 
   @Override
   public void setPivotPercentOut(double percentOut) {
-      pivot.setPercentOut(percentOut);
+    pivot.setPercentOut(percentOut);
   }
 
   @Override
@@ -69,7 +68,7 @@ public class GrabberIOFalcon implements GrabberIO {
 
   @Override
   public void resetPivotEncoder() {
-      resetPivotEncoder(0);
+    resetPivotEncoder(0);
   }
 
   @Override
@@ -83,19 +82,19 @@ public class GrabberIOFalcon implements GrabberIO {
   }
 
   // TODO check what happens when we remove this with robot
-  /** this shouldnt need to exist*/
+  /** this shouldnt need to exist */
   @Override
   public double getRollersError() {
-      return rollers.getClosedLoopError();
+    return rollers.getClosedLoopError();
   }
 
   @Override
   public boolean getLimitSwitch() {
-      return resetLimitSwitch.get();
+    return resetLimitSwitch.get();
   }
 
   @Override
   public boolean getBeambreak() {
-      return cubeBeambreak.get();
+    return cubeBeambreak.get();
   }
 }

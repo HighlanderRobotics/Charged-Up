@@ -49,6 +49,7 @@ import frc.robot.PathPointOpen;
 import frc.robot.SwerveModule;
 import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
+import frc.robot.subsystems.LEDs.LEDSubsystem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -526,7 +527,7 @@ public class SwerveSubsystem extends SubsystemBase {
         .andThen(
             headingLockDriveCommand(xSupplier, () -> 0, () -> Math.PI, true, false)
                 .raceWith(
-                    ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.25),
+                    ledSubsystem.setBlinkingCommand(Color.kBlue, 0.25),
                     new WaitUntilCommand(() -> headingController.atGoal())))
         .andThen(
             headingLockDriveCommand(
@@ -540,7 +541,7 @@ public class SwerveSubsystem extends SubsystemBase {
                     () -> Math.PI,
                     true,
                     false)
-                .alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kGreen), 0.25)));
+                .alongWith(ledSubsystem.setBlinkingCommand(Color.kGreen, 0.25)));
   }
 
   @Override

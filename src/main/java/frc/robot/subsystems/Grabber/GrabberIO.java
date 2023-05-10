@@ -35,12 +35,14 @@ public interface GrabberIO {
   public default double getPivotPosition() {
     return 0.0;
   }
-  
+
   public default double getPivotError() {
     return 0.0;
   }
 
-  public default double getRollersError() { return 0.0; }
+  public default double getRollersError() {
+    return 0.0;
+  }
 
   public default boolean getLimitSwitch() {
     return false;

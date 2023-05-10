@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -29,7 +28,7 @@ import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem.GamePiece;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
-import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Routing.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
@@ -181,15 +180,13 @@ public class RobotContainer {
     new Trigger(() -> grabberSubsystem.gamePiece == GamePiece.Cone)
         .whileTrue(
             ledSubsystem.setBlinkingCommand(
-                new Color8Bit(Color.kYellow),
-                new Color8Bit(Color.kGreen),
-                () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
+                Color.kYellow, Color.kGreen, () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     new Trigger(
             () -> grabberSubsystem.gamePiece == GamePiece.Cube && grabberSubsystem.getBeambreak())
         .whileTrue(
             ledSubsystem.setBlinkingCommand(
                 Constants.LEDConstants.defaultColor,
-                new Color8Bit(Color.kGreen),
+                Color.kGreen,
                 () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
 
     controller
@@ -204,8 +201,7 @@ public class RobotContainer {
                 .intakeConeDoubleCommand()
                 .raceWith(
                     ledSubsystem.setBlinkingCommand(
-                        new Color8Bit(Color.kYellow),
-                        () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
+                        Color.kYellow, () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
 
     controller
         .leftBumper()
@@ -218,8 +214,7 @@ public class RobotContainer {
                 .alongWith(
                     ledSubsystem
                         .setBlinkingCommand(
-                            new Color8Bit(Color.kYellow),
-                            () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
+                            Color.kYellow, () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
                         .until(() -> grabberSubsystem.gamePiece == GamePiece.Cone),
                     superstructureSubsystem
                         .waitExtendToInches(Constants.ScoringLevels.chuteLevel)
@@ -371,7 +366,7 @@ public class RobotContainer {
         .whileTrue(
             swerveSubsystem
                 .autoBalanceVelocity()
-                .alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.5)));
+                .alongWith(ledSubsystem.setBlinkingCommand(Color.kBlue, 0.5)));
 
     controller
         .start()

@@ -4,9 +4,7 @@
 
 package frc.robot.subsystems.Grabber;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
