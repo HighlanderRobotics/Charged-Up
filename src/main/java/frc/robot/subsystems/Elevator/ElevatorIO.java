@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ElevatorIO {
   @AutoLog
   public static class ElevatorIOInputs {
+    public boolean switchPressed = false;
     public double positionInches = 0.0;
     public double percentOut = 0.0;
     public double[] currentAmps = new double[] {};
@@ -27,5 +28,9 @@ public interface ElevatorIO {
 
   public default double getExtensionInches() {
     return 0.0;
+  }
+
+  public default boolean getLimitSwitch() {
+    return false;
   }
 }

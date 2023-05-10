@@ -8,12 +8,15 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import frc.lib.components.HighlanderFalcon;
+import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
 /** Implements the elevator subsystem with falcon 500 motors. */
 public class ElevatorIOFalcon implements ElevatorIO {
   private final HighlanderFalcon leader;
   private final HighlanderFalcon follower;
+  public ReversibleDigitalInput limitSwitch =
+      new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
 
   public ElevatorIOFalcon() {
     leader = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
@@ -32,6 +35,7 @@ public class ElevatorIOFalcon implements ElevatorIO {
     inputs.positionInches = getExtensionInches();
     inputs.percentOut = leader.getMotorOutputPercent();
     inputs.currentAmps = new double[] {leader.getStatorCurrent(), follower.getStatorCurrent()};
+    inputs.switchPressed = getLimitSwitch();
   }
 
   @Override
@@ -57,5 +61,10 @@ public class ElevatorIOFalcon implements ElevatorIO {
   @Override
   public void stop() {
     setPercentOut(0.0);
+  }
+
+  @Override
+  public boolean getLimitSwitch() {
+    return limitSwitch.get();
   }
 }

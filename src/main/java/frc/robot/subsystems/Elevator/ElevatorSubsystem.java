@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 import frc.robot.subsystems.Elevator.ElevatorIO.ElevatorIOInputs;
 import java.util.function.DoubleSupplier;
@@ -26,8 +25,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   boolean enabled = true;
   boolean isZeroing;
-  public ReversibleDigitalInput limitSwitch =
-      new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
+
   TrapezoidProfile.State lastState = new TrapezoidProfile.State();
   TrapezoidProfile.State goal = new TrapezoidProfile.State();
 
@@ -91,7 +89,7 @@ public class ElevatorSubsystem extends SubsystemBase {
               isZeroing = false;
               enabled = true;
             })
-        .until(() -> limitSwitch.get())
+        .until(() -> io.getLimitSwitch())
         .andThen(() -> io.zeroMotor());
   }
 
@@ -150,6 +148,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     return extendToInchesCommand(() -> extensionInches);
   }
 
+  public boolean getLimitSwitch() {
+    return io.getLimitSwitch();
+  }
+
   @Override
   public void periodic() {
 
@@ -163,7 +165,7 @@ public class ElevatorSubsystem extends SubsystemBase {
       io.stop();
     }
 
-    if (limitSwitch.get()) {
+    if (io.getLimitSwitch()) {
       zeroMotor();
     }
 

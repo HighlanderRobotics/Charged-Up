@@ -14,8 +14,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem.ScoringLevels;
-import frc.robot.subsystems.GreybotsGrabberSubsystem;
-import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
+import frc.robot.subsystems.Grabber.GrabberSubsystem;
+import frc.robot.subsystems.Grabber.GrabberSubsystem.GamePiece;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Routing.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
@@ -31,7 +31,7 @@ public class AutoChooser {
   SwerveSubsystem swerveSubsystem;
   IntakeSubsystem intakeSubsystem;
   ElevatorSubsystem elevatorSubsystem;
-  GreybotsGrabberSubsystem greybotsGrabberSubsystem;
+  GrabberSubsystem grabberSubsystem;
   RoutingSubsystem routingSubsystem;
   HashMap<String, Command> eventMap = new HashMap<>();
 
@@ -40,92 +40,81 @@ public class AutoChooser {
       IntakeSubsystem intakeSubsystem,
       ElevatorSubsystem elevatorSubsystem,
       RoutingSubsystem routingSubsystem,
-      GreybotsGrabberSubsystem greybotsGrabberSubsystem,
+      GrabberSubsystem grabberSubsystem,
       SuperstructureSubsystem superstructureSubsystem) {
 
     this.intakeSubsystem = intakeSubsystem;
     this.swerveSubsystem = swerveSubsystem;
     this.elevatorSubsystem = elevatorSubsystem;
-    this.greybotsGrabberSubsystem = greybotsGrabberSubsystem;
+    this.grabberSubsystem = grabberSubsystem;
     this.routingSubsystem = routingSubsystem;
 
-    eventMap.put("Rezero Grabber", greybotsGrabberSubsystem.resetPivotCommand().asProxy());
+    eventMap.put("Rezero Grabber", grabberSubsystem.resetPivotCommand().asProxy());
     eventMap.put(
         "Score No Aim",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
     eventMap.put(
         "Extend L3",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
             .asProxy()
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube)));
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube)));
     eventMap.put(
         "Score L3 No Aim",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
     eventMap.put(
         "Score L3 No Aim No Wait",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
     eventMap.put(
         "Score L2 No Aim",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
     eventMap.put(
         "Score L2 No Aim No Wait",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
     eventMap.put(
         "Score L2 No Aim Cube",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, false))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
     eventMap.put(
         "Score L2 No Aim Cube No Wait",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, false))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
     eventMap.put(
         "Score L2 No Aim Cube Almost No Wait",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, false))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube))
             .andThen(
                 superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.25))));
     eventMap.put(
         "Score L3 No Aim Cube",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, false))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5))));
     eventMap.put(
         "Score L3 No Aim Cube No Wait",
         new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, false))
-            .alongWith(
-                new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube))
+            .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube))
             .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
     eventMap.put("Test Wait", new WaitCommand(1.0));
     eventMap.put("Balance", swerveSubsystem.autoBalance());
-    eventMap.put("Outake Cube", greybotsGrabberSubsystem.outakeCubeCommand().asProxy());
+    eventMap.put("Outake Cube", grabberSubsystem.outakeCubeCommand().asProxy());
     eventMap.put(
         "Outake Cube Ground",
         run(
                 intakeSubsystem.outakeCommand(),
                 routingSubsystem.outakeCommand(),
-                greybotsGrabberSubsystem.outakeCubeCommand())
+                grabberSubsystem.outakeCubeCommand())
             .withTimeout(1.0)
             .asProxy());
     eventMap.put(
@@ -133,7 +122,7 @@ public class AutoChooser {
         run(
                 intakeSubsystem.runCommand().withTimeout(1.0),
                 routingSubsystem.runCommand(),
-                greybotsGrabberSubsystem.intakeCubeCommand())
+                grabberSubsystem.intakeCubeCommand())
             .withTimeout(1.3)
             .asProxy());
     eventMap.put(
@@ -167,8 +156,7 @@ public class AutoChooser {
         "just score",
         () ->
             new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
-                .alongWith(
-                    new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone))
+                .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
                 .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
 
     // LoggingWrapper.shared.add("autoChooser", chooser);
