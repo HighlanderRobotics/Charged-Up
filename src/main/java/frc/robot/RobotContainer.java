@@ -129,9 +129,9 @@ public class RobotContainer {
   private void configureBindings() {
     controller.rightStick().and(controller.leftStick()).onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
     new Trigger(() -> demoMode).whileTrue(swerveSubsystem.driveCommand(
-      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftY() * 0.4, controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX() * 0.4, controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getRightX() * 0.4, controller.getLeftTriggerAxis()), 
       true, 
       true,
       true).repeatedly());
@@ -147,12 +147,12 @@ public class RobotContainer {
     // new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry)
     //   .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
 
-    new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
-      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
-      () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
-      true, 
-      true));
+    // new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
+    //   () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+    //   () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
+    //   () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
+    //   true, 
+    //   true));
     
     // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
     new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)
