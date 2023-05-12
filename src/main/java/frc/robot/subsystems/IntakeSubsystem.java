@@ -5,12 +5,10 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-
 import edu.wpi.first.wpilibj.DoubleSolenoid;
+import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -19,11 +17,13 @@ import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
 public class IntakeSubsystem extends SubsystemBase {
-  HighlanderFalcon intake = new HighlanderFalcon(Constants.MechanismConstants.intakeID, 1.0, 0.15, 0, 0);
-  DoubleSolenoid solenoid = new DoubleSolenoid(
-    PneumaticsModuleType.REVPH, 
-    Constants.MechanismConstants.intakeSolenoidForwardID, 
-    Constants.MechanismConstants.intakeSolenoidBackwardID);
+  HighlanderFalcon intake =
+      new HighlanderFalcon(Constants.MechanismConstants.intakeID, 1.0, 0.15, 0, 0);
+  DoubleSolenoid solenoid =
+      new DoubleSolenoid(
+          PneumaticsModuleType.REVPH,
+          Constants.MechanismConstants.intakeSolenoidForwardID,
+          Constants.MechanismConstants.intakeSolenoidBackwardID);
   // Timer to make sure that the intake has time to extend when we check if its out
   Timer timeSinceExtended = new Timer();
   /** Creates a new IntakeSubsystem. */
@@ -54,22 +54,39 @@ public class IntakeSubsystem extends SubsystemBase {
 
   public CommandBase runCommand() {
     return new InstantCommand(
-      () -> {this.run(); this.extend();}, 
-      this).andThen(new RunCommand(() -> {}, this));
+            () -> {
+              this.run();
+              this.extend();
+            },
+            this)
+        .andThen(new RunCommand(() -> {}, this));
   }
 
   public CommandBase stopCommand() {
     return new InstantCommand(
-      () -> {this.stop(); this.retract();}, 
-      this);
+        () -> {
+          this.stop();
+          this.retract();
+        },
+        this);
   }
 
   public CommandBase extendCommand() {
-    return new InstantCommand(() -> {this.extend(); stop();}, this);
+    return new InstantCommand(
+        () -> {
+          this.extend();
+          stop();
+        },
+        this);
   }
 
   public CommandBase outakeCommand() {
-    return new RunCommand(() -> {outake(); extend();}, this);
+    return new RunCommand(
+        () -> {
+          outake();
+          extend();
+        },
+        this);
   }
 
   @Override
@@ -79,7 +96,5 @@ public class IntakeSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-  }
-
+  public void simulationPeriodic() {}
 }

@@ -14,8 +14,8 @@ import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.RollerClawGrabberSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
+import frc.robot.subsystems.RollerClawGrabberSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -25,13 +25,12 @@ import frc.robot.subsystems.SwerveSubsystem;
 public class EatingCommand extends SequentialCommandGroup {
   /** Creates a new EatingCommand. */
   public EatingCommand(
-    SuperstructureSubsystem superstructureSubsystem,
-    ElevatorSubsystem elevatorSubsystem, 
-    ArmSubsystem armSubsystem, 
-    SwerveSubsystem swerveSubsystem,
-    RollerClawGrabberSubsystem grabberSubsystem,
-    LEDSubsystem ledSubsystem) 
-   {
+      SuperstructureSubsystem superstructureSubsystem,
+      ElevatorSubsystem elevatorSubsystem,
+      ArmSubsystem armSubsystem,
+      SwerveSubsystem swerveSubsystem,
+      RollerClawGrabberSubsystem grabberSubsystem,
+      LEDSubsystem ledSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
 
@@ -44,20 +43,23 @@ public class EatingCommand extends SequentialCommandGroup {
       substationLocation = Constants.redSubstation;
     }
     addCommands(
-      swerveSubsystem.followPathCommand(
-        swerveSubsystem.getPathToPoint(substationLocation)).alongWith(
-          ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))
-        ),
-      new PrintCommand("finished path"),
-      swerveSubsystem.headingLockDriveCommand(
-        () -> 0, () -> 0, () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(), 
-        false, false).alongWith(
-          ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78))).alongWith(
-          superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)), 
-      // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER, false),
-      //we're only picking up cones from the substations
-      new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal() && armSubsystem.isAtSetpoint()),
-      grabberSubsystem.closeCommand()
-    );
+        swerveSubsystem
+            .followPathCommand(swerveSubsystem.getPathToPoint(substationLocation))
+            .alongWith(ledSubsystem.setSolidCommand(new Color8Bit(20, 107, 241))),
+        new PrintCommand("finished path"),
+        swerveSubsystem
+            .headingLockDriveCommand(
+                () -> 0,
+                () -> 0,
+                () -> swerveSubsystem.getNearestGoal().getRotation2d().getRadians(),
+                false,
+                false)
+            .alongWith(ledSubsystem.setSolidCommand(new Color8Bit(13, 240, 78)))
+            .alongWith(superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)),
+        // ElevatorSubsystem.extendCommand(elevatorSubsystem, armSubsystem, Level.HUMAN_PLAYER,
+        // false),
+        // we're only picking up cones from the substations
+        new WaitUntilCommand(() -> elevatorSubsystem.isAtGoal() && armSubsystem.isAtSetpoint()),
+        grabberSubsystem.closeCommand());
   }
 }
