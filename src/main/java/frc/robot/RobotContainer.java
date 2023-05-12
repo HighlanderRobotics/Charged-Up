@@ -74,6 +74,7 @@ public class RobotContainer {
   
   boolean shouldUseChute = true;
   boolean isUsingChute = false;
+  boolean demoMode = false;
 
   double lastHeadingSnapAngle = 0;
 
@@ -127,6 +128,13 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controller.rightStick().and(controller.leftStick()).onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    new Trigger(() -> demoMode).whileTrue(swerveSubsystem.driveCommand(
+      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
+      () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()), 
+      true, 
+      true,
+      true).repeatedly());
     // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled()).onTrue(
       new InstantCommand(() -> swerveSubsystem.resetModulesToAbsolute()).ignoringDisable(true));
@@ -154,13 +162,13 @@ public class RobotContainer {
       .whileTrue(
         ledSubsystem.setBlinkingCommand(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kGreen), () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
 
-    controller.leftBumper().and(() -> !shouldUseChute).whileTrue(
+    controller.leftBumper().and(() -> !demoMode).and(() -> !shouldUseChute).whileTrue(
       superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
       .andThen(new RunCommand(() -> {}, elevatorSubsystem))).onTrue(
         greybotsGrabberSubsystem.intakeConeDoubleCommand().raceWith(
         ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
 
-    controller.leftBumper().and(() -> shouldUseChute).whileTrue(
+    controller.leftBumper().and(() -> !demoMode).and(() -> shouldUseChute).whileTrue(
       greybotsGrabberSubsystem.intakeConeSingleContinuousCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming).alongWith(
       ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
         .until(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone),
@@ -190,7 +198,7 @@ public class RobotContainer {
     // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
     
-    controller.rightTrigger().whileTrue(
+    controller.rightTrigger().and(() -> !demoMode).whileTrue(
       swerveSubsystem.headingLockDriveCommand(
       () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
       () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
@@ -230,7 +238,7 @@ public class RobotContainer {
       true)
     );
 
-    controller.leftTrigger().whileTrue(
+    controller.leftTrigger().and(() -> !demoMode).whileTrue(
       swerveSubsystem.driveCommand(
       () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
       () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
@@ -239,7 +247,7 @@ public class RobotContainer {
       false,
       true)
     );
-    controller.leftTrigger().whileTrue(
+    controller.leftTrigger().and(() -> !demoMode).whileTrue(
       superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel(), 0.0).andThen(new RunCommand(() -> {}))
         .alongWith(//ledSubsystem.setRainbowCommand(), 
         routingSubsystem.slowRunCommand(),
@@ -299,6 +307,7 @@ public class RobotContainer {
   }
 
   private void addDashboardCommands() {
+    LoggingWrapper.shared.add("Demo Mode", new StartEndCommand(() -> demoMode = true, () -> demoMode = false));
 
     LoggingWrapper.shared.add("intake toggle", intakeSubsystem.extendCommand());
 
