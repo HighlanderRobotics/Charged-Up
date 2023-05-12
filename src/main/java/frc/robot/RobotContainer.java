@@ -148,14 +148,27 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    controller.rightStick().and(controller.leftStick()).onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
-    new Trigger(() -> demoMode).whileTrue(swerveSubsystem.driveCommand(
-      () -> modifyJoystickAxis(controller.getLeftY() * 0.4, controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getLeftX() * 0.4, controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getRightX() * 0.4, controller.getLeftTriggerAxis()), 
-      true, 
-      true,
-      true).repeatedly());
+    controller
+        .rightStick()
+        .and(controller.leftStick())
+        .onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+    new Trigger(() -> demoMode)
+        .whileTrue(
+            swerveSubsystem
+                .driveCommand(
+                    () ->
+                        modifyJoystickAxis(
+                            controller.getLeftY() * 0.4, controller.getLeftTriggerAxis()),
+                    () ->
+                        modifyJoystickAxis(
+                            controller.getLeftX() * 0.4, controller.getLeftTriggerAxis()),
+                    () ->
+                        modifyJoystickAxis(
+                            controller.getRightX() * 0.4, controller.getLeftTriggerAxis()),
+                    true,
+                    true,
+                    true)
+                .repeatedly());
     // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled())
         .onTrue(
@@ -174,14 +187,16 @@ public class RobotContainer {
     // new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry)
     //   .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
 
-    // new Trigger(() -> controller.getHID().getPOV() != -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
-    //   () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
+    // new Trigger(() -> controller.getHID().getPOV() !=
+    // -1).whileTrue(swerveSubsystem.headingLockDriveCommand(
+    //   () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
     //   () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
-    //   () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()), 
-    //   true, 
+    //   () -> (Math.PI * 2) - Math.toRadians(controller.getHID().getPOV()),
+    //   true,
     //   true));
-    
-    // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new Color8Bit(Color.kNavy)));
+
+    // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new
+    // Color8Bit(Color.kNavy)));
     new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)
         .whileTrue(
             ledSubsystem.setBlinkingCommand(
@@ -198,22 +213,47 @@ public class RobotContainer {
                 new Color8Bit(Color.kGreen),
                 () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
 
-    controller.leftBumper().and(() -> !demoMode).and(() -> !shouldUseChute).whileTrue(
-      superstructureSubsystem.waitExtendToInches(Constants.humanPlayerLevel)
-      .andThen(new RunCommand(() -> {}, elevatorSubsystem))).onTrue(
-        greybotsGrabberSubsystem.intakeConeDoubleCommand().raceWith(
-        ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
+    controller
+        .leftBumper()
+        .and(() -> !demoMode)
+        .and(() -> !shouldUseChute)
+        .whileTrue(
+            superstructureSubsystem
+                .waitExtendToInches(Constants.humanPlayerLevel)
+                .andThen(new RunCommand(() -> {}, elevatorSubsystem)))
+        .onTrue(
+            greybotsGrabberSubsystem
+                .intakeConeDoubleCommand()
+                .raceWith(
+                    ledSubsystem.setBlinkingCommand(
+                        new Color8Bit(Color.kYellow),
+                        () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
 
-    controller.leftBumper().and(() -> !demoMode).and(() -> shouldUseChute).whileTrue(
-      greybotsGrabberSubsystem.intakeConeSingleContinuousCommand().repeatedly().withInterruptBehavior(InterruptionBehavior.kCancelIncoming).alongWith(
-      ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kYellow), () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
-        .until(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone),
-      superstructureSubsystem.waitExtendToInches(Constants.ScoringLevels.chuteLevel)
-        .andThen(new InstantCommand(() -> isUsingChute = true), 
-          new RunCommand(() -> {}, elevatorSubsystem).alongWith(intakeSubsystem.stopCommand())))
-    ).onFalse(
-      new InstantCommand(() -> isUsingChute = false).andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0))
-      .raceWith(greybotsGrabberSubsystem.intakeConeSingleCommand()));
+    controller
+        .leftBumper()
+        .and(() -> !demoMode)
+        .and(() -> shouldUseChute)
+        .whileTrue(
+            greybotsGrabberSubsystem
+                .intakeConeSingleContinuousCommand()
+                .repeatedly()
+                .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
+                .alongWith(
+                    ledSubsystem
+                        .setBlinkingCommand(
+                            new Color8Bit(Color.kYellow),
+                            () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
+                        .until(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone),
+                    superstructureSubsystem
+                        .waitExtendToInches(Constants.ScoringLevels.chuteLevel)
+                        .andThen(
+                            new InstantCommand(() -> isUsingChute = true),
+                            new RunCommand(() -> {}, elevatorSubsystem)
+                                .alongWith(intakeSubsystem.stopCommand()))))
+        .onFalse(
+            new InstantCommand(() -> isUsingChute = false)
+                .andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0))
+                .raceWith(greybotsGrabberSubsystem.intakeConeSingleCommand()));
 
     controller
         .rightBumper()
@@ -260,21 +300,34 @@ public class RobotContainer {
     operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
     operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
     operator.start().whileTrue(greybotsGrabberSubsystem.resetPivotCommand());
-    // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem, swerveSubsystem, grabberSubsystem, superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    
-    controller.rightTrigger().and(() -> !demoMode).whileTrue(
-      swerveSubsystem.headingLockDriveCommand(
-      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
-      () -> {
-        var joystickRotation = new Rotation2d(controller.getRightX(), -controller.getRightY());
-        SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
-        SmartDashboard.putNumber("heading joystick rot", joystickRotation.getRotations());
-        if (Math.sqrt((controller.getRightX() * controller.getRightX()) + (controller.getRightY() * controller.getRightY())) < 0.2) {
-          return lastHeadingSnapAngle;
-        }
+    // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem,
+    // swerveSubsystem, grabberSubsystem,
+    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem,
+    // swerveSubsystem, grabberSubsystem,
+    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+    // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem,
+    // swerveSubsystem, grabberSubsystem,
+    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+
+    controller
+        .rightTrigger()
+        .and(() -> !demoMode)
+        .whileTrue(
+            swerveSubsystem.headingLockDriveCommand(
+                () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
+                () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
+                () -> {
+                  var joystickRotation =
+                      new Rotation2d(controller.getRightX(), -controller.getRightY());
+                  SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
+                  SmartDashboard.putNumber("heading joystick rot", joystickRotation.getRotations());
+                  if (Math.sqrt(
+                          (controller.getRightX() * controller.getRightX())
+                              + (controller.getRightY() * controller.getRightY()))
+                      < 0.2) {
+                    return lastHeadingSnapAngle;
+                  }
 
                   double correctedJoystickRot =
                       joystickRotation.getRotations() > 0
@@ -298,32 +351,45 @@ public class RobotContainer {
                 true,
                 true));
 
-    controller.leftTrigger().and(() -> !demoMode).whileTrue(
-      swerveSubsystem.driveCommand(
-      () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()), 
-      () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()), 
-      true, 
-      false,
-      true)
-    );
-    controller.leftTrigger().and(() -> !demoMode).whileTrue(
-      superstructureSubsystem.waitExtendToGoal(() -> swerveSubsystem.getLevel(), 0.0).andThen(new RunCommand(() -> {}))
-        .alongWith(//ledSubsystem.setRainbowCommand(), 
-        routingSubsystem.slowRunCommand(),
-        new ConditionalCommand(
-            new RunCommand(() -> greybotsGrabberSubsystem.holdCube(), greybotsGrabberSubsystem).withTimeout(0.5),
-            new RunCommand(() -> greybotsGrabberSubsystem.intakeCone(), greybotsGrabberSubsystem).withTimeout(0.2),
-            () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
-          ).withTimeout(0.5)
-          .andThen(greybotsGrabberSubsystem.runToScoringCommand())))
-      .onFalse(
-        new ConditionalCommand(
-          greybotsGrabberSubsystem.scoreCubeCommand(),
-          greybotsGrabberSubsystem.scoreConeCommand(),
-          () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
-        ).raceWith(new RunCommand(() -> {}, elevatorSubsystem))
-        .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
+    controller
+        .leftTrigger()
+        .and(() -> !demoMode)
+        .whileTrue(
+            swerveSubsystem.driveCommand(
+                () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
+                () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
+                () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()),
+                true,
+                false,
+                true));
+    controller
+        .leftTrigger()
+        .and(() -> !demoMode)
+        .whileTrue(
+            superstructureSubsystem
+                .waitExtendToGoal(() -> swerveSubsystem.getLevel(), 0.0)
+                .andThen(new RunCommand(() -> {}))
+                .alongWith( // ledSubsystem.setRainbowCommand(),
+                    routingSubsystem.slowRunCommand(),
+                    new ConditionalCommand(
+                            new RunCommand(
+                                    () -> greybotsGrabberSubsystem.holdCube(),
+                                    greybotsGrabberSubsystem)
+                                .withTimeout(0.5),
+                            new RunCommand(
+                                    () -> greybotsGrabberSubsystem.intakeCone(),
+                                    greybotsGrabberSubsystem)
+                                .withTimeout(0.2),
+                            () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube)
+                        .withTimeout(0.5)
+                        .andThen(greybotsGrabberSubsystem.runToScoringCommand())))
+        .onFalse(
+            new ConditionalCommand(
+                    greybotsGrabberSubsystem.scoreCubeCommand(),
+                    greybotsGrabberSubsystem.scoreConeCommand(),
+                    () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube)
+                .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
+                .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
 
     controller
         .x()
@@ -388,7 +454,8 @@ public class RobotContainer {
   }
 
   private void addDashboardCommands() {
-    LoggingWrapper.shared.add("Demo Mode", new StartEndCommand(() -> demoMode = true, () -> demoMode = false));
+    LoggingWrapper.shared.add(
+        "Demo Mode", new StartEndCommand(() -> demoMode = true, () -> demoMode = false));
 
     LoggingWrapper.shared.add("intake toggle", intakeSubsystem.extendCommand());
 
