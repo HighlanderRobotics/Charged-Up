@@ -4,11 +4,10 @@
 
 package frc.robot.subsystems.Swerve;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import org.littletonrobotics.junction.AutoLog;
 
 /** Add your docs here. */
 public interface SwerveModuleIO {
@@ -49,5 +48,7 @@ public interface SwerveModuleIO {
     return new SwerveModulePosition();
   }
 
-  public default int getModuleNumber() {return -1;}
+  public default int getModuleNumber() {
+    return -1;
+  }
 }

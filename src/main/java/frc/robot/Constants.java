@@ -119,6 +119,9 @@ public final class Constants {
     public static final double angleKD = chosenModule.angleKD;
     public static final double angleKF = chosenModule.angleKF;
 
+    public static final double simAngleKP = 0.2;
+    public static final double simAngleKD = 0.0;
+
     /* Drive Motor PID Values */
     public static final double driveKP = 0.05; // TODO: This must be tuned to specific robot
     public static final double driveKI = 0.0;
@@ -130,6 +133,11 @@ public final class Constants {
     public static final double driveKS = (0.32 / 12); // TODO: This must be tuned to specific robot
     public static final double driveKV = (1.51 / 12);
     public static final double driveKA = (0.27 / 12);
+
+    public static final double simDriveKP = 0.0;
+    public static final double simDriveKS = (0.32 / 12); // TODO: This must be tuned to specific robot
+    public static final double simDriveKV = (1.51 / 12);
+    public static final double simDriveKA = (0.27 / 12);
 
     /* Swerve Profiling Values */
     /** Meters per Second */

@@ -4,23 +4,26 @@
 
 package frc.robot.subsystems.Swerve;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import edu.wpi.first.math.geometry.Rotation2d;
+import org.littletonrobotics.junction.AutoLog;
 
 /** Add your docs here. */
 public interface GyroIO {
-    @AutoLog
-    public static class GyroIOInputs {
-        public double headingDegrees;
-        public double rollDegrees;
-    }
+  @AutoLog
+  public static class GyroIOInputs {
+    public double headingDegrees;
+    public double rollDegrees;
+  }
 
-    public default void updateInputs(GyroIOInputs input) {}
+  public default void updateInputs(GyroIOInputs input) {}
 
-    public default Rotation2d getHeading() { return new Rotation2d(); }
+  public default Rotation2d getHeading() {
+    return new Rotation2d();
+  }
 
-    public default double getRollDegrees() { return 0.0; }
+  public default double getRollDegrees() {
+    return 0.0;
+  }
 
-    public default void resetHeading(double degrees) {}
+  public default void resetHeading(double degrees) {}
 }

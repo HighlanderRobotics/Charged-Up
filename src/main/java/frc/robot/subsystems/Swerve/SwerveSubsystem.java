@@ -1,6 +1,5 @@
 package frc.robot.subsystems.Swerve;
 
-import com.ctre.phoenix.sensors.Pigeon2;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
@@ -113,13 +112,14 @@ public class SwerveSubsystem extends SubsystemBase {
           new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
           new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
         };
-    
-    inputs = new SwerveModuleIOInputs[] {
-      new SwerveModuleIOInputs(),
-      new SwerveModuleIOInputs(),
-      new SwerveModuleIOInputs(),
-      new SwerveModuleIOInputs()
-    };
+
+    inputs =
+        new SwerveModuleIOInputs[] {
+          new SwerveModuleIOInputs(),
+          new SwerveModuleIOInputs(),
+          new SwerveModuleIOInputs(),
+          new SwerveModuleIOInputs()
+        };
 
     /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
      * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.

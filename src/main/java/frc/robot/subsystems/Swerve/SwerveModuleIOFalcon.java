@@ -118,7 +118,8 @@ public class SwerveModuleIOFalcon implements SwerveModuleIO {
   public void resetToAbsolute() {
     double absolutePosition =
         Conversions.degreesToFalcon(
-            getAbsoluteRotation().getDegrees() - angleOffset.getDegrees(), Constants.Swerve.angleGearRatio);
+            getAbsoluteRotation().getDegrees() - angleOffset.getDegrees(),
+            Constants.Swerve.angleGearRatio);
     steerMotor.setSelectedSensorPosition(absolutePosition);
   }
 
@@ -165,6 +166,6 @@ public class SwerveModuleIOFalcon implements SwerveModuleIO {
 
   @Override
   public int getModuleNumber() {
-      return moduleNumber;
+    return moduleNumber;
   }
 }
