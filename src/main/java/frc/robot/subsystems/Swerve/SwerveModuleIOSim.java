@@ -4,11 +4,11 @@
 
 package frc.robot.subsystems.Swerve;
 
-import com.ctre.phoenix.motorcontrol.TalonFXSimCollection;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.FlywheelSim;
@@ -19,14 +19,26 @@ import frc.robot.Constants;
 /** Add your docs here. */
 public class SwerveModuleIOSim implements SwerveModuleIO {
   FlywheelSim drivePhysicsSim = new FlywheelSim(DCMotor.getFalcon500(1), 6.75 / 1, 0.025);
-  SingleJointedArmSim steerPhysicsSim = new SingleJointedArmSim(DCMotor.getFalcon500(1), 150 / 7, 0.004, Units.inchesToMeters(1.5), 0.0, 2 * Math.PI, false);
+  SingleJointedArmSim steerPhysicsSim =
+      new SingleJointedArmSim(
+          DCMotor.getFalcon500(1),
+          150 / 7,
+          0.004,
+          Units.inchesToMeters(1.5),
+          0.0,
+          2 * Math.PI,
+          false);
 
   PIDController driveController = new PIDController(Constants.Swerve.simDriveKP, 0, 0);
-  SimpleMotorFeedforward driveFeedforward = new SimpleMotorFeedforward(Constants.Swerve.simDriveKS, Constants.Swerve.simDriveKV, Constants.Swerve.simDriveKA);
+  SimpleMotorFeedforward driveFeedforward =
+      new SimpleMotorFeedforward(
+          Constants.Swerve.simDriveKS, Constants.Swerve.simDriveKV, Constants.Swerve.simDriveKA);
 
-  PIDController steerController = new PIDController(Constants.Swerve.simAngleKP, 0, Constants.Swerve.simAngleKD);
+  PIDController steerController =
+      new PIDController(Constants.Swerve.simAngleKP, 0, Constants.Swerve.simAngleKD);
 
   double velocitySetpoint = 0.0;
+  double drivePosition = 0.0;
   double driveVolts = 0.0;
   double steerSetpoint = 0.0;
   double steerVolts = 0.0;
@@ -39,9 +51,20 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
 
   @Override
   public void updateInputs(SwerveModuleIOInputs inputs) {
-    driveVolts = driveController.calculate(drivePhysicsSim.getAngularVelocityRPM(), velocitySetpoint) + driveFeedforward.calculate(velocitySetpoint);
-    steerVolts = steerController.calculate(steerPhysicsSim.getAngleRads(), steerSetpoint);
+    // Update physics sim
+    // drivePhysicsSim.setInputVoltage(driveVolts);
+    // drivePhysicsSim.update(0.020);
+    // drivePosition += rpmToMetersPerSecond(drivePhysicsSim.getAngularVelocityRPM()) * 0.020;
+    drivePosition += velocitySetpoint * 0.020;
+    // steerPhysicsSim.setInputVoltage(steerVolts);
+    // steerPhysicsSim.update(0.020);
+    // Update contorl loops
+    driveVolts = 0.0;
+    // driveController.calculate(drivePhysicsSim.getAngularVelocityRPM(), velocitySetpoint)
+    //     + driveFeedforward.calculate(velocitySetpoint);
+    steerVolts = 0.0; // steerController.calculate(steerPhysicsSim.getAngleRads(), steerSetpoint);
 
+    // Update logs
     inputs.moduleNumber = moduleNumber;
 
     inputs.drivePositionRotations = 0.0;
@@ -59,4 +82,36 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     inputs.steerTemparature = 0.0;
   }
 
+  @Override
+  public void setDesiredState(SwerveModuleState state, boolean isOpenLoop) {
+    velocitySetpoint = state.speedMetersPerSecond;
+    steerSetpoint = state.angle.getRadians();
+  }
+
+  @Override
+  public Rotation2d getAbsoluteRotation() {
+    return Rotation2d.fromRadians(steerSetpoint);
+  }
+
+  @Override
+  public void resetToAbsolute() {}
+
+  @Override
+  public SwerveModuleState getState() {
+    return new SwerveModuleState(velocitySetpoint, getAbsoluteRotation());
+  }
+
+  @Override
+  public SwerveModulePosition getPosition() {
+    return new SwerveModulePosition(drivePosition, getAbsoluteRotation());
+  }
+
+  @Override
+  public int getModuleNumber() {
+    return moduleNumber;
+  }
+
+  private double rpmToMetersPerSecond(double rpm) {
+    return rpm * (1.0 / 60.0) * 2 * Math.PI * Units.inchesToMeters(4.0);
+  }
 }

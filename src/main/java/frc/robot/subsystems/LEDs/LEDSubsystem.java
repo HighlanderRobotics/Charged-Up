@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
 import frc.robot.subsystems.LEDs.LEDIO.LEDIOInputs;
 import java.io.File;
 import java.util.function.DoubleSupplier;
@@ -18,7 +17,7 @@ import javax.imageio.ImageIO;
 
 public class LEDSubsystem extends SubsystemBase {
   LEDIOPWM io = new LEDIOPWM();
-  LEDIOInputs inputs = new LEDIOInputs(Constants.LEDConstants.ledLength);
+  LEDIOInputs inputs = new LEDIOInputs();
 
   int length = inputs.numLeds;
 

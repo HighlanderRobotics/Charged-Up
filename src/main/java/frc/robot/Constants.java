@@ -135,7 +135,8 @@ public final class Constants {
     public static final double driveKA = (0.27 / 12);
 
     public static final double simDriveKP = 0.0;
-    public static final double simDriveKS = (0.32 / 12); // TODO: This must be tuned to specific robot
+    public static final double simDriveKS =
+        (0.32 / 12); // TODO: This must be tuned to specific robot
     public static final double simDriveKV = (1.51 / 12);
     public static final double simDriveKA = (0.27 / 12);
 

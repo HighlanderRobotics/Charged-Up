@@ -44,6 +44,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.PathPointOpen;
+import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Swerve.GyroIO.GyroIOInputs;
@@ -54,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -104,14 +106,23 @@ public class SwerveSubsystem extends SubsystemBase {
 
     headingController.enableContinuousInput(0, Math.PI * 2);
     headingController.setTolerance(0.2);
-
-    swerveMods =
-        new SwerveModuleIOFalcon[] {
-          new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
-          new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
-          new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
-          new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
-        };
+    if (Robot.isReal()) {
+      swerveMods =
+          new SwerveModuleIOFalcon[] {
+            new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
+            new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
+            new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
+            new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
+          };
+    } else {
+      swerveMods =
+          new SwerveModuleIOSim[] {
+            new SwerveModuleIOSim(0, Constants.Swerve.Mod0.constants),
+            new SwerveModuleIOSim(1, Constants.Swerve.Mod1.constants),
+            new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
+            new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
+          };
+    }
 
     inputs =
         new SwerveModuleIOInputs[] {
@@ -558,6 +569,21 @@ public class SwerveSubsystem extends SubsystemBase {
       swerveMods[i].updateInputs(inputs[i]);
     }
     gyroIO.updateInputs(gyroInputs);
+
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve States",
+            new double[] {
+              swerveMods[0].getAbsoluteRotation().getRadians(),
+                  swerveMods[0].getState().speedMetersPerSecond,
+              swerveMods[1].getAbsoluteRotation().getRadians(),
+                  swerveMods[1].getState().speedMetersPerSecond,
+              swerveMods[2].getAbsoluteRotation().getRadians(),
+                  swerveMods[2].getState().speedMetersPerSecond,
+              swerveMods[3].getAbsoluteRotation().getRadians(),
+                  swerveMods[3].getState().speedMetersPerSecond
+            });
+    Logger.getInstance().recordOutput("Swerve Pose", getPose());
 
     pose = poseEstimator.update(getYaw(), getModulePositions());
     wheelOnlyOdo.update(getYaw(), getModulePositions());

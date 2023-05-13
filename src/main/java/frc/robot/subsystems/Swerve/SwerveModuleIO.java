@@ -13,7 +13,7 @@ import org.littletonrobotics.junction.AutoLog;
 public interface SwerveModuleIO {
   @AutoLog
   public static class SwerveModuleIOInputs {
-    public int moduleNumber = -1;
+    public long moduleNumber = -1;
 
     public double drivePositionRotations = 0.0;
     public double driveSpeedRPS = 0.0;

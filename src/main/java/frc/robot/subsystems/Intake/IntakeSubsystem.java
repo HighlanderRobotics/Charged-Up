@@ -18,6 +18,8 @@ public class IntakeSubsystem extends SubsystemBase {
   Timer timeSinceExtended = new Timer();
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
+    io = new IntakeIOFalcon();
+    inputs = new IntakeIOInputs();
     timeSinceExtended.start();
   }
 
