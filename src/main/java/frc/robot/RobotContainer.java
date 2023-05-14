@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -494,6 +496,12 @@ public class RobotContainer {
         * Math.signum(joystick)
         * (1 - (0.5 * fineTuneAxis))
         * (1 - (0.5 * (controller.leftBumper().getAsBoolean() ? 0.4 : 0)));
+  }
+
+  public void loggingPeriodic() {
+    Logger.getInstance().recordOutput("Controller Left Y Adjusted", modifyJoystickAxis(controller.getLeftY(), controller.getRightTriggerAxis()));
+    Logger.getInstance().recordOutput("Controller Left X Adjusted", modifyJoystickAxis(controller.getLeftX(), controller.getRightTriggerAxis()));
+    Logger.getInstance().recordOutput("Controller Right X Adjusted", modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
   }
 
   /**

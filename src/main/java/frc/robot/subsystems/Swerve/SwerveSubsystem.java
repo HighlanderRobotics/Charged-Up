@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
@@ -68,6 +69,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveModuleIOInputs[] inputs;
   public GyroIO gyroIO;
   public GyroIOInputs gyroInputs = new GyroIOInputs();
+  public double simHeading = 0.0;
 
   public Field2d field = new Field2d();
 
@@ -102,7 +104,7 @@ public class SwerveSubsystem extends SubsystemBase {
       new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
 
   public SwerveSubsystem() {
-    gyroIO = new GyroIOPigeon();
+    gyroIO = Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim();
 
     headingController.enableContinuousInput(0, Math.PI * 2);
     headingController.setTolerance(0.2);
@@ -391,7 +393,6 @@ public class SwerveSubsystem extends SubsystemBase {
         () -> getPose(), // Pose2d supplier
         (Pose2d pose) ->
             resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
-        Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
         new PIDConstants(
             Constants.AutoConstants.kPXController,
             0.0,
@@ -402,7 +403,13 @@ public class SwerveSubsystem extends SubsystemBase {
             0.0,
             0.0), // PID constants to correct for rotation error (used to create the rotation
         // controller)
-        this::setModuleStates, // Module states consumer used to output to the drive subsystem
+        (ChassisSpeeds speeds) ->
+            this.drive(
+                new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
+                speeds.omegaRadiansPerSecond,
+                false,
+                false,
+                false), // Module states consumer used to output to the drive subsystem
         eventMap,
         false, // Should the path be automatically mirrored depending on alliance color. Optional,
         // defaults to true
@@ -502,15 +509,19 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Resets the gyro to a given heading */
   public void zeroGyro(double angle) {
     gyroIO.resetHeading(angle);
+    simHeading = angle;
   }
 
   /**
    * @return the yaw of the drive base, based on the gyro's rotation
    */
   public Rotation2d getYaw() {
-    return (Constants.Swerve.invertGyro)
-        ? Rotation2d.fromDegrees(360 - gyroIO.getHeading().getDegrees())
-        : Rotation2d.fromDegrees(gyroIO.getHeading().getDegrees());
+    if (Robot.isReal()) {
+      return (Constants.Swerve.invertGyro)
+          ? Rotation2d.fromDegrees(360 - gyroIO.getHeading().getDegrees())
+          : Rotation2d.fromDegrees(gyroIO.getHeading().getDegrees());
+    }
+    return Rotation2d.fromDegrees(simHeading);
   }
 
   /** Resets the encoders on all swerve modules to the cancoder values */
@@ -568,7 +579,9 @@ public class SwerveSubsystem extends SubsystemBase {
     for (int i = 0; i < swerveMods.length; i++) {
       swerveMods[i].updateInputs(inputs[i]);
     }
+
     gyroIO.updateInputs(gyroInputs);
+    simHeading += Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond);
 
     Logger.getInstance()
         .recordOutput(
@@ -584,9 +597,23 @@ public class SwerveSubsystem extends SubsystemBase {
                   swerveMods[3].getState().speedMetersPerSecond
             });
     Logger.getInstance().recordOutput("Swerve Pose", getPose());
+    Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve Desired Speeds",
+            new double[] {
+              chassisSpeeds.vxMetersPerSecond,
+              chassisSpeeds.vyMetersPerSecond,
+              chassisSpeeds.omegaRadiansPerSecond
+            });
 
-    pose = poseEstimator.update(getYaw(), getModulePositions());
-    wheelOnlyOdo.update(getYaw(), getModulePositions());
+    if (Robot.isReal()) {
+      pose = poseEstimator.update(getYaw(), getModulePositions());
+      wheelOnlyOdo.update(getYaw(), getModulePositions());
+    } else {
+      pose = poseEstimator.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
+      wheelOnlyOdo.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
+    }
 
     List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
         apriltagVisionSubsystem.getMeasurement(pose);

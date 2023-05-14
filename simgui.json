@@ -102,27 +102,7 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Path 2": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Sequence": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Spline": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/elevatorsim": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/limelight-left Sim Field": {
         "window": {
           "visible": true
         }
