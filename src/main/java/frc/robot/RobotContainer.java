@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -35,6 +33,7 @@ import frc.robot.subsystems.Routing.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -499,9 +498,18 @@ public class RobotContainer {
   }
 
   public void loggingPeriodic() {
-    Logger.getInstance().recordOutput("Controller Left Y Adjusted", modifyJoystickAxis(controller.getLeftY(), controller.getRightTriggerAxis()));
-    Logger.getInstance().recordOutput("Controller Left X Adjusted", modifyJoystickAxis(controller.getLeftX(), controller.getRightTriggerAxis()));
-    Logger.getInstance().recordOutput("Controller Right X Adjusted", modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
+    Logger.getInstance()
+        .recordOutput(
+            "Controller Left Y Adjusted",
+            modifyJoystickAxis(controller.getLeftY(), controller.getRightTriggerAxis()));
+    Logger.getInstance()
+        .recordOutput(
+            "Controller Left X Adjusted",
+            modifyJoystickAxis(controller.getLeftX(), controller.getRightTriggerAxis()));
+    Logger.getInstance()
+        .recordOutput(
+            "Controller Right X Adjusted",
+            modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
   }
 
   /**

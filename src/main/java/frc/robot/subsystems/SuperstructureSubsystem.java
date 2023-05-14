@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -132,14 +131,6 @@ public class SuperstructureSubsystem extends SubsystemBase {
       mode = ExtensionState.EXTEND;
     }
     // LoggingWrapper.shared.add("Superstructure Mode", mode.toString());
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    elevatorSubsystem.updateMech2d(
-        new Pair<Double, Double>(
-            Constants.ElevatorConstants.PIDController.getSetpoint().position,
-            Constants.ArmConstants.PIDController.getSetpoint().position));
   }
 
   public static enum ExtensionState {

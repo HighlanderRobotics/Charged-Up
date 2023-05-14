@@ -1,6 +1,5 @@
 package frc.robot.subsystems.Elevator;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
@@ -16,11 +15,13 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorIO.ElevatorIOInputs;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
-  ElevatorIOFalcon io;
+  ElevatorIO io;
   ElevatorIOInputs inputs;
 
   boolean enabled = true;
@@ -41,7 +42,7 @@ public class ElevatorSubsystem extends SubsystemBase {
               new Color8Bit(Color.kPurple)));
 
   public ElevatorSubsystem() {
-    io = new ElevatorIOFalcon();
+    io = Robot.isReal() ? new ElevatorIOFalcon() : new ElevatorIOSim();
     inputs = new ElevatorIOInputs();
   }
 
@@ -103,9 +104,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         < 3.0;
   }
 
-  public void updateMech2d(Pair<Double, Double> state) {
-    //  elevatorLig2d.setLength(state.getFirst());
-    // armLig2d.setAngle(Math.toDegrees(state.getSecond()));
+  public void updateMech2d() {
+    elevatorLig2d.setLength(getExtensionInches());
   }
 
   public void enable() {
@@ -168,6 +168,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     if (io.getLimitSwitch()) {
       zeroMotor();
     }
+
+    updateMech2d();
+    Logger.getInstance().recordOutput("Elevator Mech 2D", mech2d);
 
     // We might have accidentaly tuned elevator pid with this call on, which modifies the state of
     // the pid controller
