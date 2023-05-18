@@ -4,9 +4,11 @@
       "0": {
         "columns": 50,
         "serpentine": true
-      },
+      }
+    },
+    "Other Devices": {
       "window": {
-        "visible": true
+        "visible": false
       }
     }
   },

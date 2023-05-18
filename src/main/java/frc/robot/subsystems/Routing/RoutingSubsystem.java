@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Routing;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -11,12 +13,12 @@ import frc.robot.subsystems.Routing.RoutingIO.RoutingIOInputs;
 
 public class RoutingSubsystem extends SubsystemBase {
   RoutingIOFalcon io;
-  RoutingIOInputs inputs;
+  RoutingIOInputsAutoLogged inputs;
 
   /** Creates a new RoutingSubsystem. */
   public RoutingSubsystem() {
     io = new RoutingIOFalcon();
-    inputs = new RoutingIOInputs();
+    inputs = new RoutingIOInputsAutoLogged();
   }
 
   private void run() {
@@ -55,5 +57,6 @@ public class RoutingSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
+    Logger.getInstance().processInputs("Routing", inputs);
   }
 }

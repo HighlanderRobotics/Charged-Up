@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Grabber;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -19,7 +21,7 @@ import frc.robot.subsystems.Grabber.GrabberIO.GrabberIOInputs;
 
 public class GrabberSubsystem extends SubsystemBase {
   GrabberIOFalcon io = new GrabberIOFalcon();
-  GrabberIOInputs inputs = new GrabberIOInputs();
+  GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
 
   LinearFilter intakeCurrentFilter = LinearFilter.movingAverage(50);
   LinearFilter pivotCurrentFilter = LinearFilter.movingAverage(10);
@@ -237,6 +239,7 @@ public class GrabberSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
+    Logger.getInstance().processInputs("Grabber", inputs);
 
     if (io.getLimitSwitch()) {
       resetEncoderToZero();

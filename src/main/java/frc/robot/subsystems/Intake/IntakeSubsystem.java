@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Intake;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -13,13 +15,13 @@ import frc.robot.subsystems.Intake.IntakeIO.IntakeIOInputs;
 
 public class IntakeSubsystem extends SubsystemBase {
   IntakeIOFalcon io;
-  IntakeIOInputs inputs;
+  IntakeIOInputsAutoLogged inputs;
   // Timer to make sure that the intake has time to extend when we check if its out
   Timer timeSinceExtended = new Timer();
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
     io = new IntakeIOFalcon();
-    inputs = new IntakeIOInputs();
+    inputs = new IntakeIOInputsAutoLogged();
     timeSinceExtended.start();
   }
 
@@ -85,6 +87,7 @@ public class IntakeSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
+    Logger.getInstance().processInputs("Intake", inputs);
   }
 
   @Override

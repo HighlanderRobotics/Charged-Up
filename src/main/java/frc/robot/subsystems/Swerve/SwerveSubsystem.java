@@ -66,9 +66,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveDrivePoseEstimator poseEstimator;
   public SwerveDriveOdometry wheelOnlyOdo;
   public SwerveModuleIO[] swerveMods;
-  public SwerveModuleIOInputs[] inputs;
+  public SwerveModuleIOInputsAutoLogged[] inputs;
   public GyroIO gyroIO;
-  public GyroIOInputs gyroInputs = new GyroIOInputs();
+  public GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   public double simHeading = 0.0;
 
   public Field2d field = new Field2d();
@@ -127,11 +127,11 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     inputs =
-        new SwerveModuleIOInputs[] {
-          new SwerveModuleIOInputs(),
-          new SwerveModuleIOInputs(),
-          new SwerveModuleIOInputs(),
-          new SwerveModuleIOInputs()
+        new SwerveModuleIOInputsAutoLogged[] {
+          new SwerveModuleIOInputsAutoLogged(),
+          new SwerveModuleIOInputsAutoLogged(),
+          new SwerveModuleIOInputsAutoLogged(),
+          new SwerveModuleIOInputsAutoLogged()
         };
 
     /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
@@ -578,9 +578,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     for (int i = 0; i < swerveMods.length; i++) {
       swerveMods[i].updateInputs(inputs[i]);
+      Logger.getInstance().processInputs("Swerve Module " + i, inputs[i]);
     }
 
     gyroIO.updateInputs(gyroInputs);
+    Logger.getInstance().processInputs("Gyro", gyroInputs);
     simHeading += Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond);
 
     Logger.getInstance()

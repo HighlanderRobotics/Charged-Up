@@ -15,6 +15,8 @@ import java.io.File;
 import java.util.function.DoubleSupplier;
 import javax.imageio.ImageIO;
 
+import org.littletonrobotics.junction.Logger;
+
 public class LEDSubsystem extends SubsystemBase {
   LEDIOPWM io = new LEDIOPWM();
   LEDIOInputs inputs = new LEDIOInputs();
@@ -150,6 +152,7 @@ public class LEDSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
+    Logger.getInstance().processInputs("LEDs", inputs);
   }
 
   @Override

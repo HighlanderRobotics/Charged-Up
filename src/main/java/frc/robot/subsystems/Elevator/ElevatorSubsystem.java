@@ -2,6 +2,7 @@ package frc.robot.subsystems.Elevator;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -16,13 +17,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.Robot;
-import frc.robot.subsystems.Elevator.ElevatorIO.ElevatorIOInputs;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
   ElevatorIO io;
-  ElevatorIOInputs inputs;
+  ElevatorIOInputsAutoLogged inputs;
 
   boolean enabled = true;
   boolean isZeroing;
@@ -30,8 +30,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   TrapezoidProfile.State lastState = new TrapezoidProfile.State();
   TrapezoidProfile.State goal = new TrapezoidProfile.State();
 
-  Mechanism2d mech2d = new Mechanism2d(70, 60);
-  MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
+  Mechanism2d mech2d = new Mechanism2d(Units.inchesToMeters(35), Units.inchesToMeters(60));
+  MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, Units.inchesToMeters(0));
   MechanismLigament2d elevatorLig2d =
       root2d.append(
           new MechanismLigament2d(
@@ -43,7 +43,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public ElevatorSubsystem() {
     io = Robot.isReal() ? new ElevatorIOFalcon() : new ElevatorIOSim();
-    inputs = new ElevatorIOInputs();
+    inputs = new ElevatorIOInputsAutoLogged();
   }
 
   private void updatePID() {
@@ -105,7 +105,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   public void updateMech2d() {
-    elevatorLig2d.setLength(getExtensionInches());
+    elevatorLig2d.setLength(Units.inchesToMeters(getExtensionInches()) * 2.5);
   }
 
   public void enable() {
@@ -156,6 +156,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void periodic() {
 
     io.updateInputs(inputs);
+    Logger.getInstance().processInputs("Elevator", inputs);
 
     if (enabled) {
       updatePID();
@@ -171,6 +172,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     updateMech2d();
     Logger.getInstance().recordOutput("Elevator Mech 2D", mech2d);
+    Logger.getInstance().recordOutput("Elevator Goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+    Logger.getInstance().recordOutput("Elevator Setpoint", Constants.ElevatorConstants.PIDController.getSetpoint().position);
+    Logger.getInstance().recordOutput("Elevator Enabled", enabled);
 
     // We might have accidentaly tuned elevator pid with this call on, which modifies the state of
     // the pid controller

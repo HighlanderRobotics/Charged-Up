@@ -39,8 +39,9 @@ public interface LEDIO {
   public default void solid(Color color) {}
 
   private static double[] toColorCodes(Color[] colorCodes) {
-    double[] result = new double[colorCodes.length * 3];
-    for (int i = 0; i < result.length; i++) {
+    int len = colorCodes.length * 3;
+    double[] result = new double[len];
+    for (int i = 0; i < colorCodes.length; i++) {
       result[i * 3] = colorCodes[i].red;
       result[(i * 3) + 1] = colorCodes[i].green;
       result[(i * 3) + 2] = colorCodes[i].blue;

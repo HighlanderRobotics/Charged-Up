@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.Elevator;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.numbers.N1;
@@ -24,9 +26,11 @@ public class ElevatorIOSim implements ElevatorIO {
           Units.inchesToMeters(1.75),
           0.0,
           58.0,
-          true);
+          false);
 
   public void updateInputs(ElevatorIOInputs inputs) {
+    physicsSim.update(0.020);
+
     inputs.positionInches = getExtensionInches();
     inputs.percentOut = physicsSim.getOutput().get(0, 0) / 12.0;
     inputs.currentAmps = new double[] {physicsSim.getCurrentDrawAmps(), physicsSim.getCurrentDrawAmps()};
@@ -34,7 +38,8 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   public void setPercentOut(double percentOut, double ff) {
-    physicsSim.setInputVoltage((-percentOut * 12.0) + (-ff * 12.0));
+    Logger.getInstance().recordOutput("Elevator Voltage Out", (percentOut * 12.0) + (ff * 12.0));
+    physicsSim.setInputVoltage((percentOut * 12.0) + (ff * 12.0));
   }
 
   public void setPercentOut(double percentOut) {
@@ -46,14 +51,14 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   public void zeroMotor() {
-    physicsSim.setState(new MatBuilder<N2, N1>(Nat.N2(), Nat.N1()).fill(0.0, 0.0));
+    // physicsSim.setState(new MatBuilder<N2, N1>(Nat.N2(), Nat.N1()).fill(0.0, 0.0));
   }
 
   public double getExtensionInches() {
-    return physicsSim.getPositionMeters();
+    return Units.metersToInches(physicsSim.getPositionMeters());
   }
 
   public boolean getLimitSwitch() {
-    return physicsSim.hasHitLowerLimit();
+    return false;
   }
 }
