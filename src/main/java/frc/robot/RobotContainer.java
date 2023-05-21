@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -93,9 +95,9 @@ public class RobotContainer {
     // Set default commands here
     swerveSubsystem.setDefaultCommand(
         swerveSubsystem.driveCommand(
-            () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
-            () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
-            () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()),
+            () -> modifyJoystickAxis(demoMode ? controller.getLeftY() * 0.4 : controller.getLeftY(), controller.getLeftTriggerAxis()),
+            () -> modifyJoystickAxis(demoMode ? controller.getLeftX() * 0.4 : controller.getLeftX(), controller.getLeftTriggerAxis()),
+            () -> modifyJoystickAxis(demoMode ? controller.getRightX() * 0.6 : controller.getRightX(), controller.getLeftTriggerAxis()),
             true,
             true,
             true));
@@ -148,6 +150,9 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
+    new Trigger(() -> demoMode)
+        .onTrue(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kGreen), () -> 0.25).withTimeout(2.0))
+        .onFalse(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kRed), 0.25));
     controller
         .rightStick()
         .and(controller.leftStick())
@@ -164,7 +169,7 @@ public class RobotContainer {
                             controller.getLeftX() * 0.4, controller.getLeftTriggerAxis()),
                     () ->
                         modifyJoystickAxis(
-                            controller.getRightX() * 0.4, controller.getLeftTriggerAxis()),
+                            controller.getRightX() * 0.65, controller.getLeftTriggerAxis()),
                     true,
                     true,
                     true)
@@ -300,6 +305,8 @@ public class RobotContainer {
     operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
     operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
     operator.start().whileTrue(greybotsGrabberSubsystem.resetPivotCommand());
+    operator.leftStick().onTrue(new InstantCommand(() -> demoMode = true));
+    operator.rightStick().onTrue(new InstantCommand(() -> demoMode = false));
     // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem,
     // swerveSubsystem, grabberSubsystem,
     // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
@@ -455,7 +462,9 @@ public class RobotContainer {
 
   private void addDashboardCommands() {
     LoggingWrapper.shared.add(
-        "Demo Mode", new StartEndCommand(() -> demoMode = true, () -> demoMode = false));
+        "Demo Mode", new RunCommand(() -> demoMode = true));
+    LoggingWrapper.shared.add(
+        "Demo Mode off", new InstantCommand(() -> demoMode = false));
 
     LoggingWrapper.shared.add("intake toggle", intakeSubsystem.extendCommand());
 
@@ -568,5 +577,9 @@ public class RobotContainer {
     } else {
       ledSubsystem.runColorAlong(Color.kBlue, Constants.LEDConstants.defaultColor, 12, 2);
     }
+  }
+
+  public void robotPeriodic() {
+    LoggingWrapper.shared.add("Demo Mode Readout", demoMode);
   }
 }
