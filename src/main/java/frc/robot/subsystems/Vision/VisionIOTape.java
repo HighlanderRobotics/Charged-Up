@@ -179,4 +179,8 @@ public class VisionIOTape implements VisionIO {
   public boolean hasTargets() {
     return camera.getLatestResult().hasTargets();
   }
+
+  @Override
+  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {    
+  }
 }

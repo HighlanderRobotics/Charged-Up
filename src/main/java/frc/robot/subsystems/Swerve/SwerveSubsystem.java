@@ -14,6 +14,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -51,7 +52,10 @@ import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Swerve.GyroIO.GyroIOInputs;
 import frc.robot.subsystems.Swerve.SwerveModuleIO.SwerveModuleIOInputs;
 import frc.robot.subsystems.Vision.VisionIOApriltags;
+import frc.robot.subsystems.Vision.VisionIOSimApriltags;
 import frc.robot.subsystems.Vision.VisionIOTape;
+import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -77,6 +81,8 @@ public class SwerveSubsystem extends SubsystemBase {
   private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, -0.01);
 
   private VisionIOApriltags apriltagVisionSubsystem = new VisionIOApriltags();
+  private VisionIOSimApriltags apriltagVisionSim = new VisionIOSimApriltags();
+  private VisionIOInputs visionIOInputs = new VisionIOInputs();
   private LinearFilter tapeYawFilter = LinearFilter.singlePoleIIR(0.2, 0.020);
   private double tapeYawFilterVal = 0;
 
@@ -616,6 +622,9 @@ public class SwerveSubsystem extends SubsystemBase {
       pose = poseEstimator.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
       wheelOnlyOdo.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
     }
+
+    apriltagVisionSim.updateInputs(visionIOInputs, new Pose3d(pose));
+    Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
 
     List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
         apriltagVisionSubsystem.getMeasurement(pose);

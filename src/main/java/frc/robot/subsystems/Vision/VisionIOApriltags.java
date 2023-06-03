@@ -7,6 +7,7 @@ package frc.robot.subsystems.Vision;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInLayouts;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -153,5 +154,9 @@ public class VisionIOApriltags implements VisionIO {
     }
 
     return estimations;
+  }
+
+  @Override
+  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
   }
 }

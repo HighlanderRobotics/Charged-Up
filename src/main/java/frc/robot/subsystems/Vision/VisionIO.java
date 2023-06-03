@@ -24,6 +24,8 @@ public interface VisionIO {
     double timeSinceLastTimestamp = 0.0;
     Pose3d lastPose = new Pose3d();
     ArrayList<Long> tags = new ArrayList<>();
+    double[] cornersX = new double[] {};
+    double[] cornersY = new double[] {};
 
     @Override
     public void toLog(LogTable table) {
@@ -39,6 +41,8 @@ public interface VisionIO {
         tagsArray[i] = tags.get(i);
       }
       table.put("Tags Used", tagsArray);
+      table.put("Target Corners X", cornersX);
+      table.put("Target Corners Y", cornersY);
     }
 
     @Override
@@ -61,6 +65,8 @@ public interface VisionIO {
       for (int i = 0; i < loggedTags.length; i++) {
         tags.set(i, loggedTags[i]);
       }
+      cornersX = table.getDoubleArray("Target Corners X", cornersX);
+      cornersY = table.getDoubleArray("Target Corners Y", cornersY);
     }
   }
 
@@ -80,4 +86,6 @@ public interface VisionIO {
             new EstimatedRobotPose(new Pose3d(), 0, List.of()),
             Constants.PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS));
   }
+
+  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose);
 }
