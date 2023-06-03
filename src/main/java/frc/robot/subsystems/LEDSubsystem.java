@@ -4,16 +4,10 @@
 
 package frc.robot.subsystems;
 
-import java.io.File;
-import java.util.function.DoubleSupplier;
-
-import javax.imageio.ImageIO;
-
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -21,6 +15,9 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
+import java.io.File;
+import java.util.function.DoubleSupplier;
+import javax.imageio.ImageIO;
 
 public class LEDSubsystem extends SubsystemBase {
   AddressableLED led;
@@ -76,17 +73,19 @@ public class LEDSubsystem extends SubsystemBase {
     return new RunCommand(() -> setBlinking(color, secOn.getAsDouble()), this);
   }
 
-  public CommandBase setBlinkingCommand(Color8Bit colorOn, Color8Bit colorOff, DoubleSupplier secOn) {
-    return new RunCommand(() -> setBlinking(colorOn, colorOff, secOn.getAsDouble(), secOn.getAsDouble()), this);
+  public CommandBase setBlinkingCommand(
+      Color8Bit colorOn, Color8Bit colorOff, DoubleSupplier secOn) {
+    return new RunCommand(
+        () -> setBlinking(colorOn, colorOff, secOn.getAsDouble(), secOn.getAsDouble()), this);
   }
 
   public void setNoise(Color8Bit colorA, Color8Bit colorB, int value) {
     try {
       var image = ImageIO.read(new File(Filesystem.getDeployDirectory() + "/ledNoise.png"));
       LoggingWrapper.shared.add("huh", value);
-      LoggingWrapper.shared.add("test color", (image.getRGB(value, 0)&0xFF) / 255.0);
+      LoggingWrapper.shared.add("test color", (image.getRGB(value, 0) & 0xFF) / 255.0);
       for (int i = 0; i < buffer.getLength(); i++) {
-        double t = (image.getRGB(value, i)&0xFF) / 255.0;
+        double t = (image.getRGB(value, i) & 0xFF) / 255.0;
         buffer.setRGB(i, (int) (colorA.red * t), (int) (colorA.green * t), (int) (colorA.blue * t));
       }
     } catch (Exception e) {
@@ -96,7 +95,11 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   public CommandBase setNoiseCommand(Color8Bit color) {
-    return new RunCommand(() -> setNoise(color, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20) % 400), this);
+    return new RunCommand(
+        () ->
+            setNoise(
+                color, new Color8Bit(Color.kBlack), (int) (Timer.getFPGATimestamp() * 20) % 400),
+        this);
   }
 
   private static Color8Bit dim(Color8Bit color, double t) {
@@ -104,7 +107,10 @@ public class LEDSubsystem extends SubsystemBase {
   }
 
   private static Color8Bit interpolate(Color8Bit a, Color8Bit b, double t) {
-    return new Color8Bit(interpolate(a.red, b.red, t), interpolate(a.green, b.green, t), interpolate(a.blue, b.blue, t));
+    return new Color8Bit(
+        interpolate(a.red, b.red, t),
+        interpolate(a.green, b.green, t),
+        interpolate(a.blue, b.blue, t));
   }
 
   private static int interpolate(double v0, double v1, double t) {
@@ -131,7 +137,7 @@ public class LEDSubsystem extends SubsystemBase {
   public void runColorAlong(Color colorDash, Color8Bit colorBg, int dashLength, int speed) {
     setSolid(colorBg);
     for (int i = dashStart; i < dashStart + dashLength; i++) {
-        buffer.setLED(i % buffer.getLength(), colorDash);
+      buffer.setLED(i % buffer.getLength(), colorDash);
     }
 
     for (int i = dashStart; i < dashStart + dashLength; i++) {
@@ -149,7 +155,7 @@ public class LEDSubsystem extends SubsystemBase {
   // public CommandBase setBatteryStatusCommand() {
   //   return new RunCommand(() -> {
   //     setProgress(
-  //       interpolate(new Color8Bit(255, 0, 0), new Color8Bit(0, 255, 0), 
+  //       interpolate(new Color8Bit(255, 0, 0), new Color8Bit(0, 255, 0),
   //       MathUtil.clamp((RoboRioDataJNI.getVInVoltage() - 10) / 3, 0, 4)),
   //       4);
   //   }, this);
@@ -159,9 +165,8 @@ public class LEDSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     led.setData(buffer);
-  } 
+  }
 
   @Override
-  public void simulationPeriodic() {
-  }
+  public void simulationPeriodic() {}
 }

@@ -5,21 +5,22 @@
 package frc.robot;
 
 import com.pathplanner.lib.PathPoint;
-
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
 /** Add your docs here. */
 public class PathPointOpen extends PathPoint {
 
-    public PathPointOpen(Translation2d position, Rotation2d heading) {
-        super(position, heading);
-        //TODO Auto-generated constructor stub
-    }
-    public Translation2d getTranslation2d () {
-        return position;
-    }
-    public Rotation2d getRotation2d() {
-        return heading;
-    }
+  public PathPointOpen(Translation2d position, Rotation2d heading) {
+    super(position, heading);
+    // TODO Auto-generated constructor stub
+  }
+
+  public Translation2d getTranslation2d() {
+    return position;
+  }
+
+  public Rotation2d getRotation2d() {
+    return heading;
+  }
 }

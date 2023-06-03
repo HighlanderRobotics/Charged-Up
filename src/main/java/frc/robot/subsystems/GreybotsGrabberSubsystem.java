@@ -7,11 +7,8 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -27,16 +24,16 @@ import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 
 public class GreybotsGrabberSubsystem extends SubsystemBase {
-  static HighlanderFalcon grabberIntake = new HighlanderFalcon(Constants.MechanismConstants.grabberIntakeID, "CANivore", 1, 5e-1, 0.0, 0.0);
-  static HighlanderFalcon grabberPivot = new HighlanderFalcon(
-    Constants.MechanismConstants.grabberPivotID, 
-    "CANivore",
-    1.0, 
-    2.0e-2, 
-    0.0, 
-    0.0);
-  ReversibleDigitalInput resetLimitSwitch = new ReversibleDigitalInput(Constants.MechanismConstants.grabberLimitSwitch, true);
-  ReversibleDigitalInput cubeBeambreak = new ReversibleDigitalInput(Constants.MechanismConstants.grabberBeambreak, true);
+  static HighlanderFalcon grabberIntake =
+      new HighlanderFalcon(
+          Constants.MechanismConstants.grabberIntakeID, "CANivore", 1, 5e-1, 0.0, 0.0);
+  static HighlanderFalcon grabberPivot =
+      new HighlanderFalcon(
+          Constants.MechanismConstants.grabberPivotID, "CANivore", 1.0, 2.0e-2, 0.0, 0.0);
+  ReversibleDigitalInput resetLimitSwitch =
+      new ReversibleDigitalInput(Constants.MechanismConstants.grabberLimitSwitch, true);
+  ReversibleDigitalInput cubeBeambreak =
+      new ReversibleDigitalInput(Constants.MechanismConstants.grabberBeambreak, true);
   DutyCycleEncoder absEncoder = new DutyCycleEncoder(Constants.ArmConstants.armEncoderID);
   LinearFilter intakeCurrentFilter = LinearFilter.movingAverage(50);
   LinearFilter pivotCurrentFilter = LinearFilter.movingAverage(10);
@@ -98,11 +95,13 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
   }
 
   private void goToSingleSubstationRotation() {
-    grabberPivot.set(ControlMode.Position, Constants.MechanismConstants.grabberSingleSubstationRotation);
+    grabberPivot.set(
+        ControlMode.Position, Constants.MechanismConstants.grabberSingleSubstationRotation);
   }
 
   private void goToDoubleSubstationRotation() {
-    grabberPivot.set(ControlMode.Position, Constants.MechanismConstants.grabberDoubleSubstationRotation);
+    grabberPivot.set(
+        ControlMode.Position, Constants.MechanismConstants.grabberDoubleSubstationRotation);
   }
 
   private void goToScoringRotation() {
@@ -123,45 +122,72 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
     grabberPivot.set(ControlMode.PercentOutput, 0);
   }
 
-  public CommandBase intakeCubeCommand(){
-    return new RunCommand(() -> {intakeCube(); goToRoutingRotation();}, this)
-      .until(() -> cubeBeambreak.get())
-      .andThen(new WaitCommand(0.4))
-      .finallyDo((boolean interrupt) -> {stop(); gamePiece = GamePiece.Cube;});
+  public CommandBase intakeCubeCommand() {
+    return new RunCommand(
+            () -> {
+              intakeCube();
+              goToRoutingRotation();
+            },
+            this)
+        .until(() -> cubeBeambreak.get())
+        .andThen(new WaitCommand(0.4))
+        .finallyDo(
+            (boolean interrupt) -> {
+              stop();
+              gamePiece = GamePiece.Cube;
+            });
   }
 
-  public CommandBase intakeConeDoubleCommand(){
-    return new InstantCommand(() -> {intakeCurrentFilter.reset(); goToDoubleSubstationRotation();}).andThen(
-      new RunCommand(() -> intakeCone(), this))
-      .until(() -> intakeCurrentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
-      .andThen(
-        new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
-        new InstantCommand(() -> stop()), 
-        new InstantCommand(() -> gamePiece = GamePiece.Cone),
-        runToRoutingCommand());
+  public CommandBase intakeConeDoubleCommand() {
+    return new InstantCommand(
+            () -> {
+              intakeCurrentFilter.reset();
+              goToDoubleSubstationRotation();
+            })
+        .andThen(new RunCommand(() -> intakeCone(), this))
+        .until(() -> intakeCurrentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
+        .andThen(
+            new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
+            new InstantCommand(() -> stop()),
+            new InstantCommand(() -> gamePiece = GamePiece.Cone),
+            runToRoutingCommand());
   }
-  
-  public CommandBase intakeConeSingleCommand(){
-    return new InstantCommand(() -> {intakeCurrentFilter.reset(); goToSingleSubstationRotation();}).andThen(
-      new RunCommand(() -> intakeCone(), this))
-      .until(() -> intakeCurrentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
-      .andThen(
-        new InstantCommand(() -> gamePiece = GamePiece.Cone),
-        new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
-        new InstantCommand(() -> stop()), 
-        runToRoutingCommand());
+
+  public CommandBase intakeConeSingleCommand() {
+    return new InstantCommand(
+            () -> {
+              intakeCurrentFilter.reset();
+              goToSingleSubstationRotation();
+            })
+        .andThen(new RunCommand(() -> intakeCone(), this))
+        .until(() -> intakeCurrentFilter.calculate(grabberIntake.getStatorCurrent()) > 60.0)
+        .andThen(
+            new InstantCommand(() -> gamePiece = GamePiece.Cone),
+            new RunCommand(() -> intakeCone(), this).withTimeout(0.4),
+            new InstantCommand(() -> stop()),
+            runToRoutingCommand());
   }
 
   public CommandBase intakeConeSingleContinuousCommand() {
     return new RunCommand(() -> intakeCone()).alongWith(runToSingleSubstationCommand());
   }
 
-  public CommandBase outakeCubeCommand(){
-    return new RunCommand(() -> {outakeCube(); gamePiece = GamePiece.None;}, this);
+  public CommandBase outakeCubeCommand() {
+    return new RunCommand(
+        () -> {
+          outakeCube();
+          gamePiece = GamePiece.None;
+        },
+        this);
   }
 
-  public CommandBase outakeConeCommand(){
-    return new RunCommand(() -> {outakeCone(); gamePiece = GamePiece.None;}, this);
+  public CommandBase outakeConeCommand() {
+    return new RunCommand(
+        () -> {
+          outakeCone();
+          gamePiece = GamePiece.None;
+        },
+        this);
   }
 
   public CommandBase runToStorageCommand() {
@@ -186,39 +212,50 @@ public class GreybotsGrabberSubsystem extends SubsystemBase {
 
   public CommandBase runToRoutingStopCommand() {
     return runToRoutingCommand()
-      .alongWith(new ConditionalCommand(
-        new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0.2))
-          .withTimeout(0.5).andThen(new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0))), 
-        new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0)),
-        () -> gamePiece == GamePiece.Cone));
+        .alongWith(
+            new ConditionalCommand(
+                new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0.2))
+                    .withTimeout(0.5)
+                    .andThen(new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0))),
+                new RunCommand(() -> grabberIntake.set(ControlMode.PercentOutput, 0)),
+                () -> gamePiece == GamePiece.Cone));
   }
 
   public CommandBase scoreConeCommand() {
-    return runToScoringCommand().raceWith(new RunCommand(() -> grabberIntake.setPercentOut(0)))
-      .raceWith(new WaitCommand(0.2).andThen(new WaitUntilCommand(() -> grabberIntake.getClosedLoopError() < 500.0)))
-      .andThen(
-        outakeConeCommand().withTimeout(0.5)
-      );
+    return runToScoringCommand()
+        .raceWith(new RunCommand(() -> grabberIntake.setPercentOut(0)))
+        .raceWith(
+            new WaitCommand(0.2)
+                .andThen(new WaitUntilCommand(() -> grabberIntake.getClosedLoopError() < 500.0)))
+        .andThen(outakeConeCommand().withTimeout(0.5));
   }
 
   public CommandBase scoreCubeCommand() {
-    return runToRoutingCommand().until(() -> grabberIntake.getClosedLoopError() < 1000.0)
-      .andThen(
-        outakeCubeCommand().withTimeout(0.5)
-      );
+    return runToRoutingCommand()
+        .until(() -> grabberIntake.getClosedLoopError() < 1000.0)
+        .andThen(outakeCubeCommand().withTimeout(0.5));
   }
 
   public Command stopCommand() {
-    return new RunCommand(() -> {stop();}, this);
+    return new RunCommand(
+        () -> {
+          stop();
+        },
+        this);
   }
 
   public CommandBase resetPivotCommand() {
     return new FunctionalCommand(
-      () -> grabberIntake.set(ControlMode.PercentOutput, 0.0), 
-      () -> grabberPivot.set(ControlMode.PercentOutput, -0.2), 
-      (interrupt) -> {if (!interrupt) {resetEncoderToZero();} stop();}, 
-      () -> resetLimitSwitch.get(),
-      this);
+        () -> grabberIntake.set(ControlMode.PercentOutput, 0.0),
+        () -> grabberPivot.set(ControlMode.PercentOutput, -0.2),
+        (interrupt) -> {
+          if (!interrupt) {
+            resetEncoderToZero();
+          }
+          stop();
+        },
+        () -> resetLimitSwitch.get(),
+        this);
   }
 
   @Override
