@@ -51,6 +51,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
   public void resetEncoderToZero() {
     io.resetPivotEncoder();
+    Logger.getInstance().recordOutput("is it reset to 0", true);
   }
 
   private void intakeCube() {
@@ -222,6 +223,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   public CommandBase resetPivotCommand() {
+    
     return new FunctionalCommand(
         () -> io.setRollersPercentOut(0.0),
         () -> io.setPivotPercentOut(-0.2),
@@ -233,6 +235,8 @@ public class GrabberSubsystem extends SubsystemBase {
         },
         () -> io.getLimitSwitch(),
         this);
+
+
   }
 
   @Override
@@ -244,7 +248,7 @@ public class GrabberSubsystem extends SubsystemBase {
     if (io.getLimitSwitch()) {
       resetEncoderToZero();
     }
-
+    
     // LoggingWrapper.shared.add("grabber output", grabberIntake.getMotorOutputVoltage());
     // LoggingWrapper.shared.add("grabber error", grabberIntake.getClosedLoopError(0));
     // LoggingWrapper.shared.add("grabber pivot angle", grabberPivot.getSelectedSensorPosition());

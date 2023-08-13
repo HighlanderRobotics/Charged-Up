@@ -6,6 +6,8 @@ import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -103,11 +105,10 @@ public class SwerveSubsystem extends SubsystemBase {
   private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
   private ArrayList<Pose2d> dashboardFieldTapePoses = new ArrayList<>();
 
-  public ProfiledPIDController headingController =
-      new ProfiledPIDController(1.2, 0, 0.1, new Constraints(Math.PI * 4, Math.PI * 6));
+  public ProfiledPIDController headingController = new ProfiledPIDController(1.2, 0, 0.1,
+      new Constraints(Math.PI * 4, Math.PI * 6));
 
-  public VisionIOTape tapeVisionSubsystem =
-      new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
+  public VisionIOTape tapeVisionSubsystem = new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
 
   public SwerveSubsystem() {
     gyroIO = Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim();
@@ -115,32 +116,31 @@ public class SwerveSubsystem extends SubsystemBase {
     headingController.enableContinuousInput(0, Math.PI * 2);
     headingController.setTolerance(0.2);
     if (Robot.isReal()) {
-      swerveMods =
-          new SwerveModuleIOFalcon[] {
-            new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
-            new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
-            new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
-            new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
-          };
+      swerveMods = new SwerveModuleIOFalcon[] {
+          new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
+          new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
+          new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
+          new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
+      };
     } else {
-      swerveMods =
-          new SwerveModuleIOSim[] {
-            new SwerveModuleIOSim(0, Constants.Swerve.Mod0.constants),
-            new SwerveModuleIOSim(1, Constants.Swerve.Mod1.constants),
-            new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
-            new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
-          };
+      swerveMods = new SwerveModuleIOSim[] {
+          new SwerveModuleIOSim(0, Constants.Swerve.Mod0.constants),
+          new SwerveModuleIOSim(1, Constants.Swerve.Mod1.constants),
+          new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
+          new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
+      };
     }
 
-    inputs =
-        new SwerveModuleIOInputsAutoLogged[] {
-          new SwerveModuleIOInputsAutoLogged(),
-          new SwerveModuleIOInputsAutoLogged(),
-          new SwerveModuleIOInputsAutoLogged(),
-          new SwerveModuleIOInputsAutoLogged()
-        };
+    inputs = new SwerveModuleIOInputsAutoLogged[] {
+        new SwerveModuleIOInputsAutoLogged(),
+        new SwerveModuleIOInputsAutoLogged(),
+        new SwerveModuleIOInputsAutoLogged(),
+        new SwerveModuleIOInputsAutoLogged()
+    };
 
-    /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
+    /*
+     * By pausing init for a second before setting module offsets, we avoid a bug
+     * with inverting motors.
      * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
      */
     Timer.delay(1.0);
@@ -149,17 +149,15 @@ public class SwerveSubsystem extends SubsystemBase {
     Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
     Vector<N3> visStdDevs = VecBuilder.fill(0.6, 0.6, 0.3);
 
-    poseEstimator =
-        new SwerveDrivePoseEstimator(
-            Constants.Swerve.swerveKinematics,
-            getYaw(),
-            getModulePositions(),
-            new Pose2d(),
-            odoStdDevs,
-            visStdDevs);
+    poseEstimator = new SwerveDrivePoseEstimator(
+        Constants.Swerve.swerveKinematics,
+        getYaw(),
+        getModulePositions(),
+        new Pose2d(),
+        odoStdDevs,
+        visStdDevs);
 
-    wheelOnlyOdo =
-        new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
+    wheelOnlyOdo = new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
 
     List<Pose2d> tapePoses = new ArrayList<>();
 
@@ -173,10 +171,18 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     field.getObject("tape targets").setPoses(tapePoses);
+
+    PPSwerveControllerCommand
+        .setLoggingCallbacks(
+          (traj) -> Logger.getInstance().recordOutput("Active Trajectory", traj), 
+          (target) -> Logger.getInstance().recordOutput("Active Trajectory Target", target), 
+          null, 
+          null);
   }
 
   /**
-   * Set the modules to the correct state based on a desired translation and rotation, either field
+   * Set the modules to the correct state based on a desired translation and
+   * rotation, either field
    * or robot relative and either open or closed loop
    */
   public void drive(
@@ -187,18 +193,17 @@ public class SwerveSubsystem extends SubsystemBase {
       boolean useAlliance) {
     Pose2d velPose = new Pose2d(translation.times(0.02), new Rotation2d(rotation * 0.02));
     Twist2d velTwist = new Pose2d().log(velPose);
-    SwerveModuleState[] swerveModuleStates =
-        Constants.Swerve.swerveKinematics.toSwerveModuleStates(
-            fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                    velTwist.dx / 0.02,
-                    velTwist.dy / 0.02,
-                    velTwist.dtheta / 0.02,
-                    useAlliance && DriverStation.getAlliance() == DriverStation.Alliance.Red
-                        ? getYaw()
-                        : getYaw())
-                : new ChassisSpeeds(
-                    velTwist.dx / 0.02, velTwist.dy / 0.02, velTwist.dtheta / 0.02));
+    SwerveModuleState[] swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(
+        fieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                velTwist.dx / 0.02,
+                velTwist.dy / 0.02,
+                velTwist.dtheta / 0.02,
+                useAlliance && DriverStation.getAlliance() == DriverStation.Alliance.Red
+                    ? getYaw()
+                    : getYaw())
+            : new ChassisSpeeds(
+                velTwist.dx / 0.02, velTwist.dy / 0.02, velTwist.dtheta / 0.02));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
     for (SwerveModuleIO mod : swerveMods) {
@@ -208,7 +213,10 @@ public class SwerveSubsystem extends SubsystemBase {
     chassisSpeeds = new ChassisSpeeds(velTwist.dx, velTwist.dy, velTwist.dtheta);
   }
 
-  /** Generates a Command that consumes an X, Y, and Theta input supplier to drive the robot */
+  /**
+   * Generates a Command that consumes an X, Y, and Theta input supplier to drive
+   * the robot
+   */
   public CommandBase driveCommand(
       DoubleSupplier x,
       DoubleSupplier y,
@@ -217,14 +225,13 @@ public class SwerveSubsystem extends SubsystemBase {
       boolean isOpenLoop,
       boolean useAlliance) {
     return new RunCommand(
-        () ->
-            drive(
-                new Translation2d(x.getAsDouble(), y.getAsDouble())
-                    .times(Constants.Swerve.maxSpeed),
-                omega.getAsDouble() * Constants.Swerve.maxAngularVelocity,
-                fieldRelative,
-                isOpenLoop,
-                useAlliance),
+        () -> drive(
+            new Translation2d(x.getAsDouble(), y.getAsDouble())
+                .times(Constants.Swerve.maxSpeed),
+            omega.getAsDouble() * Constants.Swerve.maxAngularVelocity,
+            fieldRelative,
+            isOpenLoop,
+            useAlliance),
         this);
   }
 
@@ -250,32 +257,29 @@ public class SwerveSubsystem extends SubsystemBase {
       boolean fieldRelative,
       boolean isOpenLoop) {
     return new InstantCommand(
-            () -> {
-              Constants.AutoConstants.xController.reset(getPose().getX());
-              Constants.AutoConstants.yController.reset(getPose().getY());
-              headingController.reset(getYaw().getRadians() % (Math.PI * 2));
-              headingController.setGoal(theta.getAsDouble());
-            })
+        () -> {
+          Constants.AutoConstants.xController.reset(getPose().getX());
+          Constants.AutoConstants.yController.reset(getPose().getY());
+          headingController.reset(getYaw().getRadians() % (Math.PI * 2));
+          headingController.setGoal(theta.getAsDouble());
+        })
         .andThen(
             driveCommand(
-                    () ->
-                        deadband(
-                            Constants.AutoConstants.xController.calculate(
-                                pose.getX(), x.getAsDouble()),
-                            0.05),
-                    () ->
-                        deadband(
-                            Constants.AutoConstants.yController.calculate(
-                                pose.getY(), y.getAsDouble()),
-                            0.05),
-                    () ->
-                        deadband(
-                            headingController.calculate(
-                                pose.getRotation().getRadians() % (2 * Math.PI)),
-                            0.05),
-                    fieldRelative,
-                    isOpenLoop,
-                    false)
+                () -> deadband(
+                    Constants.AutoConstants.xController.calculate(
+                        pose.getX(), x.getAsDouble()),
+                    0.05),
+                () -> deadband(
+                    Constants.AutoConstants.yController.calculate(
+                        pose.getY(), y.getAsDouble()),
+                    0.05),
+                () -> deadband(
+                    headingController.calculate(
+                        pose.getRotation().getRadians() % (2 * Math.PI)),
+                    0.05),
+                fieldRelative,
+                isOpenLoop,
+                false)
                 .alongWith(
                     new PrintCommand(pose.getX() + " x"),
                     new PrintCommand(pose.getY() + " y"),
@@ -315,7 +319,7 @@ public class SwerveSubsystem extends SubsystemBase {
     var path = PathPlanner.generatePath(constraints, start, end);
     List<Pose2d> poses = new ArrayList<>();
     // for (State state : path.getStates()) {
-    //     poses.add(state.poseMeters);
+    // poses.add(state.poseMeters);
     // }
     // field.getObject("path").setPoses(poses);
     return path;
@@ -337,10 +341,9 @@ public class SwerveSubsystem extends SubsystemBase {
     double distance = Double.MAX_VALUE;
     if (alliance == Alliance.Blue) {
       for (PathPointOpen point : ScoringPositions.bluePositionsList) {
-        double currentDistance =
-            Math.sqrt(
-                Math.pow(pose.getY() - point.getTranslation2d().getY(), 2)
-                    + Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+        double currentDistance = Math.sqrt(
+            Math.pow(pose.getY() - point.getTranslation2d().getY(), 2)
+                + Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
         if (currentDistance < distance) {
           distance = currentDistance;
           output = point;
@@ -350,10 +353,9 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     if (alliance == Alliance.Red) {
       for (PathPointOpen point : ScoringPositions.redPositionsList) {
-        double currentDistance =
-            Math.sqrt(
-                Math.pow(pose.getY() - point.getTranslation2d().getY(), 2)
-                    + Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
+        double currentDistance = Math.sqrt(
+            Math.pow(pose.getY() - point.getTranslation2d().getY(), 2)
+                + Math.pow(pose.getX() - point.getTranslation2d().getX(), 2));
         if (currentDistance < distance) {
           distance = currentDistance;
           output = point;
@@ -372,13 +374,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public boolean checkIfConeGoal(
       PathPointOpen goal) { // this doesn't apply for level 1 scoring positions
-    // System.out.println("index " + (Constants.ScoringPositions.bluePositionsList.indexOf(goal) %
+    // System.out.println("index " +
+    // (Constants.ScoringPositions.bluePositionsList.indexOf(goal) %
     // 3));
-    // System.out.println("index " + (Constants.ScoringPositions.redPositionsList.indexOf(goal) %
+    // System.out.println("index " +
+    // (Constants.ScoringPositions.redPositionsList.indexOf(goal) %
     // 3));
     if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1
-        || (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3)
-            == 1) { // then its a cube goal
+        || (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3) == 1) { // then its a cube goal
       return false;
     } else { // then its a cone goal
       return true;
@@ -397,31 +400,31 @@ public class SwerveSubsystem extends SubsystemBase {
   public SwerveAutoBuilder autoBuilder(Map<String, Command> eventMap) {
     return new SwerveAutoBuilder(
         () -> getPose(), // Pose2d supplier
-        (Pose2d pose) ->
-            resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
+        (Pose2d pose) -> resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
         new PIDConstants(
             Constants.AutoConstants.kPXController,
             0.0,
-            0.0), // PID constants to correct for translation error (used to create the X and Y PID
+            0.0), // PID constants to correct for translation error (used to create the X and Y
+                  // PID
         // controllers)
         new PIDConstants(
             Constants.AutoConstants.kPThetaController,
             0.0,
             0.0), // PID constants to correct for rotation error (used to create the rotation
         // controller)
-        (ChassisSpeeds speeds) ->
-            this.drive(
-                new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
-                speeds.omegaRadiansPerSecond,
-                false,
-                false,
-                false), // Module states consumer used to output to the drive subsystem
+        (ChassisSpeeds speeds) -> this.drive(
+            new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
+            speeds.omegaRadiansPerSecond,
+            false,
+            false,
+            false), // Module states consumer used to output to the drive subsystem
         eventMap,
-        false, // Should the path be automatically mirrored depending on alliance color. Optional,
+        false, // Should the path be automatically mirrored depending on alliance color.
+               // Optional,
         // defaults to true
         this // The drive subsystem. Used to properly set the requirements of path following
-        // commands
-        );
+    // commands
+    );
   }
 
   public CommandBase autoBalanceVelocity() {
@@ -458,7 +461,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   // public CommandBase disableGamePieceOverride() {
-  //     return new InstantCommand(() -> isConeOveride = Optional.empty());
+  // return new InstantCommand(() -> isConeOveride = Optional.empty());
   // }
 
   /* Used by SwerveControllerCommand in Auto */
@@ -486,7 +489,8 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   /**
-   * @return the current state of each of the swerve modules, including current speed
+   * @return the current state of each of the swerve modules, including current
+   *         speed
    */
   public SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
@@ -557,9 +561,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase simpleTapeAllignCommand(
       DoubleSupplier xSupplier, DoubleSupplier ySupplier, LEDSubsystem ledSubsystem) {
     return new InstantCommand(
-            () -> {
-              headingController.reset(getYaw().getRadians());
-            })
+        () -> {
+          headingController.reset(getYaw().getRadians());
+        })
         .andThen(
             headingLockDriveCommand(xSupplier, () -> 0, () -> Math.PI, true, false)
                 .raceWith(
@@ -567,16 +571,15 @@ public class SwerveSubsystem extends SubsystemBase {
                     new WaitUntilCommand(() -> headingController.atGoal())))
         .andThen(
             headingLockDriveCommand(
-                    xSupplier,
-                    () ->
-                        tapeVisionSubsystem.hasTargets()
-                            ? tapeDriveAssistController.calculate(
-                                tapeYawFilterVal,
-                                Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
-                            : 0,
-                    () -> Math.PI,
-                    true,
-                    false)
+                xSupplier,
+                () -> tapeVisionSubsystem.hasTargets()
+                    ? tapeDriveAssistController.calculate(
+                        tapeYawFilterVal,
+                        Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
+                    : 0,
+                () -> Math.PI,
+                true,
+                false)
                 .alongWith(ledSubsystem.setBlinkingCommand(Color.kGreen, 0.25)));
   }
 
@@ -595,14 +598,14 @@ public class SwerveSubsystem extends SubsystemBase {
         .recordOutput(
             "Swerve States",
             new double[] {
-              swerveMods[0].getAbsoluteRotation().getRadians(),
-                  swerveMods[0].getState().speedMetersPerSecond,
-              swerveMods[1].getAbsoluteRotation().getRadians(),
-                  swerveMods[1].getState().speedMetersPerSecond,
-              swerveMods[2].getAbsoluteRotation().getRadians(),
-                  swerveMods[2].getState().speedMetersPerSecond,
-              swerveMods[3].getAbsoluteRotation().getRadians(),
-                  swerveMods[3].getState().speedMetersPerSecond
+                swerveMods[0].getAbsoluteRotation().getRadians(),
+                swerveMods[0].getState().speedMetersPerSecond,
+                swerveMods[1].getAbsoluteRotation().getRadians(),
+                swerveMods[1].getState().speedMetersPerSecond,
+                swerveMods[2].getAbsoluteRotation().getRadians(),
+                swerveMods[2].getState().speedMetersPerSecond,
+                swerveMods[3].getAbsoluteRotation().getRadians(),
+                swerveMods[3].getState().speedMetersPerSecond
             });
     Logger.getInstance().recordOutput("Swerve Pose", getPose());
     Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
@@ -610,9 +613,9 @@ public class SwerveSubsystem extends SubsystemBase {
         .recordOutput(
             "Swerve Desired Speeds",
             new double[] {
-              chassisSpeeds.vxMetersPerSecond,
-              chassisSpeeds.vyMetersPerSecond,
-              chassisSpeeds.omegaRadiansPerSecond
+                chassisSpeeds.vxMetersPerSecond,
+                chassisSpeeds.vyMetersPerSecond,
+                chassisSpeeds.omegaRadiansPerSecond
             });
 
     if (Robot.isReal()) {
@@ -626,8 +629,8 @@ public class SwerveSubsystem extends SubsystemBase {
     apriltagVisionSim.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
 
-    List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
-        apriltagVisionSubsystem.getMeasurement(pose);
+    List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements = apriltagVisionSubsystem
+        .getMeasurement(pose);
 
     for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements) {
       dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
@@ -640,11 +643,11 @@ public class SwerveSubsystem extends SubsystemBase {
     // Log swerve module information
     // May want to disable to conserve bandwidth
     // for(SwerveModule mod : mSwerveMods){
-    //     //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Cancoder",
+    // //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Cancoder",
     // mod.getCanCoder().getDegrees());
-    //     //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Integrated",
+    // //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Integrated",
     // mod.getPosition().angle.getDegrees());
-    //     //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Velocity",
+    // //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Velocity",
     // mod.getState().speedMetersPerSecond);
     // }
 

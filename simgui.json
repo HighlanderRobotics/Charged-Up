@@ -43,7 +43,8 @@
       "/SmartDashboard/reset elevator": "Command",
       "/SmartDashboard/reset to 0": "Command",
       "/SmartDashboard/rezero elevator": "Command",
-      "/SmartDashboard/scoring sequence": "Command"
+      "/SmartDashboard/scoring sequence": "Command",
+      "/SmartDashboard/sim Sim Field": "Field2d"
     },
     "windows": {
       "/SmartDashboard/Auto Chooser": {
