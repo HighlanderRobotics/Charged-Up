@@ -51,7 +51,6 @@ public class GrabberSubsystem extends SubsystemBase {
 
   public void resetEncoderToZero() {
     io.resetPivotEncoder();
-    Logger.getInstance().recordOutput("is it reset to 0", true);
   }
 
   private void intakeCube() {
@@ -247,6 +246,7 @@ public class GrabberSubsystem extends SubsystemBase {
 
     if (io.getLimitSwitch()) {
       resetEncoderToZero();
+      Logger.getInstance().recordOutput("grabber reset to 0", true);
     }
     
     // LoggingWrapper.shared.add("grabber output", grabberIntake.getMotorOutputVoltage());
