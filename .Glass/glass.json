@@ -6,7 +6,9 @@
       }
     },
     "types": {
+      "/AdvantageKit/RealOutputs/Elevator Mech 2D": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Auto Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
       "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
@@ -29,8 +31,10 @@
       "/SmartDashboard/reset elevator": "Command",
       "/SmartDashboard/reset to 0": "Command",
       "/SmartDashboard/reset to vision": "Command",
+      "/SmartDashboard/rezero": "Command",
       "/SmartDashboard/rezero elevator": "Command",
-      "/SmartDashboard/scoring sequence": "Command"
+      "/SmartDashboard/scoring sequence": "Command",
+      "/SmartDashboard/sim Sim Field": "Field2d"
     }
   },
   "NetworkTables Settings": {

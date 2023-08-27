@@ -513,7 +513,7 @@ public class RobotContainer {
         .recordOutput(
             "Controller Right X Adjusted",
             modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
-    SmartDashboard.putData("rezero", new InstantCommand(() -> grabberSubsystem.resetEncoderToZero()));
+    // SmartDashboard.putData("rezero", new InstantCommand(() -> grabberSubsystem.resetEncoderToZero()));
   }
 
   /**
