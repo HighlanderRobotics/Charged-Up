@@ -43,9 +43,9 @@ public class GrabberIOFalcon implements GrabberIO {
     inputs.rollersSpeedRPS = rollers.getSelectedSensorVelocity() * 10 / 2048;
     inputs.rollersCurrentAmps = rollers.getStatorCurrent();
 
-    inputs.pivotPercentOut = rollers.getMotorOutputPercent();
-    inputs.pivotPositionTicks = rollers.getSelectedSensorPosition();
-    inputs.pivotCurrentAmps = rollers.getStatorCurrent();
+    inputs.pivotPercentOut = pivot.getMotorOutputPercent();
+    inputs.pivotPositionTicks = pivot.getSelectedSensorPosition();
+    inputs.pivotCurrentAmps = pivot.getStatorCurrent();
   }
 
   @Override
@@ -55,6 +55,7 @@ public class GrabberIOFalcon implements GrabberIO {
 
   @Override
   public void setPivotTarget(double encoderTicks) {
+    System.out.println("Encoder Ticks: " + encoderTicks);
     pivot.set(ControlMode.Position, encoderTicks);
   }
 
