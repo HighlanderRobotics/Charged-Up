@@ -181,6 +181,5 @@ public class VisionIOTape implements VisionIO {
   }
 
   @Override
-  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {    
-  }
+  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
 }

@@ -14,7 +14,6 @@ import frc.robot.subsystems.LEDs.LEDIO.LEDIOInputs;
 import java.io.File;
 import java.util.function.DoubleSupplier;
 import javax.imageio.ImageIO;
-
 import org.littletonrobotics.junction.Logger;
 
 public class LEDSubsystem extends SubsystemBase {

@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.Grabber;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -17,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
-import frc.robot.subsystems.Grabber.GrabberIO.GrabberIOInputs;
+import org.littletonrobotics.junction.Logger;
 
 public class GrabberSubsystem extends SubsystemBase {
   GrabberIOFalcon io = new GrabberIOFalcon();
@@ -222,7 +220,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   public CommandBase resetPivotCommand() {
-    
+
     return new FunctionalCommand(
         () -> io.setRollersPercentOut(0.0),
         () -> io.setPivotPercentOut(-0.2),
@@ -234,10 +232,7 @@ public class GrabberSubsystem extends SubsystemBase {
         },
         () -> io.getLimitSwitch(),
         this);
-
-
   }
-  
 
   @Override
   public void periodic() {
@@ -249,7 +244,7 @@ public class GrabberSubsystem extends SubsystemBase {
       resetEncoderToZero();
       Logger.getInstance().recordOutput("grabber reset to 0", true);
     }
-    
+
     // LoggingWrapper.shared.add("grabber output", grabberIntake.getMotorOutputVoltage());
     // LoggingWrapper.shared.add("grabber error", grabberIntake.getClosedLoopError(0));
     // LoggingWrapper.shared.add("grabber pivot angle", grabberPivot.getSelectedSensorPosition());

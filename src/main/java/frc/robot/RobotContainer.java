@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -26,16 +24,16 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
-import frc.robot.subsystems.SuperstructureSubsystem;
-import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
-import frc.robot.subsystems.Grabber.GrabberIO;
 import frc.robot.subsystems.Grabber.GrabberSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem.GamePiece;
 import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Routing.RoutingSubsystem;
+import frc.robot.subsystems.SuperstructureSubsystem;
+import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -418,7 +416,6 @@ public class RobotContainer {
             )
             .withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
-  
 
   // Uses old logging system
   @Deprecated
@@ -513,7 +510,8 @@ public class RobotContainer {
         .recordOutput(
             "Controller Right X Adjusted",
             modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
-    SmartDashboard.putData("rezero", new InstantCommand(() -> grabberSubsystem.resetEncoderToZero()));
+    SmartDashboard.putData(
+        "rezero", new InstantCommand(() -> grabberSubsystem.resetEncoderToZero()));
   }
 
   /**

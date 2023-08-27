@@ -4,16 +4,11 @@
 
 package frc.robot.subsystems.Elevator;
 
-import org.littletonrobotics.junction.Logger;
-
-import edu.wpi.first.math.MatBuilder;
-import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.robot.Constants;
+import org.littletonrobotics.junction.Logger;
 
 /** Add your docs here. */
 public class ElevatorIOSim implements ElevatorIO {
@@ -33,7 +28,8 @@ public class ElevatorIOSim implements ElevatorIO {
 
     inputs.positionInches = getExtensionInches();
     inputs.percentOut = physicsSim.getOutput().get(0, 0) / 12.0;
-    inputs.currentAmps = new double[] {physicsSim.getCurrentDrawAmps(), physicsSim.getCurrentDrawAmps()};
+    inputs.currentAmps =
+        new double[] {physicsSim.getCurrentDrawAmps(), physicsSim.getCurrentDrawAmps()};
     inputs.switchPressed = getLimitSwitch();
   }
 

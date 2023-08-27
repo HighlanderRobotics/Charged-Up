@@ -173,8 +173,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     updateMech2d();
 
     Logger.getInstance().recordOutput("Elevator Mech 2D", mech2d);
-    Logger.getInstance().recordOutput("Elevator Goal", Constants.ElevatorConstants.PIDController.getGoal().position);
-    Logger.getInstance().recordOutput("Elevator Setpoint", Constants.ElevatorConstants.PIDController.getSetpoint().position);
+    Logger.getInstance()
+        .recordOutput(
+            "Elevator Goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+    Logger.getInstance()
+        .recordOutput(
+            "Elevator Setpoint", Constants.ElevatorConstants.PIDController.getSetpoint().position);
     Logger.getInstance().recordOutput("Elevator Enabled", enabled);
     Logger.getInstance().recordOutput("Is Zeroing", isZeroing);
 
