@@ -4,12 +4,10 @@
 
 package frc.robot.subsystems.Routing;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.subsystems.Routing.RoutingIO.RoutingIOInputs;
+import org.littletonrobotics.junction.Logger;
 
 public class RoutingSubsystem extends SubsystemBase {
   RoutingIOFalcon io;

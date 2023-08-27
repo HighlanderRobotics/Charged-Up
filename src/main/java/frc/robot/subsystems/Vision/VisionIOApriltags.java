@@ -157,6 +157,5 @@ public class VisionIOApriltags implements VisionIO {
   }
 
   @Override
-  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
-  }
+  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
 }
