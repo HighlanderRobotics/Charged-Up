@@ -5,6 +5,7 @@
 package frc.robot.subsystems.Grabber;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import frc.lib.components.HighlanderFalcon;
@@ -30,6 +31,7 @@ public class GrabberIOFalcon implements GrabberIO {
     pivot.setNeutralMode(NeutralMode.Brake);
     pivot.config_kF(0, 0);
     pivot.setInverted(TalonFXInvertType.CounterClockwise);
+    pivot.configSelectedFeedbackSensor(FeedbackDevice.IntegratedSensor);
   }
 
   @Override
