@@ -8,6 +8,7 @@ import org.littletonrobotics.junction.AutoLog;
 
 /** Add your docs here. */
 public interface GrabberIO {
+  
   @AutoLog
   public static class GrabberIOInputs {
     public double rollersSpeedRPS = 0.0;
@@ -19,7 +20,6 @@ public interface GrabberIO {
     public boolean switchPressed = false;
     public boolean beambreakTriggered = false;
   }
-
   public default void updateInputs(GrabberIOInputs inputs) {}
 
   public default void setRollersPercentOut(double percentOut) {}

@@ -58,6 +58,7 @@ public class GrabberIOFalcon implements GrabberIO {
 
   @Override
   public void setPivotPercentOut(double percentOut) {
+    System.out.println("percent out: "+ percentOut);
     pivot.setPercentOut(percentOut);
   }
 
