@@ -158,6 +158,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     io.updateInputs(inputs);
     Logger.getInstance().processInputs("Elevator", inputs);
 
+    // TODO change this to an enum instead of 2 booleans
     if (enabled) {
       updatePID();
     } else if (isZeroing) {

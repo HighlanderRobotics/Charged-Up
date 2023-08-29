@@ -290,7 +290,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Generates a Command that consumes a PathPlanner path and follows it */
   public Command followPathCommand(PathPlannerTrajectory path) {
-    // field.getObject("path goal").setPoses(path.getEndState().poseMeters);
     return new SwerveControllerCommand(
         path,
         () -> getPose(),
@@ -319,11 +318,6 @@ public class SwerveSubsystem extends SubsystemBase {
   public PathPlannerTrajectory getPathBetweenTwoPoints(
       PathConstraints constraints, PathPoint start, PathPoint end) {
     var path = PathPlanner.generatePath(constraints, start, end);
-    List<Pose2d> poses = new ArrayList<>();
-    // for (State state : path.getStates()) {
-    // poses.add(state.poseMeters);
-    // }
-    // field.getObject("path").setPoses(poses);
     return path;
   }
 
@@ -368,7 +362,6 @@ public class SwerveSubsystem extends SubsystemBase {
       }
     }
     field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
-    // ledSubsystem.setBlinking(color, 1);
     return output;
   }
 
@@ -378,12 +371,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public boolean checkIfConeGoal(
       PathPointOpen goal) { // this doesn't apply for level 1 scoring positions
-    // System.out.println("index " +
-    // (Constants.ScoringPositions.bluePositionsList.indexOf(goal) %
-    // 3));
-    // System.out.println("index " +
-    // (Constants.ScoringPositions.redPositionsList.indexOf(goal) %
-    // 3));
     if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1
         || (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3)
             == 1) { // then its a cube goal
@@ -394,7 +381,6 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
-    // System.out.println(nearestGoalIsCone);
     if (isCone) {
       return level.getConeInches();
     } else {
@@ -467,10 +453,6 @@ public class SwerveSubsystem extends SubsystemBase {
         false);
   }
 
-  // public CommandBase disableGamePieceOverride() {
-  // return new InstantCommand(() -> isConeOveride = Optional.empty());
-  // }
-
   /* Used by SwerveControllerCommand in Auto */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
@@ -483,6 +465,7 @@ public class SwerveSubsystem extends SubsystemBase {
   /** Return the pose of the drivebase, as estimated by the pose estimator. */
   public Pose2d getPose() {
     return wheelOnlyOdo.getPoseMeters();
+    // Use this if we want to use vision
     // return poseEstimator.getEstimatedPosition();
   }
 
@@ -646,17 +629,6 @@ public class SwerveSubsystem extends SubsystemBase {
           measurement.estimation.timestampSeconds,
           measurement.confidence.times(2.0));
     }
-
-    // Log swerve module information
-    // May want to disable to conserve bandwidth
-    // for(SwerveModule mod : mSwerveMods){
-    // //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Cancoder",
-    // mod.getCanCoder().getDegrees());
-    // //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Integrated",
-    // mod.getPosition().angle.getDegrees());
-    // //LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Velocity",
-    // mod.getState().speedMetersPerSecond);
-    // }
 
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());

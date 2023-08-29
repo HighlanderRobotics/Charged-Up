@@ -18,6 +18,7 @@ import frc.robot.Constants;
 
 /** Add your docs here. */
 public class SwerveModuleIOSim implements SwerveModuleIO {
+  // Physics sims arent in use right now, but could add them in later
   FlywheelSim drivePhysicsSim = new FlywheelSim(DCMotor.getFalcon500(1), 6.75 / 1, 0.025);
   SingleJointedArmSim steerPhysicsSim =
       new SingleJointedArmSim(
@@ -51,18 +52,11 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
 
   @Override
   public void updateInputs(SwerveModuleIOInputs inputs) {
-    // Update physics sim
-    // drivePhysicsSim.setInputVoltage(driveVolts);
-    // drivePhysicsSim.update(0.020);
-    // drivePosition += rpmToMetersPerSecond(drivePhysicsSim.getAngularVelocityRPM()) * 0.020;
+    // Update physics "sim"
     drivePosition += velocitySetpoint * 0.020;
-    // steerPhysicsSim.setInputVoltage(steerVolts);
-    // steerPhysicsSim.update(0.020);
     // Update contorl loops
     driveVolts = 0.0;
-    // driveController.calculate(drivePhysicsSim.getAngularVelocityRPM(), velocitySetpoint)
-    //     + driveFeedforward.calculate(velocitySetpoint);
-    steerVolts = 0.0; // steerController.calculate(steerPhysicsSim.getAngleRads(), steerSetpoint);
+    steerVolts = 0.0;
 
     // Update logs
     inputs.moduleNumber = moduleNumber;

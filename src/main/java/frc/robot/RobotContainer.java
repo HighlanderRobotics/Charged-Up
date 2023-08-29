@@ -66,7 +66,7 @@ public class RobotContainer {
           routingSubsystem,
           grabberSubsystem,
           superstructureSubsystem);
-  // Replace with CommandPS4Controller or CommandJoystick if needed
+
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
   private final CommandXboxController operator =
@@ -86,7 +86,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    // LoggingWrapper.shared.add("autoBalance", swerveSubsystem.autoBalance());
     // Set default commands here
     swerveSubsystem.setDefaultCommand(
         swerveSubsystem.driveCommand(
@@ -103,7 +102,6 @@ public class RobotContainer {
             .extendToInchesCommand(1.0)
             .andThen(
                 elevatorSubsystem.zeroElevator(),
-                new PrintCommand("Working"),
                 new StartEndCommand(
                     () -> elevatorSubsystem.disable(),
                     () -> elevatorSubsystem.enable(),
@@ -131,8 +129,6 @@ public class RobotContainer {
             () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     // Configure the trigger bindings
     configureBindings();
-    // Add testing buttons to dashboard
-    // addDashboardCommands();
   }
 
   /**
@@ -163,9 +159,6 @@ public class RobotContainer {
             new InstantCommand(
                 () ->
                     swerveSubsystem.zeroGyro((swerveSubsystem.getYaw().getDegrees() + 180) % 360)));
-    // Reset odometry to vision measurement when we first see a vision target
-    // new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry)
-    //   .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
 
     new Trigger(() -> controller.getHID().getPOV() != -1)
         .whileTrue(
@@ -176,8 +169,6 @@ public class RobotContainer {
                 true,
                 true));
 
-    // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new
-    // Color8Bit(Color.kNavy)));
     new Trigger(() -> grabberSubsystem.gamePiece == GamePiece.Cone)
         .whileTrue(
             ledSubsystem.setBlinkingCommand(
@@ -235,6 +226,7 @@ public class RobotContainer {
                 intakeSubsystem.runCommand(),
                 routingSubsystem.runCommand(),
                 grabberSubsystem.intakeCubeCommand()));
+
     operator
         .y()
         .whileTrue(
@@ -243,6 +235,7 @@ public class RobotContainer {
                     swerveSubsystem.setLevel(
                         ElevatorSubsystem.ScoringLevels.L3,
                         grabberSubsystem.gamePiece == GamePiece.Cone)));
+
     operator
         .b()
         .whileTrue(
@@ -251,6 +244,7 @@ public class RobotContainer {
                     swerveSubsystem.setLevel(
                         ElevatorSubsystem.ScoringLevels.L2,
                         grabberSubsystem.gamePiece == GamePiece.Cone)));
+
     operator
         .a()
         .whileTrue(
@@ -259,35 +253,34 @@ public class RobotContainer {
                     swerveSubsystem.setLevel(
                         ElevatorSubsystem.ScoringLevels.L1,
                         grabberSubsystem.gamePiece == GamePiece.Cone)));
+
     operator.x().whileTrue(swerveSubsystem.autoBalance());
 
     operator
         .povDown()
         .onTrue(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone));
+
     operator
         .povCenter()
         .onTrue(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.None));
     operator.povUp().onTrue(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube));
-    operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
-    operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
-    operator.start().whileTrue(grabberSubsystem.resetPivotCommand());
-    // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem,
-    // swerveSubsystem, grabberSubsystem,
-    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem,
-    // swerveSubsystem, grabberSubsystem,
-    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem,
-    // swerveSubsystem, grabberSubsystem,
-    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
 
+    operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
+
+    operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
+
+    operator.start().whileTrue(grabberSubsystem.resetPivotCommand());
+
+    // Heading snaps
     controller
         .rightTrigger()
         .whileTrue(
             swerveSubsystem.headingLockDriveCommand(
+                // Use normal translation
                 () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
                 () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
                 () -> {
+                    // Find rotation based on 3 "zones" on controller
                   var joystickRotation =
                       new Rotation2d(controller.getRightX(), -controller.getRightY());
                   SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
@@ -331,13 +324,15 @@ public class RobotContainer {
                 true,
                 false,
                 true));
+
+    // Scoring command
     controller
         .leftTrigger()
         .whileTrue(
             superstructureSubsystem
                 .waitExtendToGoal(() -> swerveSubsystem.getLevel(), 0.0)
                 .andThen(new RunCommand(() -> {}))
-                .alongWith( // ledSubsystem.setRainbowCommand(),
+                .alongWith(
                     routingSubsystem.slowRunCommand(),
                     new ConditionalCommand(
                             new RunCommand(() -> grabberSubsystem.holdCube(), grabberSubsystem)
@@ -362,6 +357,7 @@ public class RobotContainer {
                 intakeSubsystem.outakeCommand(),
                 routingSubsystem.outakeCommand(),
                 grabberSubsystem.outakeCubeCommand())));
+
     controller
         .y()
         .whileTrue(
@@ -376,6 +372,7 @@ public class RobotContainer {
                 .extendToInchesCommand(-2)
                 .until(() -> elevatorSubsystem.getLimitSwitch())
                 .andThen(new PrintCommand("reset elevator")));
+
     controller.back().whileTrue(run(grabberSubsystem.intakeConeSingleCommand()));
 
     operator.back().whileTrue(run(grabberSubsystem.intakeConeSingleCommand()));
@@ -398,92 +395,9 @@ public class RobotContainer {
             new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)),
             () -> grabberSubsystem.gamePiece == GamePiece.Cone));
 
-    // isExtended.whileTrue(
-    //   intakeSubsystem.extendCommand().unless(() ->
-    // isUsingChute).repeatedly()//.withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-    //   );
-
-    superstructureSubsystem.retractAndRouteTrigger.whileTrue(
-        run(
-            // elevatorSubsystem.extendToInchesCommand(0.0),
-            // grabberSubsystem.runToStorageCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)
-            ));
-
     superstructureSubsystem.storeTrigger.whileTrue(
-        run(routingSubsystem.stopCommand()
-            // armSubsystem.runToHorizontalCommand()
-            // elevatorSubsystem.extendToInchesCommand(0.0)
-            )
+        routingSubsystem.stopCommand()
             .withInterruptBehavior(InterruptionBehavior.kCancelSelf));
-  }
-
-  // Uses old logging system
-  @Deprecated
-  private void addDashboardCommands() {
-
-    LoggingWrapper.shared.add("intake toggle", intakeSubsystem.extendCommand());
-
-    LoggingWrapper.shared.add("extend to 0", superstructureSubsystem.waitExtendToInches(0));
-    LoggingWrapper.shared.add("extend to 12", superstructureSubsystem.waitExtendToInches(12));
-    LoggingWrapper.shared.add("extend to 36", superstructureSubsystem.waitExtendToInches(36));
-
-    LoggingWrapper.shared.add(
-        "reset elevator",
-        new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem)
-            .ignoringDisable(true));
-
-    LoggingWrapper.shared.add(
-        "reset to 0",
-        new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
-
-    LoggingWrapper.shared.add(
-        "rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
-
-    LoggingWrapper.shared.add(
-        "Rezero Grabber",
-        grabberSubsystem.resetPivotCommand().alongWith(intakeSubsystem.extendCommand()));
-
-    LoggingWrapper.shared.add(
-        "Run grabber to storage",
-        grabberSubsystem
-            .runToStorageCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to routing",
-        grabberSubsystem
-            .runToRoutingCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to scoring",
-        grabberSubsystem
-            .runToScoringCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to double substation",
-        grabberSubsystem
-            .runToDoubleSubstationCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to single substation",
-        grabberSubsystem
-            .runToSingleSubstationCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-
-    LoggingWrapper.shared.add(
-        "Grabber intake cone single substation no extend",
-        grabberSubsystem.intakeConeSingleCommand().alongWith(intakeSubsystem.extendCommand()));
-    LoggingWrapper.shared.add(
-        "Grabber intake cone double substation no extend",
-        grabberSubsystem.intakeConeDoubleCommand().alongWith(intakeSubsystem.extendCommand()));
-    LoggingWrapper.shared.add(
-        "Grabber intake cube no extend", grabberSubsystem.intakeCubeCommand());
-
-    LoggingWrapper.shared.add(
-        "Grabber outake cone",
-        grabberSubsystem
-            .outakeConeCommand()
-            .alongWith(intakeSubsystem.extendCommand())
-            .withTimeout(1.0));
   }
 
   private static Command run(Command... commands) {
@@ -497,6 +411,7 @@ public class RobotContainer {
         * (1 - (0.5 * (controller.leftBumper().getAsBoolean() ? 0.4 : 0)));
   }
 
+  // Use this method to periodically log data to advantagekit
   public void loggingPeriodic() {
     Logger.getInstance()
         .recordOutput(
@@ -510,7 +425,6 @@ public class RobotContainer {
         .recordOutput(
             "Controller Right X Adjusted",
             modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
-    // SmartDashboard.putData("rezero", new InstantCommand(() -> grabberSubsystem.resetEncoderToZero()));
   }
 
   /**
@@ -525,8 +439,6 @@ public class RobotContainer {
 
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
-    // ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int)
-    // (Timer.getFPGATimestamp() * 20));
     if (DriverStation.getAlliance() == Alliance.Invalid) {
       ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
     } else if (DriverStation.getAlliance() == Alliance.Red) {

@@ -67,8 +67,6 @@ public class SwerveModuleIOFalcon implements SwerveModuleIO {
   public void setDesiredState(SwerveModuleState desiredState, boolean isOpenLoop) {
     /* This is a custom optimize function, since default WPILib optimize assumes continuous controller which CTRE and Rev onboard is not */
     desiredState = CTREModuleState.optimize(desiredState, getState().angle);
-    // LoggingWrapper.shared.add(moduleNumber + " targ rot", desiredState.angle.getDegrees());
-    // LoggingWrapper.shared.add(moduleNumber + " targ speed", desiredState.speedMetersPerSecond);
     setAngle(desiredState);
     setSpeed(desiredState, isOpenLoop);
   }

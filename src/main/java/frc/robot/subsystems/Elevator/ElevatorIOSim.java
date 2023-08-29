@@ -46,9 +46,7 @@ public class ElevatorIOSim implements ElevatorIO {
     physicsSim.setInputVoltage(0.0);
   }
 
-  public void zeroMotor() {
-    // physicsSim.setState(new MatBuilder<N2, N1>(Nat.N2(), Nat.N1()).fill(0.0, 0.0));
-  }
+  public void zeroMotor() {}
 
   public double getExtensionInches() {
     return Units.metersToInches(physicsSim.getPositionMeters());

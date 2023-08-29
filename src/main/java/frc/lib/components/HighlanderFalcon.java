@@ -10,7 +10,9 @@ import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 
-/** A talonfx wrapper. Lazy talon functionality is taken from 254 */
+/** A talonfx wrapper. Lazy talon functionality is taken from 254.
+ * Less useful in practice than in theory, should phase out as we move to phoenix v6.
+ */
 public class HighlanderFalcon extends TalonFX {
   private double lastSet = 0.0;
   private TalonFXControlMode lastControlMode = null;
