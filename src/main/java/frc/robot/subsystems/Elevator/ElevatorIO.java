@@ -16,21 +16,17 @@ public interface ElevatorIO {
     public double[] currentAmps = new double[] {};
   }
 
-  public default void updateInputs(ElevatorIOInputs inputs) {}
+  public abstract void updateInputs(ElevatorIOInputs inputs);
 
-  public default void setPercentOut(double percentOut, double ff) {}
+  public abstract void setPercentOut(double percentOut, double ff);
 
-  public default void setPercentOut(double percentOut) {}
+  public abstract void setPercentOut(double percentOut);
 
-  public default void stop() {}
+  public abstract void stop();
 
-  public default void zeroMotor() {}
+  public abstract void zeroMotor();
 
-  public default double getExtensionInches() {
-    return 0.0;
-  }
+  public abstract double getExtensionInches();
 
-  public default boolean getLimitSwitch() {
-    return false;
-  }
+  public abstract boolean getLimitSwitch();
 }

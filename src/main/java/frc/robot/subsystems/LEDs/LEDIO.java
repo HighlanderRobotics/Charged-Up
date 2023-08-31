@@ -32,11 +32,11 @@ public interface LEDIO {
     }
   }
 
-  public default void updateInputs(LEDIOInputs inputs) {}
+  public abstract void updateInputs(LEDIOInputs inputs);
 
-  public default void set(int i, Color color) {}
+  public abstract void set(int i, Color color);
 
-  public default void solid(Color color) {}
+  public abstract void solid(Color color);
 
   private static double[] toColorCodes(Color[] colorCodes) {
     int len = colorCodes.length * 3;

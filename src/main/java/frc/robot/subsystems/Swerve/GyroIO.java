@@ -15,15 +15,11 @@ public interface GyroIO {
     public double rollDegrees;
   }
 
-  public default void updateInputs(GyroIOInputs input) {}
+  public abstract void updateInputs(GyroIOInputs input);
 
-  public default Rotation2d getHeading() {
-    return new Rotation2d();
-  }
+  public abstract Rotation2d getHeading();
 
-  public default double getRollDegrees() {
-    return 0.0;
-  }
+  public abstract double getRollDegrees();
 
-  public default void resetHeading(double degrees) {}
+  public abstract void resetHeading(double degrees);
 }

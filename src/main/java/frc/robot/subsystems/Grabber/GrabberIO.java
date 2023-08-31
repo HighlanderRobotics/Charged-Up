@@ -21,35 +21,25 @@ public interface GrabberIO {
     public boolean beambreakTriggered = false;
   }
 
-  public default void updateInputs(GrabberIOInputs inputs) {}
+  public abstract void updateInputs(GrabberIOInputs inputs);
 
-  public default void setRollersPercentOut(double percentOut) {}
+  public abstract void setRollersPercentOut(double percentOut);
 
-  public default void setPivotTarget(double encoderTicks) {}
+  public abstract void setPivotTarget(double encoderTicks);
 
-  public default void setPivotPercentOut(double percentOut) {}
+  public abstract void setPivotPercentOut(double percentOut);
 
-  public default void resetPivotEncoder(int newPosition) {}
+  public abstract void resetPivotEncoder(int newPosition);
 
-  public default void resetPivotEncoder() {}
+  public abstract void resetPivotEncoder();
 
-  public default double getPivotPosition() {
-    return 0.0;
-  }
+  public abstract double getPivotPosition();
 
-  public default double getPivotError() {
-    return 0.0;
-  }
+  public abstract double getPivotError();
 
-  public default double getRollersError() {
-    return 0.0;
-  }
+  public abstract double getRollersError();
 
-  public default boolean getLimitSwitch() {
-    return false;
-  }
+  public abstract boolean getLimitSwitch();
 
-  public default boolean getBeambreak() {
-    return false;
-  }
+  public abstract boolean getBeambreak();
 }
