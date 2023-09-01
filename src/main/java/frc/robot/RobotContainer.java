@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,6 +22,8 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.choreolib.ChoreoTrajectory;
+import frc.lib.choreolib.TrajectoryManager;
 import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
@@ -84,6 +87,9 @@ public class RobotContainer {
 
   double lastHeadingSnapAngle = 0;
 
+  Field2d m_field = new Field2d();
+  ChoreoTrajectory traj;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // LoggingWrapper.shared.add("autoBalance", swerveSubsystem.autoBalance());
@@ -133,6 +139,18 @@ public class RobotContainer {
     configureBindings();
     // Add testing buttons to dashboard
     // addDashboardCommands();
+
+    configureChoreo();
+  }
+
+  private void configureChoreo() {
+     TrajectoryManager.getInstance().LoadTrajectories();
+     traj = TrajectoryManager.getInstance().getTrajectory("Circle.json");
+     m_field.getObject("traj").setPoses(
+             traj.getInitialPose(), traj.getFinalPose());
+     m_field.getObject("trajPoses").setPoses(
+             traj.getPoses());
+     SmartDashboard.putData(m_field);
   }
 
   /**
