@@ -87,7 +87,7 @@ public class RobotContainer {
 
   double lastHeadingSnapAngle = 0;
 
-  Field2d m_field = new Field2d();
+  Field2d field = new Field2d();
   ChoreoTrajectory traj;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -145,12 +145,12 @@ public class RobotContainer {
 
   private void configureChoreo() {
      TrajectoryManager.getInstance().LoadTrajectories();
-     traj = TrajectoryManager.getInstance().getTrajectory("Circle.json");
-     m_field.getObject("traj").setPoses(
+     traj = TrajectoryManager.getInstance().getTrajectory("Demo1.json");
+     field.getObject("traj").setPoses(
              traj.getInitialPose(), traj.getFinalPose());
-     m_field.getObject("trajPoses").setPoses(
+     field.getObject("trajPoses").setPoses(
              traj.getPoses());
-     SmartDashboard.putData(m_field);
+     SmartDashboard.putData(field);
   }
 
   /**
@@ -528,6 +528,7 @@ public class RobotContainer {
         .recordOutput(
             "Controller Right X Adjusted",
             modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
+    SmartDashboard.putData("choreo field", field);
     // SmartDashboard.putData("rezero", new InstantCommand(() -> grabberSubsystem.resetEncoderToZero()));
   }
 
@@ -538,7 +539,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example path will be run in autonomous
-    return autoChooser.getAutoCommand();
+    return swerveSubsystem.choreoTrajFollow(traj);
   }
 
   /** Hopefully only need to use for LEDS */
@@ -546,7 +547,7 @@ public class RobotContainer {
     // ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int)
     // (Timer.getFPGATimestamp() * 20));
     if (DriverStation.getAlliance() == Alliance.Invalid) {
-      ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
+      ledSubsystem.setSolid(Constants.LEDConstants.defaultColor); 
     } else if (DriverStation.getAlliance() == Alliance.Red) {
       ledSubsystem.runColorAlong(Color.kRed, Constants.LEDConstants.defaultColor, 12, 2);
     } else {

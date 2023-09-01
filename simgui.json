@@ -34,6 +34,7 @@
       "/SmartDashboard/Spline": "Command",
       "/SmartDashboard/autoBalance": "Command",
       "/SmartDashboard/autoChooser": "String Chooser",
+      "/SmartDashboard/choreo field": "Field2d",
       "/SmartDashboard/elevatorsim": "Mechanism2d",
       "/SmartDashboard/extend to 0": "Command",
       "/SmartDashboard/extend to 12": "Command",
