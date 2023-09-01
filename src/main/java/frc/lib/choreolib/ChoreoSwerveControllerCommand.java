@@ -1,11 +1,5 @@
 package frc.lib.choreolib;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
-import frc.lib.choreolib.ChoreoTrajectory;
-import frc.lib.choreolib.ChoreoTrajectoryState;
-import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -14,9 +8,10 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /** Custom PathPlanner version of SwerveControllerCommand */
 public class ChoreoSwerveControllerCommand extends CommandBase {
@@ -62,7 +57,8 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
       Subsystem... requirements) {
     this.trajectory = trajectory;
     this.poseSupplier = poseSupplier;
-    this.controller = new ChoreoHolonomicDriveController(xController, yController, rotationController);
+    this.controller =
+        new ChoreoHolonomicDriveController(xController, yController, rotationController);
     this.outputChassisSpeeds = outputChassisSpeeds;
     this.outputModuleStates = null;
     this.kinematics = null;
@@ -150,7 +146,8 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
     this.trajectory = trajectory;
     this.poseSupplier = poseSupplier;
     this.kinematics = kinematics;
-    this.controller = new ChoreoHolonomicDriveController(xController, yController, rotationController);
+    this.controller =
+        new ChoreoHolonomicDriveController(xController, yController, rotationController);
     this.outputModuleStates = outputModuleStates;
     this.outputChassisSpeeds = null;
     this.useKinematics = true;
@@ -208,7 +205,7 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    //SmartDashboard.putData("ChoreoSwerveControllerCommand_field", this.field);
+    // SmartDashboard.putData("ChoreoSwerveControllerCommand_field", this.field);
     this.field.getObject("traj").setPoses(this.trajectory.getPoses());
 
     this.timer.reset();
@@ -218,7 +215,8 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
   @Override
   public void execute() {
     double currentTime = this.timer.get();
-    ChoreoTrajectoryState desiredState = (ChoreoTrajectoryState) this.trajectory.sample(currentTime);
+    ChoreoTrajectoryState desiredState =
+        (ChoreoTrajectoryState) this.trajectory.sample(currentTime);
 
     Pose2d currentPose = this.poseSupplier.get();
     this.field.setRobotPose(currentPose);
@@ -233,8 +231,9 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
 
     ChassisSpeeds targetChassisSpeeds = this.controller.calculate(currentPose, desiredState);
 
-    // var alpha = ( 
-    // ((ChoreoTrajectoryState) this.trajectory.sample(currentTime + 0.01)).holonomicAngularVelocityRadPerSec
+    // var alpha = (
+    // ((ChoreoTrajectoryState) this.trajectory.sample(currentTime +
+    // 0.01)).holonomicAngularVelocityRadPerSec
     // - desiredState.holonomicAngularVelocityRadPerSec) / 0.01;
 
     // targetChassisSpeeds.alphaRadiansPerSecondSq = alpha;
@@ -254,8 +253,7 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
 
     if (interrupted) {
       if (useKinematics) {
-        this.outputModuleStates.accept(
-            this.kinematics.toSwerveModuleStates(new ChassisSpeeds()));
+        this.outputModuleStates.accept(this.kinematics.toSwerveModuleStates(new ChassisSpeeds()));
       } else {
         this.outputChassisSpeeds.accept(new ChassisSpeeds());
       }

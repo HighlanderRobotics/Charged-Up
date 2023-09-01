@@ -136,8 +136,6 @@ public class AutoChooser {
     eventMap.put("Zero Elevator", elevatorSubsystem.zeroElevator());
 
     chooser.addDefaultOption("none", () -> new InstantCommand(() -> {}));
-    // "Two Cone Auto",
-    // new TwoConeAuto(swerveSubsystem, intakeSubsystem));
     chooser.addOption("2 + Charge Flat", () -> twoParkTop());
     chooser.addOption("1.5 + Charge Flat", () -> onePlusParkTop());
     chooser.addOption("1 + Charge Middle", () -> onePlusParkMiddle());
@@ -145,7 +143,6 @@ public class AutoChooser {
     chooser.addOption("1.5 + Park Bump", () -> onePlusParkBottom());
     chooser.addOption("1 + Mobility", () -> oneMobility());
     chooser.addOption("Apriltags Test", () -> apriltagsTest());
-    // chooser.addOption("2 + Park Bottom Red", twoPlusParkBottomRed());
     chooser.addOption("2 Bump", () -> twoPieceBump());
     chooser.addOption("2.5 Piece Top", () -> twoAndAHalfTop());
     chooser.addOption("3 Piece Flat", () -> threeTop());
@@ -158,12 +155,6 @@ public class AutoChooser {
             new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
                 .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
                 .andThen(superstructureSubsystem.scoreNoAim().asProxy()));
-
-    // LoggingWrapper.shared.add("autoChooser", chooser);
-
-    // List<PathPlannerTrajectory> twoConeGroup = PathPlanner.loadPathGroup
-    // ("TwoCone", new PathConstraints(4, 3));
-    // HashMap<String, Command> Constants.eventMap = new HashMap<>();
   }
 
   public Command getAutoCommand() {

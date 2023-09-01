@@ -4,6 +4,7 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import java.util.Date;
 
+@Deprecated
 class QueuedElement {
 
   /** Timestamp in Milliseconds */

@@ -16,11 +16,11 @@ public interface IntakeIO {
     public double currentAmps = 0.0;
   }
 
-  public default void updateInputs(IntakeIOInputs input) {}
+  public abstract void updateInputs(IntakeIOInputs input);
 
-  public default void extend() {}
+  public abstract void extend();
 
-  public default void retract() {}
+  public abstract void retract();
 
-  public default void setPercentOut(double percentOut) {}
+  public abstract void setPercentOut(double percentOut);
 }

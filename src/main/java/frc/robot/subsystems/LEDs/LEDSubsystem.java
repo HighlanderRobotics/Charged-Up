@@ -66,11 +66,10 @@ public class LEDSubsystem extends SubsystemBase {
         () -> setBlinking(colorOn, colorOff, secOn.getAsDouble(), secOn.getAsDouble()), this);
   }
 
+  /** Uses a noise image to make funky colors, doesnt work that well */
   public void setNoise(Color colorA, Color colorB, int value) {
     try {
       var image = ImageIO.read(new File(Filesystem.getDeployDirectory() + "/ledNoise.png"));
-      // LoggingWrapper.shared.add("huh", value);
-      // LoggingWrapper.shared.add("test color", (image.getRGB(value, 0) & 0xFF) / 255.0);
       for (int i = 0; i < length; i++) {
         double t = (image.getRGB(value, i) & 0xFF) / 255.0;
         io.set(
@@ -137,15 +136,6 @@ public class LEDSubsystem extends SubsystemBase {
   public CommandBase setRainbowCommand() {
     return new RunCommand(() -> rainbow(), this);
   }
-
-  // public CommandBase setBatteryStatusCommand() {
-  //   return new RunCommand(() -> {
-  //     setProgress(
-  //       interpolate(new Color(255, 0, 0), new Color(0, 255, 0),
-  //       MathUtil.clamp((RoboRioDataJNI.getVInVoltage() - 10) / 3, 0, 4)),
-  //       4);
-  //   }, this);
-  // }
 
   @Override
   public void periodic() {

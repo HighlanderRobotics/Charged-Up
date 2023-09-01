@@ -35,7 +35,7 @@ public class TrajectoryManager {
   public void LoadTrajectories() {
     var traj_dir = new File(Filesystem.getDeployDirectory(), "trajectories");
     if (traj_dir.exists()) {
-      File[] trajFiles= traj_dir.listFiles();
+      File[] trajFiles = traj_dir.listFiles();
       for (File traj : trajFiles) {
         if (traj.isFile() && traj.getName().endsWith(".json")) {
           trajectories.add(traj.getName());

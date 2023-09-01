@@ -34,8 +34,6 @@ public class GrabberSubsystem extends SubsystemBase {
 
   /** Creates a new GrabberSubsystem. */
   public GrabberSubsystem() {
-
-    // grabberPivot.setSensorPhase(true);
     goToStorageRotation();
   }
 
@@ -52,7 +50,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void intakeCube() {
-    io.setRollersPercentOut(-0.65); // TODO: find best value
+    io.setRollersPercentOut(-0.65);
   }
 
   public void holdCube() {
@@ -60,7 +58,7 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   private void outakeCube() {
-    io.setRollersPercentOut(0.4); // TODO: find best value
+    io.setRollersPercentOut(0.4);
   }
 
   public void intakeCone() {
@@ -92,7 +90,6 @@ public class GrabberSubsystem extends SubsystemBase {
   }
 
   public void stop() {
-    // grabber.set(ControlMode.Velocity, 0); // might want to use PID hold
     io.setRollersPercentOut(0);
     io.setPivotPercentOut(0);
   }
@@ -244,13 +241,5 @@ public class GrabberSubsystem extends SubsystemBase {
       resetEncoderToZero();
       Logger.getInstance().recordOutput("grabber reset to 0", true);
     }
-
-    // LoggingWrapper.shared.add("grabber output", grabberIntake.getMotorOutputVoltage());
-    // LoggingWrapper.shared.add("grabber error", grabberIntake.getClosedLoopError(0));
-    // LoggingWrapper.shared.add("grabber pivot angle", grabberPivot.getSelectedSensorPosition());
-    // LoggingWrapper.shared.add("grabber pivot angle 2", grabberPivot.getSelectedSensorPosition());
-    // LoggingWrapper.shared.add("grabber pivot target", grabberPivot.getClosedLoopTarget());
-    // LoggingWrapper.shared.add("grabber reset limit switch", resetLimitSwitch.get());
-    // LoggingWrapper.shared.add("grabber beambreak", cubeBeambreak.get());
   }
 }

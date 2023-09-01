@@ -13,7 +13,7 @@ public class ChoreoTrajectoryState implements Interpolatable<ChoreoTrajectorySta
   public final double x;
   public final double y;
   public final double heading;
-  
+
   public final double velocityX;
   public final double velocityY;
   public final double angularVelocity;

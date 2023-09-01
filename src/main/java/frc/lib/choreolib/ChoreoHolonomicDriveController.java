@@ -82,26 +82,19 @@ public class ChoreoHolonomicDriveController {
    * @return The next output of the holonomic drive controller
    */
   public ChassisSpeeds calculate(Pose2d currentPose, ChoreoTrajectoryState referenceState) {
-    double xFF =
-        referenceState.velocityX;
-    double yFF =
-        referenceState.velocityY;
+    double xFF = referenceState.velocityX;
+    double yFF = referenceState.velocityY;
     double rotationFF = referenceState.angularVelocity;
-    
-    
+
     this.translationError = referenceState.getPose().relativeTo(currentPose).getTranslation();
     this.rotationError = new Rotation2d(referenceState.heading).minus(currentPose.getRotation());
 
     if (!this.isEnabled) {
-      return 
-      
-        ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, rotationFF, currentPose.getRotation());
+      return ChassisSpeeds.fromFieldRelativeSpeeds(xFF, yFF, rotationFF, currentPose.getRotation());
     }
 
-    double xFeedback =
-        this.xController.calculate(currentPose.getX(), referenceState.x);
-    double yFeedback =
-        this.yController.calculate(currentPose.getY(), referenceState.y);
+    double xFeedback = this.xController.calculate(currentPose.getX(), referenceState.x);
+    double yFeedback = this.yController.calculate(currentPose.getY(), referenceState.y);
     double rotationFeedback =
         this.rotationController.calculate(
             currentPose.getRotation().getRadians(), referenceState.heading);
@@ -110,4 +103,3 @@ public class ChoreoHolonomicDriveController {
         xFF + xFeedback, yFF + yFeedback, rotationFF + rotationFeedback, currentPose.getRotation());
   }
 }
-

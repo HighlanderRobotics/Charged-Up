@@ -30,25 +30,17 @@ public interface SwerveModuleIO {
     public double steerTemparature = 0.0;
   }
 
-  public default void updateInputs(SwerveModuleIOInputs inputs) {}
+  public abstract void updateInputs(SwerveModuleIOInputs inputs);
 
-  public default void setDesiredState(SwerveModuleState state, boolean isOpenLoop) {}
+  public abstract void setDesiredState(SwerveModuleState state, boolean isOpenLoop);
 
-  public default Rotation2d getAbsoluteRotation() {
-    return new Rotation2d();
-  }
+  public abstract Rotation2d getAbsoluteRotation();
 
-  public default void resetToAbsolute() {}
+  public abstract void resetToAbsolute();
 
-  public default SwerveModuleState getState() {
-    return new SwerveModuleState();
-  }
+  public abstract SwerveModuleState getState();
 
-  public default SwerveModulePosition getPosition() {
-    return new SwerveModulePosition();
-  }
+  public abstract SwerveModulePosition getPosition();
 
-  public default int getModuleNumber() {
-    return -1;
-  }
+  public abstract int getModuleNumber();
 }

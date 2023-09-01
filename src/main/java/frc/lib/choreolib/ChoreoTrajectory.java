@@ -68,6 +68,6 @@ public class ChoreoTrajectory {
   }
 
   public Pose2d[] getPoses() {
-    return states.stream().map((state)->state.getPose()).toArray(Pose2d[]::new);
+    return states.stream().map((state) -> state.getPose()).toArray(Pose2d[]::new);
   }
 }

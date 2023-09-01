@@ -4,6 +4,8 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.DataLogManager;
 import java.util.*;
 
+/** Use advantagekit instead */
+@Deprecated
 public class LoggingWrapper {
 
   public static final LoggingWrapper shared = new LoggingWrapper();

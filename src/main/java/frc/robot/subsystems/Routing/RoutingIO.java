@@ -18,7 +18,7 @@ public interface RoutingIO {
     public double rightCurrentAmps = 0.0;
   }
 
-  public default void updateInputs(RoutingIOInputs input) {}
+  public abstract void updateInputs(RoutingIOInputs input);
 
-  public default void setPercentOut(double percentOut) {}
+  public abstract void setPercentOut(double percentOut);
 }

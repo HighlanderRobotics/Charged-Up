@@ -61,7 +61,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
 
   public CommandBase waitExtendToInches(DoubleSupplier extensionInches) {
     return intakeSubsystem
-        .extendCommand() // new InstantCommand(() -> mode = ExtensionState.EXTEND)
+        .extendCommand()
         .andThen(new WaitCommand(0.3))
         .andThen(elevatorSubsystem.extendToInchesCommand(extensionInches))
         .withInterruptBehavior(InterruptionBehavior.kCancelIncoming);
@@ -116,21 +116,16 @@ public class SuperstructureSubsystem extends SubsystemBase {
                             grabberSubsystem.scoreConeCommand(),
                             () -> grabberSubsystem.gamePiece == GamePiece.Cube)
                         .alongWith(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.35))
-                        .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0) // ,
-                    // new WaitCommand(0.25)
-                    // elevatorSubsystem.extendToInchesCommand(1.0)
-                    ));
+                        .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     if (elevatorSubsystem.getExtensionInches() > 4.5
-        || Constants.ElevatorConstants.PIDController.getGoal().position
-            > 4.5) { // TODO: Find good value for maximum extension before "extended"
+        || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5) {
       mode = ExtensionState.EXTEND;
     }
-    // LoggingWrapper.shared.add("Superstructure Mode", mode.toString());
   }
 
   public static enum ExtensionState {
