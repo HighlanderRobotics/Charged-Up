@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
-
 public class IntakeIOFalcon implements IntakeIO {
   private final HighlanderFalcon motor =
       new HighlanderFalcon(Constants.MechanismConstants.intakeID, 1.0, 0.15, 0, 0);

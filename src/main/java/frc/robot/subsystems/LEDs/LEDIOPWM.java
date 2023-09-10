@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.util.Color;
 import frc.robot.Constants;
 
-
 public class LEDIOPWM implements LEDIO {
   AddressableLED led;
   AddressableLEDBuffer buffer;

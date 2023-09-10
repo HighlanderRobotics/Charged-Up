@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
-
 public class ElevatorIOSim implements ElevatorIO {
 
   ElevatorSim physicsSim =

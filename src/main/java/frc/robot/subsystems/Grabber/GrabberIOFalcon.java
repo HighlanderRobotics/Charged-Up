@@ -12,7 +12,6 @@ import frc.lib.components.HighlanderFalcon;
 import frc.lib.components.ReversibleDigitalInput;
 import frc.robot.Constants;
 
-
 public class GrabberIOFalcon implements GrabberIO {
   HighlanderFalcon rollers =
       new HighlanderFalcon(
@@ -47,7 +46,7 @@ public class GrabberIOFalcon implements GrabberIO {
     inputs.pivotPercentOut = pivot.getMotorOutputPercent();
     inputs.pivotPositionTicks = pivot.getSelectedSensorPosition();
     inputs.pivotCurrentAmps = pivot.getStatorCurrent();
-    
+
     return inputs;
   }
 

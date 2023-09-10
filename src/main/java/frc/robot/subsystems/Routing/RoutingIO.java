@@ -6,7 +6,6 @@ package frc.robot.subsystems.Routing;
 
 import org.littletonrobotics.junction.AutoLog;
 
-
 public interface RoutingIO {
   @AutoLog
   public static class RoutingIOInputs {

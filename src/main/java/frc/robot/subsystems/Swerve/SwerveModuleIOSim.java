@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.util.SwerveModuleConstants;
 import frc.robot.Constants;
 
-
 public class SwerveModuleIOSim implements SwerveModuleIO {
   // Physics sims arent in use right now, but could add them in later
   FlywheelSim drivePhysicsSim = new FlywheelSim(DCMotor.getFalcon500(1), 6.75 / 1, 0.025);

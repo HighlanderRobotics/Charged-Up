@@ -6,7 +6,6 @@ package frc.robot.subsystems.Grabber;
 
 import org.littletonrobotics.junction.AutoLog;
 
-
 public interface GrabberIO {
 
   @AutoLog

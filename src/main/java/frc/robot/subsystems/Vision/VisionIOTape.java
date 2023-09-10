@@ -23,7 +23,6 @@ import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-
 public class VisionIOTape implements VisionIO {
   PhotonCamera camera;
   Transform3d cameraToRobot;

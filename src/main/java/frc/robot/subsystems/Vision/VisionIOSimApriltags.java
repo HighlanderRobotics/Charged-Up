@@ -9,13 +9,10 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import frc.robot.Constants;
-
 import java.util.List;
-
 import org.photonvision.PhotonCamera;
 import org.photonvision.SimVisionSystem;
 import org.photonvision.targeting.PhotonTrackedTarget;
-
 
 public class VisionIOSimApriltags implements VisionIO {
   SimVisionSystem sim =

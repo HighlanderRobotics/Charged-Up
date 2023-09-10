@@ -8,7 +8,6 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
-
 public class RoutingIOFalcon implements RoutingIO {
   HighlanderFalcon left =
       new HighlanderFalcon(
