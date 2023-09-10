@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.util.SwerveModuleConstants;
 import frc.robot.Constants;
 
-/** Add your docs here. */
+
 public class SwerveModuleIOSim implements SwerveModuleIO {
   // Physics sims arent in use right now, but could add them in later
   FlywheelSim drivePhysicsSim = new FlywheelSim(DCMotor.getFalcon500(1), 6.75 / 1, 0.025);
@@ -51,7 +51,9 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
   }
 
   @Override
-  public void updateInputs(SwerveModuleIOInputs inputs) {
+  public SwerveModuleIOInputsAutoLogged updateInputs() {
+    var inputs = new SwerveModuleIOInputsAutoLogged();
+
     // Update physics "sim"
     drivePosition += velocitySetpoint * 0.020;
     // Update contorl loops
@@ -74,6 +76,8 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     inputs.steerPercentOut = steerVolts / 12.0;
     inputs.steerCurrentAmps = 0.0;
     inputs.steerTemparature = 0.0;
+
+    return inputs;
   }
 
   @Override

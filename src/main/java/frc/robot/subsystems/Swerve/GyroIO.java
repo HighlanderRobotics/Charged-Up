@@ -7,7 +7,7 @@ package frc.robot.subsystems.Swerve;
 import edu.wpi.first.math.geometry.Rotation2d;
 import org.littletonrobotics.junction.AutoLog;
 
-/** Add your docs here. */
+
 public interface GyroIO {
   @AutoLog
   public static class GyroIOInputs {
@@ -15,7 +15,7 @@ public interface GyroIO {
     public double rollDegrees;
   }
 
-  public abstract void updateInputs(GyroIOInputs input);
+  public abstract GyroIOInputsAutoLogged updateInputs();
 
   public abstract Rotation2d getHeading();
 

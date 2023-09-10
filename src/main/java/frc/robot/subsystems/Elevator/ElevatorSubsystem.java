@@ -155,7 +155,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    io.updateInputs(inputs);
+    inputs = io.updateInputs();
     Logger.getInstance().processInputs("Elevator", inputs);
 
     // TODO change this to an enum instead of 2 booleans

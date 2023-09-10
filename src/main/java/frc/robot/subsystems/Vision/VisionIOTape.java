@@ -23,7 +23,7 @@ import org.photonvision.common.hardware.VisionLEDMode;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-/** Add your docs here. */
+
 public class VisionIOTape implements VisionIO {
   PhotonCamera camera;
   Transform3d cameraToRobot;
@@ -181,5 +181,7 @@ public class VisionIOTape implements VisionIO {
   }
 
   @Override
-  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
+  public VisionIOInputs updateInputs(Pose3d robotPose) {
+    return new VisionIOInputs();
+  }
 }

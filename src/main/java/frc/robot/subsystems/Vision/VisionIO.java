@@ -17,7 +17,7 @@ import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.EstimatedRobotPose;
 
-/** Add your docs here. */
+/** At this point needs to be entirely redone */
 public interface VisionIO {
   public static class VisionIOInputs implements LoggableInputs {
     double timestamp = 0.0;
@@ -82,5 +82,5 @@ public interface VisionIO {
 
   public abstract List<VisionMeasurement> getMeasurement(Pose2d previousPose);
 
-  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose);
+  public abstract VisionIOInputs updateInputs(Pose3d robotPose);
 }

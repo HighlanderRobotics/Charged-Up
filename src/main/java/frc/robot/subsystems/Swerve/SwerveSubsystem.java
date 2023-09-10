@@ -576,11 +576,11 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     for (int i = 0; i < swerveMods.length; i++) {
-      swerveMods[i].updateInputs(inputs[i]);
+      inputs[i] = swerveMods[i].updateInputs();
       Logger.getInstance().processInputs("Swerve Module " + i, inputs[i]);
     }
 
-    gyroIO.updateInputs(gyroInputs);
+    gyroInputs = gyroIO.updateInputs();
     Logger.getInstance().processInputs("Gyro", gyroInputs);
     simHeading += Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond);
 
@@ -616,7 +616,7 @@ public class SwerveSubsystem extends SubsystemBase {
       wheelOnlyOdo.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
     }
 
-    apriltagVisionSim.updateInputs(visionIOInputs, new Pose3d(pose));
+    visionIOInputs = apriltagVisionSim.updateInputs(new Pose3d(pose));
     Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
 
     List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =

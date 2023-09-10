@@ -11,7 +11,7 @@ import frc.robot.subsystems.Vision.VisionIOTape;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** Add your docs here. */
+
 public class TapeVisionTest {
   VisionIOTape tapeVisionSubsystem =
       new VisionIOTape("limelight-left", Constants.leftCameraToRobot);

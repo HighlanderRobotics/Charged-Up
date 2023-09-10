@@ -8,7 +8,7 @@ import com.pathplanner.lib.PathPoint;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
-/** Add your docs here. */
+
 public class PathPointOpen extends PathPoint {
 
   public PathPointOpen(Translation2d position, Rotation2d heading) {

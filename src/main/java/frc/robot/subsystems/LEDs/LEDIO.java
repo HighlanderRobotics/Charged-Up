@@ -9,7 +9,7 @@ import frc.robot.Constants;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-/** Add your docs here. */
+
 public interface LEDIO {
   public static class LEDIOInputs implements LoggableInputs {
     public int numLeds = Constants.LEDConstants.ledLength;

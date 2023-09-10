@@ -16,7 +16,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.SimVisionSystem;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
-/** Add your docs here. */
+
 public class VisionIOSimApriltags implements VisionIO {
   SimVisionSystem sim =
       new SimVisionSystem("sim", 77.6, Constants.leftCameraToRobot.inverse(), 4.0, 320, 240, 10);
@@ -33,9 +33,10 @@ public class VisionIOSimApriltags implements VisionIO {
   }
 
   @Override
-  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
+  public VisionIOInputs updateInputs(Pose3d robotPose) {
     sim.processFrame(robotPose);
     var targets = camera.getLatestResult().getTargets();
+    var inputs = new VisionIOInputs();
 
     inputs.tags.clear();
     for (PhotonTrackedTarget target : targets) {
@@ -53,6 +54,7 @@ public class VisionIOSimApriltags implements VisionIO {
         inputs.cornersX[(i * 4) + j] = targets.get(i).getDetectedCorners().get(j).x;
       }
     }
+    return inputs;
   }
 
   @Override

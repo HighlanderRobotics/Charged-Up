@@ -149,5 +149,15 @@ public class VisionIOApriltags implements VisionIO {
   }
 
   @Override
-  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
+  public VisionIOInputs updateInputs(Pose3d robotPose) {
+    var inputs = new VisionIOInputs();
+    var measurement = getMeasurement(robotPose.toPose2d());
+    inputs.timestamp = 0.0;
+    inputs.timeSinceLastTimestamp = 0.0;
+    inputs.lastPose = new Pose3d();
+    inputs.tags = new ArrayList<>();
+    inputs.cornersX = new double[] {};
+    inputs.cornersY = new double[] {};
+    return inputs;
+  }
 }

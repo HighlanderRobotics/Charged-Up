@@ -6,14 +6,16 @@ package frc.robot.subsystems.Swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
-/** Add your docs here. */
+
 public class GyroIOSim implements GyroIO {
   double heading = 0.0;
 
   @Override
-  public void updateInputs(GyroIOInputs input) {
-    input.headingDegrees = heading;
-    input.rollDegrees = 0.0;
+  public GyroIOInputsAutoLogged updateInputs() {
+    var inputs = new GyroIOInputsAutoLogged();
+    inputs.headingDegrees = heading;
+    inputs.rollDegrees = 0.0;
+    return inputs;
   }
 
   @Override
