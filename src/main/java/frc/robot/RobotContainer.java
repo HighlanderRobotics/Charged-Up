@@ -25,6 +25,7 @@ import frc.lib.choreolib.ChoreoTrajectory;
 import frc.lib.choreolib.TrajectoryManager;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
+import frc.robot.commands.ChoreoAutoChooser;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem.GamePiece;
@@ -67,6 +68,14 @@ public class RobotContainer {
           routingSubsystem,
           grabberSubsystem,
           superstructureSubsystem);
+ private ChoreoAutoChooser choreoAutoChooser =
+      new ChoreoAutoChooser(
+            swerveSubsystem,
+            intakeSubsystem,
+            elevatorSubsystem,
+            routingSubsystem,
+            grabberSubsystem,
+            superstructureSubsystem);
 
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -135,16 +144,7 @@ public class RobotContainer {
     configureBindings();
     // Add testing buttons to dashboard
     // addDashboardCommands();
-
-    configureChoreo();
-  }
-
-  private void configureChoreo() {
-    TrajectoryManager.getInstance().LoadTrajectories();
-    traj = TrajectoryManager.getInstance().getTrajectory("Demo1.json");
-    field.getObject("traj").setPoses(traj.getInitialPose(), traj.getFinalPose());
-    field.getObject("trajPoses").setPoses(traj.getPoses());
-    SmartDashboard.putData(field);
+    choreoAutoChooser.configureChoreo();
   }
 
   /**
@@ -451,7 +451,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example path will be run in autonomous
     return swerveSubsystem.choreoTrajFollow(traj);
   }
 
