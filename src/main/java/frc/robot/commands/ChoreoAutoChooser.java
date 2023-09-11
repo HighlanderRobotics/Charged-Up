@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -55,6 +56,24 @@ public class ChoreoAutoChooser {
         return TrajectoryManager.getInstance().getTrajectory(fileName);
     }
 
+    private Command intake() {
+        return Commands.parallel(
+            intakeSubsystem.runCommand().withTimeout(1.0),
+                routingSubsystem.runCommand(),
+                grabberSubsystem.intakeCubeCommand())
+            .withTimeout(1.3)
+            .asProxy();
+        
+        }
+
+        private Command scoreLevelThree() {
+            return new SequentialCommandGroup(
+                new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
+                    .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
+                    .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5)))
+            );
+        }
+
     private Command DemoPath1() {
         return swerveSubsystem.choreoTrajFollow(getPath("DemoPath1.json"))
             .alongWith(
@@ -65,25 +84,18 @@ public class ChoreoAutoChooser {
             );
     }
 
-    private Command TwoPiece() {
+    private Command twoPiece() {
         return scoreLevelThree()
-        .andThen(
-            swerveSubsystem.choreoTrajFollow(getPath("2Piece.json"))
-            .alongWith(
-                new SequentialCommandGroup(
-                    new WaitCommand(2.35),
-                    intakeSubsystem.runCommand(),
-                    new WaitCommand(1)
+            .andThen(
+                swerveSubsystem.choreoTrajFollow(getPath("2Piece.json"))
+                .alongWith(
+                    new SequentialCommandGroup(
+                        new WaitCommand(2.35),
+                        intake(),
+                        new WaitCommand(1)
+                    )
                 )
-            )
-        );
+            );
     }
 
-    private Command scoreLevelThree() {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
-                .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
-                .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(0.5)))
-        );
-    }
 }
