@@ -45,7 +45,8 @@ public class SwerveModuleIOFalcon implements SwerveModuleIO {
   }
 
   @Override
-  public void updateInputs(SwerveModuleIOInputs inputs) {
+  public SwerveModuleIOInputsAutoLogged updateInputs() {
+    var inputs = new SwerveModuleIOInputsAutoLogged();
     inputs.moduleNumber = moduleNumber;
 
     inputs.drivePositionRotations = driveMotor.getSelectedSensorPosition() / 2048;
@@ -61,6 +62,7 @@ public class SwerveModuleIOFalcon implements SwerveModuleIO {
     inputs.steerPercentOut = steerMotor.getMotorOutputPercent();
     inputs.steerCurrentAmps = steerMotor.getStatorCurrent();
     inputs.steerTemparature = steerMotor.getTemperature();
+    return inputs;
   }
 
   @Override

@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -21,9 +20,10 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
+import frc.robot.subsystems.Elevator.ElevatorIOFalcon;
+import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem.GamePiece;
@@ -32,6 +32,10 @@ import frc.robot.subsystems.LEDs.LEDSubsystem;
 import frc.robot.subsystems.Routing.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
+import frc.robot.subsystems.Swerve.GyroIOPigeon;
+import frc.robot.subsystems.Swerve.GyroIOSim;
+import frc.robot.subsystems.Swerve.SwerveModuleIOFalcon;
+import frc.robot.subsystems.Swerve.SwerveModuleIOSim;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import org.littletonrobotics.junction.Logger;
 
@@ -43,8 +47,24 @@ import org.littletonrobotics.junction.Logger;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private SwerveSubsystem swerveSubsystem =
+      new SwerveSubsystem(
+          Robot.isReal()
+              ? new SwerveModuleIOFalcon[] {
+                new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
+                new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
+                new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
+                new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
+              }
+              : new SwerveModuleIOSim[] {
+                new SwerveModuleIOSim(0, Constants.Swerve.Mod0.constants),
+                new SwerveModuleIOSim(1, Constants.Swerve.Mod1.constants),
+                new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
+                new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
+              },
+          Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim());
+  private ElevatorSubsystem elevatorSubsystem =
+      new ElevatorSubsystem(Robot.isReal() ? new ElevatorIOFalcon() : new ElevatorIOSim());
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
   private LEDSubsystem ledSubsystem = new LEDSubsystem();
@@ -280,7 +300,7 @@ public class RobotContainer {
                 () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
                 () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
                 () -> {
-                    // Find rotation based on 3 "zones" on controller
+                  // Find rotation based on 3 "zones" on controller
                   var joystickRotation =
                       new Rotation2d(controller.getRightX(), -controller.getRightY());
                   SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
@@ -396,8 +416,7 @@ public class RobotContainer {
             () -> grabberSubsystem.gamePiece == GamePiece.Cone));
 
     superstructureSubsystem.storeTrigger.whileTrue(
-        routingSubsystem.stopCommand()
-            .withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+        routingSubsystem.stopCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
 
   private static Command run(Command... commands) {

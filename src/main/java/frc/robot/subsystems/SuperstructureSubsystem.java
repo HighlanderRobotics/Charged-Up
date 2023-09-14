@@ -116,16 +116,14 @@ public class SuperstructureSubsystem extends SubsystemBase {
                             grabberSubsystem.scoreConeCommand(),
                             () -> grabberSubsystem.gamePiece == GamePiece.Cube)
                         .alongWith(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(0.35))
-                        .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)
-                    ));
+                        .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0)));
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     if (elevatorSubsystem.getExtensionInches() > 4.5
-        || Constants.ElevatorConstants.PIDController.getGoal().position
-            > 4.5) {
+        || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5) {
       mode = ExtensionState.EXTEND;
     }
   }

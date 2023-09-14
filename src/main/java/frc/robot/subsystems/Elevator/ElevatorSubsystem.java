@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -41,8 +40,8 @@ public class ElevatorSubsystem extends SubsystemBase {
               15,
               new Color8Bit(Color.kPurple)));
 
-  public ElevatorSubsystem() {
-    io = Robot.isReal() ? new ElevatorIOFalcon() : new ElevatorIOSim();
+  public ElevatorSubsystem(ElevatorIO io) {
+    this.io = io;
     inputs = new ElevatorIOInputsAutoLogged();
   }
 
@@ -155,7 +154,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
 
-    io.updateInputs(inputs);
+    inputs = io.updateInputs();
     Logger.getInstance().processInputs("Elevator", inputs);
 
     // TODO change this to an enum instead of 2 booleans

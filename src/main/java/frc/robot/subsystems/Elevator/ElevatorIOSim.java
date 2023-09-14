@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import frc.robot.Constants;
 import org.littletonrobotics.junction.Logger;
 
-/** Add your docs here. */
 public class ElevatorIOSim implements ElevatorIO {
 
   ElevatorSim physicsSim =
@@ -23,14 +22,16 @@ public class ElevatorIOSim implements ElevatorIO {
           58.0,
           false);
 
-  public void updateInputs(ElevatorIOInputs inputs) {
+  public ElevatorIOInputsAutoLogged updateInputs() {
     physicsSim.update(0.020);
 
+    var inputs = new ElevatorIOInputsAutoLogged();
     inputs.positionInches = getExtensionInches();
     inputs.percentOut = physicsSim.getOutput().get(0, 0) / 12.0;
     inputs.currentAmps =
         new double[] {physicsSim.getCurrentDrawAmps(), physicsSim.getCurrentDrawAmps()};
     inputs.switchPressed = getLimitSwitch();
+    return inputs;
   }
 
   public void setPercentOut(double percentOut, double ff) {

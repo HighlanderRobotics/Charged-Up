@@ -9,7 +9,6 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import org.littletonrobotics.junction.AutoLog;
 
-/** Add your docs here. */
 public interface SwerveModuleIO {
   @AutoLog
   public static class SwerveModuleIOInputs {
@@ -30,7 +29,7 @@ public interface SwerveModuleIO {
     public double steerTemparature = 0.0;
   }
 
-  public abstract void updateInputs(SwerveModuleIOInputs inputs);
+  public abstract SwerveModuleIOInputsAutoLogged updateInputs();
 
   public abstract void setDesiredState(SwerveModuleState state, boolean isOpenLoop);
 

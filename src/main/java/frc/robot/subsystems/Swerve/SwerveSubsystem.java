@@ -107,28 +107,12 @@ public class SwerveSubsystem extends SubsystemBase {
   // public VisionIOTape tapeVisionSubsystem =
   //     new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
 
-  public SwerveSubsystem() {
-    gyroIO = Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim();
+  public SwerveSubsystem(SwerveModuleIO[] swerveIO, GyroIO gyroIO) {
+    this.gyroIO = gyroIO;
 
     headingController.enableContinuousInput(0, Math.PI * 2);
     headingController.setTolerance(0.2);
-    if (Robot.isReal()) {
-      swerveMods =
-          new SwerveModuleIOFalcon[] {
-            new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
-            new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
-            new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
-            new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
-          };
-    } else {
-      swerveMods =
-          new SwerveModuleIOSim[] {
-            new SwerveModuleIOSim(0, Constants.Swerve.Mod0.constants),
-            new SwerveModuleIOSim(1, Constants.Swerve.Mod1.constants),
-            new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
-            new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
-          };
-    }
+    swerveMods = swerveIO;
 
     inputs =
         new SwerveModuleIOInputsAutoLogged[] {
@@ -576,11 +560,11 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     for (int i = 0; i < swerveMods.length; i++) {
-      swerveMods[i].updateInputs(inputs[i]);
+      inputs[i] = swerveMods[i].updateInputs();
       Logger.getInstance().processInputs("Swerve Module " + i, inputs[i]);
     }
 
-    gyroIO.updateInputs(gyroInputs);
+    gyroInputs = gyroIO.updateInputs();
     Logger.getInstance().processInputs("Gyro", gyroInputs);
     simHeading += Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond);
 
