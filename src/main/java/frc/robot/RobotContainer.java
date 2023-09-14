@@ -93,7 +93,7 @@ public class RobotContainer {
             () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
             () -> modifyJoystickAxis(controller.getRightX(), controller.getLeftTriggerAxis()),
             true,
-            true,
+            false,
             true));
     // this is a little sus, might have to change logic to use subsystems separately or combine
     // routing and intake subsystem
