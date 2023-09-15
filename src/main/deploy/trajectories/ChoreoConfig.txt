@@ -1,9 +1,11 @@
-Mass: 63.5029318
-Mol: 7.8941658741
-Max Velocity: 70
-Max Torque: 2
-Width: 0.8382
-Length: 0.889
-Wheelbase: 0.6223
-Trackwidth: 0.57658
-Wheel Radius: 0.0508
+"robotConfiguration": {
+    "mass": 63.5029318,
+    "rotationalInertia": 7.8941658741,
+    "wheelMaxTorque": 2,
+    "wheelMaxVelocity": 70,
+    "wheelbase": 0.6223,
+    "trackWidth": 0.57658,
+    "bumperLength": 0.889,
+    "bumperWidth": 0.8382,
+    "wheelRadius": 0.0508
+}
