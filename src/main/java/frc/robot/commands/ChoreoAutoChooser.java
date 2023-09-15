@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.choreolib.ChoreoPath;
+import frc.lib.choreolib.ChoreoPathFeature;
 import frc.lib.choreolib.AutoFieldPosition;
 import frc.lib.choreolib.ChoreoTrajectory;
 import frc.lib.choreolib.TrajectoryManager;
@@ -54,15 +55,19 @@ public final class ChoreoAutoChooser {
         TrajectoryManager.getInstance().LoadTrajectories();
 
         for (ChoreoPath path : paths) {
-            // chooser.addOption(path.localizedDescription(), () -> ));
+            chooser.addOption(path.localizedDescription(), () -> RunAuto(path));
         }
     }
 
-    public static final ChoreoPath[] paths = new ChoreoPath[] {
-        new ChoreoPath(2, Alliance.Blue, AutoFieldPosition.Bump),
-        new ChoreoPath(2, Alliance.Blue, AutoFieldPosition.Clear),
-        new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Bump),
-        new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Clear),
+    public Command getAutonomousCommand() {
+        return chooser.get().get();
+    }
+
+    public final ChoreoPath[] paths = new ChoreoPath[] {
+        new ChoreoPath(2, Alliance.Blue, AutoFieldPosition.Bump, ChoreoPathFeature.none),
+        new ChoreoPath(2, Alliance.Blue, AutoFieldPosition.Clear, ChoreoPathFeature.none),
+        new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Bump, ChoreoPathFeature.none),
+        new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Clear, ChoreoPathFeature.none),
     };
 
     public ChoreoTrajectory getPath(ChoreoPath path) {
@@ -87,12 +92,13 @@ public final class ChoreoAutoChooser {
         );
     }
 
-    // private Command RunAuto(ChoreoPath path) {
-        // switch (path.pieceCount) {
-        // case 2: return TwoPiece(path);
-        // default: throw Exception("Not a Command Path");
-        // }
-    // }
+    private Command RunAuto(ChoreoPath path) {
+        System.out.println("getting trajectory: " + path.fileName());
+        switch (path.pieceCount) {
+        case 2: return TwoPiece(path);
+        default: return TwoPiece(path);
+        }
+    }
 
     private Command TwoPiece(ChoreoPath path) {
         return scoreLevelThree()

@@ -95,7 +95,6 @@ public class RobotContainer {
   double lastHeadingSnapAngle = 0;
 
   Field2d field = new Field2d();
-  ChoreoTrajectory traj;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -450,7 +449,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return swerveSubsystem.choreoTrajFollow(traj);
+    return choreoAutoChooser.getAutonomousCommand();
   }
 
   /** Hopefully only need to use for LEDS */
