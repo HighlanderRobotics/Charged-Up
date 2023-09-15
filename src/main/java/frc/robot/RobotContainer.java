@@ -144,7 +144,6 @@ public class RobotContainer {
     configureBindings();
     // Add testing buttons to dashboard
     // addDashboardCommands();
-    choreoAutoChooser.configureChoreo();
   }
 
   /**
