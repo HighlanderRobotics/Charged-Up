@@ -55,17 +55,15 @@ public class NewVisionSubsystem extends SubsystemBase {
       return;
     }
 
-    for (Vision.VisionSource visionSource : Vision.VISION_SOURCES) { //TODO is this actually necessary
-      var camera = new PhotonCamera(visionSource.name);
+      var camera = new PhotonCamera(Vision.visionSource.name);
       var estimator =
           new PhotonPoseEstimator(
               fieldLayout,
               PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP,
               camera,
-              visionSource.robotToCamera);
+              Vision.visionSource.robotToCamera);
       estimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
-      cameraStatusList.addBoolean(visionSource.name, camera::isConnected);
-    }
+      cameraStatusList.addBoolean(Vision.visionSource.name, camera::isConnected);
 
   }
 
