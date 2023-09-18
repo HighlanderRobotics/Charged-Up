@@ -161,10 +161,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     // TODO change this to an enum instead of 2 booleans
     if (enabled) {
       updatePID();
+      Logger.getInstance().recordOutput("Elevator Mode", "PID");
     } else if (isZeroing) {
       io.setPercentOut(-0.1);
+      Logger.getInstance().recordOutput("Elevator Mode", "ZERO");
     } else {
       io.stop();
+      Logger.getInstance().recordOutput("Elevator Mode", "OFF");
     }
 
     if (io.getLimitSwitch()) {
