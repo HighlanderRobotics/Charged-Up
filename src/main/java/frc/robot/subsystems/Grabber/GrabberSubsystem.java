@@ -236,6 +236,7 @@ public class GrabberSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.getInstance().processInputs("Grabber", inputs);
+    Logger.getInstance().recordOutput("Grabber Game Piece", gamePiece.toString());
 
     if (io.getLimitSwitch()) {
       resetEncoderToZero();

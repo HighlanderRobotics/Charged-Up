@@ -104,7 +104,7 @@ public class SuperstructureSubsystem extends SubsystemBase {
             this.waitExtendToGoal(() -> swerveSubsystem.getLevel(), -1.0)
                 .deadlineWith(
                     ledSubsystem.setRainbowCommand(),
-                    new WaitCommand(0.4)
+                    new WaitCommand(0.1)
                         .andThen(
                             grabberSubsystem.stopCommand().withTimeout(0.1),
                             grabberSubsystem.runToScoringCommand()))

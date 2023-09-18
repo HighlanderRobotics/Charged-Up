@@ -425,6 +425,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase choreoTrajFollow(ChoreoTrajectory traj) {
     return new InstantCommand(() -> resetOdometry(traj.getInitialPose()))
         .andThen(
+            new PrintCommand("! traj start"),
             new ChoreoSwerveControllerCommand(
                 traj,
                 this::getPose,
