@@ -9,13 +9,10 @@ import java.util.List;
 
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
-import org.opencv.photo.Photo;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
 
 /** Add your docs here. */
 public interface NewVisionIO {
@@ -25,7 +22,6 @@ public interface NewVisionIO {
         List<PhotonTrackedTarget> targets = new ArrayList<>();
 
         public void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
-            
             logTransform3d(target.getBestCameraToTarget(), table, name);
             logTransform3d(target.getAlternateCameraToTarget(), table, name);
 
@@ -35,9 +31,8 @@ public interface NewVisionIO {
             table.put("skew", target.getSkew());
             table.put("fiducial id", target.getFiducialId());
             table.put("pose ambiguity", target.getPoseAmbiguity());
-
-            
         }
+
         public void logTransform3d(Transform3d transform3d, LogTable table, String name) {
             double rotation[] = new double[4];
             rotation[0] = transform3d.getRotation().getQuaternion().getW();
@@ -45,20 +40,26 @@ public interface NewVisionIO {
             rotation[2] = transform3d.getRotation().getQuaternion().getY();
             rotation[3] = transform3d.getRotation().getQuaternion().getZ();
             table.put("rotation " + name, rotation);
+
+            double translation[] = new double[3];
+            translation[0] = transform3d.getTranslation().getX();
+            translation[1] = transform3d.getTranslation().getY();
+            translation[2] = transform3d.getTranslation().getZ();
+            table.put("translation " + name, translation);
         }
+
         @Override
         public void toLog(LogTable table) {
             table.put("timestamp", timestamp);
             table.put("latency", timeSinceLastTimestamp);
             for (int i = 0; i < targets.size(); i++) {
-                logPhotonTrackedTarget(targets[i], table, String.valueOf(i));
+                logPhotonTrackedTarget(targets.get(i), table, String.valueOf(i));
             }
-
-            
         }
         @Override
         public void fromLog(LogTable table) {
-            
+            timestamp = table.getDouble("timestamp", timestamp);
+            timeSinceLastTimestamp = table.getDouble("latency", timeSinceLastTimestamp);
         }
     }
     public abstract void updateInputs(NewVisionIOInputs inputs, Pose3d robotPose);
