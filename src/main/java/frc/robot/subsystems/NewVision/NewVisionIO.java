@@ -21,19 +21,19 @@ public interface NewVisionIO {
         double timeSinceLastTimestamp = 0.0;
         List<PhotonTrackedTarget> targets = new ArrayList<>();
 
-        public void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
+        public static void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
             logTransform3d(target.getBestCameraToTarget(), table, name);
             logTransform3d(target.getAlternateCameraToTarget(), table, name);
 
-            table.put("yaw", target.getYaw());
-            table.put("pitch", target.getPitch());
-            table.put("area", target.getArea());
-            table.put("skew", target.getSkew());
-            table.put("fiducial id", target.getFiducialId());
-            table.put("pose ambiguity", target.getPoseAmbiguity());
+            table.put("yaw " + name, target.getYaw());
+            table.put("pitch " + name, target.getPitch());
+            table.put("area " + name, target.getArea());
+            table.put("skew " + name, target.getSkew());
+            table.put("fiducial id " + name, target.getFiducialId());
+            table.put("pose ambiguity " + name, target.getPoseAmbiguity());
         }
 
-        public void logTransform3d(Transform3d transform3d, LogTable table, String name) {
+        public static void logTransform3d(Transform3d transform3d, LogTable table, String name) {
             double rotation[] = new double[4];
             rotation[0] = transform3d.getRotation().getQuaternion().getW();
             rotation[1] = transform3d.getRotation().getQuaternion().getX();
