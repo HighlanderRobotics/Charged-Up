@@ -171,7 +171,7 @@ public class ElevatorSubsystem extends SubsystemBase {
       zeroMotor();
     }
 
-    updateMech2d();
+    // updateMech2d();
 
     Logger.getInstance().recordOutput("Elevator Mech 2D", mech2d);
     Logger.getInstance()
