@@ -21,8 +21,8 @@ public class NewVisionIOReal implements NewVisionIO {
         inputs.targets = latestResult.targets;
         for (int i = 0; i < inputs.targets.size(); i++) {
             for (int j = 0; j < 4; j++) {
-              inputs.cornersY[(i * 4) + j] = inputs.targets.get(i).getDetectedCorners().get(j).y;
-              inputs.cornersX[(i * 4) + j] = inputs.targets.get(i).getDetectedCorners().get(j).x;
+              NewVisionIOInputs.detectedCornersX[(i * 4) + j] = inputs.targets.get(i).getDetectedCorners().get(j).y;
+              NewVisionIOInputs.detectedCornersY[(i * 4) + j] = inputs.targets.get(i).getDetectedCorners().get(j).x;
             }
           }
         

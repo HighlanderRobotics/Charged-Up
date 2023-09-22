@@ -24,6 +24,10 @@ public interface NewVisionIO {
         double timestamp = 0.0;
         double timeSinceLastTimestamp = 0.0;
         List<PhotonTrackedTarget> targets = new ArrayList<>();
+        static double[] detectedCornersX = new double[4];
+        static double[] detectedCornersY = new double[4];
+        static double[] minAreaRectCornersX = new double[4];
+        static double[] minAreaRectCornersY = new double[4];
 
         public static void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
             logTransform3d(target.getBestCameraToTarget(), table, name);
@@ -39,10 +43,6 @@ public interface NewVisionIO {
         }
 
         public static void logCorners(PhotonTrackedTarget target, LogTable table, String name) {
-            double[] detectedCornersX = new double[4];
-            double[] detectedCornersY = new double[4];
-            double[] minAreaRectCornersX = new double[4];
-            double[] minAreaRectCornersY = new double[4];
             for (int i = 0; i <4; i++) {
                 detectedCornersX[i] = target.getDetectedCorners().get(i).x;
                 detectedCornersY[i] = target.getDetectedCorners().get(i).y;
@@ -89,15 +89,18 @@ public interface NewVisionIO {
         }
 
         public void getLoggedPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
-            double[] translation = table.getDoubleArray("translation " + name, translation);
-            double[] rotation = table.getDoubleArray("rotation " + name, rotation);
-            double[] altTranslation = table.getDoubleArray("translation alt " + name, translation);
-            double[] altRotation = table.getDoubleArray("rotation alt " + name, rotation);
+            double[] translation = table.getDoubleArray("translation " + name, new double[3]);
+            double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
+            double[] altTranslation = table.getDoubleArray("translation alt " + name, new double[3]);
+            double[] altRotation = table.getDoubleArray("rotation alt " + name, new double[4]);
 
             List<TargetCorner> detectedCorners = new ArrayList<>();
             List<TargetCorner> minAreaRectCorners = new ArrayList<>();
 
-            
+            for (int i = 0; i <4; i++) {
+                detectedCorners.add(new TargetCorner(detectedCornersX[i], detectedCornersY[i]));
+                minAreaRectCorners.add(new TargetCorner(minAreaRectCornersX[i], minAreaRectCornersY[i]));
+            }
 
             for (int i = 0; i < targets.size(); i++) {
                 Transform3d pose = getLoggedTransform3d(translation, rotation);
