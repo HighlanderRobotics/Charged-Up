@@ -366,7 +366,7 @@ public final class Constants {
     public static final TrapezoidProfile.Constraints elevatorConstraints =
         new TrapezoidProfile.Constraints(60.0, 40.0);
     public static final ProfiledPIDController PIDController =
-        new ProfiledPIDController(0.2 / 7, 0.0, 0.0139 / 2, elevatorConstraints);
+        new ProfiledPIDController(0.25 / 7, 0.0, 0.0139 / 2, elevatorConstraints);
 
     static {
       PIDController.setTolerance(

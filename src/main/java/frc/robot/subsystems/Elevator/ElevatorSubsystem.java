@@ -102,7 +102,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public boolean isAtGoal() {
     return Math.abs(
             Constants.ElevatorConstants.PIDController.getGoal().position - getExtensionInches())
-        < 3.0;
+        < 1.5;
   }
 
   public void updateMech2d() {
