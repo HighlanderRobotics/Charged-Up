@@ -362,7 +362,7 @@ public final class Constants {
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward =
-        new ElevatorFeedforward(1.0e-2, 0.07, 0.01);
+        new ElevatorFeedforward(1.0e-2, 0.11, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints =
         new TrapezoidProfile.Constraints(60.0, 40.0);
     public static final ProfiledPIDController PIDController =

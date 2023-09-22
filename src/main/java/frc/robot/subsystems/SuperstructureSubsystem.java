@@ -107,7 +107,10 @@ public class SuperstructureSubsystem extends SubsystemBase {
                     new WaitCommand(0.1)
                         .andThen(
                             grabberSubsystem.stopCommand().withTimeout(0.1),
-                            grabberSubsystem.runToScoringCommand()))
+                            new ConditionalCommand(
+                              grabberSubsystem.runToScoringHoldConeCommand(), 
+                              grabberSubsystem.stopCommand(),
+                              () -> grabberSubsystem.gamePiece == GamePiece.Cone)))
                 .withTimeout(1.2)
                 .andThen(
                     new WaitCommand(.15),

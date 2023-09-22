@@ -193,6 +193,10 @@ public class GrabberSubsystem extends SubsystemBase {
                 () -> gamePiece == GamePiece.Cone));
   }
 
+  public CommandBase runToScoringHoldConeCommand() {
+    return runToScoringCommand().alongWith(new RunCommand(() -> intakeCone()).withTimeout(0.4));
+  }
+
   public CommandBase scoreConeCommand() {
     return runToScoringCommand()
         .raceWith(new RunCommand(() -> io.setRollersPercentOut(0)))
