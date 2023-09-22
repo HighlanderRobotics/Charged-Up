@@ -69,6 +69,7 @@ public final class ChoreoAutoChooser {
         new ChoreoPath(2, Alliance.Blue, AutoFieldPosition.Clear, ChoreoPathFeature.none),
         new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Bump, ChoreoPathFeature.none),
         new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Clear, ChoreoPathFeature.none),
+        new ChoreoPath(3, Alliance.Blue, AutoFieldPosition.Clear, ChoreoPathFeature.none),
     };
 
     public ChoreoTrajectory getPath(ChoreoPath path) {
@@ -95,7 +96,11 @@ public final class ChoreoAutoChooser {
 
     private Command runAuto(ChoreoPath path) {
         System.out.println("getting trajectory: " + path.fileName());
-        return twoPiece(path);
+        if (path.pieceCount == 2) {
+            return twoPiece(path);
+        } else {
+            return threePiece(path);
+        }
     }
 
     private Command scoreLevelThree() {
@@ -119,6 +124,19 @@ public final class ChoreoAutoChooser {
             swerveSubsystem.choreoTrajFollow(getPath(path))
                 .alongWith(
                     new WaitCommand(1.6).andThen(intake())),
+            outake()
+        );
+    }
+
+    private Command threePiece(ChoreoPath path) {
+        return Commands.sequence(
+            intake(),
+            swerveSubsystem.choreoTrajFollow(getPath(path))
+                .alongWith(
+                    new WaitCommand(2.5).andThen(intake()),
+                    new WaitCommand(5.8).andThen(outake()),
+                    new WaitCommand(8.5).andThen(intake())
+                ),
             outake()
         );
     }
