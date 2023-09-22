@@ -10,9 +10,13 @@ import java.util.List;
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
 
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Quaternion;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /** Add your docs here. */
 public interface NewVisionIO {
@@ -23,7 +27,8 @@ public interface NewVisionIO {
 
         public static void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
             logTransform3d(target.getBestCameraToTarget(), table, name);
-            logTransform3d(target.getAlternateCameraToTarget(), table, name);
+            logTransform3d(target.getAlternateCameraToTarget(), table, "alt" + name);
+            logCorners(target, table, name);
 
             table.put("yaw " + name, target.getYaw());
             table.put("pitch " + name, target.getPitch());
@@ -31,6 +36,23 @@ public interface NewVisionIO {
             table.put("skew " + name, target.getSkew());
             table.put("fiducial id " + name, target.getFiducialId());
             table.put("pose ambiguity " + name, target.getPoseAmbiguity());
+        }
+
+        public static void logCorners(PhotonTrackedTarget target, LogTable table, String name) {
+            double[] detectedCornersX = new double[4];
+            double[] detectedCornersY = new double[4];
+            double[] minAreaRectCornersX = new double[4];
+            double[] minAreaRectCornersY = new double[4];
+            for (int i = 0; i <4; i++) {
+                detectedCornersX[i] = target.getDetectedCorners().get(i).x;
+                detectedCornersY[i] = target.getDetectedCorners().get(i).y;
+                minAreaRectCornersX[i] = target.getMinAreaRectCorners().get(i).x;
+                minAreaRectCornersY[i] = target.getMinAreaRectCorners().get(i).y;
+            }
+            table.put("detected corners x " + name, detectedCornersX);
+            table.put("detected corners y " + name, detectedCornersY);
+            table.put("min area rect corners x " + name, minAreaRectCornersX);
+            table.put("min area rect corners Y " + name, minAreaRectCornersY);
         }
 
         public static void logTransform3d(Transform3d transform3d, LogTable table, String name) {
@@ -48,6 +70,54 @@ public interface NewVisionIO {
             table.put("translation " + name, translation);
         }
 
+        public Transform3d getLoggedTransform3d(double[] translation, double[] rotation) {
+            Transform3d transform3d = new Transform3d(
+                new Translation3d(
+                    translation[0], 
+                    translation[1], 
+                    translation[2]),
+                new Rotation3d(
+                    new Quaternion(
+                        rotation[0], 
+                        rotation[1], 
+                        rotation[2], 
+                        rotation[3]
+                    )
+                )
+            );
+            return transform3d;
+        }
+
+        public void getLoggedPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
+            double[] translation = table.getDoubleArray("translation " + name, translation);
+            double[] rotation = table.getDoubleArray("rotation " + name, rotation);
+            double[] altTranslation = table.getDoubleArray("translation alt " + name, translation);
+            double[] altRotation = table.getDoubleArray("rotation alt " + name, rotation);
+
+            List<TargetCorner> detectedCorners = new ArrayList<>();
+            List<TargetCorner> minAreaRectCorners = new ArrayList<>();
+
+            
+
+            for (int i = 0; i < targets.size(); i++) {
+                Transform3d pose = getLoggedTransform3d(translation, rotation);
+                Transform3d altPose = getLoggedTransform3d(altTranslation, altRotation);
+                targets.add(
+                    new PhotonTrackedTarget( //TODO i'm not sure if i'm doing names right lmao
+                        table.getDouble("yaw " + name, target.getYaw()),
+                        table.getDouble("pitch " + name, target.getPitch()),
+                        table.getDouble("area " + name, target.getArea()),
+                        table.getDouble("skew " + name, target.getSkew()),
+                        (int)(table.getInteger("fiducial id " + name, target.getFiducialId())),
+                        pose,
+                        altPose,
+                        table.getDouble("pose ambiguity " + name, target.getPoseAmbiguity()),
+                        minAreaRectCorners,
+                        detectedCorners)
+                );
+            }
+        }
+
         @Override
         public void toLog(LogTable table) {
             table.put("timestamp", timestamp);
@@ -60,6 +130,7 @@ public interface NewVisionIO {
         public void fromLog(LogTable table) {
             timestamp = table.getDouble("timestamp", timestamp);
             timeSinceLastTimestamp = table.getDouble("latency", timeSinceLastTimestamp);
+            
         }
     }
     public abstract void updateInputs(NewVisionIOInputs inputs, Pose3d robotPose);
