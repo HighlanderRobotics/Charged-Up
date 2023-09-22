@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.choreolib.AutoFieldPosition;
 import frc.lib.choreolib.ChoreoPath;
 import frc.lib.choreolib.ChoreoPathFeature;
@@ -81,37 +82,45 @@ public final class ChoreoAutoChooser {
                 grabberSubsystem.intakeCubeCommand())
             .withTimeout(1.3)
             .asProxy();
-        }
+    }
+
+    private Command outake() {
+        return Commands.parallel(
+            intakeSubsystem.outakeCommand(),
+            routingSubsystem.outakeCommand(),
+            grabberSubsystem.outakeCubeCommand())
+        .withTimeout(1.0)
+        .asProxy();
+    }
 
     private Command runAuto(ChoreoPath path) {
         System.out.println("getting trajectory: " + path.fileName());
         return twoPiece(path);
-        
     }
 
     private Command scoreLevelThree() {
-        return new SequentialCommandGroup(
-            new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
-                .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
-                .andThen(superstructureSubsystem.scoreNoAim().asProxy().andThen(new WaitCommand(1.0)))
-        );
+        return new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
+                    .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
+                    .andThen(superstructureSubsystem.scoreNoAim().asProxy())
+                    .andThen(new WaitCommand(2.0));
+    }
+
+    private Command scoreLevelTwo() {
+        return new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L2, true))
+                    .alongWith(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone))
+                    .andThen(superstructureSubsystem.scoreNoAim().asProxy())
+                    .andThen(new WaitCommand(2.0));
     }
 
     private Command twoPiece(ChoreoPath path) {
-        return scoreLevelThree()
-            .andThen(new PrintCommand("Score Level 3 done"))
-            .andThen(
-                swerveSubsystem.choreoTrajFollow(getPath(path))
-                // new WaitCommand(2.0),
-                // intake()
-                // .alongWith(
-                //     new SequentialCommandGroup(
-                //         new WaitCommand(1.1),
-                        // intake(),
-                //         new WaitCommand(1)
-                //     )
-                // )
-            );
+        return Commands.sequence(
+            new WaitCommand(0.1),
+            scoreLevelThree(),
+            swerveSubsystem.choreoTrajFollow(getPath(path))
+                .alongWith(
+                    new WaitCommand(1.6).andThen(intake())),
+            outake()
+        );
     }
 
     private Command justScore() {

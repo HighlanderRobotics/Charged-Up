@@ -422,7 +422,7 @@ public class SwerveSubsystem extends SubsystemBase {
         );
   }
 
-  public CommandBase choreoTrajFollow(ChoreoTrajectory traj) {
+  public Command choreoTrajFollow(ChoreoTrajectory traj) {
     return new InstantCommand(() -> resetOdometry(traj.getInitialPose()))
         .andThen(
             new PrintCommand("! traj start"),
@@ -450,7 +450,9 @@ public class SwerveSubsystem extends SubsystemBase {
                         false,
                         false,
                         false),
-                this));
+                this),
+                driveCommand(() -> 0, () -> 0, () -> 0, false, false, false)
+                  .until(() -> true));
   }
 
   public CommandBase autoBalanceVelocity() {
