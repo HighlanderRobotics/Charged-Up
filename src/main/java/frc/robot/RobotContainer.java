@@ -4,10 +4,10 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,9 +21,11 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.logging.LoggingWrapper;
+import frc.lib.choreolib.ChoreoTrajectory;
+import frc.lib.choreolib.TrajectoryManager;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
+import frc.robot.commands.ChoreoAutoChooser;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem.GamePiece;
@@ -66,6 +68,14 @@ public class RobotContainer {
           routingSubsystem,
           grabberSubsystem,
           superstructureSubsystem);
+ private ChoreoAutoChooser choreoAutoChooser =
+      new ChoreoAutoChooser(
+            swerveSubsystem,
+            intakeSubsystem,
+            elevatorSubsystem,
+            routingSubsystem,
+            grabberSubsystem,
+            superstructureSubsystem);
 
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
@@ -83,6 +93,8 @@ public class RobotContainer {
   boolean isUsingChute = false;
 
   double lastHeadingSnapAngle = 0;
+
+  Field2d field = new Field2d();
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -129,6 +141,8 @@ public class RobotContainer {
             () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     // Configure the trigger bindings
     configureBindings();
+    // Add testing buttons to dashboard
+    // addDashboardCommands();
   }
 
   /**
@@ -280,7 +294,7 @@ public class RobotContainer {
                 () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
                 () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
                 () -> {
-                    // Find rotation based on 3 "zones" on controller
+                  // Find rotation based on 3 "zones" on controller
                   var joystickRotation =
                       new Rotation2d(controller.getRightX(), -controller.getRightY());
                   SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
@@ -396,8 +410,7 @@ public class RobotContainer {
             () -> grabberSubsystem.gamePiece == GamePiece.Cone));
 
     superstructureSubsystem.storeTrigger.whileTrue(
-        routingSubsystem.stopCommand()
-            .withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+        routingSubsystem.stopCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
 
   private static Command run(Command... commands) {
@@ -425,6 +438,9 @@ public class RobotContainer {
         .recordOutput(
             "Controller Right X Adjusted",
             modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
+    SmartDashboard.putData("choreo field", field);
+    // SmartDashboard.putData("rezero", new InstantCommand(() ->
+    // grabberSubsystem.resetEncoderToZero()));
   }
 
   /**
@@ -433,8 +449,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example path will be run in autonomous
-    return autoChooser.getAutoCommand();
+    return choreoAutoChooser.getAutonomousCommand();
   }
 
   /** Hopefully only need to use for LEDS */

@@ -17,6 +17,7 @@
       "/AdvantageKit/RealOutputs/Elevator Mech 2D": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Chooser": "String Chooser",
+      "/SmartDashboard/Choreo Auto Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
       "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
@@ -34,6 +35,7 @@
       "/SmartDashboard/Spline": "Command",
       "/SmartDashboard/autoBalance": "Command",
       "/SmartDashboard/autoChooser": "String Chooser",
+      "/SmartDashboard/choreo field": "Field2d",
       "/SmartDashboard/elevatorsim": "Mechanism2d",
       "/SmartDashboard/extend to 0": "Command",
       "/SmartDashboard/extend to 12": "Command",
@@ -47,7 +49,7 @@
       "/SmartDashboard/sim Sim Field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Auto Chooser": {
+      "/SmartDashboard/Choreo Auto Chooser": {
         "window": {
           "visible": true
         }
@@ -97,11 +99,6 @@
           "length": 1.0,
           "width": 0.800000011920929
         },
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Path 1": {
         "window": {
           "visible": true
         }

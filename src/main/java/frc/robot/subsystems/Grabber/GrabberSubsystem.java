@@ -193,6 +193,10 @@ public class GrabberSubsystem extends SubsystemBase {
                 () -> gamePiece == GamePiece.Cone));
   }
 
+  public CommandBase runToScoringHoldConeCommand() {
+    return runToScoringCommand().alongWith(new RunCommand(() -> intakeCone()).withTimeout(0.4));
+  }
+
   public CommandBase scoreConeCommand() {
     return runToScoringCommand()
         .raceWith(new RunCommand(() -> io.setRollersPercentOut(0)))
@@ -236,6 +240,7 @@ public class GrabberSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     io.updateInputs(inputs);
     Logger.getInstance().processInputs("Grabber", inputs);
+    Logger.getInstance().recordOutput("Grabber Game Piece", gamePiece.toString());
 
     if (io.getLimitSwitch()) {
       resetEncoderToZero();

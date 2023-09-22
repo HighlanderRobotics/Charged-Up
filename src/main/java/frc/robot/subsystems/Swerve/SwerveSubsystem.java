@@ -43,6 +43,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.lib.choreolib.ChoreoSwerveControllerCommand;
+import frc.lib.choreolib.ChoreoTrajectory;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
@@ -50,10 +52,10 @@ import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.LEDs.LEDSubsystem;
-import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
-import frc.robot.subsystems.Vision.VisionIOApriltags;
-import frc.robot.subsystems.Vision.VisionIOSimApriltags;
-import frc.robot.subsystems.Vision.VisionIOTape;
+// import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
+// import frc.robot.subsystems.Vision.VisionIOApriltags;
+// import frc.robot.subsystems.Vision.VisionIOSimApriltags;
+// import frc.robot.subsystems.Vision.VisionIOTape;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -418,6 +420,39 @@ public class SwerveSubsystem extends SubsystemBase {
         this // The drive subsystem. Used to properly set the requirements of path following
         // commands
         );
+  }
+
+  public Command choreoTrajFollow(ChoreoTrajectory traj) {
+    return new InstantCommand(() -> resetOdometry(traj.getInitialPose()))
+        .andThen(
+            new PrintCommand("! traj start"),
+            new ChoreoSwerveControllerCommand(
+                traj,
+                this::getPose,
+                new PIDController(
+                    Constants.AutoConstants.kPXController,
+                    0.0,
+                    0.0), // PID constants to correct for translation error (used to create the X
+                // and Y
+                // PID
+                // controllers)
+                new PIDController(Constants.AutoConstants.kPXController, 0.0, 0.0),
+                new PIDController(
+                    Constants.AutoConstants.kPThetaController,
+                    0.0,
+                    0.0), // PID constants to correct for rotation error (used to create the
+                // rotation
+                // controller)
+                (ChassisSpeeds speeds) ->
+                    this.drive(
+                        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
+                        speeds.omegaRadiansPerSecond,
+                        false,
+                        false,
+                        false),
+                this),
+                driveCommand(() -> 0, () -> 0, () -> 0, false, false, false)
+                  .until(() -> true));
   }
 
   public CommandBase autoBalanceVelocity() {

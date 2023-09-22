@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
@@ -78,7 +79,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     return inputs.positionInches;
   }
 
-  public CommandBase zeroElevator() {
+  public Command zeroElevator() {
     return new RunCommand(
             () -> {
               isZeroing = true;
@@ -101,7 +102,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public boolean isAtGoal() {
     return Math.abs(
             Constants.ElevatorConstants.PIDController.getGoal().position - getExtensionInches())
-        < 3.0;
+        < 1.5;
   }
 
   public void updateMech2d() {
@@ -161,10 +162,13 @@ public class ElevatorSubsystem extends SubsystemBase {
     // TODO change this to an enum instead of 2 booleans
     if (enabled) {
       updatePID();
+      Logger.getInstance().recordOutput("Elevator Mode", "PID");
     } else if (isZeroing) {
       io.setPercentOut(-0.1);
+      Logger.getInstance().recordOutput("Elevator Mode", "ZERO");
     } else {
       io.stop();
+      Logger.getInstance().recordOutput("Elevator Mode", "OFF");
     }
 
     if (io.getLimitSwitch()) {

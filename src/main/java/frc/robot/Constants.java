@@ -135,8 +135,7 @@ public final class Constants {
     public static final double driveKA = (0.27 / 12);
 
     public static final double simDriveKP = 0.0;
-    public static final double simDriveKS =
-        (0.32 / 12);
+    public static final double simDriveKS = (0.32 / 12);
     public static final double simDriveKV = (1.51 / 12);
     public static final double simDriveKA = (0.27 / 12);
 
@@ -144,8 +143,7 @@ public final class Constants {
     /** Meters per Second */
     public static final double maxSpeed = 6;
     /** Radians per Second */
-    public static final double maxAngularVelocity =
-        10.0;
+    public static final double maxAngularVelocity = 10.0;
 
     /* Neutral Modes */
     public static final NeutralMode angleNeutralMode = NeutralMode.Coast;
@@ -364,11 +362,11 @@ public final class Constants {
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward =
-        new ElevatorFeedforward(1.0e-2, 0.07, 0.01);
+        new ElevatorFeedforward(1.0e-2, 0.11, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints =
         new TrapezoidProfile.Constraints(60.0, 40.0);
     public static final ProfiledPIDController PIDController =
-        new ProfiledPIDController(0.2 / 7, 0.0, 0.0139 / 2, elevatorConstraints);
+        new ProfiledPIDController(0.25 / 7, 0.0, 0.0139 / 2, elevatorConstraints);
 
     static {
       PIDController.setTolerance(
@@ -522,16 +520,16 @@ public final class Constants {
       }
     }
 
-    public static final List<VisionSource> VISION_SOURCES =
-        List.of(
-            new VisionSource(
-                "limelight-right",
-                new Transform3d(
-                    new Translation3d(
-                        Units.inchesToMeters(-8),
-                        Units.inchesToMeters(-9.75),
-                        Units.inchesToMeters(-22.75)),
-                    new Rotation3d(0, 0, Units.degreesToRadians(-5)))));
+    // public static final List<VisionSource> VISION_SOURCES =
+    //     List.of(
+    //         new VisionSource(
+    //             "limelight-right",
+    //             new Transform3d(
+    //                 new Translation3d(
+    //                     Units.inchesToMeters(-8),
+    //                     Units.inchesToMeters(-9.75),
+    //                     Units.inchesToMeters(-22.75)),
+    //                 new Rotation3d(0, 0, Units.degreesToRadians(-5)))));
   }
 
   /** For 5026 vision code */
