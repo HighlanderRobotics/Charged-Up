@@ -57,7 +57,7 @@ public final class ChoreoAutoChooser {
             chooser.addOption(path.localizedDescription(), () -> runAuto(path));
         }
 
-        chooser.addOption("Just Score", () -> justScore());
+        chooser.addDefaultOption("Just Score", () -> justScore());
     }
 
     public Command getAutonomousCommand() {

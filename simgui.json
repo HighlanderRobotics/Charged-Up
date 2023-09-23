@@ -18,6 +18,7 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Chooser": "String Chooser",
       "/SmartDashboard/Choreo Auto Chooser": "String Chooser",
+      "/SmartDashboard/ChoreoSwerveControllerCommand_field": "Field2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
       "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
@@ -131,5 +132,8 @@
         "open": true
       }
     }
+  },
+  "NetworkTables View": {
+    "visible": false
   }
 }
