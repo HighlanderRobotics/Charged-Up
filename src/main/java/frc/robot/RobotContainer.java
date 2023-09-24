@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.choreolib.ChoreoTrajectory;
 import frc.lib.choreolib.TrajectoryManager;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AutoChooser;
+import frc.robot.commands.PathplannerAutoChooser;
 import frc.robot.commands.ChoreoAutoChooser;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Grabber.GrabberSubsystem;
@@ -36,6 +36,7 @@ import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -60,8 +61,8 @@ public class RobotContainer {
           swerveSubsystem,
           grabberSubsystem,
           ledSubsystem);
-  private AutoChooser autoChooser =
-      new AutoChooser(
+  private PathplannerAutoChooser pathplannerAutoChooser =
+      new PathplannerAutoChooser(
           swerveSubsystem,
           intakeSubsystem,
           elevatorSubsystem,
@@ -95,6 +96,8 @@ public class RobotContainer {
   double lastHeadingSnapAngle = 0;
 
   Field2d field = new Field2d();
+
+  LoggedDashboardBoolean autoSystem = new LoggedDashboardBoolean("Use Choreo Autos?", true);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -449,7 +452,11 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return choreoAutoChooser.getAutonomousCommand();
+    if (autoSystem.get()){
+        return choreoAutoChooser.getAutonomousCommand();
+    } else {
+        return pathplannerAutoChooser.getAutoCommand();
+    }
   }
 
   /** Hopefully only need to use for LEDS */
@@ -457,9 +464,17 @@ public class RobotContainer {
     if (DriverStation.getAlliance() == Alliance.Invalid) {
       ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
     } else if (DriverStation.getAlliance() == Alliance.Red) {
-      ledSubsystem.runColorAlong(Color.kRed, Constants.LEDConstants.defaultColor, 12, 2);
+      ledSubsystem.runColorAlong(
+        Color.kRed, 
+        autoSystem.get() ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
+        12, 
+        2);
     } else {
-      ledSubsystem.runColorAlong(Color.kBlue, Constants.LEDConstants.defaultColor, 12, 2);
+      ledSubsystem.runColorAlong(
+        Color.kBlue, 
+        autoSystem.get() ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
+        12, 
+        2);
     }
   }
 }
