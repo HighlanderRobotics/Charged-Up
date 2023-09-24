@@ -21,8 +21,6 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.choreolib.ChoreoTrajectory;
-import frc.lib.choreolib.TrajectoryManager;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
 import frc.robot.commands.ChoreoAutoChooser;
@@ -68,14 +66,14 @@ public class RobotContainer {
           routingSubsystem,
           grabberSubsystem,
           superstructureSubsystem);
- private ChoreoAutoChooser choreoAutoChooser =
+  private ChoreoAutoChooser choreoAutoChooser =
       new ChoreoAutoChooser(
-            swerveSubsystem,
-            intakeSubsystem,
-            elevatorSubsystem,
-            routingSubsystem,
-            grabberSubsystem,
-            superstructureSubsystem);
+          swerveSubsystem,
+          intakeSubsystem,
+          elevatorSubsystem,
+          routingSubsystem,
+          grabberSubsystem,
+          superstructureSubsystem);
 
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);

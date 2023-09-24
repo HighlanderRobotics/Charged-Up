@@ -15,7 +15,6 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -451,8 +450,7 @@ public class SwerveSubsystem extends SubsystemBase {
                         false,
                         false),
                 this),
-                driveCommand(() -> 0, () -> 0, () -> 0, false, false, false)
-                  .until(() -> true));
+            driveCommand(() -> 0, () -> 0, () -> 0, false, false, false).until(() -> true));
   }
 
   public CommandBase autoBalanceVelocity() {
@@ -593,19 +591,19 @@ public class SwerveSubsystem extends SubsystemBase {
                 .raceWith(
                     ledSubsystem.setBlinkingCommand(Color.kBlue, 0.25),
                     new WaitUntilCommand(() -> headingController.atGoal())))
-        // .andThen(
-        //     headingLockDriveCommand(
-        //             xSupplier,
-        //             () ->
-        //                 tapeVisionSubsystem.hasTargets()
-        //                     ? tapeDriveAssistController.calculate(
-        //                         tapeYawFilterVal,
-        //                         Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
-        //                     : 0,
-        //             () -> Math.PI,
-        //             true,
-        //             false)
-                .alongWith(ledSubsystem.setBlinkingCommand(Color.kGreen, 0.25));
+        .andThen(
+            headingLockDriveCommand(
+                    xSupplier,
+                    () ->false
+                        // tapeVisionSubsystem.hasTargets()
+                            ? tapeDriveAssistController.calculate(
+                                tapeYawFilterVal,
+                                Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
+                            : 0,
+                    () -> Math.PI,
+                    true,
+                    false)
+                .alongWith(ledSubsystem.setBlinkingCommand(Color.kGreen, 0.25)));
   }
 
   @Override
@@ -657,7 +655,8 @@ public class SwerveSubsystem extends SubsystemBase {
     // List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
     //     apriltagVisionSubsystem.getMeasurement(pose);
 
-    // for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements) {
+    // for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements)
+    // {
     //   dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
     //   poseEstimator.addVisionMeasurement(
     //       measurement.estimation.estimatedPose.toPose2d(),
