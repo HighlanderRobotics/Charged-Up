@@ -7,16 +7,21 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /** Custom PathPlanner version of SwerveControllerCommand */
 public class ChoreoSwerveControllerCommand extends CommandBase {
   private final Timer timer = new Timer();
-  private final ChoreoTrajectory trajectory;
+  private ChoreoTrajectory trajectory;
   private final Supplier<Pose2d> poseSupplier;
   private final SwerveDriveKinematics kinematics;
   private final ChoreoHolonomicDriveController controller;
@@ -205,7 +210,8 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    // SmartDashboard.putData("ChoreoSwerveControllerCommand_field", this.field);
+    // trajectory = useAllianceColor && DriverStation.getAlliance() == Alliance.Red ? trajectory.mirrorred() : trajectory;
+    SmartDashboard.putData("ChoreoSwerveControllerCommand_field", this.field);
     this.field.getObject("traj").setPoses(this.trajectory.getPoses());
 
     this.timer.reset();
@@ -217,9 +223,13 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
     double currentTime = this.timer.get();
     ChoreoTrajectoryState desiredState =
         (ChoreoTrajectoryState) this.trajectory.sample(currentTime);
+    if (useAllianceColor && DriverStation.getAlliance() == Alliance.Red) {
+      desiredState = desiredState.flipped();
+    }
+    SmartDashboard.putNumberArray("Choreo Swerve Target State", desiredState.asArray());
 
     Pose2d currentPose = this.poseSupplier.get();
-    this.field.setRobotPose(currentPose);
+    this.field.setRobotPose(desiredState.getPose());
 
     /*SmartDashboard.putNumber(
         "ChoreoSwerveControllerCommand_xError", currentPose.getX() - desiredState.poseMeters.getX());

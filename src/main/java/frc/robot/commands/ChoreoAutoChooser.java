@@ -52,20 +52,18 @@ public final class ChoreoAutoChooser {
       chooser.addOption(path.localizedDescription(), () -> runAuto(path));
     }
 
-    chooser.addOption("Just Score", () -> justScore());
-  }
+        chooser.addDefaultOption("Just Score", () -> justScore());
+    }
 
   public Command getAutonomousCommand() {
     return chooser.get().get();
   }
 
-  public final ChoreoPath[] paths =
-      new ChoreoPath[] {
-        new ChoreoPath(2, Alliance.Blue, AutoFieldPosition.Bump, ChoreoPathFeature.none),
-        new ChoreoPath(2, Alliance.Blue, AutoFieldPosition.Clear, ChoreoPathFeature.none),
-        new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Bump, ChoreoPathFeature.none),
-        new ChoreoPath(2, Alliance.Red, AutoFieldPosition.Clear, ChoreoPathFeature.none),
-      };
+    public final ChoreoPath[] paths = new ChoreoPath[] {
+        new ChoreoPath(2, AutoFieldPosition.Bump, ChoreoPathFeature.none),
+        new ChoreoPath(2, AutoFieldPosition.Clear, ChoreoPathFeature.none),
+        new ChoreoPath(3, AutoFieldPosition.Clear, ChoreoPathFeature.none),
+    };
 
   public ChoreoTrajectory getPath(ChoreoPath path) {
     return TrajectoryManager.getInstance()
@@ -90,10 +88,14 @@ public final class ChoreoAutoChooser {
         .asProxy();
   }
 
-  private Command runAuto(ChoreoPath path) {
-    System.out.println("getting trajectory: " + path.fileName());
-    return twoPiece(path);
-  }
+    private Command runAuto(ChoreoPath path) {
+        System.out.println("getting trajectory: " + path.fileName());
+        if (path.pieceCount == 2) {
+            return twoPiece(path);
+        } else {
+            return threePiece(path);
+        }
+    }
 
   private Command scoreLevelThree() {
     return new InstantCommand(() -> swerveSubsystem.setLevel(ScoringLevels.L3, true))
@@ -109,15 +111,29 @@ public final class ChoreoAutoChooser {
         .andThen(new WaitCommand(2.0));
   }
 
-  private Command twoPiece(ChoreoPath path) {
-    return Commands.sequence(
-        new WaitCommand(0.1),
-        scoreLevelThree(),
-        swerveSubsystem
-            .choreoTrajFollow(getPath(path))
-            .alongWith(new WaitCommand(1.6).andThen(intake())),
-        outake());
-  }
+    private Command twoPiece(ChoreoPath path) {
+        return Commands.sequence(
+            new WaitCommand(0.1),
+            scoreLevelThree(),
+            swerveSubsystem.choreoTrajFollow(getPath(path))
+                .alongWith(
+                    new WaitCommand(1.6).andThen(intake())),
+            outake()
+        );
+    }
+
+    private Command threePiece(ChoreoPath path) {
+        return Commands.sequence(
+            intake(),
+            swerveSubsystem.choreoTrajFollow(getPath(path))
+                .alongWith(
+                    new WaitCommand(2.5).andThen(intake()),
+                    new WaitCommand(5.8).andThen(outake()),
+                    new WaitCommand(8.5).andThen(intake())
+                ),
+            outake()
+        );
+    }
 
   private Command justScore() {
     return scoreLevelThree();

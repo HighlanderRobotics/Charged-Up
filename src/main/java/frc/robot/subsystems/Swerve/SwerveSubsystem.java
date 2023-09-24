@@ -422,7 +422,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Command choreoTrajFollow(ChoreoTrajectory traj) {
-    return new InstantCommand(() -> resetOdometry(traj.getInitialPose()))
+    return new InstantCommand(() -> resetOdometry(traj.sample(0, DriverStation.getAlliance() == Alliance.Red).getPose()))
         .andThen(
             new PrintCommand("! traj start"),
             new ChoreoSwerveControllerCommand(
@@ -449,6 +449,7 @@ public class SwerveSubsystem extends SubsystemBase {
                         false,
                         false,
                         false),
+                true,
                 this),
             driveCommand(() -> 0, () -> 0, () -> 0, false, false, false).until(() -> true));
   }
@@ -630,7 +631,7 @@ public class SwerveSubsystem extends SubsystemBase {
               swerveMods[3].getAbsoluteRotation().getRadians(),
               swerveMods[3].getState().speedMetersPerSecond
             });
-    Logger.getInstance().recordOutput("Swerve Pose", getPose());
+    Logger.getInstance().recordOutput("Swerve Pose", new double[]{getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()});
     Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
     Logger.getInstance()
         .recordOutput(
