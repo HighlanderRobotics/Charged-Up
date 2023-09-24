@@ -101,24 +101,21 @@ public interface NewVisionIO {
                 detectedCorners.add(new TargetCorner(detectedCornersX[i], detectedCornersY[i]));
                 minAreaRectCorners.add(new TargetCorner(minAreaRectCornersX[i], minAreaRectCornersY[i]));
             }
-
-            for (int i = 0; i < targets.size(); i++) {
-                Transform3d pose = getLoggedTransform3d(translation, rotation);
-                Transform3d altPose = getLoggedTransform3d(altTranslation, altRotation);
-                targets.add(
-                    new PhotonTrackedTarget( //TODO i'm not sure if i'm doing names right lmao
-                        table.getDouble("yaw " + name, target.getYaw()),
-                        table.getDouble("pitch " + name, target.getPitch()),
-                        table.getDouble("area " + name, target.getArea()),
-                        table.getDouble("skew " + name, target.getSkew()),
-                        (int)(table.getInteger("fiducial id " + name, target.getFiducialId())),
-                        pose,
-                        altPose,
-                        table.getDouble("pose ambiguity " + name, target.getPoseAmbiguity()),
-                        minAreaRectCorners,
-                        detectedCorners)
-                );
-            }
+            Transform3d pose = getLoggedTransform3d(translation, rotation);
+            Transform3d altPose = getLoggedTransform3d(altTranslation, altRotation);
+            targets.add(
+                new PhotonTrackedTarget(
+                    table.getDouble("yaw " + name, target.getYaw()),
+                    table.getDouble("pitch " + name, target.getPitch()),
+                    table.getDouble("area " + name, target.getArea()),
+                    table.getDouble("skew " + name, target.getSkew()),
+                    (int)(table.getInteger("fiducial id " + name, target.getFiducialId())),
+                    pose,
+                    altPose,
+                    table.getDouble("pose ambiguity " + name, target.getPoseAmbiguity()),
+                    minAreaRectCorners,
+                    detectedCorners)
+            );
         }
 
         @Override
