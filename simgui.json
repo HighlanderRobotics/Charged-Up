@@ -20,6 +20,7 @@
       "/AdvantageKit/RealOutputs/Elevator Mech 2D": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Chooser": "String Chooser",
+      "/SmartDashboard/Auto System Type": "String Chooser",
       "/SmartDashboard/Choreo Auto Chooser": "String Chooser",
       "/SmartDashboard/ChoreoSwerveControllerCommand_field": "Field2d",
       "/SmartDashboard/Field": "Field2d",
@@ -54,6 +55,11 @@
     },
     "windows": {
       "/SmartDashboard/Auto Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Auto System Type": {
         "window": {
           "visible": true
         }
@@ -121,6 +127,11 @@
   },
   "NetworkTables": {
     "transitory": {
+      "AdvantageKit": {
+        "DashboardInputs": {
+          "open": true
+        }
+      },
       "Shuffleboard": {
         "open": true
       },

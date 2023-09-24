@@ -35,6 +35,7 @@ import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -95,7 +96,12 @@ public class RobotContainer {
 
   Field2d field = new Field2d();
 
-  LoggedDashboardBoolean autoSystem = new LoggedDashboardBoolean("Use Choreo Autos?", true);
+  enum AutoSystem {
+    choreo, pathplanner
+  }
+
+  LoggedDashboardChooser<AutoSystem> autoSystemType =
+      new LoggedDashboardChooser<>("Auto System Type");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -144,6 +150,9 @@ public class RobotContainer {
     configureBindings();
     // Add testing buttons to dashboard
     // addDashboardCommands();
+
+    autoSystemType.addDefaultOption("Choreo", AutoSystem.choreo);
+    autoSystemType.addOption("Path Planner", AutoSystem.pathplanner);
   }
 
   /**
@@ -450,10 +459,13 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    if (autoSystem.get()){
-        return choreoAutoChooser.getAutonomousCommand();
-    } else {
-        return pathplannerAutoChooser.getAutoCommand();
+    switch (autoSystemType.get()) {
+        case choreo:
+            return choreoAutoChooser.getAutonomousCommand();
+        case pathplanner:
+            return pathplannerAutoChooser.getAutoCommand();
+        default:
+            return null;
     }
   }
 
@@ -464,13 +476,13 @@ public class RobotContainer {
     } else if (DriverStation.getAlliance() == Alliance.Red) {
       ledSubsystem.runColorAlong(
         Color.kRed, 
-        autoSystem.get() ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
+        autoSystemType.get() == AutoSystem.choreo ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
         12, 
         2);
     } else {
       ledSubsystem.runColorAlong(
         Color.kBlue, 
-        autoSystem.get() ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
+        autoSystemType.get() == AutoSystem.choreo ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
         12, 
         2);
     }
