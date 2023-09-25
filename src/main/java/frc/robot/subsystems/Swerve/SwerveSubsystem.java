@@ -32,7 +32,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -42,18 +41,16 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
-import frc.robot.subsystems.LEDs.LEDSubsystem;
+import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionSubsystem;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
-import frc.robot.subsystems.Vision.VisionIOApriltags;
-import frc.robot.subsystems.Vision.VisionIOSimApriltags;
-import frc.robot.subsystems.Vision.VisionIOTape;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,14 +72,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Field2d field = new Field2d();
 
-  private boolean isInTapeMode = true;
-  private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, -0.01);
-
-  private VisionIOApriltags apriltagVisionSubsystem = new VisionIOApriltags();
-  private VisionIOSimApriltags apriltagVisionSim = new VisionIOSimApriltags();
+  private VisionSubsystem visionSubsystem = new VisionSubsystem();
+  private VisionIOReal visionIOReal = new VisionIOReal();
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
-  private LinearFilter tapeYawFilter = LinearFilter.singlePoleIIR(0.2, 0.020);
-  private double tapeYawFilterVal = 0;
 
   public boolean hasResetOdometry = false;
 
@@ -103,9 +95,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public ProfiledPIDController headingController =
       new ProfiledPIDController(1.2, 0, 0.1, new Constraints(Math.PI * 4, Math.PI * 6));
-
-  public VisionIOTape tapeVisionSubsystem =
-      new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
 
   public SwerveSubsystem() {
     gyroIO = Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim();
@@ -547,32 +536,6 @@ public class SwerveSubsystem extends SubsystemBase {
     return extensionLevel;
   }
 
-  public CommandBase simpleTapeAllignCommand(
-      DoubleSupplier xSupplier, DoubleSupplier ySupplier, LEDSubsystem ledSubsystem) {
-    return new InstantCommand(
-            () -> {
-              headingController.reset(getYaw().getRadians());
-            })
-        .andThen(
-            headingLockDriveCommand(xSupplier, () -> 0, () -> Math.PI, true, false)
-                .raceWith(
-                    ledSubsystem.setBlinkingCommand(Color.kBlue, 0.25),
-                    new WaitUntilCommand(() -> headingController.atGoal())))
-        .andThen(
-            headingLockDriveCommand(
-                    xSupplier,
-                    () ->
-                        tapeVisionSubsystem.hasTargets()
-                            ? tapeDriveAssistController.calculate(
-                                tapeYawFilterVal,
-                                Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
-                            : 0,
-                    () -> Math.PI,
-                    true,
-                    false)
-                .alongWith(ledSubsystem.setBlinkingCommand(Color.kGreen, 0.25)));
-  }
-
   @Override
   public void periodic() {
     for (int i = 0; i < swerveMods.length; i++) {
@@ -616,19 +579,20 @@ public class SwerveSubsystem extends SubsystemBase {
       wheelOnlyOdo.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
     }
 
-    apriltagVisionSim.updateInputs(visionIOInputs, new Pose3d(pose));
+    visionIOReal.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
 
-    List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
-        apriltagVisionSubsystem.getMeasurement(pose);
+    // I don't know if we'll ever need to look at this again but I don't really want to delete it just yet
+    // List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
+    //     visionSubsystem.getMeasurement(pose);
 
-    for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements) {
-      dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
-      poseEstimator.addVisionMeasurement(
-          measurement.estimation.estimatedPose.toPose2d(),
-          measurement.estimation.timestampSeconds,
-          measurement.confidence.times(2.0));
-    }
+    // for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements) {
+    //   dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
+    //   poseEstimator.addVisionMeasurement(
+    //       measurement.estimation.estimatedPose.toPose2d(),
+    //       measurement.estimation.timestampSeconds,
+    //       measurement.confidence.times(2.0));
+    // }
 
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
@@ -647,6 +611,5 @@ public class SwerveSubsystem extends SubsystemBase {
     double filteredRoll = rollFilter.calculate(gyroIO.getRollDegrees());
     rollRate = (filteredRoll - lastRoll) / 0.020;
     lastRoll = filteredRoll;
-    tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());
   }
 }

@@ -4,83 +4,142 @@
 
 package frc.robot.subsystems.Vision;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import frc.robot.Constants;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
-import org.photonvision.EstimatedRobotPose;
+import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.TargetCorner;
+
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Quaternion;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 
 /** Add your docs here. */
 public interface VisionIO {
-  public static class VisionIOInputs implements LoggableInputs {
-    double timestamp = 0.0;
-    double timeSinceLastTimestamp = 0.0;
-    Pose3d lastPose = new Pose3d();
-    ArrayList<Long> tags = new ArrayList<>();
-    double[] cornersX = new double[] {};
-    double[] cornersY = new double[] {};
+    public static class VisionIOInputs implements LoggableInputs {
+        double timestamp = 0.0;
+        double timeSinceLastTimestamp = 0.0;
+        List<PhotonTrackedTarget> targets = new ArrayList<>();
 
-    @Override
-    public void toLog(LogTable table) {
-      table.put("Latest Frame Timestamp", timestamp);
-      table.put("Latency", timeSinceLastTimestamp);
-      table.put(
-          "Last Estimated Pose",
-          new double[] {
-            lastPose.getX(), lastPose.getY(), lastPose.getZ(), lastPose.getRotation().getAngle()
-          });
-      long[] tagsArray = new long[tags.size()];
-      for (int i = 0; i < tagsArray.length; i++) {
-        tagsArray[i] = tags.get(i);
-      }
-      table.put("Tags Used", tagsArray);
-      table.put("Target Corners X", cornersX);
-      table.put("Target Corners Y", cornersY);
+        public static void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
+            logTransform3d(target.getBestCameraToTarget(), table, name);
+            logTransform3d(target.getAlternateCameraToTarget(), table, "alt" + name);
+            logCorners(target, table, name);
+
+            table.put("yaw " + name, target.getYaw());
+            table.put("pitch " + name, target.getPitch());
+            table.put("area " + name, target.getArea());
+            table.put("skew " + name, target.getSkew());
+            table.put("fiducial id " + name, target.getFiducialId());
+            table.put("pose ambiguity " + name, target.getPoseAmbiguity());
+        }
+
+        public static void logCorners(PhotonTrackedTarget target, LogTable table, String name) {
+            double[] detectedCornersX = new double[4];
+            double[] detectedCornersY = new double[4];
+            double[] minAreaRectCornersX = new double[4];
+            double[] minAreaRectCornersY = new double[4];
+            
+            for (int i = 0; i <4; i++) {
+                detectedCornersX[i] = target.getDetectedCorners().get(i).x;
+                detectedCornersY[i] = target.getDetectedCorners().get(i).y;
+                minAreaRectCornersX[i] = target.getMinAreaRectCorners().get(i).x;
+                minAreaRectCornersY[i] = target.getMinAreaRectCorners().get(i).y;
+            }
+            table.put("detected corners x " + name, detectedCornersX);
+            table.put("detected corners y " + name, detectedCornersY);
+            table.put("min area rect corners x " + name, minAreaRectCornersX);
+            table.put("min area rect corners Y " + name, minAreaRectCornersY);
+        }
+
+        public static void logTransform3d(Transform3d transform3d, LogTable table, String name) {
+            double rotation[] = new double[4];
+            rotation[0] = transform3d.getRotation().getQuaternion().getW();
+            rotation[1] = transform3d.getRotation().getQuaternion().getX();
+            rotation[2] = transform3d.getRotation().getQuaternion().getY();
+            rotation[3] = transform3d.getRotation().getQuaternion().getZ();
+            table.put("rotation " + name, rotation);
+
+            double translation[] = new double[3];
+            translation[0] = transform3d.getTranslation().getX();
+            translation[1] = transform3d.getTranslation().getY();
+            translation[2] = transform3d.getTranslation().getZ();
+            table.put("translation " + name, translation);
+        }
+
+        public Transform3d getLoggedTransform3d(double[] translation, double[] rotation) {
+            Transform3d transform3d = new Transform3d(
+                new Translation3d(
+                    translation[0], 
+                    translation[1], 
+                    translation[2]),
+                new Rotation3d(
+                    new Quaternion(
+                        rotation[0], 
+                        rotation[1], 
+                        rotation[2], 
+                        rotation[3]
+                    )
+                )
+            );
+            return transform3d;
+        }
+
+        public void getLoggedPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
+            double[] translation = table.getDoubleArray("translation " + name, new double[3]);
+            double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
+            double[] altTranslation = table.getDoubleArray("translation alt " + name, new double[3]);
+            double[] altRotation = table.getDoubleArray("rotation alt " + name, new double[4]);
+            double[] detectedCornersX = table.getDoubleArray("detected corners x "  + name, new double[4]);
+            double[] detectedCornersY = table.getDoubleArray("detected corners y "  + name, new double[4]);
+            double[] minAreaRectCornersX = table.getDoubleArray("min area rect corners x " + name, new double[4]);
+            double[] minAreaRectCornersY = table.getDoubleArray("min area rect corners y " + name, new double[4]);
+
+            List<TargetCorner> detectedCorners = new ArrayList<>();
+            List<TargetCorner> minAreaRectCorners = new ArrayList<>();
+
+            for (int i = 0; i <4; i++) {
+                detectedCorners.add(new TargetCorner(detectedCornersX[i], detectedCornersY[i]));
+                minAreaRectCorners.add(new TargetCorner(minAreaRectCornersX[i], minAreaRectCornersY[i]));
+            }
+            Transform3d pose = getLoggedTransform3d(translation, rotation);
+            Transform3d altPose = getLoggedTransform3d(altTranslation, altRotation);
+            targets.add(
+                new PhotonTrackedTarget(
+                    table.getDouble("yaw " + name, target.getYaw()),
+                    table.getDouble("pitch " + name, target.getPitch()),
+                    table.getDouble("area " + name, target.getArea()),
+                    table.getDouble("skew " + name, target.getSkew()),
+                    (int)(table.getInteger("fiducial id " + name, target.getFiducialId())),
+                    pose,
+                    altPose,
+                    table.getDouble("pose ambiguity " + name, target.getPoseAmbiguity()),
+                    minAreaRectCorners,
+                    detectedCorners)
+            );
+        }
+
+        @Override
+        public void toLog(LogTable table) {
+            table.put("timestamp", timestamp);
+            table.put("latency", timeSinceLastTimestamp);
+            for (int i = 0; i < targets.size(); i++) {
+                logPhotonTrackedTarget(targets.get(i), table, String.valueOf(i));
+            }
+        }
+        
+        @Override
+        public void fromLog(LogTable table) {
+            timestamp = table.getDouble("timestamp", timestamp);
+            timeSinceLastTimestamp = table.getDouble("latency", timeSinceLastTimestamp);
+            for (int i = 0; i < targets.size(); i++) {
+                getLoggedPhotonTrackedTarget(targets.get(i), table, String.valueOf(i));
+            }
+        }
     }
-
-    @Override
-    public void fromLog(LogTable table) {
-      timestamp = table.getDouble("Latest Frame Timestamp", timestamp);
-      timeSinceLastTimestamp = table.getDouble("Latency", timeSinceLastTimestamp);
-      var loggedLastPose =
-          table.getDoubleArray(
-              "Last Estimated Pose",
-              new double[] {
-                lastPose.getX(), lastPose.getY(), lastPose.getZ(), lastPose.getRotation().getAngle()
-              });
-      lastPose =
-          new Pose3d(
-              loggedLastPose[0],
-              loggedLastPose[1],
-              loggedLastPose[2],
-              new Rotation3d(0.0, 0.0, loggedLastPose[3]));
-      var loggedTags = table.getIntegerArray("Tags Used", new long[] {});
-      for (int i = 0; i < loggedTags.length; i++) {
-        tags.set(i, loggedTags[i]);
-      }
-      cornersX = table.getDoubleArray("Target Corners X", cornersX);
-      cornersY = table.getDoubleArray("Target Corners Y", cornersY);
-    }
-  }
-
-  public static class VisionMeasurement {
-    public EstimatedRobotPose estimation;
-    public Matrix<N3, N1> confidence;
-
-    public VisionMeasurement(EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {
-      this.estimation = estimation;
-      this.confidence = confidence;
-    }
-  }
-
-  public abstract List<VisionMeasurement> getMeasurement(Pose2d previousPose);
-
-  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose);
+    public abstract void updateInputs(VisionIOInputs inputs, Pose3d robotPose);
 }
