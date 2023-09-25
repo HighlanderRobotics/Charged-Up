@@ -1,12 +1,8 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Elevator;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
@@ -19,24 +15,22 @@ import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.lib.components.HighlanderFalcon;
-import frc.lib.components.ReversibleDigitalInput;
-import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
-  HighlanderFalcon elevatorMotor;
-  HighlanderFalcon elevatorFollower;
+  ElevatorIO io;
+  ElevatorIOInputsAutoLogged inputs;
+
   boolean enabled = true;
   boolean isZeroing;
-  public ReversibleDigitalInput limitSwitch =
-      new ReversibleDigitalInput(Constants.ElevatorConstants.elevatorLimitSwitchID, true);
+
   TrapezoidProfile.State lastState = new TrapezoidProfile.State();
   TrapezoidProfile.State goal = new TrapezoidProfile.State();
 
-  Mechanism2d mech2d = new Mechanism2d(70, 60);
-  MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, 8);
+  Mechanism2d mech2d = new Mechanism2d(Units.inchesToMeters(35), Units.inchesToMeters(60));
+  MechanismRoot2d root2d = mech2d.getRoot("Elevator Root", 0, Units.inchesToMeters(0));
   MechanismLigament2d elevatorLig2d =
       root2d.append(
           new MechanismLigament2d(
@@ -45,41 +39,16 @@ public class ElevatorSubsystem extends SubsystemBase {
               Math.toDegrees(Constants.ElevatorConstants.elevatorAngleRad),
               15,
               new Color8Bit(Color.kPurple)));
-  MechanismLigament2d armLig2d =
-      elevatorLig2d.append(
-          new MechanismLigament2d(
-              "Arm",
-              Constants.ArmConstants.armLengthInches,
-              90,
-              15,
-              new Color8Bit(Color.kLavender)));
 
-  public ElevatorSubsystem() {
-    elevatorMotor = new HighlanderFalcon(Constants.ElevatorConstants.elevatorMotorID, 5.45 / 1.0);
-    elevatorMotor.config_kF(0, 0);
-    elevatorFollower = new HighlanderFalcon(Constants.ElevatorConstants.elevatorFollowerID);
-    elevatorFollower.set(ControlMode.Follower, Constants.ElevatorConstants.elevatorMotorID);
-    elevatorFollower.configSupplyCurrentLimit(
-        new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
-    elevatorMotor.configSupplyCurrentLimit(
-        new SupplyCurrentLimitConfiguration(true, 30.0, 30.0, 0.5));
-    elevatorMotor.configVoltageCompSaturation(10);
-    elevatorFollower.configVoltageCompSaturation(10);
-    LoggingWrapper.shared.add("elevatorsim", mech2d);
-    zeroMotor();
+  public ElevatorSubsystem(ElevatorIO io) {
+    this.io = io;
+    inputs = new ElevatorIOInputsAutoLogged();
   }
 
   private void updatePID() {
     double pidOut = Constants.ElevatorConstants.PIDController.calculate(getExtensionInches());
     var setpoint = Constants.ElevatorConstants.PIDController.getSetpoint();
-    LoggingWrapper.shared.add("elevator setpoint", setpoint.position);
-    LoggingWrapper.shared.add("elevator setpoint velocity", setpoint.velocity);
-    LoggingWrapper.shared.add("elevator pid out", pidOut);
-    LoggingWrapper.shared.add(
-        "elevator ff out", Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
-    elevatorMotor.set(
-        ControlMode.PercentOutput,
-        pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
+    io.setPercentOut(pidOut + Constants.ElevatorConstants.feedforward.calculate(setpoint.velocity));
   }
 
   public void updateStateSpaceController() {
@@ -93,9 +62,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     Constants.ElevatorConstants.elevatorLoop.predict(0.020);
 
     double voltage = Constants.ElevatorConstants.elevatorLoop.getU(0);
-    LoggingWrapper.shared.add("elevator state space voltage out", voltage);
 
-    elevatorMotor.set(ControlMode.PercentOutput, voltage / 12.0);
+    io.setPercentOut(voltage / 12.0);
   }
 
   private void setGoal(double position) {
@@ -105,17 +73,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     goal = new TrapezoidProfile.State(position, 0);
   }
 
-  private void setGoal(double position, double velocity) {
-    Constants.ElevatorConstants.PIDController.reset(getExtensionInches());
-    Constants.ElevatorConstants.PIDController.setGoal(new State(position, velocity));
-
-    goal = new TrapezoidProfile.State(position, velocity);
-  }
-
   public double getExtensionInches() {
-    return elevatorMotor.getRotations()
-        * Constants.ElevatorConstants.elevatorSpoolCircumference
-        * 2.5;
+    return inputs.positionInches;
   }
 
   public CommandBase zeroElevator() {
@@ -130,12 +89,12 @@ public class ElevatorSubsystem extends SubsystemBase {
               isZeroing = false;
               enabled = true;
             })
-        .until(() -> limitSwitch.get())
-        .andThen(() -> elevatorMotor.setSelectedSensorPosition(0));
+        .until(() -> io.getLimitSwitch())
+        .andThen(() -> io.zeroMotor());
   }
 
   public void zeroMotor() {
-    elevatorMotor.setSelectedSensorPosition(0);
+    io.zeroMotor();
   }
 
   public boolean isAtGoal() {
@@ -144,9 +103,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         < 3.0;
   }
 
-  public void updateMech2d(Pair<Double, Double> state) {
-    //  elevatorLig2d.setLength(state.getFirst());
-    // armLig2d.setAngle(Math.toDegrees(state.getSecond()));
+  public void updateMech2d() {
+    elevatorLig2d.setLength(Units.inchesToMeters(getExtensionInches()) * 2.5);
   }
 
   public void enable() {
@@ -189,37 +147,46 @@ public class ElevatorSubsystem extends SubsystemBase {
     return extendToInchesCommand(() -> extensionInches);
   }
 
+  public boolean getLimitSwitch() {
+    return io.getLimitSwitch();
+  }
+
   @Override
   public void periodic() {
+
+    inputs = io.updateInputs();
+    Logger.getInstance().processInputs("Elevator", inputs);
+
+    // TODO change this to an enum instead of 2 booleans
     if (enabled) {
       updatePID();
     } else if (isZeroing) {
-      elevatorMotor.set(ControlMode.PercentOutput, -0.1, DemandType.ArbitraryFeedForward, 0);
-      System.out.println("Is zeroing");
+      io.setPercentOut(-0.1);
     } else {
-      elevatorMotor.set(ControlMode.PercentOutput, 0, DemandType.ArbitraryFeedForward, 0);
+      io.stop();
     }
 
-    if (limitSwitch.get()) {
+    if (io.getLimitSwitch()) {
       zeroMotor();
     }
 
-    LoggingWrapper.shared.add(
-        "elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
-    LoggingWrapper.shared.add("elevator pose inches", getExtensionInches());
+    updateMech2d();
+
+    Logger.getInstance().recordOutput("Elevator Mech 2D", mech2d);
+    Logger.getInstance()
+        .recordOutput(
+            "Elevator Goal", Constants.ElevatorConstants.PIDController.getGoal().position);
+    Logger.getInstance()
+        .recordOutput(
+            "Elevator Setpoint", Constants.ElevatorConstants.PIDController.getSetpoint().position);
+    Logger.getInstance().recordOutput("Elevator Enabled", enabled);
+    Logger.getInstance().recordOutput("Is Zeroing", isZeroing);
+
     // We might have accidentaly tuned elevator pid with this call on, which modifies the state of
     // the pid controller
     // Basically, dont remove this line it's load bearing
     SmartDashboard.putNumber(
         "elevator pid output",
         Constants.ElevatorConstants.PIDController.calculate(getExtensionInches()));
-
-    LoggingWrapper.shared.add(
-        "elevator goal", Constants.ElevatorConstants.PIDController.getGoal().position);
-    LoggingWrapper.shared.add("elevator pose inches", getExtensionInches());
-    // LoggingWrapper.shared.add("elevator native position", getMeasurement());
-    LoggingWrapper.shared.add("elevator enable", enabled);
-    LoggingWrapper.shared.add("elevator limit switch", limitSwitch.get());
-    // LoggingWrapper.shared.add("elevator is at goal", isAtGoal());
   }
 }

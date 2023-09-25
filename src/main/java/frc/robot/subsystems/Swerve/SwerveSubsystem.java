@@ -1,12 +1,12 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Swerve;
 
-import com.ctre.phoenix.sensors.Pigeon2;
 import com.pathplanner.lib.PathConstraints;
 import com.pathplanner.lib.PathPlanner;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -42,18 +43,22 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.PathPointOpen;
-import frc.robot.SwerveModule;
-import frc.robot.subsystems.ApriltagVisionSubsystem.VisionMeasurement;
-import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
+import frc.robot.Robot;
+import frc.robot.subsystems.Elevator.ElevatorSubsystem;
+import frc.robot.subsystems.LEDs.LEDSubsystem;
+import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
+import frc.robot.subsystems.Vision.VisionIOApriltags;
+import frc.robot.subsystems.Vision.VisionIOSimApriltags;
+import frc.robot.subsystems.Vision.VisionIOTape;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
+import org.littletonrobotics.junction.Logger;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -62,15 +67,20 @@ public class SwerveSubsystem extends SubsystemBase {
   public PIDController yBallanceController = new PIDController(1.0, 0, 0.5);
   public SwerveDrivePoseEstimator poseEstimator;
   public SwerveDriveOdometry wheelOnlyOdo;
-  public SwerveModule[] mSwerveMods;
-  public Pigeon2 gyro;
+  public SwerveModuleIO[] swerveMods;
+  public SwerveModuleIOInputsAutoLogged[] inputs;
+  public GyroIO gyroIO;
+  public GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
+  public double simHeading = 0.0;
 
   public Field2d field = new Field2d();
 
   private boolean isInTapeMode = true;
   private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, -0.01);
 
-  private ApriltagVisionSubsystem apriltagVisionSubsystem = new ApriltagVisionSubsystem();
+  // private VisionIOApriltags apriltagVisionSubsystem = new VisionIOApriltags();
+  // private VisionIOSimApriltags apriltagVisionSim = new VisionIOSimApriltags();
+  // private VisionIOInputs visionIOInputs = new VisionIOInputs();
   private LinearFilter tapeYawFilter = LinearFilter.singlePoleIIR(0.2, 0.020);
   private double tapeYawFilterVal = 0;
 
@@ -94,26 +104,27 @@ public class SwerveSubsystem extends SubsystemBase {
   public ProfiledPIDController headingController =
       new ProfiledPIDController(1.2, 0, 0.1, new Constraints(Math.PI * 4, Math.PI * 6));
 
-  public TapeVisionSubsystem tapeVisionSubsystem =
-      new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
+  // public VisionIOTape tapeVisionSubsystem =
+  //     new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
 
-  public SwerveSubsystem() {
-    gyro = new Pigeon2(Constants.Swerve.pigeonID);
-    gyro.configFactoryDefault();
-    zeroGyro();
+  public SwerveSubsystem(SwerveModuleIO[] swerveIO, GyroIO gyroIO) {
+    this.gyroIO = gyroIO;
 
     headingController.enableContinuousInput(0, Math.PI * 2);
     headingController.setTolerance(0.2);
+    swerveMods = swerveIO;
 
-    mSwerveMods =
-        new SwerveModule[] {
-          new SwerveModule(0, Constants.Swerve.Mod0.constants),
-          new SwerveModule(1, Constants.Swerve.Mod1.constants),
-          new SwerveModule(2, Constants.Swerve.Mod2.constants),
-          new SwerveModule(3, Constants.Swerve.Mod3.constants)
+    inputs =
+        new SwerveModuleIOInputsAutoLogged[] {
+          new SwerveModuleIOInputsAutoLogged(),
+          new SwerveModuleIOInputsAutoLogged(),
+          new SwerveModuleIOInputsAutoLogged(),
+          new SwerveModuleIOInputsAutoLogged()
         };
 
-    /* By pausing init for a second before setting module offsets, we avoid a bug with inverting motors.
+    /*
+     * By pausing init for a second before setting module offsets, we avoid a bug
+     * with inverting motors.
      * See https://github.com/Team364/BaseFalconSwerve/issues/8 for more info.
      */
     Timer.delay(1.0);
@@ -146,6 +157,12 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     field.getObject("tape targets").setPoses(tapePoses);
+
+    PPSwerveControllerCommand.setLoggingCallbacks(
+        (traj) -> Logger.getInstance().recordOutput("Active Trajectory", traj),
+        (target) -> Logger.getInstance().recordOutput("Active Trajectory Target", target),
+        null,
+        null);
   }
 
   /**
@@ -174,8 +191,8 @@ public class SwerveSubsystem extends SubsystemBase {
                     velTwist.dx / 0.02, velTwist.dy / 0.02, velTwist.dtheta / 0.02));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
-    for (SwerveModule mod : mSwerveMods) {
-      mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
+    for (SwerveModuleIO mod : swerveMods) {
+      mod.setDesiredState(swerveModuleStates[mod.getModuleNumber()], isOpenLoop);
     }
 
     chassisSpeeds = new ChassisSpeeds(velTwist.dx, velTwist.dy, velTwist.dtheta);
@@ -257,7 +274,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Generates a Command that consumes a PathPlanner path and follows it */
   public Command followPathCommand(PathPlannerTrajectory path) {
-    // field.getObject("path goal").setPoses(path.getEndState().poseMeters);
     return new SwerveControllerCommand(
         path,
         () -> getPose(),
@@ -286,11 +302,6 @@ public class SwerveSubsystem extends SubsystemBase {
   public PathPlannerTrajectory getPathBetweenTwoPoints(
       PathConstraints constraints, PathPoint start, PathPoint end) {
     var path = PathPlanner.generatePath(constraints, start, end);
-    List<Pose2d> poses = new ArrayList<>();
-    // for (State state : path.getStates()) {
-    //     poses.add(state.poseMeters);
-    // }
-    // field.getObject("path").setPoses(poses);
     return path;
   }
 
@@ -335,7 +346,6 @@ public class SwerveSubsystem extends SubsystemBase {
       }
     }
     field.getObject("goal").setPose(new Pose2d(output.getTranslation2d(), output.getRotation2d()));
-    // ledSubsystem.setBlinking(color, 1);
     return output;
   }
 
@@ -345,10 +355,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public boolean checkIfConeGoal(
       PathPointOpen goal) { // this doesn't apply for level 1 scoring positions
-    // System.out.println("index " + (Constants.ScoringPositions.bluePositionsList.indexOf(goal) %
-    // 3));
-    // System.out.println("index " + (Constants.ScoringPositions.redPositionsList.indexOf(goal) %
-    // 3));
     if ((Constants.ScoringPositions.bluePositionsList.indexOf(goal) % 3) == 1
         || (Constants.ScoringPositions.redPositionsList.indexOf(goal) % 3)
             == 1) { // then its a cube goal
@@ -359,7 +365,6 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public double getExtension(ElevatorSubsystem.ScoringLevels level, boolean isCone) {
-    // System.out.println(nearestGoalIsCone);
     if (isCone) {
       return level.getConeInches();
     } else {
@@ -372,20 +377,27 @@ public class SwerveSubsystem extends SubsystemBase {
         () -> getPose(), // Pose2d supplier
         (Pose2d pose) ->
             resetOdometry(pose), // Pose2d consumer, used to reset odometry at the beginning of auto
-        Constants.Swerve.swerveKinematics, // SwerveDriveKinematics
         new PIDConstants(
             Constants.AutoConstants.kPXController,
             0.0,
-            0.0), // PID constants to correct for translation error (used to create the X and Y PID
+            0.0), // PID constants to correct for translation error (used to create the X and Y
+        // PID
         // controllers)
         new PIDConstants(
             Constants.AutoConstants.kPThetaController,
             0.0,
             0.0), // PID constants to correct for rotation error (used to create the rotation
         // controller)
-        this::setModuleStates, // Module states consumer used to output to the drive subsystem
+        (ChassisSpeeds speeds) ->
+            this.drive(
+                new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
+                speeds.omegaRadiansPerSecond,
+                false,
+                false,
+                false), // Module states consumer used to output to the drive subsystem
         eventMap,
-        false, // Should the path be automatically mirrored depending on alliance color. Optional,
+        false, // Should the path be automatically mirrored depending on alliance color.
+        // Optional,
         // defaults to true
         this // The drive subsystem. Used to properly set the requirements of path following
         // commands
@@ -407,10 +419,10 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase autoBalance() {
     return driveCommand(
         () -> {
-          if (gyro.getRoll() > 11.0) {
+          if (gyroIO.getRollDegrees() > 11.0) {
             lockOutSwerve = false;
             return -0.1;
-          } else if (gyro.getRoll() < -11.0) {
+          } else if (gyroIO.getRollDegrees() < -11.0) {
             lockOutSwerve = false;
             return 0.1;
           } else {
@@ -425,22 +437,19 @@ public class SwerveSubsystem extends SubsystemBase {
         false);
   }
 
-  // public CommandBase disableGamePieceOverride() {
-  //     return new InstantCommand(() -> isConeOveride = Optional.empty());
-  // }
-
   /* Used by SwerveControllerCommand in Auto */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
 
-    for (SwerveModule mod : mSwerveMods) {
-      mod.setDesiredState(desiredStates[mod.moduleNumber], false);
+    for (SwerveModuleIO mod : swerveMods) {
+      mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
     }
   }
 
   /** Return the pose of the drivebase, as estimated by the pose estimator. */
   public Pose2d getPose() {
     return wheelOnlyOdo.getPoseMeters();
+    // Use this if we want to use vision
     // return poseEstimator.getEstimatedPosition();
   }
 
@@ -458,8 +467,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
-    for (SwerveModule mod : mSwerveMods) {
-      states[mod.moduleNumber] = mod.getState();
+    for (SwerveModuleIO mod : swerveMods) {
+      states[mod.getModuleNumber()] = mod.getState();
     }
     return states;
   }
@@ -469,8 +478,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
-    for (SwerveModule mod : mSwerveMods) {
-      positions[mod.moduleNumber] = mod.getPosition();
+    for (SwerveModuleIO mod : swerveMods) {
+      positions[mod.getModuleNumber()] = mod.getPosition();
     }
     return positions;
   }
@@ -482,21 +491,25 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Resets the gyro to a given heading */
   public void zeroGyro(double angle) {
-    gyro.setYaw(angle);
+    gyroIO.resetHeading(angle);
+    simHeading = angle;
   }
 
   /**
    * @return the yaw of the drive base, based on the gyro's rotation
    */
   public Rotation2d getYaw() {
-    return (Constants.Swerve.invertGyro)
-        ? Rotation2d.fromDegrees(360 - gyro.getYaw())
-        : Rotation2d.fromDegrees(gyro.getYaw());
+    if (Robot.isReal()) {
+      return (Constants.Swerve.invertGyro)
+          ? Rotation2d.fromDegrees(360 - gyroIO.getHeading().getDegrees())
+          : Rotation2d.fromDegrees(gyroIO.getHeading().getDegrees());
+    }
+    return Rotation2d.fromDegrees(simHeading);
   }
 
   /** Resets the encoders on all swerve modules to the cancoder values */
   public void resetModulesToAbsolute() {
-    for (SwerveModule module : mSwerveMods) {
+    for (SwerveModuleIO module : swerveMods) {
       module.resetToAbsolute();
     }
   }
@@ -527,13 +540,13 @@ public class SwerveSubsystem extends SubsystemBase {
         .andThen(
             headingLockDriveCommand(xSupplier, () -> 0, () -> Math.PI, true, false)
                 .raceWith(
-                    ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.25),
+                    ledSubsystem.setBlinkingCommand(Color.kBlue, 0.25),
                     new WaitUntilCommand(() -> headingController.atGoal())))
         .andThen(
             headingLockDriveCommand(
                     xSupplier,
-                    () ->
-                        tapeVisionSubsystem.hasTargets()
+                    () ->false
+                        // tapeVisionSubsystem.hasTargets()
                             ? tapeDriveAssistController.calculate(
                                 tapeYawFilterVal,
                                 Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
@@ -541,45 +554,71 @@ public class SwerveSubsystem extends SubsystemBase {
                     () -> Math.PI,
                     true,
                     false)
-                .alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kGreen), 0.25)));
+                .alongWith(ledSubsystem.setBlinkingCommand(Color.kGreen, 0.25)));
   }
 
   @Override
   public void periodic() {
-    pose = poseEstimator.update(getYaw(), getModulePositions());
-    wheelOnlyOdo.update(getYaw(), getModulePositions());
-
-    List<VisionMeasurement> visionMeasurements =
-        apriltagVisionSubsystem.getEstimatedGlobalPose(pose);
-
-    for (VisionMeasurement measurement : visionMeasurements) {
-      dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
-      poseEstimator.addVisionMeasurement(
-          measurement.estimation.estimatedPose.toPose2d(),
-          measurement.estimation.timestampSeconds,
-          measurement.confidence.times(2.0));
+    for (int i = 0; i < swerveMods.length; i++) {
+      inputs[i] = swerveMods[i].updateInputs();
+      Logger.getInstance().processInputs("Swerve Module " + i, inputs[i]);
     }
 
-    // Log swerve module information
-    // May want to disable to conserve bandwidth
-    // for(SwerveModule mod : mSwerveMods){
-    //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Cancoder",
-    // mod.getCanCoder().getDegrees());
-    //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Integrated",
-    // mod.getPosition().angle.getDegrees());
-    //     LoggingWrapper.shared.add("Mod " + mod.moduleNumber + " Velocity",
-    // mod.getState().speedMetersPerSecond);
+    gyroInputs = gyroIO.updateInputs();
+    Logger.getInstance().processInputs("Gyro", gyroInputs);
+    simHeading += Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond);
+
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve States",
+            new double[] {
+              swerveMods[0].getAbsoluteRotation().getRadians(),
+              swerveMods[0].getState().speedMetersPerSecond,
+              swerveMods[1].getAbsoluteRotation().getRadians(),
+              swerveMods[1].getState().speedMetersPerSecond,
+              swerveMods[2].getAbsoluteRotation().getRadians(),
+              swerveMods[2].getState().speedMetersPerSecond,
+              swerveMods[3].getAbsoluteRotation().getRadians(),
+              swerveMods[3].getState().speedMetersPerSecond
+            });
+    Logger.getInstance().recordOutput("Swerve Pose", getPose());
+    Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve Desired Speeds",
+            new double[] {
+              chassisSpeeds.vxMetersPerSecond,
+              chassisSpeeds.vyMetersPerSecond,
+              chassisSpeeds.omegaRadiansPerSecond
+            });
+
+    if (Robot.isReal()) {
+      pose = poseEstimator.update(getYaw(), getModulePositions());
+      wheelOnlyOdo.update(getYaw(), getModulePositions());
+    } else {
+      pose = poseEstimator.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
+      wheelOnlyOdo.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
+    }
+
+    // apriltagVisionSim.updateInputs(visionIOInputs, new Pose3d(pose));
+    // Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
+
+    // List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
+    //     apriltagVisionSubsystem.getMeasurement(pose);
+
+    // for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements) {
+    //   dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
+    //   poseEstimator.addVisionMeasurement(
+    //       measurement.estimation.estimatedPose.toPose2d(),
+    //       measurement.estimation.timestampSeconds,
+    //       measurement.confidence.times(2.0));
     // }
 
-    LoggingWrapper.shared.add("Heading", getYaw().getDegrees());
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
     field.getObject("fused pose").setPose(poseEstimator.getEstimatedPosition());
     field.getObject("latest tag vision pose").setPoses(dashboardFieldVisionPoses);
-    // field.getObject("latest tape vision pose").setPoses(dashboardFieldTapePoses);
     dashboardFieldVisionPoses.clear();
-    LoggingWrapper.shared.add("field", field);
-    LoggingWrapper.shared.add("Has reset", hasResetOdometry);
     dashboardFieldTapePoses.clear();
     SmartDashboard.putData(field);
     SmartDashboard.putBoolean("Has reset", hasResetOdometry);
@@ -587,50 +626,11 @@ public class SwerveSubsystem extends SubsystemBase {
     if (DriverStation.isDisabled()) {
       hasResetOdometry = false;
     }
-    // getNearestGoal();
-    // getPathToPoint(getNearestGoal());
-
-    LoggingWrapper.shared.add("x error", Constants.AutoConstants.xController.getPositionError());
-    LoggingWrapper.shared.add("y error", Constants.AutoConstants.yController.getPositionError());
-    LoggingWrapper.shared.add("x goal", Constants.AutoConstants.xController.getGoal().position);
-    LoggingWrapper.shared.add("Y goal", Constants.AutoConstants.yController.getGoal().position);
-    LoggingWrapper.shared.add("Heading goal", headingController.getGoal().position);
-    LoggingWrapper.shared.add("Heading error", headingController.getPositionError());
-    LoggingWrapper.shared.add("total error", getNearestGoalDistance());
-    LoggingWrapper.shared.add("is cone goal", nearestGoalIsCone);
-    LoggingWrapper.shared.add("extension requested", getExtension(ScoringLevels.L2, true));
-    LoggingWrapper.shared.add("alliance", DriverStation.getAlliance().toString());
-    LoggingWrapper.shared.add("gyro roll", gyro.getRoll());
-    LoggingWrapper.shared.add("gyro pitch", gyro.getPitch());
-    LoggingWrapper.shared.add("swerve chassis speeds", chassisSpeeds.vxMetersPerSecond);
-    LoggingWrapper.shared.add(
-        "balance pid out", xBallanceController.calculate(deadband(gyro.getRoll(), 6.0)));
-    LoggingWrapper.shared.add("is in tape mode", isInTapeMode);
-    LoggingWrapper.shared.add("should lock out", lockOutSwerve);
     pose = getPose();
     nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
-    double filteredRoll = rollFilter.calculate(gyro.getRoll());
+    double filteredRoll = rollFilter.calculate(gyroIO.getRollDegrees());
     rollRate = (filteredRoll - lastRoll) / 0.020;
     lastRoll = filteredRoll;
-    tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());
-  }
-
-  @Override
-  public void simulationPeriodic() {
-    Pose2d visSimRobotPose =
-        new Pose2d(
-            Units.inchesToMeters((60 + (Timer.getFPGATimestamp() * 15)) % 200),
-            0.513,
-            new Rotation2d(3.3));
-    field.getObject("vis sim robot pose").setPose(visSimRobotPose);
-    tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
-    try {
-      field
-          .getObject("vis sim est pose")
-          .setPoses(tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst());
-    } catch (Exception exception) {
-      field.getObject("vis sim est pose").setPoses();
-    }
-    System.out.print("");
+    // tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());
   }
 }

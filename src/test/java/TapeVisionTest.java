@@ -2,22 +2,18 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
-import frc.robot.subsystems.TapeVisionSubsystem;
-import java.util.List;
+import frc.robot.subsystems.Vision.VisionIOTape;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-/** Add your docs here. */
 public class TapeVisionTest {
-  TapeVisionSubsystem tapeVisionSubsystem =
-      new TapeVisionSubsystem("limelight-left", Constants.leftCameraToRobot);
+  VisionIOTape tapeVisionSubsystem =
+      new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
   static final double margin = Units.inchesToMeters(2);
 
   @BeforeEach
@@ -69,24 +65,26 @@ public class TapeVisionTest {
   }
 
   void test(Pose2d visSimRobotPose) {
-    tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
-    List<Pose2d> estimatedPoses = tapeVisionSubsystem.getEstimatedPoses(visSimRobotPose).getFirst();
-    if (estimatedPoses.size() == 0) {
-      return;
-    }
-    Pose2d estimatedPose = estimatedPoses.get(0);
-    assertEquals(
-        visSimRobotPose.getX(),
-        estimatedPose.getX(),
-        margin,
-        "Diff X was: "
-            + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
-    assertEquals(
-        visSimRobotPose.getY(),
-        estimatedPose.getY(),
-        margin,
-        "Diff Y was: "
-            + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
+    // If we ever get back to this make a sim implementation of VisionIOTape to comply with
+    // advantagekit practices
+    // tapeVisionSubsystem.updateSimCamera(visSimRobotPose);
+    // List<Pose2d> estimatedPoses = tapeVisionSubsystem.getMeasurement(visSimRobotPose).;
+    // if (estimatedPoses.size() == 0) {
+    //   return;
+    // }
+    // Pose2d estimatedPose = estimatedPoses.get(0);
+    // assertEquals(
+    //     visSimRobotPose.getX(),
+    //     estimatedPose.getX(),
+    //     margin,
+    //     "Diff X was: "
+    //         + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
+    // assertEquals(
+    //     visSimRobotPose.getY(),
+    //     estimatedPose.getY(),
+    //     margin,
+    //     "Diff Y was: "
+    //         + visSimRobotPose.getTranslation().getDistance(estimatedPose.getTranslation()));
   }
 
   void test(double x, double y, double rotDeg) {

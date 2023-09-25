@@ -31,6 +31,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
@@ -118,24 +119,31 @@ public final class Constants {
     public static final double angleKD = chosenModule.angleKD;
     public static final double angleKF = chosenModule.angleKF;
 
+    public static final double simAngleKP = 0.2;
+    public static final double simAngleKD = 0.0;
+
     /* Drive Motor PID Values */
-    public static final double driveKP = 0.05; // TODO: This must be tuned to specific robot
+    public static final double driveKP = 0.05;
     public static final double driveKI = 0.0;
     public static final double driveKD = 0.0;
     public static final double driveKF = 0.0;
 
     /* Drive Motor Characterization Values
      * Divide SYSID values by 12 to convert from volts to percent output for CTRE */
-    public static final double driveKS = (0.32 / 12); // TODO: This must be tuned to specific robot
+    public static final double driveKS = (0.32 / 12);
     public static final double driveKV = (1.51 / 12);
     public static final double driveKA = (0.27 / 12);
 
+    public static final double simDriveKP = 0.0;
+    public static final double simDriveKS = (0.32 / 12);
+    public static final double simDriveKV = (1.51 / 12);
+    public static final double simDriveKA = (0.27 / 12);
+
     /* Swerve Profiling Values */
     /** Meters per Second */
-    public static final double maxSpeed = 6; // TODO: This must be tuned to specific robot
+    public static final double maxSpeed = 6;
     /** Radians per Second */
-    public static final double maxAngularVelocity =
-        10.0; // TODO: This must be tuned to specific robot
+    public static final double maxAngularVelocity = 10.0;
 
     /* Neutral Modes */
     public static final NeutralMode angleNeutralMode = NeutralMode.Coast;
@@ -143,7 +151,7 @@ public final class Constants {
 
     /* Module Specific Constants */
     /* Front Left Module - Module 0 */
-    public static final class Mod0 { // TODO: This must be tuned to specific robot
+    public static final class Mod0 {
       public static final int driveMotorID = 3;
       public static final int angleMotorID = 4;
       public static final int canCoderID = 2;
@@ -153,7 +161,7 @@ public final class Constants {
     }
 
     /* Front Right Module - Module 1 */
-    public static final class Mod1 { // TODO: This must be tuned to specific robot
+    public static final class Mod1 {
       public static final int driveMotorID = 1;
       public static final int angleMotorID = 2;
       public static final int canCoderID = 1;
@@ -163,7 +171,7 @@ public final class Constants {
     }
 
     /* Back Left Module - Module 2 */
-    public static final class Mod2 { // TODO: This must be tuned to specific robot
+    public static final class Mod2 {
       public static final int driveMotorID = 7;
       public static final int angleMotorID = 8;
       public static final int canCoderID = 4;
@@ -173,7 +181,7 @@ public final class Constants {
     }
 
     /* Back Right Module - Module 3 */
-    public static final class Mod3 { // TODO: This must be tuned to specific robot
+    public static final class Mod3 {
       public static final int driveMotorID = 5;
       public static final int angleMotorID = 6;
       public static final int canCoderID = 3;
@@ -183,8 +191,7 @@ public final class Constants {
     }
   }
 
-  public static final
-  class AutoConstants { // TODO: The below constants are used in the example auto, and must be tuned
+  public static final class AutoConstants {
     // to specific robot
     public static final double maxSpeedMetersPerSecond = 3.0;
     public static final double maxAccelerationMetersPerSecondSquared = 4.0;
@@ -453,13 +460,13 @@ public final class Constants {
     public static final int intakeID = 20;
     public static final int intakeSolenoidForwardID = 3;
     public static final int intakeSolenoidBackwardID = 4;
-    public static final double intakeTimeToExtend = 0.1; // TODO: find
+    public static final double intakeTimeToExtend = 0.1;
 
     public static final int routingLeftID = 21;
     public static final int routingRightID = 22;
     public static final int routingConveyerID = 23;
-    public static final double routingKP = 1; // TODO: tune
-    public static final double conveyerKP = 1; // TODO: tune
+    public static final double routingKP = 1;
+    public static final double conveyerKP = 1;
 
     public static final int grabberIntakeID = 24;
     public static final int grabberPivotID = 27;
@@ -479,9 +486,9 @@ public final class Constants {
 
   public static final class LEDConstants {
     public static final int ledPort = 1;
-    public static final int ledLength = 140; // TODO: find
+    public static final int ledLength = 140;
 
-    public static final Color8Bit defaultColor = new Color8Bit(58 / 2, 11 / 2, 110 / 2);
+    public static final Color defaultColor = new Color(58 / 2, 11 / 2, 110 / 2);
   }
 
   public static final class ScoringLevels {

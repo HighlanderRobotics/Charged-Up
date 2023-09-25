@@ -4,32 +4,26 @@
       "0": {
         "columns": 50,
         "serpentine": true
-      },
+      }
+    },
+    "Other Devices": {
       "window": {
-        "visible": true
+        "visible": false
       }
     }
   },
   "NTProvider": {
     "types": {
+      "/AdvantageKit/RealOutputs/Elevator Mech 2D": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
+      "/SmartDashboard/Auto Chooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
-      "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
-      "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
-      "/SmartDashboard/Grabber intake cube no extend": "Command",
-      "/SmartDashboard/Grabber outake cone": "Command",
       "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
       "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
       "/SmartDashboard/Grabber intake cube no extend": "Command",
       "/SmartDashboard/Grabber outake cone": "Command",
       "/SmartDashboard/Path 1": "Command",
       "/SmartDashboard/Path 2": "Command",
-      "/SmartDashboard/Rezero Grabber": "Command",
-      "/SmartDashboard/Run grabber to double substation": "Command",
-      "/SmartDashboard/Run grabber to routing": "Command",
-      "/SmartDashboard/Run grabber to scoring": "Command",
-      "/SmartDashboard/Run grabber to single substation": "Command",
-      "/SmartDashboard/Run grabber to storage": "Command",
       "/SmartDashboard/Rezero Grabber": "Command",
       "/SmartDashboard/Run grabber to double substation": "Command",
       "/SmartDashboard/Run grabber to routing": "Command",
@@ -45,12 +39,19 @@
       "/SmartDashboard/extend to 12": "Command",
       "/SmartDashboard/extend to 36": "Command",
       "/SmartDashboard/intake toggle": "Command",
+      "/SmartDashboard/limelight-left Sim Field": "Field2d",
       "/SmartDashboard/reset elevator": "Command",
       "/SmartDashboard/reset to 0": "Command",
       "/SmartDashboard/rezero elevator": "Command",
-      "/SmartDashboard/scoring sequence": "Command"
+      "/SmartDashboard/scoring sequence": "Command",
+      "/SmartDashboard/sim Sim Field": "Field2d"
     },
     "windows": {
+      "/SmartDashboard/Auto Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Field": {
         "Robot": {
           "color": [
@@ -105,27 +106,7 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Path 2": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Sequence": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Spline": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/elevatorsim": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/limelight-left Sim Field": {
         "window": {
           "visible": true
         }
@@ -138,6 +119,9 @@
         "open": true
       },
       "SmartDashboard": {
+        "Auto Chooser": {
+          "open": true
+        },
         "elevatorsim": {
           "open": true
         },

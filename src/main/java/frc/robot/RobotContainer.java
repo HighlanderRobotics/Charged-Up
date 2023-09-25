@@ -4,13 +4,11 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
@@ -22,20 +20,24 @@ import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.logging.LoggingWrapper;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AutoChooser;
-import frc.robot.commands.ScoringCommand;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.ElevatorSubsystem.ScoringLevels;
-import frc.robot.subsystems.GreybotsGrabberSubsystem;
-import frc.robot.subsystems.GreybotsGrabberSubsystem.GamePiece;
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.RoutingSubsystem;
+import frc.robot.subsystems.Elevator.ElevatorIOFalcon;
+import frc.robot.subsystems.Elevator.ElevatorIOSim;
+import frc.robot.subsystems.Elevator.ElevatorSubsystem;
+import frc.robot.subsystems.Grabber.GrabberSubsystem;
+import frc.robot.subsystems.Grabber.GrabberSubsystem.GamePiece;
+import frc.robot.subsystems.Intake.IntakeSubsystem;
+import frc.robot.subsystems.LEDs.LEDSubsystem;
+import frc.robot.subsystems.Routing.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem.ExtensionState;
-import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.Swerve.GyroIOPigeon;
+import frc.robot.subsystems.Swerve.GyroIOSim;
+import frc.robot.subsystems.Swerve.SwerveModuleIOFalcon;
+import frc.robot.subsystems.Swerve.SwerveModuleIOSim;
+import frc.robot.subsystems.Swerve.SwerveSubsystem;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -45,12 +47,28 @@ import frc.robot.subsystems.SwerveSubsystem;
  */
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
-  private SwerveSubsystem swerveSubsystem = new SwerveSubsystem();
-  private ElevatorSubsystem elevatorSubsystem = new ElevatorSubsystem();
+  private SwerveSubsystem swerveSubsystem =
+      new SwerveSubsystem(
+          Robot.isReal()
+              ? new SwerveModuleIOFalcon[] {
+                new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
+                new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
+                new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
+                new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
+              }
+              : new SwerveModuleIOSim[] {
+                new SwerveModuleIOSim(0, Constants.Swerve.Mod0.constants),
+                new SwerveModuleIOSim(1, Constants.Swerve.Mod1.constants),
+                new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
+                new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
+              },
+          Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim());
+  private ElevatorSubsystem elevatorSubsystem =
+      new ElevatorSubsystem(Robot.isReal() ? new ElevatorIOFalcon() : new ElevatorIOSim());
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
   private RoutingSubsystem routingSubsystem = new RoutingSubsystem();
   private LEDSubsystem ledSubsystem = new LEDSubsystem();
-  private GreybotsGrabberSubsystem greybotsGrabberSubsystem = new GreybotsGrabberSubsystem();
+  private GrabberSubsystem grabberSubsystem = new GrabberSubsystem();
 
   private SuperstructureSubsystem superstructureSubsystem =
       new SuperstructureSubsystem(
@@ -58,7 +76,7 @@ public class RobotContainer {
           elevatorSubsystem,
           routingSubsystem,
           swerveSubsystem,
-          greybotsGrabberSubsystem,
+          grabberSubsystem,
           ledSubsystem);
   private AutoChooser autoChooser =
       new AutoChooser(
@@ -66,9 +84,9 @@ public class RobotContainer {
           intakeSubsystem,
           elevatorSubsystem,
           routingSubsystem,
-          greybotsGrabberSubsystem,
+          grabberSubsystem,
           superstructureSubsystem);
-  // Replace with CommandPS4Controller or CommandJoystick if needed
+
   private final CommandXboxController controller =
       new CommandXboxController(OperatorConstants.driverControllerPort);
   private final CommandXboxController operator =
@@ -79,7 +97,7 @@ public class RobotContainer {
           () ->
               elevatorSubsystem.getExtensionInches() > 4.5
                   || Constants.ElevatorConstants.PIDController.getGoal().position > 4.5
-                  || greybotsGrabberSubsystem.getIsExtended());
+                  || grabberSubsystem.getIsExtended());
 
   boolean shouldUseChute = true;
   boolean isUsingChute = false;
@@ -88,7 +106,6 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    LoggingWrapper.shared.add("autoBalance", swerveSubsystem.autoBalance());
     // Set default commands here
     swerveSubsystem.setDefaultCommand(
         swerveSubsystem.driveCommand(
@@ -105,16 +122,15 @@ public class RobotContainer {
             .extendToInchesCommand(1.0)
             .andThen(
                 elevatorSubsystem.zeroElevator(),
-                new PrintCommand("Working"),
                 new StartEndCommand(
                     () -> elevatorSubsystem.disable(),
                     () -> elevatorSubsystem.enable(),
                     elevatorSubsystem)));
-    greybotsGrabberSubsystem.setDefaultCommand(
-        greybotsGrabberSubsystem
+    grabberSubsystem.setDefaultCommand(
+        grabberSubsystem
             .resetPivotCommand()
-            .unless(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)
-            .andThen(greybotsGrabberSubsystem.runToRoutingStopCommand()));
+            .unless(() -> grabberSubsystem.gamePiece == GamePiece.Cone)
+            .andThen(grabberSubsystem.runToRoutingStopCommand()));
     intakeSubsystem.setDefaultCommand(
         new WaitCommand(0.7)
             .andThen(
@@ -133,8 +149,6 @@ public class RobotContainer {
             () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     // Configure the trigger bindings
     configureBindings();
-    // Add testing buttons to dashboard
-    addDashboardCommands();
   }
 
   /**
@@ -165,9 +179,6 @@ public class RobotContainer {
             new InstantCommand(
                 () ->
                     swerveSubsystem.zeroGyro((swerveSubsystem.getYaw().getDegrees() + 180) % 360)));
-    // Reset odometry to vision measurement when we first see a vision target
-    // new Trigger(() -> swerveSubsystem.hasTargets() && !swerveSubsystem.hasResetOdometry)
-    //   .onTrue(swerveSubsystem.resetIfTargets().alongWith(new PrintCommand("reset from vision")));
 
     new Trigger(() -> controller.getHID().getPOV() != -1)
         .whileTrue(
@@ -178,22 +189,16 @@ public class RobotContainer {
                 true,
                 true));
 
-    // new Trigger(() -> swerveSubsystem.hasTargets()).whileTrue(ledSubsystem.setSolidCommand(new
-    // Color8Bit(Color.kNavy)));
-    new Trigger(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)
+    new Trigger(() -> grabberSubsystem.gamePiece == GamePiece.Cone)
         .whileTrue(
             ledSubsystem.setBlinkingCommand(
-                new Color8Bit(Color.kYellow),
-                new Color8Bit(Color.kGreen),
-                () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
+                Color.kYellow, Color.kGreen, () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     new Trigger(
-            () ->
-                greybotsGrabberSubsystem.gamePiece == GamePiece.Cube
-                    && greybotsGrabberSubsystem.getBeambreak())
+            () -> grabberSubsystem.gamePiece == GamePiece.Cube && grabberSubsystem.getBeambreak())
         .whileTrue(
             ledSubsystem.setBlinkingCommand(
                 Constants.LEDConstants.defaultColor,
-                new Color8Bit(Color.kGreen),
+                Color.kGreen,
                 () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
 
     controller
@@ -204,27 +209,25 @@ public class RobotContainer {
                 .waitExtendToInches(Constants.humanPlayerLevel)
                 .andThen(new RunCommand(() -> {}, elevatorSubsystem)))
         .onTrue(
-            greybotsGrabberSubsystem
+            grabberSubsystem
                 .intakeConeDoubleCommand()
                 .raceWith(
                     ledSubsystem.setBlinkingCommand(
-                        new Color8Bit(Color.kYellow),
-                        () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
+                        Color.kYellow, () -> 1.0 / (swerveSubsystem.getLevel().level * 2))));
 
     controller
         .leftBumper()
         .and(() -> shouldUseChute)
         .whileTrue(
-            greybotsGrabberSubsystem
+            grabberSubsystem
                 .intakeConeSingleContinuousCommand()
                 .repeatedly()
                 .withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
                 .alongWith(
                     ledSubsystem
                         .setBlinkingCommand(
-                            new Color8Bit(Color.kYellow),
-                            () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
-                        .until(() -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone),
+                            Color.kYellow, () -> 1.0 / (swerveSubsystem.getLevel().level * 2))
+                        .until(() -> grabberSubsystem.gamePiece == GamePiece.Cone),
                     superstructureSubsystem
                         .waitExtendToInches(Constants.ScoringLevels.chuteLevel)
                         .andThen(
@@ -234,7 +237,7 @@ public class RobotContainer {
         .onFalse(
             new InstantCommand(() -> isUsingChute = false)
                 .andThen(new RunCommand(() -> {}, elevatorSubsystem).withTimeout(1.0))
-                .raceWith(greybotsGrabberSubsystem.intakeConeSingleCommand()));
+                .raceWith(grabberSubsystem.intakeConeSingleCommand()));
 
     controller
         .rightBumper()
@@ -242,7 +245,8 @@ public class RobotContainer {
             run(
                 intakeSubsystem.runCommand(),
                 routingSubsystem.runCommand(),
-                greybotsGrabberSubsystem.intakeCubeCommand()));
+                grabberSubsystem.intakeCubeCommand()));
+
     operator
         .y()
         .whileTrue(
@@ -250,7 +254,8 @@ public class RobotContainer {
                 () ->
                     swerveSubsystem.setLevel(
                         ElevatorSubsystem.ScoringLevels.L3,
-                        greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
+                        grabberSubsystem.gamePiece == GamePiece.Cone)));
+
     operator
         .b()
         .whileTrue(
@@ -258,7 +263,8 @@ public class RobotContainer {
                 () ->
                     swerveSubsystem.setLevel(
                         ElevatorSubsystem.ScoringLevels.L2,
-                        greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
+                        grabberSubsystem.gamePiece == GamePiece.Cone)));
+
     operator
         .a()
         .whileTrue(
@@ -266,38 +272,35 @@ public class RobotContainer {
                 () ->
                     swerveSubsystem.setLevel(
                         ElevatorSubsystem.ScoringLevels.L1,
-                        greybotsGrabberSubsystem.gamePiece == GamePiece.Cone)));
+                        grabberSubsystem.gamePiece == GamePiece.Cone)));
+
     operator.x().whileTrue(swerveSubsystem.autoBalance());
 
     operator
         .povDown()
-        .onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cone));
+        .onTrue(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cone));
+
     operator
         .povCenter()
-        .onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.None));
-    operator
-        .povUp()
-        .onTrue(new InstantCommand(() -> greybotsGrabberSubsystem.gamePiece = GamePiece.Cube));
-    operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
-    operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
-    operator.start().whileTrue(greybotsGrabberSubsystem.resetPivotCommand());
-    // controller.a().whileTrue(new ScoringCommand(ScoringLevels.L1, () -> 0, elevatorSubsystem,
-    // swerveSubsystem, grabberSubsystem,
-    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    // controller.b().whileTrue(new ScoringCommand(ScoringLevels.L2, () -> 0, elevatorSubsystem,
-    // swerveSubsystem, grabberSubsystem,
-    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
-    // controller.y().whileTrue(new ScoringCommand(ScoringLevels.L3, () -> 0, elevatorSubsystem,
-    // swerveSubsystem, grabberSubsystem,
-    // superstructureSubsystem).withInterruptBehavior(InterruptionBehavior.kCancelIncoming));
+        .onTrue(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.None));
+    operator.povUp().onTrue(new InstantCommand(() -> grabberSubsystem.gamePiece = GamePiece.Cube));
 
+    operator.leftBumper().onTrue(new InstantCommand(() -> shouldUseChute = false));
+
+    operator.rightBumper().onTrue(new InstantCommand(() -> shouldUseChute = true));
+
+    operator.start().whileTrue(grabberSubsystem.resetPivotCommand());
+
+    // Heading snaps
     controller
         .rightTrigger()
         .whileTrue(
             swerveSubsystem.headingLockDriveCommand(
+                // Use normal translation
                 () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
                 () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
                 () -> {
+                  // Find rotation based on 3 "zones" on controller
                   var joystickRotation =
                       new Rotation2d(controller.getRightX(), -controller.getRightY());
                   SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
@@ -341,31 +344,29 @@ public class RobotContainer {
                 true,
                 false,
                 true));
+
+    // Scoring command
     controller
         .leftTrigger()
         .whileTrue(
             superstructureSubsystem
                 .waitExtendToGoal(() -> swerveSubsystem.getLevel(), 0.0)
                 .andThen(new RunCommand(() -> {}))
-                .alongWith( // ledSubsystem.setRainbowCommand(),
+                .alongWith(
                     routingSubsystem.slowRunCommand(),
                     new ConditionalCommand(
-                            new RunCommand(
-                                    () -> greybotsGrabberSubsystem.holdCube(),
-                                    greybotsGrabberSubsystem)
+                            new RunCommand(() -> grabberSubsystem.holdCube(), grabberSubsystem)
                                 .withTimeout(0.5),
-                            new RunCommand(
-                                    () -> greybotsGrabberSubsystem.intakeCone(),
-                                    greybotsGrabberSubsystem)
+                            new RunCommand(() -> grabberSubsystem.intakeCone(), grabberSubsystem)
                                 .withTimeout(0.2),
-                            () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube)
+                            () -> grabberSubsystem.gamePiece == GamePiece.Cube)
                         .withTimeout(0.5)
-                        .andThen(greybotsGrabberSubsystem.runToScoringCommand())))
+                        .andThen(grabberSubsystem.runToScoringCommand())))
         .onFalse(
             new ConditionalCommand(
-                    greybotsGrabberSubsystem.scoreCubeCommand(),
-                    greybotsGrabberSubsystem.scoreConeCommand(),
-                    () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cube)
+                    grabberSubsystem.scoreCubeCommand(),
+                    grabberSubsystem.scoreConeCommand(),
+                    () -> grabberSubsystem.gamePiece == GamePiece.Cube)
                 .raceWith(new RunCommand(() -> {}, elevatorSubsystem))
                 .unless(() -> elevatorSubsystem.getExtensionInches() < 10.0));
 
@@ -375,24 +376,26 @@ public class RobotContainer {
             (run(
                 intakeSubsystem.outakeCommand(),
                 routingSubsystem.outakeCommand(),
-                greybotsGrabberSubsystem.outakeCubeCommand())));
+                grabberSubsystem.outakeCubeCommand())));
+
     controller
         .y()
         .whileTrue(
             swerveSubsystem
                 .autoBalanceVelocity()
-                .alongWith(ledSubsystem.setBlinkingCommand(new Color8Bit(Color.kBlue), 0.5)));
+                .alongWith(ledSubsystem.setBlinkingCommand(Color.kBlue, 0.5)));
 
     controller
         .start()
         .whileTrue(
             elevatorSubsystem
                 .extendToInchesCommand(-2)
-                .until(() -> elevatorSubsystem.limitSwitch.get())
+                .until(() -> elevatorSubsystem.getLimitSwitch())
                 .andThen(new PrintCommand("reset elevator")));
-    controller.back().whileTrue(run(greybotsGrabberSubsystem.intakeConeSingleCommand()));
 
-    operator.back().whileTrue(run(greybotsGrabberSubsystem.intakeConeSingleCommand()));
+    controller.back().whileTrue(run(grabberSubsystem.intakeConeSingleCommand()));
+
+    operator.back().whileTrue(run(grabberSubsystem.intakeConeSingleCommand()));
 
     operator
         .leftTrigger()
@@ -410,106 +413,10 @@ public class RobotContainer {
         new ConditionalCommand(
             new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.STORE)),
             new RunCommand(() -> superstructureSubsystem.setMode(ExtensionState.RETRACT_AND_ROUTE)),
-            () -> greybotsGrabberSubsystem.gamePiece == GamePiece.Cone));
-
-    // isExtended.whileTrue(
-    //   intakeSubsystem.extendCommand().unless(() ->
-    // isUsingChute).repeatedly()//.withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
-    //   );
-
-    superstructureSubsystem.retractAndRouteTrigger.whileTrue(
-        run(
-            // elevatorSubsystem.extendToInchesCommand(0.0),
-            // greybotsGrabberSubsystem.runToStorageCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf)
-            ));
+            () -> grabberSubsystem.gamePiece == GamePiece.Cone));
 
     superstructureSubsystem.storeTrigger.whileTrue(
-        run(routingSubsystem.stopCommand()
-            // armSubsystem.runToHorizontalCommand()
-            // elevatorSubsystem.extendToInchesCommand(0.0)
-            )
-            .withInterruptBehavior(InterruptionBehavior.kCancelSelf));
-  }
-
-  private void addDashboardCommands() {
-
-    LoggingWrapper.shared.add("intake toggle", intakeSubsystem.extendCommand());
-
-    LoggingWrapper.shared.add("extend to 0", superstructureSubsystem.waitExtendToInches(0));
-    LoggingWrapper.shared.add("extend to 12", superstructureSubsystem.waitExtendToInches(12));
-    LoggingWrapper.shared.add("extend to 36", superstructureSubsystem.waitExtendToInches(36));
-
-    LoggingWrapper.shared.add(
-        "reset elevator",
-        new InstantCommand(() -> elevatorSubsystem.zeroMotor(), elevatorSubsystem)
-            .ignoringDisable(true));
-
-    LoggingWrapper.shared.add(
-        "reset to 0",
-        new InstantCommand(() -> swerveSubsystem.resetOdometry(new Pose2d()), swerveSubsystem));
-
-    LoggingWrapper.shared.add(
-        "rezero elevator", new InstantCommand(() -> elevatorSubsystem.zeroMotor()));
-
-    LoggingWrapper.shared.add(
-        "scoring sequence",
-        new ScoringCommand(
-            ScoringLevels.L3,
-            () -> 0,
-            elevatorSubsystem,
-            swerveSubsystem,
-            greybotsGrabberSubsystem,
-            superstructureSubsystem));
-
-    LoggingWrapper.shared.add(
-        "Rezero Grabber",
-        greybotsGrabberSubsystem.resetPivotCommand().alongWith(intakeSubsystem.extendCommand()));
-
-    LoggingWrapper.shared.add(
-        "Run grabber to storage",
-        greybotsGrabberSubsystem
-            .runToStorageCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to routing",
-        greybotsGrabberSubsystem
-            .runToRoutingCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to scoring",
-        greybotsGrabberSubsystem
-            .runToScoringCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to double substation",
-        greybotsGrabberSubsystem
-            .runToDoubleSubstationCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-    LoggingWrapper.shared.add(
-        "Run grabber to single substation",
-        greybotsGrabberSubsystem
-            .runToSingleSubstationCommand()
-            .alongWith(intakeSubsystem.extendCommand().repeatedly()));
-
-    LoggingWrapper.shared.add(
-        "Grabber intake cone single substation no extend",
-        greybotsGrabberSubsystem
-            .intakeConeSingleCommand()
-            .alongWith(intakeSubsystem.extendCommand()));
-    LoggingWrapper.shared.add(
-        "Grabber intake cone double substation no extend",
-        greybotsGrabberSubsystem
-            .intakeConeDoubleCommand()
-            .alongWith(intakeSubsystem.extendCommand()));
-    LoggingWrapper.shared.add(
-        "Grabber intake cube no extend", greybotsGrabberSubsystem.intakeCubeCommand());
-
-    LoggingWrapper.shared.add(
-        "Grabber outake cone",
-        greybotsGrabberSubsystem
-            .outakeConeCommand()
-            .alongWith(intakeSubsystem.extendCommand())
-            .withTimeout(1.0));
+        routingSubsystem.stopCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
 
   private static Command run(Command... commands) {
@@ -521,6 +428,22 @@ public class RobotContainer {
         * Math.signum(joystick)
         * (1 - (0.5 * fineTuneAxis))
         * (1 - (0.5 * (controller.leftBumper().getAsBoolean() ? 0.4 : 0)));
+  }
+
+  // Use this method to periodically log data to advantagekit
+  public void loggingPeriodic() {
+    Logger.getInstance()
+        .recordOutput(
+            "Controller Left Y Adjusted",
+            modifyJoystickAxis(controller.getLeftY(), controller.getRightTriggerAxis()));
+    Logger.getInstance()
+        .recordOutput(
+            "Controller Left X Adjusted",
+            modifyJoystickAxis(controller.getLeftX(), controller.getRightTriggerAxis()));
+    Logger.getInstance()
+        .recordOutput(
+            "Controller Right X Adjusted",
+            modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
   }
 
   /**
@@ -535,8 +458,6 @@ public class RobotContainer {
 
   /** Hopefully only need to use for LEDS */
   public void disabledPeriodic() {
-    // ledSubsystem.setNoise(Constants.LEDConstants.defaultColor, new Color8Bit(Color.kBlack), (int)
-    // (Timer.getFPGATimestamp() * 20));
     if (DriverStation.getAlliance() == Alliance.Invalid) {
       ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
     } else if (DriverStation.getAlliance() == Alliance.Red) {
