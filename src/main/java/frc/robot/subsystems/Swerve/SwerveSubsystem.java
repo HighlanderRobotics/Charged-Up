@@ -533,10 +533,6 @@ public class SwerveSubsystem extends SubsystemBase {
     return extensionLevel;
   }
 
-  public void updateVisionInputs(VisionIOInputs inputs, Pose3d pose) {
-    visionIOReal.updateInputs(inputs, pose);
-  }
-
   @Override
   public void periodic() {
     for (int i = 0; i < swerveMods.length; i++) {

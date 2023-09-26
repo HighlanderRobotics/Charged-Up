@@ -28,7 +28,7 @@ public interface VisionIO {
         PhotonTrackedTarget target, LogTable table, String name) {
 
       logTransform3d(target.getBestCameraToTarget(), table, name);
-      logTransform3d(target.getAlternateCameraToTarget(), table, "alt" + name);
+      logTransform3d(target.getAlternateCameraToTarget(), table, "alt " + name);
       logCorners(target, table, name);
 
       table.put("yaw " + name, target.getYaw());
