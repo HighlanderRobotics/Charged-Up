@@ -41,16 +41,14 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
-import frc.robot.Constants;
 import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
-import frc.robot.subsystems.Vision.VisionIOReal;
-import frc.robot.subsystems.Vision.VisionSubsystem;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
-
+import frc.robot.subsystems.Vision.VisionIOReal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -72,7 +70,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Field2d field = new Field2d();
 
-  private VisionSubsystem visionSubsystem = new VisionSubsystem();
   private VisionIOReal visionIOReal = new VisionIOReal();
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
 
@@ -536,6 +533,10 @@ public class SwerveSubsystem extends SubsystemBase {
     return extensionLevel;
   }
 
+  public void updateVisionInputs(VisionIOInputs inputs, Pose3d pose) {
+    visionIOReal.updateInputs(inputs, pose);
+  }
+
   @Override
   public void periodic() {
     for (int i = 0; i < swerveMods.length; i++) {
@@ -581,18 +582,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     visionIOReal.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
-
-    // I don't know if we'll ever need to look at this again but I don't really want to delete it just yet
-    // List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
-    //     visionSubsystem.getMeasurement(pose);
-
-    // for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements) {
-    //   dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
-    //   poseEstimator.addVisionMeasurement(
-    //       measurement.estimation.estimatedPose.toPose2d(),
-    //       measurement.estimation.timestampSeconds,
-    //       measurement.confidence.times(2.0));
-    // }
 
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());

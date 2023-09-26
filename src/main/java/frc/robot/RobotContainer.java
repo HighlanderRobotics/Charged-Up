@@ -278,7 +278,7 @@ public class RobotContainer {
                 () -> modifyJoystickAxis(controller.getLeftY(), controller.getLeftTriggerAxis()),
                 () -> modifyJoystickAxis(controller.getLeftX(), controller.getLeftTriggerAxis()),
                 () -> {
-                    // Find rotation based on 3 "zones" on controller
+                  // Find rotation based on 3 "zones" on controller
                   var joystickRotation =
                       new Rotation2d(controller.getRightX(), -controller.getRightY());
                   SmartDashboard.putNumber("heading snap", lastHeadingSnapAngle);
@@ -394,8 +394,7 @@ public class RobotContainer {
             () -> grabberSubsystem.gamePiece == GamePiece.Cone));
 
     superstructureSubsystem.storeTrigger.whileTrue(
-        routingSubsystem.stopCommand()
-            .withInterruptBehavior(InterruptionBehavior.kCancelSelf));
+        routingSubsystem.stopCommand().withInterruptBehavior(InterruptionBehavior.kCancelSelf));
   }
 
   private static Command run(Command... commands) {

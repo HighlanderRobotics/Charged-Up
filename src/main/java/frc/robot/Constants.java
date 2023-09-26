@@ -135,8 +135,7 @@ public final class Constants {
     public static final double driveKA = (0.27 / 12);
 
     public static final double simDriveKP = 0.0;
-    public static final double simDriveKS =
-        (0.32 / 12);
+    public static final double simDriveKS = (0.32 / 12);
     public static final double simDriveKV = (1.51 / 12);
     public static final double simDriveKA = (0.27 / 12);
 
@@ -144,8 +143,7 @@ public final class Constants {
     /** Meters per Second */
     public static final double maxSpeed = 6;
     /** Radians per Second */
-    public static final double maxAngularVelocity =
-        10.0;
+    public static final double maxAngularVelocity = 10.0;
 
     /* Neutral Modes */
     public static final NeutralMode angleNeutralMode = NeutralMode.Coast;
@@ -521,15 +519,14 @@ public final class Constants {
         this.robotToCamera = robotToCamera;
       }
     }
-    public static final VisionSource visionSource = new VisionSource(
-        "opi-cam",
-        new Transform3d(
-            new Translation3d( //TODO find actual numbers
-                Units.inchesToMeters(0),
-                Units.inchesToMeters(0),
-                Units.inchesToMeters(0)),
-            new Rotation3d(0, 0, Units.degreesToRadians(0))));
-            
+
+    public static final VisionSource visionSource =
+        new VisionSource(
+            "opi-cam",
+            new Transform3d(
+                new Translation3d( // TODO find actual numbers
+                    Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
+                new Rotation3d(0, 0, Units.degreesToRadians(0))));
   }
 
   /** For 5026 vision code */
@@ -658,5 +655,4 @@ public final class Constants {
       }
     }
   }
-
 }

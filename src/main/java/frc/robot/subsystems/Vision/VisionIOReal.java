@@ -4,21 +4,19 @@
 
 package frc.robot.subsystems.Vision;
 
-import org.photonvision.PhotonCamera;
-
 import edu.wpi.first.math.geometry.Pose3d;
+import org.photonvision.PhotonCamera;
 
 /** Add your docs here. */
 public class VisionIOReal implements VisionIO {
-    PhotonCamera camera = new PhotonCamera("opi camera");
+  PhotonCamera camera = new PhotonCamera("opi camera");
 
-    @Override
-    public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
-        var latestResult = camera.getLatestResult();
+  @Override
+  public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
+    var latestResult = camera.getLatestResult();
 
-        inputs.timestamp = latestResult.getTimestampSeconds();
-        inputs.timeSinceLastTimestamp = latestResult.getLatencyMillis();
-        inputs.targets = latestResult.targets;
-    }
-
+    inputs.timestamp = latestResult.getTimestampSeconds();
+    inputs.timeSinceLastTimestamp = latestResult.getLatencyMillis();
+    inputs.targets = latestResult.targets;
+  }
 }
