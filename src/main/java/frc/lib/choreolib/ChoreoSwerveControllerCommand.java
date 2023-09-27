@@ -6,15 +6,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -210,7 +207,8 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
 
   @Override
   public void initialize() {
-    // trajectory = useAllianceColor && DriverStation.getAlliance() == Alliance.Red ? trajectory.mirrorred() : trajectory;
+    // trajectory = useAllianceColor && DriverStation.getAlliance() == Alliance.Red ?
+    // trajectory.mirrorred() : trajectory;
     SmartDashboard.putData("ChoreoSwerveControllerCommand_field", this.field);
     this.field.getObject("traj").setPoses(this.trajectory.getPoses());
 

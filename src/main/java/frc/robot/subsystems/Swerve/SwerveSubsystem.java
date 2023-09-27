@@ -57,7 +57,6 @@ import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -400,7 +399,10 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Command choreoTrajFollow(ChoreoTrajectory traj) {
-    return new InstantCommand(() -> resetOdometry(traj.sample(0, DriverStation.getAlliance() == Alliance.Red).getPose()))
+    return new InstantCommand(
+            () ->
+                resetOdometry(
+                    traj.sample(0, DriverStation.getAlliance() == Alliance.Red).getPose()))
         .andThen(
             new PrintCommand("! traj start"),
             new ChoreoSwerveControllerCommand(
@@ -583,7 +585,12 @@ public class SwerveSubsystem extends SubsystemBase {
               swerveMods[3].getAbsoluteRotation().getRadians(),
               swerveMods[3].getState().speedMetersPerSecond
             });
-    Logger.getInstance().recordOutput("Swerve Pose", new double[]{getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()});
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve Pose",
+            new double[] {
+              getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()
+            });
     Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
     Logger.getInstance()
         .recordOutput(

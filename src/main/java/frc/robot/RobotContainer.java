@@ -22,8 +22,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.PathplannerAutoChooser;
 import frc.robot.commands.ChoreoAutoChooser;
+import frc.robot.commands.PathplannerAutoChooser;
 import frc.robot.subsystems.Elevator.ElevatorIOFalcon;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
@@ -40,7 +40,6 @@ import frc.robot.subsystems.Swerve.SwerveModuleIOFalcon;
 import frc.robot.subsystems.Swerve.SwerveModuleIOSim;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -119,7 +118,8 @@ public class RobotContainer {
   Field2d field = new Field2d();
 
   enum AutoSystem {
-    choreo, pathplanner
+    choreo,
+    pathplanner
   }
 
   LoggedDashboardChooser<AutoSystem> autoSystemType =
@@ -482,12 +482,12 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     switch (autoSystemType.get()) {
-        case choreo:
-            return choreoAutoChooser.getAutonomousCommand();
-        case pathplanner:
-            return pathplannerAutoChooser.getAutoCommand();
-        default:
-            return null;
+      case choreo:
+        return choreoAutoChooser.getAutonomousCommand();
+      case pathplanner:
+        return pathplannerAutoChooser.getAutoCommand();
+      default:
+        return null;
     }
   }
 
@@ -497,16 +497,20 @@ public class RobotContainer {
       ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
     } else if (DriverStation.getAlliance() == Alliance.Red) {
       ledSubsystem.runColorAlong(
-        Color.kRed, 
-        autoSystemType.get() == AutoSystem.choreo ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
-        12, 
-        2);
+          Color.kRed,
+          autoSystemType.get() == AutoSystem.choreo
+              ? Constants.LEDConstants.defaultColor
+              : Color.kSeaGreen,
+          12,
+          2);
     } else {
       ledSubsystem.runColorAlong(
-        Color.kBlue, 
-        autoSystemType.get() == AutoSystem.choreo ? Constants.LEDConstants.defaultColor : Color.kSeaGreen, 
-        12, 
-        2);
+          Color.kBlue,
+          autoSystemType.get() == AutoSystem.choreo
+              ? Constants.LEDConstants.defaultColor
+              : Color.kSeaGreen,
+          12,
+          2);
     }
   }
 }

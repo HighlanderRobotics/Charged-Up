@@ -1,7 +1,6 @@
 package frc.lib.choreolib;
 
 import edu.wpi.first.math.geometry.Pose2d;
-
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;

@@ -56,12 +56,12 @@ public class ChoreoTrajectoryState implements Interpolatable<ChoreoTrajectorySta
 
   public ChoreoTrajectoryState flipped() {
     return ChoreoTrajectoryState.builder()
-      .x(FIELD_WIDTH_METERS - this.x)
-      .y(this.y)
-      .heading(((this.heading + (Math.PI/2)) * -1) - (Math.PI/2))
-      .velocityX(this.velocityX * -1)
-      .velocityY(this.velocityY)
-      .angularVelocity(this.angularVelocity * -1)
-      .build();
+        .x(FIELD_WIDTH_METERS - this.x)
+        .y(this.y)
+        .heading(((this.heading + (Math.PI / 2)) * -1) - (Math.PI / 2))
+        .velocityX(this.velocityX * -1)
+        .velocityY(this.velocityY)
+        .angularVelocity(this.angularVelocity * -1)
+        .build();
   }
 }
