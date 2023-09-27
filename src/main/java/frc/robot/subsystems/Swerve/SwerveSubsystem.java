@@ -48,7 +48,10 @@ import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
+import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +73,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Field2d field = new Field2d();
 
-  private VisionIOReal visionIOReal = new VisionIOReal();
+  private VisionIO visionIO = Robot.isReal() ? new VisionIOReal() : new VisionIOSim();
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
 
   public boolean hasResetOdometry = false;
@@ -576,7 +579,7 @@ public class SwerveSubsystem extends SubsystemBase {
       wheelOnlyOdo.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
     }
 
-    visionIOReal.updateInputs(visionIOInputs, new Pose3d(pose));
+    visionIO.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
 
     field.setRobotPose(getPose());
