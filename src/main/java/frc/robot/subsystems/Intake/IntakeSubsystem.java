@@ -9,16 +9,18 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
+
 import org.littletonrobotics.junction.Logger;
 
 public class IntakeSubsystem extends SubsystemBase {
-  IntakeIOFalcon io;
+  IntakeIO io;
   IntakeIOInputsAutoLogged inputs;
   // Timer to make sure that the intake has time to extend when we check if its out
   Timer timeSinceExtended = new Timer();
   /** Creates a new IntakeSubsystem. */
   public IntakeSubsystem() {
-    io = new IntakeIOFalcon();
+    io = Robot.isReal() ? new IntakeIOFalcon() : new IntakeIOSim();
     inputs = new IntakeIOInputsAutoLogged();
     timeSinceExtended.start();
   }

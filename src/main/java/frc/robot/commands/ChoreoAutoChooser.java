@@ -63,6 +63,7 @@ public final class ChoreoAutoChooser {
         new ChoreoPath(2, AutoFieldPosition.Bump, ChoreoPathFeature.none),
         new ChoreoPath(2, AutoFieldPosition.Clear, ChoreoPathFeature.none),
         new ChoreoPath(3, AutoFieldPosition.Clear, ChoreoPathFeature.none),
+        new ChoreoPath(3, AutoFieldPosition.Bump, ChoreoPathFeature.none)
       };
 
   public ChoreoTrajectory getPath(ChoreoPath path) {
