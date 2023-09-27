@@ -99,7 +99,7 @@ public final class ChoreoAutoChooser {
       if (path.fieldPosition == AutoFieldPosition.Clear) {
         return threePieceClear(path);
       } else {
-        return threePieceClear(path);
+        return threePieceBump(path);
       }
     } else {
       return justScore();
