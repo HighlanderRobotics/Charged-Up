@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.choreolib.AutoFieldPosition;
 import frc.lib.choreolib.ChoreoPath;
-import frc.lib.choreolib.ChoreoPathFeature;
 import frc.lib.choreolib.ChoreoTrajectory;
 import frc.lib.choreolib.TrajectoryManager;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
