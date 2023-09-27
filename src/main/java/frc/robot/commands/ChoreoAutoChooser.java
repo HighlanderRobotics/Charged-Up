@@ -59,9 +59,9 @@ public final class ChoreoAutoChooser {
 
   public final ChoreoPath[] paths =
       new ChoreoPath[] {
-        new ChoreoPath(2, AutoFieldPosition.Bump, ChoreoPathFeature.none),
-        new ChoreoPath(2, AutoFieldPosition.Clear, ChoreoPathFeature.none),
-        new ChoreoPath(3, AutoFieldPosition.Clear, ChoreoPathFeature.none),
+        new ChoreoPath(2, AutoFieldPosition.Bump),
+        new ChoreoPath(2, AutoFieldPosition.Clear),
+        new ChoreoPath(3, AutoFieldPosition.Clear),
       };
 
   public ChoreoTrajectory getPath(ChoreoPath path) {
