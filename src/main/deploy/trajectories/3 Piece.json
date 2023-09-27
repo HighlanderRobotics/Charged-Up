@@ -3759,7 +3759,7 @@
                         "wptScope": true,
                         "sgmtScope": false
                     },
-                    "uuid": "48c580f0-5a97-459a-92c0-9c96d0dda9f2"
+                    "uuid": "114b4bc1-f0df-435d-b633-de1e1d1f33a9"
                 },
                 {
                     "scope": [
@@ -3785,7 +3785,7 @@
                         "wptScope": true,
                         "sgmtScope": false
                     },
-                    "uuid": "613e1325-ff34-4605-a515-981c0c1a0e8d"
+                    "uuid": "b20c998d-4a03-48f2-817c-e38de9963752"
                 },
                 {
                     "scope": [
@@ -3812,7 +3812,7 @@
                         "wptScope": true,
                         "sgmtScope": true
                     },
-                    "uuid": "69410073-4cfe-410d-a6ac-1650a2b1d469"
+                    "uuid": "0f8fab39-140e-4745-8c87-ebe3cd739ae2"
                 },
                 {
                     "scope": [
@@ -3839,7 +3839,7 @@
                         "wptScope": true,
                         "sgmtScope": true
                     },
-                    "uuid": "c16a2902-04b8-4593-b6c8-ce8bac943e9a"
+                    "uuid": "8bde2fa2-bb29-43d3-93f4-8521e90bff9c"
                 },
                 {
                     "scope": [
@@ -3866,7 +3866,7 @@
                         "wptScope": true,
                         "sgmtScope": true
                     },
-                    "uuid": "c5c74e32-342a-49e7-bcf3-fefd7d44bb5b"
+                    "uuid": "82525f6e-af46-4d4a-8f85-5ecddef3390d"
                 },
                 {
                     "scope": [
@@ -3893,7 +3893,7 @@
                         "wptScope": true,
                         "sgmtScope": true
                     },
-                    "uuid": "7f013420-608a-40ba-9dac-daa6f4cc38df"
+                    "uuid": "6d6e8b68-980e-42db-a59a-11a4eb4a1997"
                 },
                 {
                     "scope": [
@@ -3920,7 +3920,7 @@
                         "wptScope": true,
                         "sgmtScope": true
                     },
-                    "uuid": "32a2c86c-6b04-4c83-9be9-5e529347cf8e"
+                    "uuid": "e98190eb-0d71-482f-8462-b43f532cec08"
                 },
                 {
                     "scope": [
@@ -3946,7 +3946,7 @@
                         "wptScope": true,
                         "sgmtScope": false
                     },
-                    "uuid": "d4a200a5-2a4f-4762-88ba-0b00967b2a36"
+                    "uuid": "ab0d5a78-e530-49a4-8ceb-314469cc59f5"
                 },
                 {
                     "scope": [
@@ -3972,16 +3972,106 @@
                         "wptScope": true,
                         "sgmtScope": false
                     },
-                    "uuid": "99f90f28-bd3c-47ef-a4fe-a7e830b9a6eb"
+                    "uuid": "a3682d9a-e494-48ca-86ff-bf0bf19e8ceb"
                 }
             ]
         },
-        "3 Red Clear": {
+        "3 Blue Bump": {
             "waypoints": [
                 {
-                    "x": 14.630361557006836,
-                    "y": 4.923251628875732,
+                    "x": 1.8202487230300903,
+                    "y": 1.6281083822250366,
+                    "heading": -3.14,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 3.1140871047973633,
+                    "y": 0.7578068375587463,
                     "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 6.214251518249512,
+                    "y": 0.8845431208610535,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 7.062409400939941,
+                    "y": 0.904041051864624,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 3.777015209197998,
+                    "y": 0.3873469829559326,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": false,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.3076958656311035,
+                    "y": 0.39974135160446167,
+                    "heading": 3.14,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 4.654420375823975,
+                    "y": 0.8065515756607056,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 6.370234489440918,
+                    "y": 1.8301907777786255,
+                    "heading": 0.4346702408111918,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 6.945422172546387,
+                    "y": 2.0739142894744873,
+                    "heading": 0.4157140805880645,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 4.6739182472229,
+                    "y": 0.8163005113601685,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": false,
+                    "controlIntervalCount": 0
+                },
+                {
+                    "x": 2.346691608428955,
+                    "y": 1.0626695156097412,
+                    "heading": 3.141592653589793,
                     "isInitialGuess": false,
                     "translationConstrained": true,
                     "headingConstrained": true,
@@ -4014,7 +4104,7 @@
                         "wptScope": true,
                         "sgmtScope": false
                     },
-                    "uuid": "2f908ee7-a0db-4527-a1d4-d2ae7e5ca40f"
+                    "uuid": "422fa0ae-ec70-4b7d-a110-f653fd0a4635"
                 },
                 {
                     "scope": [
@@ -4040,7 +4130,221 @@
                         "wptScope": true,
                         "sgmtScope": false
                     },
-                    "uuid": "6ae0eaed-8da4-423c-aa91-1d25d9b30298"
+                    "uuid": "7f186d98-e166-4393-81da-aadf27d46629"
+                },
+                {
+                    "scope": [
+                        8,
+                        7
+                    ],
+                    "type": "ZeroAngularVelocity",
+                    "definition": {
+                        "name": "Zero Angular Velocity",
+                        "shortName": "0 Ang Velo",
+                        "description": "Zero angular velocity throughout scope",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": true
+                    },
+                    "uuid": "d9243f9c-3d01-4654-bc60-61d2a35d29da"
+                },
+                {
+                    "scope": [
+                        2,
+                        3
+                    ],
+                    "type": "ZeroAngularVelocity",
+                    "definition": {
+                        "name": "Zero Angular Velocity",
+                        "shortName": "0 Ang Velo",
+                        "description": "Zero angular velocity throughout scope",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": true
+                    },
+                    "uuid": "6fbeb095-b313-45c7-b7af-e5c2d2c89917"
+                },
+                {
+                    "scope": [
+                        0,
+                        1
+                    ],
+                    "type": "ZeroAngularVelocity",
+                    "definition": {
+                        "name": "Zero Angular Velocity",
+                        "shortName": "0 Ang Velo",
+                        "description": "Zero angular velocity throughout scope",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": true
+                    },
+                    "uuid": "53294fff-1f8c-453b-87e3-7cbea2f1209a"
+                },
+                {
+                    "scope": [
+                        5,
+                        5
+                    ],
+                    "type": "ZeroAngularVelocity",
+                    "definition": {
+                        "name": "Zero Angular Velocity",
+                        "shortName": "0 Ang Velo",
+                        "description": "Zero angular velocity throughout scope",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": true
+                    },
+                    "uuid": "a8825ee3-00ab-4a34-b394-59ba7f0fe537"
+                },
+                {
+                    "scope": [
+                        10,
+                        10
+                    ],
+                    "type": "ZeroAngularVelocity",
+                    "definition": {
+                        "name": "Zero Angular Velocity",
+                        "shortName": "0 Ang Velo",
+                        "description": "Zero angular velocity throughout scope",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": true
+                    },
+                    "uuid": "7bef7260-de4b-49de-b7a1-280003692308"
+                },
+                {
+                    "scope": [
+                        10
+                    ],
+                    "type": "WptZeroVelocity",
+                    "definition": {
+                        "name": "Waypoint Zero Velocity",
+                        "shortName": "Wpt 0 Velo",
+                        "description": "Zero velocity at waypoint",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": false
+                    },
+                    "uuid": "76f04c33-6cf2-498c-80d1-f99af012e36b"
+                },
+                {
+                    "scope": [
+                        5
+                    ],
+                    "type": "WptZeroVelocity",
+                    "definition": {
+                        "name": "Waypoint Zero Velocity",
+                        "shortName": "Wpt 0 Velo",
+                        "description": "Zero velocity at waypoint",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": false
+                    },
+                    "uuid": "b70e1781-a464-4f0d-9ebe-c3dd25168240"
+                },
+                {
+                    "scope": [
+                        4,
+                        5
+                    ],
+                    "type": "ZeroAngularVelocity",
+                    "definition": {
+                        "name": "Zero Angular Velocity",
+                        "shortName": "0 Ang Velo",
+                        "description": "Zero angular velocity throughout scope",
+                        "icon": {
+                            "type": {
+                                "type": {},
+                                "compare": null
+                            },
+                            "key": null,
+                            "ref": null,
+                            "props": {},
+                            "_owner": null,
+                            "_store": {}
+                        },
+                        "properties": {},
+                        "wptScope": true,
+                        "sgmtScope": true
+                    },
+                    "uuid": "23928e36-1057-41a3-9c20-b01c1dee7515"
                 }
             ]
         }
