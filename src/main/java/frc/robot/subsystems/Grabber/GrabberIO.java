@@ -6,7 +6,6 @@ package frc.robot.subsystems.Grabber;
 
 import org.littletonrobotics.junction.AutoLog;
 
-/** Add your docs here. */
 public interface GrabberIO {
 
   @AutoLog
@@ -21,7 +20,7 @@ public interface GrabberIO {
     public boolean beambreakTriggered = false;
   }
 
-  public abstract void updateInputs(GrabberIOInputs inputs);
+  public abstract GrabberIOInputsAutoLogged updateInputs();
 
   public abstract void setRollersPercentOut(double percentOut);
 

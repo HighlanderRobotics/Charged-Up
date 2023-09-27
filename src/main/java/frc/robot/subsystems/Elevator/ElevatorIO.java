@@ -6,7 +6,6 @@ package frc.robot.subsystems.Elevator;
 
 import org.littletonrobotics.junction.AutoLog;
 
-/** Add your docs here. */
 public interface ElevatorIO {
   @AutoLog
   public static class ElevatorIOInputs {
@@ -16,7 +15,7 @@ public interface ElevatorIO {
     public double[] currentAmps = new double[] {};
   }
 
-  public abstract void updateInputs(ElevatorIOInputs inputs);
+  public abstract ElevatorIOInputsAutoLogged updateInputs();
 
   public abstract void setPercentOut(double percentOut, double ff);
 

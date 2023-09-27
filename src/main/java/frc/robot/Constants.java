@@ -520,16 +520,13 @@ public final class Constants {
       }
     }
 
-    // public static final List<VisionSource> VISION_SOURCES =
-    //     List.of(
-    //         new VisionSource(
-    //             "limelight-right",
-    //             new Transform3d(
-    //                 new Translation3d(
-    //                     Units.inchesToMeters(-8),
-    //                     Units.inchesToMeters(-9.75),
-    //                     Units.inchesToMeters(-22.75)),
-    //                 new Rotation3d(0, 0, Units.degreesToRadians(-5)))));
+    public static final VisionSource visionSource =
+        new VisionSource(
+            "opi-cam",
+            new Transform3d(
+                new Translation3d( // TODO find actual numbers
+                    Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
+                new Rotation3d(0, 0, Units.degreesToRadians(0))));
   }
 
   /** For 5026 vision code */

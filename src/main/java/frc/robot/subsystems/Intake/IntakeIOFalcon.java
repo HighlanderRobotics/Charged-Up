@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
-/** Add your docs here. */
 public class IntakeIOFalcon implements IntakeIO {
   private final HighlanderFalcon motor =
       new HighlanderFalcon(Constants.MechanismConstants.intakeID, 1.0, 0.15, 0, 0);
@@ -24,11 +23,13 @@ public class IntakeIOFalcon implements IntakeIO {
   public IntakeIOFalcon() {}
 
   @Override
-  public void updateInputs(IntakeIOInputs input) {
-    input.isExtended = isExtended;
-    input.percentOut = motor.getMotorOutputPercent();
-    input.speedRPS = motor.getSelectedSensorVelocity() * 10 / 2048;
-    input.currentAmps = motor.getStatorCurrent();
+  public IntakeIOInputsAutoLogged updateInputs() {
+    var inputs = new IntakeIOInputsAutoLogged();
+    inputs.isExtended = isExtended;
+    inputs.percentOut = motor.getMotorOutputPercent();
+    inputs.speedRPS = motor.getSelectedSensorVelocity() * 10 / 2048;
+    inputs.currentAmps = motor.getStatorCurrent();
+    return inputs;
   }
 
   @Override

@@ -15,6 +15,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
@@ -31,7 +32,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -41,7 +41,6 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.lib.choreolib.ChoreoSwerveControllerCommand;
 import frc.lib.choreolib.ChoreoTrajectory;
 import frc.robot.Constants;
@@ -50,11 +49,15 @@ import frc.robot.Constants.ScoringPositions;
 import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
-import frc.robot.subsystems.LEDs.LEDSubsystem;
 // import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
-// import frc.robot.subsystems.Vision.VisionIOApriltags;
-// import frc.robot.subsystems.Vision.VisionIOSimApriltags;
-// import frc.robot.subsystems.Vision.VisionIOTape;
+// import frc.robot.subsystems.Vision.VisionIO;
+// import frc.robot.subsystems.Vision.VisionIOReal;
+// import frc.robot.subsystems.Vision.VisionIOSim;
+import frc.robot.subsystems.Vision.VisionIO;
+import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
+import frc.robot.subsystems.Vision.VisionIOReal;
+import frc.robot.subsystems.Vision.VisionIOSim;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,14 +79,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Field2d field = new Field2d();
 
-  private boolean isInTapeMode = true;
-  private PIDController tapeDriveAssistController = new PIDController(-0.018, 0, -0.01);
-
-  // private VisionIOApriltags apriltagVisionSubsystem = new VisionIOApriltags();
-  // private VisionIOSimApriltags apriltagVisionSim = new VisionIOSimApriltags();
-  // private VisionIOInputs visionIOInputs = new VisionIOInputs();
-  private LinearFilter tapeYawFilter = LinearFilter.singlePoleIIR(0.2, 0.020);
-  private double tapeYawFilterVal = 0;
+  private VisionIO visionIO = Robot.isReal() ? new VisionIOReal() : new VisionIOSim();
+  private VisionIOInputs visionIOInputs = new VisionIOInputs();
 
   public boolean hasResetOdometry = false;
 
@@ -105,31 +102,12 @@ public class SwerveSubsystem extends SubsystemBase {
   public ProfiledPIDController headingController =
       new ProfiledPIDController(1.2, 0, 0.1, new Constraints(Math.PI * 4, Math.PI * 6));
 
-  // public VisionIOTape tapeVisionSubsystem =
-  //     new VisionIOTape("limelight-left", Constants.leftCameraToRobot);
-
-  public SwerveSubsystem() {
-    gyroIO = Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim();
+  public SwerveSubsystem(SwerveModuleIO[] swerveIO, GyroIO gyroIO) {
+    this.gyroIO = gyroIO;
 
     headingController.enableContinuousInput(0, Math.PI * 2);
     headingController.setTolerance(0.2);
-    if (Robot.isReal()) {
-      swerveMods =
-          new SwerveModuleIOFalcon[] {
-            new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
-            new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
-            new SwerveModuleIOFalcon(2, Constants.Swerve.Mod2.constants),
-            new SwerveModuleIOFalcon(3, Constants.Swerve.Mod3.constants)
-          };
-    } else {
-      swerveMods =
-          new SwerveModuleIOSim[] {
-            new SwerveModuleIOSim(0, Constants.Swerve.Mod0.constants),
-            new SwerveModuleIOSim(1, Constants.Swerve.Mod1.constants),
-            new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
-            new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
-          };
-    }
+    swerveMods = swerveIO;
 
     inputs =
         new SwerveModuleIOInputsAutoLogged[] {
@@ -581,40 +559,14 @@ public class SwerveSubsystem extends SubsystemBase {
     return extensionLevel;
   }
 
-  public CommandBase simpleTapeAllignCommand(
-      DoubleSupplier xSupplier, DoubleSupplier ySupplier, LEDSubsystem ledSubsystem) {
-    return new InstantCommand(
-            () -> {
-              headingController.reset(getYaw().getRadians());
-            })
-        .andThen(
-            headingLockDriveCommand(xSupplier, () -> 0, () -> Math.PI, true, false)
-                .raceWith(
-                    ledSubsystem.setBlinkingCommand(Color.kBlue, 0.25),
-                    new WaitUntilCommand(() -> headingController.atGoal())))
-        .andThen(
-            headingLockDriveCommand(
-                    xSupplier,
-                    () ->false
-                        // tapeVisionSubsystem.hasTargets()
-                            ? tapeDriveAssistController.calculate(
-                                tapeYawFilterVal,
-                                Constants.Vision.simpleVisionSnapTarget + ySupplier.getAsDouble())
-                            : 0,
-                    () -> Math.PI,
-                    true,
-                    false)
-                .alongWith(ledSubsystem.setBlinkingCommand(Color.kGreen, 0.25)));
-  }
-
   @Override
   public void periodic() {
     for (int i = 0; i < swerveMods.length; i++) {
-      swerveMods[i].updateInputs(inputs[i]);
+      inputs[i] = swerveMods[i].updateInputs();
       Logger.getInstance().processInputs("Swerve Module " + i, inputs[i]);
     }
 
-    gyroIO.updateInputs(gyroInputs);
+    gyroInputs = gyroIO.updateInputs();
     Logger.getInstance().processInputs("Gyro", gyroInputs);
     simHeading += Units.radiansToDegrees(chassisSpeeds.omegaRadiansPerSecond);
 
@@ -650,20 +602,8 @@ public class SwerveSubsystem extends SubsystemBase {
       wheelOnlyOdo.update(Rotation2d.fromDegrees(simHeading), getModulePositions());
     }
 
-    // apriltagVisionSim.updateInputs(visionIOInputs, new Pose3d(pose));
-    // Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
-
-    // List<frc.robot.subsystems.Vision.VisionIO.VisionMeasurement> visionMeasurements =
-    //     apriltagVisionSubsystem.getMeasurement(pose);
-
-    // for (frc.robot.subsystems.Vision.VisionIO.VisionMeasurement measurement : visionMeasurements)
-    // {
-    //   dashboardFieldVisionPoses.add(measurement.estimation.estimatedPose.toPose2d());
-    //   poseEstimator.addVisionMeasurement(
-    //       measurement.estimation.estimatedPose.toPose2d(),
-    //       measurement.estimation.timestampSeconds,
-    //       measurement.confidence.times(2.0));
-    // }
+    visionIO.updateInputs(visionIOInputs, new Pose3d(pose));
+    Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
 
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
@@ -682,6 +622,5 @@ public class SwerveSubsystem extends SubsystemBase {
     double filteredRoll = rollFilter.calculate(gyroIO.getRollDegrees());
     rollRate = (filteredRoll - lastRoll) / 0.020;
     lastRoll = filteredRoll;
-    // tapeYawFilterVal = tapeYawFilter.calculate(tapeVisionSubsystem.getYaw());
   }
 }

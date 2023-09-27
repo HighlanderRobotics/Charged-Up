@@ -125,8 +125,8 @@ configurations.all {
 }
 
 spotless {
+    enforceCheck false
     java {
-        enforceCheck false
         target fileTree('.') {
             include '**/*.java'
             exclude '**/build/**', '**/build-*/**'

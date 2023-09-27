@@ -8,7 +8,6 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import frc.lib.components.HighlanderFalcon;
 import frc.robot.Constants;
 
-/** Add your docs here. */
 public class RoutingIOFalcon implements RoutingIO {
   HighlanderFalcon left =
       new HighlanderFalcon(
@@ -31,13 +30,15 @@ public class RoutingIOFalcon implements RoutingIO {
   }
 
   @Override
-  public void updateInputs(RoutingIOInputs input) {
-    input.leftPercentOut = left.getMotorOutputPercent();
-    input.speedLeftRPS = left.getSelectedSensorVelocity() * 10.0 / 2048;
-    input.leftCurrentAmps = left.getStatorCurrent();
-    input.rightPercentOut = right.getMotorOutputPercent();
-    input.speedRightRPS = right.getSelectedSensorVelocity() * 10.0 / 2048;
-    input.rightCurrentAmps = right.getStatorCurrent();
+  public RoutingIOInputsAutoLogged updateInputs() {
+    var inputs = new RoutingIOInputsAutoLogged();
+    inputs.leftPercentOut = left.getMotorOutputPercent();
+    inputs.speedLeftRPS = left.getSelectedSensorVelocity() * 10.0 / 2048;
+    inputs.leftCurrentAmps = left.getStatorCurrent();
+    inputs.rightPercentOut = right.getMotorOutputPercent();
+    inputs.speedRightRPS = right.getSelectedSensorVelocity() * 10.0 / 2048;
+    inputs.rightCurrentAmps = right.getStatorCurrent();
+    return inputs;
   }
 
   @Override
