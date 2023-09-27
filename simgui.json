@@ -114,6 +114,9 @@
           ],
           "length": 1.0,
           "width": 0.800000011920929
+        },
+        "window": {
+          "visible": true
         }
       },
       "/SmartDashboard/elevatorsim": {

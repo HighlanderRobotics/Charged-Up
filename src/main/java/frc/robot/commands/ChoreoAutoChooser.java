@@ -71,6 +71,7 @@ public final class ChoreoAutoChooser {
         .getTrajectory("individual_trajectories/" + path.fileName());
   }
 
+  /** Extend and intake for 1.3 sec */
   private Command intake() {
     return Commands.parallel(
             intakeSubsystem.runCommand().withTimeout(1.0),
@@ -80,6 +81,7 @@ public final class ChoreoAutoChooser {
         .asProxy();
   }
 
+  /** Extend and outake for 1.0 sec */
   private Command outake() {
     return Commands.parallel(
             intakeSubsystem.outakeCommand(),
@@ -93,8 +95,14 @@ public final class ChoreoAutoChooser {
     System.out.println("getting trajectory: " + path.fileName());
     if (path.pieceCount == 2) {
       return twoPiece(path);
+    } else if (path.pieceCount == 3) {
+      if (path.fieldPosition == AutoFieldPosition.Clear) {
+        return threePieceClear(path);
+      } else {
+        return threePieceClear(path);
+      }
     } else {
-      return threePiece(path);
+      return justScore();
     }
   }
 
@@ -115,7 +123,7 @@ public final class ChoreoAutoChooser {
         scoreLevelThree());
   }
 
-  private Command threePiece(ChoreoPath path) {
+  private Command threePieceClear(ChoreoPath path) {
     return Commands.sequence(
         new WaitCommand(0.1),
         intake().withTimeout(0.5),
@@ -125,6 +133,19 @@ public final class ChoreoAutoChooser {
                 new WaitCommand(2.5).andThen(intake()),
                 new WaitCommand(5.8).andThen(outake()),
                 new WaitCommand(8.4).andThen(intake())),
+        outake());
+  }
+
+  private Command threePieceBump(ChoreoPath path) {
+    return Commands.sequence(
+        new WaitCommand(0.1),
+        intake().withTimeout(0.5),
+        swerveSubsystem
+            .choreoTrajFollow(getPath(path))
+            .alongWith(
+                new WaitCommand(2.5).andThen(intake()),
+                new WaitCommand(6.1).andThen(outake()),
+                new WaitCommand(8.5).andThen(intake())),
         outake());
   }
 
