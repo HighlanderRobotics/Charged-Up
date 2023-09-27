@@ -57,13 +57,11 @@ public class GrabberIOFalcon implements GrabberIO {
 
   @Override
   public void setPivotTarget(double encoderTicks) {
-    System.out.println("Encoder Ticks: " + encoderTicks);
     pivot.set(ControlMode.Position, encoderTicks);
   }
 
   @Override
   public void setPivotPercentOut(double percentOut) {
-    System.out.println("percent out: " + percentOut);
     pivot.setPercentOut(percentOut);
   }
 

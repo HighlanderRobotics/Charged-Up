@@ -4,6 +4,9 @@
       "0": {
         "columns": 50,
         "serpentine": true
+      },
+      "window": {
+        "visible": true
       }
     },
     "Other Devices": {
@@ -17,6 +20,9 @@
       "/AdvantageKit/RealOutputs/Elevator Mech 2D": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto Chooser": "String Chooser",
+      "/SmartDashboard/Auto System Type": "String Chooser",
+      "/SmartDashboard/Choreo Auto Chooser": "String Chooser",
+      "/SmartDashboard/ChoreoSwerveControllerCommand_field": "Field2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Grabber intake cone double substation no extend": "Command",
       "/SmartDashboard/Grabber intake cone single substation no extend": "Command",
@@ -34,7 +40,7 @@
       "/SmartDashboard/Spline": "Command",
       "/SmartDashboard/autoBalance": "Command",
       "/SmartDashboard/autoChooser": "String Chooser",
-      "/SmartDashboard/camera Sim Field": "Field2d",
+      "/SmartDashboard/choreo field": "Field2d",
       "/SmartDashboard/elevatorsim": "Mechanism2d",
       "/SmartDashboard/extend to 0": "Command",
       "/SmartDashboard/extend to 12": "Command",
@@ -49,6 +55,16 @@
     },
     "windows": {
       "/SmartDashboard/Auto Chooser": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Auto System Type": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Choreo Auto Chooser": {
         "window": {
           "visible": true
         }
@@ -102,11 +118,6 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Path 1": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/elevatorsim": {
         "window": {
           "visible": true
@@ -116,6 +127,11 @@
   },
   "NetworkTables": {
     "transitory": {
+      "AdvantageKit": {
+        "DashboardInputs": {
+          "open": true
+        }
+      },
       "Shuffleboard": {
         "open": true
       },

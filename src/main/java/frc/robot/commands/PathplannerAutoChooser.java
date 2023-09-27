@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-public class AutoChooser {
+public class PathplannerAutoChooser {
   LoggedDashboardChooser<Supplier<Command>> chooser =
       new LoggedDashboardChooser<Supplier<Command>>("Auto Chooser");
   SwerveSubsystem swerveSubsystem;
@@ -35,7 +35,7 @@ public class AutoChooser {
   RoutingSubsystem routingSubsystem;
   HashMap<String, Command> eventMap = new HashMap<>();
 
-  public AutoChooser(
+  public PathplannerAutoChooser(
       SwerveSubsystem swerveSubsystem,
       IntakeSubsystem intakeSubsystem,
       ElevatorSubsystem elevatorSubsystem,

@@ -7,6 +7,7 @@ package frc.robot;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,7 +22,8 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.AutoChooser;
+import frc.robot.commands.ChoreoAutoChooser;
+import frc.robot.commands.PathplannerAutoChooser;
 import frc.robot.subsystems.Elevator.ElevatorIOFalcon;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
@@ -38,6 +40,7 @@ import frc.robot.subsystems.Swerve.SwerveModuleIOFalcon;
 import frc.robot.subsystems.Swerve.SwerveModuleIOSim;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -78,8 +81,16 @@ public class RobotContainer {
           swerveSubsystem,
           grabberSubsystem,
           ledSubsystem);
-  private AutoChooser autoChooser =
-      new AutoChooser(
+  private PathplannerAutoChooser pathplannerAutoChooser =
+      new PathplannerAutoChooser(
+          swerveSubsystem,
+          intakeSubsystem,
+          elevatorSubsystem,
+          routingSubsystem,
+          grabberSubsystem,
+          superstructureSubsystem);
+  private ChoreoAutoChooser choreoAutoChooser =
+      new ChoreoAutoChooser(
           swerveSubsystem,
           intakeSubsystem,
           elevatorSubsystem,
@@ -103,6 +114,16 @@ public class RobotContainer {
   boolean isUsingChute = false;
 
   double lastHeadingSnapAngle = 0;
+
+  Field2d field = new Field2d();
+
+  enum AutoSystem {
+    choreo,
+    pathplanner
+  }
+
+  LoggedDashboardChooser<AutoSystem> autoSystemType =
+      new LoggedDashboardChooser<>("Auto System Type");
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -149,6 +170,11 @@ public class RobotContainer {
             () -> 1.0 / (swerveSubsystem.getLevel().level * 2)));
     // Configure the trigger bindings
     configureBindings();
+    // Add testing buttons to dashboard
+    // addDashboardCommands();
+
+    autoSystemType.addDefaultOption("Choreo", AutoSystem.choreo);
+    autoSystemType.addOption("Path Planner", AutoSystem.pathplanner);
   }
 
   /**
@@ -444,6 +470,9 @@ public class RobotContainer {
         .recordOutput(
             "Controller Right X Adjusted",
             modifyJoystickAxis(controller.getRightX(), controller.getRightTriggerAxis()));
+    SmartDashboard.putData("choreo field", field);
+    // SmartDashboard.putData("rezero", new InstantCommand(() ->
+    // grabberSubsystem.resetEncoderToZero()));
   }
 
   /**
@@ -452,8 +481,14 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example path will be run in autonomous
-    return autoChooser.getAutoCommand();
+    switch (autoSystemType.get()) {
+      case choreo:
+        return choreoAutoChooser.getAutonomousCommand();
+      case pathplanner:
+        return pathplannerAutoChooser.getAutoCommand();
+      default:
+        return null;
+    }
   }
 
   /** Hopefully only need to use for LEDS */
@@ -461,9 +496,21 @@ public class RobotContainer {
     if (DriverStation.getAlliance() == Alliance.Invalid) {
       ledSubsystem.setSolid(Constants.LEDConstants.defaultColor);
     } else if (DriverStation.getAlliance() == Alliance.Red) {
-      ledSubsystem.runColorAlong(Color.kRed, Constants.LEDConstants.defaultColor, 12, 2);
+      ledSubsystem.runColorAlong(
+          Color.kRed,
+          autoSystemType.get() == AutoSystem.choreo
+              ? Constants.LEDConstants.defaultColor
+              : Color.kSeaGreen,
+          12,
+          2);
     } else {
-      ledSubsystem.runColorAlong(Color.kBlue, Constants.LEDConstants.defaultColor, 12, 2);
+      ledSubsystem.runColorAlong(
+          Color.kBlue,
+          autoSystemType.get() == AutoSystem.choreo
+              ? Constants.LEDConstants.defaultColor
+              : Color.kSeaGreen,
+          12,
+          2);
     }
   }
 }

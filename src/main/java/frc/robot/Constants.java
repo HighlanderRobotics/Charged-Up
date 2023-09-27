@@ -362,11 +362,11 @@ public final class Constants {
     // TODO: check this
     public static final double elevatorGearRatio = 5.45;
     public static final ElevatorFeedforward feedforward =
-        new ElevatorFeedforward(1.0e-2, 0.07, 0.01);
+        new ElevatorFeedforward(1.0e-2, 0.11, 0.01);
     public static final TrapezoidProfile.Constraints elevatorConstraints =
         new TrapezoidProfile.Constraints(60.0, 40.0);
     public static final ProfiledPIDController PIDController =
-        new ProfiledPIDController(0.2 / 7, 0.0, 0.0139 / 2, elevatorConstraints);
+        new ProfiledPIDController(0.25 / 7, 0.0, 0.0139 / 2, elevatorConstraints);
 
     static {
       PIDController.setTolerance(
@@ -494,7 +494,7 @@ public final class Constants {
   public static final class ScoringLevels {
     public static final double topConeLevel = 46; // this is in inches
     public static final double topCubeLevel = 47;
-    public static final double midConeLevel = 31.0;
+    public static final double midConeLevel = 29.0;
     public static final double midCubeLevel = 29.75;
     public static final double bottomLevel = 20;
 

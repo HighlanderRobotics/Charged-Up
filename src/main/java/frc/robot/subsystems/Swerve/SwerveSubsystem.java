@@ -41,17 +41,18 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.SwerveControllerCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.lib.choreolib.ChoreoSwerveControllerCommand;
+import frc.lib.choreolib.ChoreoTrajectory;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
-import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 import frc.robot.subsystems.Vision.VisionIO;
+import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -393,6 +394,42 @@ public class SwerveSubsystem extends SubsystemBase {
         );
   }
 
+  public Command choreoTrajFollow(ChoreoTrajectory traj) {
+    return new InstantCommand(
+            () ->
+                resetOdometry(
+                    traj.sample(0, DriverStation.getAlliance() == Alliance.Red).getPose()))
+        .andThen(
+            new PrintCommand("! traj start"),
+            new ChoreoSwerveControllerCommand(
+                traj,
+                this::getPose,
+                new PIDController(
+                    Constants.AutoConstants.kPXController,
+                    0.0,
+                    0.0), // PID constants to correct for translation error (used to create the X
+                // and Y
+                // PID
+                // controllers)
+                new PIDController(Constants.AutoConstants.kPXController, 0.0, 0.0),
+                new PIDController(
+                    Constants.AutoConstants.kPThetaController,
+                    0.0,
+                    0.0), // PID constants to correct for rotation error (used to create the
+                // rotation
+                // controller)
+                (ChassisSpeeds speeds) ->
+                    this.drive(
+                        new Translation2d(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond),
+                        speeds.omegaRadiansPerSecond,
+                        false,
+                        false,
+                        false),
+                true,
+                this),
+            driveCommand(() -> 0, () -> 0, () -> 0, false, false, false).until(() -> true));
+  }
+
   public CommandBase autoBalanceVelocity() {
     return autoBalance()
         .until(
@@ -544,7 +581,12 @@ public class SwerveSubsystem extends SubsystemBase {
               swerveMods[3].getAbsoluteRotation().getRadians(),
               swerveMods[3].getState().speedMetersPerSecond
             });
-    Logger.getInstance().recordOutput("Swerve Pose", getPose());
+    Logger.getInstance()
+        .recordOutput(
+            "Swerve Pose",
+            new double[] {
+              getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()
+            });
     Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
     Logger.getInstance()
         .recordOutput(
