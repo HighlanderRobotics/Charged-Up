@@ -6,7 +6,6 @@ package frc.robot.subsystems.Routing;
 
 import org.littletonrobotics.junction.AutoLog;
 
-/** Add your docs here. */
 public interface RoutingIO {
   @AutoLog
   public static class RoutingIOInputs {
@@ -18,7 +17,7 @@ public interface RoutingIO {
     public double rightCurrentAmps = 0.0;
   }
 
-  public abstract void updateInputs(RoutingIOInputs input);
+  public abstract RoutingIOInputsAutoLogged updateInputs();
 
   public abstract void setPercentOut(double percentOut);
 }

@@ -8,7 +8,6 @@ import com.ctre.phoenix.sensors.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 
-/** Add your docs here. */
 public class GyroIOPigeon implements GyroIO {
   Pigeon2 gyro;
 
@@ -19,9 +18,11 @@ public class GyroIOPigeon implements GyroIO {
   }
 
   @Override
-  public void updateInputs(GyroIOInputs input) {
-    input.headingDegrees = gyro.getYaw();
-    input.rollDegrees = gyro.getRoll();
+  public GyroIOInputsAutoLogged updateInputs() {
+    var inputs = new GyroIOInputsAutoLogged();
+    inputs.headingDegrees = gyro.getYaw();
+    inputs.rollDegrees = gyro.getRoll();
+    return inputs;
   }
 
   @Override

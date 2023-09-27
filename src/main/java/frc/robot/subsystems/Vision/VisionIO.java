@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
-/** Add your docs here. */
+/** At this point needs to be entirely redone */
 public interface VisionIO {
   public static class VisionIOInputs implements LoggableInputs {
     double timestamp = 0.0;

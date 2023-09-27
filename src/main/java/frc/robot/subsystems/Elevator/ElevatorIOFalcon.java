@@ -31,11 +31,13 @@ public class ElevatorIOFalcon implements ElevatorIO {
   }
 
   @Override
-  public void updateInputs(ElevatorIOInputs inputs) {
+  public ElevatorIOInputsAutoLogged updateInputs() {
+    var inputs = new ElevatorIOInputsAutoLogged();
     inputs.positionInches = getExtensionInches();
     inputs.percentOut = leader.getMotorOutputPercent();
     inputs.currentAmps = new double[] {leader.getStatorCurrent(), follower.getStatorCurrent()};
     inputs.switchPressed = getLimitSwitch();
+    return inputs;
   }
 
   @Override
