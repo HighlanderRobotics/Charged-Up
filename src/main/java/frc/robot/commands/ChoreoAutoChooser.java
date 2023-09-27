@@ -18,6 +18,7 @@ import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import frc.lib.choreolib.ChoreoPathFeature;
 
 public final class ChoreoAutoChooser {
   LoggedDashboardChooser<Supplier<Command>> chooser =
@@ -59,9 +60,9 @@ public final class ChoreoAutoChooser {
 
   public final ChoreoPath[] paths =
       new ChoreoPath[] {
-        new ChoreoPath(2, AutoFieldPosition.Bump),
-        new ChoreoPath(2, AutoFieldPosition.Clear),
-        new ChoreoPath(3, AutoFieldPosition.Clear),
+        new ChoreoPath(2, AutoFieldPosition.Bump, ChoreoPathFeature.none),
+        new ChoreoPath(2, AutoFieldPosition.Clear, ChoreoPathFeature.none),
+        new ChoreoPath(3, AutoFieldPosition.Clear, ChoreoPathFeature.none),
       };
 
   public ChoreoTrajectory getPath(ChoreoPath path) {
