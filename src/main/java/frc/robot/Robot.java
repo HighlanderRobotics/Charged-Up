@@ -35,7 +35,7 @@ public class Robot extends LoggedRobot {
     Logger.getInstance().recordMetadata("Codebase", "Comp2023"); // Set a metadata value
 
     if (isReal()) {
-      Logger.getInstance().addDataReceiver(new WPILOGWriter("/u")); // Log to RIO
+      Logger.getInstance().addDataReceiver(new WPILOGWriter("/u")); // Log to External Media
       Logger.getInstance().addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
       new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
     } else {
