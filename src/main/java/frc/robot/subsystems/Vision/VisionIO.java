@@ -19,10 +19,10 @@ import org.photonvision.targeting.TargetCorner;
 /** At this point needs to be entirely redone */
 public interface VisionIO {
   public static class VisionIOInputs implements LoggableInputs {
-    double timestamp = 0.0;
-    double timeSinceLastTimestamp = 0.0;
-    double numTags = 0;
-    List<PhotonTrackedTarget> targets = new ArrayList<>();
+    public double timestamp = 0.0;
+    public double timeSinceLastTimestamp = 0.0;
+    public double numTags = 0;
+    public List<PhotonTrackedTarget> targets = new ArrayList<>();
 
     public static void logPhotonTrackedTarget(
         PhotonTrackedTarget target, LogTable table, String name) {

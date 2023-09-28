@@ -606,7 +606,20 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     visionIO.updateInputs(visionIOInputs, new Pose3d(pose));
-    Logger.getInstance().processInputs("Vision Sim IO", visionIOInputs);
+    Logger.getInstance().processInputs("Vision", visionIOInputs);
+    double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
+    double[] apriltagY = new double[visionIOInputs.targets.size() * 4];
+    for (int i = 0; i < visionIOInputs.targets.size(); i ++) {
+      var target = visionIOInputs.targets.get(i);
+      for (int j = 0; j < 4; j++) {
+        apriltagX[(4 * i) + j] = target.getDetectedCorners().get(j).x;
+        apriltagY[(4 * i) + j] = target.getDetectedCorners().get(j).y;
+      }
+    }
+
+    Logger.getInstance().recordOutput("Apriltag X Dash", apriltagX);
+    Logger.getInstance().recordOutput("Apriltag Y Dash", apriltagY);
+
 
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());
