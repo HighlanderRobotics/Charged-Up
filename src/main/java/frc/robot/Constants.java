@@ -54,6 +54,13 @@ public final class Constants {
     public static final int operatorControllerPort = 1;
   }
 
+  public static enum SimMode {
+    SIM,
+    REPLAY
+  }
+
+  public static final SimMode SIM_MODE = SimMode.SIM;
+
   public static final Transform3d rightCameraToRobot =
       new Transform3d(
           new Translation3d(

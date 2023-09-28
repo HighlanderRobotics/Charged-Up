@@ -40,6 +40,7 @@
       "/SmartDashboard/Spline": "Command",
       "/SmartDashboard/autoBalance": "Command",
       "/SmartDashboard/autoChooser": "String Chooser",
+      "/SmartDashboard/camera Sim Field": "Field2d",
       "/SmartDashboard/choreo field": "Field2d",
       "/SmartDashboard/elevatorsim": "Mechanism2d",
       "/SmartDashboard/extend to 0": "Command",
