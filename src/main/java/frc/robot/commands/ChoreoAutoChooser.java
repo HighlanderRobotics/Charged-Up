@@ -143,9 +143,9 @@ public final class ChoreoAutoChooser {
         swerveSubsystem
             .choreoTrajFollow(getPath(path))
             .alongWith(
-                new WaitCommand(2.5).andThen(intake()),
+                new WaitCommand(2.2).andThen(intake()),
                 new WaitCommand(6.1).andThen(outake()),
-                new WaitCommand(8.5).andThen(intake())),
+                new WaitCommand(8.2).andThen(intake())),
         outake());
   }
 
