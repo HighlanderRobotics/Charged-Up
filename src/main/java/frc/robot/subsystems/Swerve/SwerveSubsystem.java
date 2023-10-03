@@ -76,6 +76,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   private VisionIO visionIO = Robot.isReal() ? new VisionIOReal() : new VisionIOSim();
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
+  private int frames = 0;
+  private double lastTimestamp = 0.0;
 
   public boolean hasResetOdometry = false;
 
@@ -619,6 +621,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Logger.getInstance().recordOutput("Apriltag X Dash", apriltagX);
     Logger.getInstance().recordOutput("Apriltag Y Dash", apriltagY);
+
+    if (visionIOInputs.timestamp != lastTimestamp) {
+      frames++;
+      lastTimestamp = visionIOInputs.timestamp;
+    }
+
+    Logger.getInstance().recordOutput("Apriltag framerate", frames / (Logger.getInstance().getTimestamp() * 10000.0));
 
 
     field.setRobotPose(getPose());

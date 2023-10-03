@@ -59,7 +59,7 @@ public final class Constants {
     REPLAY
   }
 
-  public static final SimMode SIM_MODE = SimMode.SIM;
+  public static final SimMode SIM_MODE = SimMode.REPLAY;
 
   public static final Transform3d rightCameraToRobot =
       new Transform3d(
