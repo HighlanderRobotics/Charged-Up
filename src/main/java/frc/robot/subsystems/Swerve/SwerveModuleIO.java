@@ -34,14 +34,14 @@ public interface SwerveModuleIO {
     public SwerveModuleState getState() {
       return new SwerveModuleState(
         (driveSpeedRPS / Constants.Swerve.driveGearRatio) * 2 * Math.PI * Units.inchesToMeters(2),
-        Rotation2d.fromRotations(steerPositionRotations / Constants.Swerve.angleGearRatio)
+        Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio))
       );
     }
 
     public SwerveModulePosition getPosition() {
       return new SwerveModulePosition(
         (drivePositionRotations / Constants.Swerve.driveGearRatio) * 2 * Math.PI * Units.inchesToMeters(2),
-        Rotation2d.fromRotations(steerPositionRotations / Constants.Swerve.angleGearRatio)
+        Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio))
       );
     }
   }
@@ -50,13 +50,5 @@ public interface SwerveModuleIO {
 
   public abstract void setDesiredState(SwerveModuleState state, boolean isOpenLoop);
 
-  public abstract Rotation2d getAbsoluteRotation();
-
   public abstract void resetToAbsolute();
-
-  public abstract SwerveModuleState getState();
-
-  public abstract SwerveModulePosition getPosition();
-
-  public abstract int getModuleNumber();
 }

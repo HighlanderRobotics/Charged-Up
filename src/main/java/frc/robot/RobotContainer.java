@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.Constants.SimMode;
 import frc.robot.commands.ChoreoAutoChooser;
 import frc.robot.commands.PathplannerAutoChooser;
 import frc.robot.subsystems.Elevator.ElevatorIOFalcon;
@@ -52,7 +53,7 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private SwerveSubsystem swerveSubsystem =
       new SwerveSubsystem(
-          Robot.isReal()
+          Robot.isReal() || Constants.SIM_MODE == SimMode.REPLAY
               ? new SwerveModuleIOFalcon[] {
                 new SwerveModuleIOFalcon(0, Constants.Swerve.Mod0.constants),
                 new SwerveModuleIOFalcon(1, Constants.Swerve.Mod1.constants),
@@ -65,7 +66,7 @@ public class RobotContainer {
                 new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
                 new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
               },
-          Robot.isReal() ? new GyroIOPigeon() : new GyroIOSim());
+          Robot.isReal() || Constants.SIM_MODE == SimMode.REPLAY ? new GyroIOPigeon() : new GyroIOSim());
   private ElevatorSubsystem elevatorSubsystem =
       new ElevatorSubsystem(Robot.isReal() ? new ElevatorIOFalcon() : new ElevatorIOSim());
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();

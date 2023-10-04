@@ -18,15 +18,5 @@ public class GyroIOSim implements GyroIO {
   }
 
   @Override
-  public Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(heading);
-  }
-
-  @Override
-  public double getRollDegrees() {
-    return 0.0;
-  }
-
-  @Override
   public void resetHeading(double degrees) {}
 }

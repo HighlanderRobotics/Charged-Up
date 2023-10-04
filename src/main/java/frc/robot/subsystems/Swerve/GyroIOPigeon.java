@@ -26,16 +26,6 @@ public class GyroIOPigeon implements GyroIO {
   }
 
   @Override
-  public Rotation2d getHeading() {
-    return Rotation2d.fromDegrees(gyro.getYaw());
-  }
-
-  @Override
-  public double getRollDegrees() {
-    return gyro.getRoll();
-  }
-
-  @Override
   public void resetHeading(double degrees) {
     gyro.setYaw(degrees);
   }

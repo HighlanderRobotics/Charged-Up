@@ -109,8 +109,7 @@ public class SwerveModuleIOFalcon implements SwerveModuleIO {
             steerMotor.getSelectedSensorPosition(), Constants.Swerve.angleGearRatio));
   }
 
-  @Override
-  public Rotation2d getAbsoluteRotation() {
+  private Rotation2d getAbsoluteRotation() {
     return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition());
   }
 
@@ -144,28 +143,12 @@ public class SwerveModuleIOFalcon implements SwerveModuleIO {
     driveMotor.setSelectedSensorPosition(0);
   }
 
-  @Override
-  public SwerveModuleState getState() {
+  private SwerveModuleState getState() {
     return new SwerveModuleState(
         Conversions.falconToMPS(
             driveMotor.getSelectedSensorVelocity(),
             Constants.Swerve.wheelCircumference,
             Constants.Swerve.driveGearRatio),
         getAngle());
-  }
-
-  @Override
-  public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(
-        Conversions.falconToMeters(
-            driveMotor.getSelectedSensorPosition(),
-            Constants.Swerve.wheelCircumference,
-            Constants.Swerve.driveGearRatio),
-        getAngle());
-  }
-
-  @Override
-  public int getModuleNumber() {
-    return moduleNumber;
   }
 }

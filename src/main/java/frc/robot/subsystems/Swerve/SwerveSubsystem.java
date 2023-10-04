@@ -19,6 +19,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -208,8 +209,9 @@ public class SwerveSubsystem extends SubsystemBase {
                     velTwist.dx / 0.02, velTwist.dy / 0.02, velTwist.dtheta / 0.02));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
-    for (SwerveModuleIO mod : swerveMods) {
-      mod.setDesiredState(swerveModuleStates[mod.getModuleNumber()], isOpenLoop);
+    for (int i = 0; i < 4; i ++) {
+      SwerveModuleIO mod = swerveMods[i];
+      mod.setDesiredState(swerveModuleStates[(int) inputs[i].moduleNumber], isOpenLoop);
     }
 
     chassisSpeeds = new ChassisSpeeds(velTwist.dx, velTwist.dy, velTwist.dtheta);
@@ -472,10 +474,10 @@ public class SwerveSubsystem extends SubsystemBase {
   public CommandBase autoBalance() {
     return driveCommand(
         () -> {
-          if (gyroIO.getRollDegrees() > 11.0) {
+          if (gyroInputs.rollDegrees > 11.0) {
             lockOutSwerve = false;
             return -0.1;
-          } else if (gyroIO.getRollDegrees() < -11.0) {
+          } else if (gyroInputs.rollDegrees < -11.0) {
             lockOutSwerve = false;
             return 0.1;
           } else {
@@ -494,8 +496,9 @@ public class SwerveSubsystem extends SubsystemBase {
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
 
-    for (SwerveModuleIO mod : swerveMods) {
-      mod.setDesiredState(desiredStates[mod.getModuleNumber()], false);
+    for (int i = 0; i < 4; i ++) {
+      SwerveModuleIO mod = swerveMods[i];
+      mod.setDesiredState(desiredStates[(int) inputs[i].moduleNumber], false);
     }
   }
 
@@ -552,10 +555,10 @@ public class SwerveSubsystem extends SubsystemBase {
    * @return the yaw of the drive base, based on the gyro's rotation
    */
   public Rotation2d getYaw() {
-    if (Robot.isReal()) {
+    if (Robot.isReal() || Constants.SIM_MODE == SimMode.REPLAY) {
       return (Constants.Swerve.invertGyro)
-          ? Rotation2d.fromDegrees(360 - gyroIO.getHeading().getDegrees())
-          : Rotation2d.fromDegrees(gyroIO.getHeading().getDegrees());
+          ? Rotation2d.fromDegrees(360 - gyroInputs.headingDegrees)
+          : Rotation2d.fromDegrees(gyroInputs.headingDegrees);
     }
     return Rotation2d.fromDegrees(simHeading);
   }
@@ -599,13 +602,13 @@ public class SwerveSubsystem extends SubsystemBase {
         .recordOutput(
             "Swerve States",
             new double[] {
-              inputs[0].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[0].absoluteEncoderRotations,
               inputs[0].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
-              inputs[1].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[1].absoluteEncoderRotations,
               inputs[1].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
-              inputs[2].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[2].absoluteEncoderRotations,
               inputs[2].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
-              inputs[3].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[3].absoluteEncoderRotations,
               inputs[3].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2)
             });
     Logger.getInstance()
@@ -615,6 +618,7 @@ public class SwerveSubsystem extends SubsystemBase {
               getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()
             });
     Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
+    Logger.getInstance().recordOutput("Get Yaw", getYaw().getDegrees());
     Logger.getInstance()
         .recordOutput(
             "Swerve Desired Speeds",
@@ -655,6 +659,7 @@ public class SwerveSubsystem extends SubsystemBase {
     Pose3d[] apriltagEstimatedPoses = new Pose3d[2 * visionIOInputs.targets.size()];
     Pose3d[] tagFieldPoses = new Pose3d[visionIOInputs.targets.size()];
     long[] tagIDs = new long[visionIOInputs.targets.size()];
+    Pose3d bestPose = null;
     for (int i = 0; i < visionIOInputs.targets.size(); i++) {
       var target = visionIOInputs.targets.get(i);
       tagFieldPoses[i] = tagFieldLayout.getTagPose(target.getFiducialId()).get();
@@ -666,7 +671,12 @@ public class SwerveSubsystem extends SubsystemBase {
               .transformBy(target.getBestCameraToTarget().inverse())
               .transformBy(Constants.leftCameraToRobot);
       apriltagEstimatedPoses[2 * i] = pose;
-      poseEstimator.addVisionMeasurement(pose.toPose2d(), visionIOInputs.timestamp);
+      if (bestPose == null) {
+        bestPose = pose;
+      }
+      if (Math.abs(pose.getZ()) < Math.abs(bestPose.getZ())) {
+        bestPose = pose;
+      }
       Pose3d altPose =
           tagFieldLayout
               .getTagPose(target.getFiducialId())
@@ -674,9 +684,13 @@ public class SwerveSubsystem extends SubsystemBase {
               .transformBy(target.getAlternateCameraToTarget().inverse())
               .transformBy(Constants.leftCameraToRobot);
       apriltagEstimatedPoses[(2 * i) + 1] = altPose;
-      poseEstimator.addVisionMeasurement(altPose.toPose2d(), visionIOInputs.timestamp);
+      if (Math.abs(altPose.getZ()) < Math.abs(bestPose.getZ())) {
+        bestPose = altPose;
+      }
     }
-
+    if (bestPose != null) {
+      poseEstimator.addVisionMeasurement(bestPose.toPose2d(), visionIOInputs.timestamp);
+    }
     Logger.getInstance().recordOutput("Vision Poses", apriltagEstimatedPoses);
     Logger.getInstance().recordOutput("Apriltag Target Poses", tagFieldPoses);
     Logger.getInstance().recordOutput("APriltag Target IDs", tagIDs);
@@ -702,7 +716,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
     pose = getPose();
     nearestGoalIsCone = checkIfConeGoal(getNearestGoal());
-    double filteredRoll = rollFilter.calculate(gyroIO.getRollDegrees());
+    double filteredRoll = rollFilter.calculate(gyroInputs.rollDegrees);
     rollRate = (filteredRoll - lastRoll) / 0.020;
     lastRoll = filteredRoll;
   }

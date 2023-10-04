@@ -16,9 +16,5 @@ public interface GyroIO {
 
   public abstract GyroIOInputsAutoLogged updateInputs();
 
-  public abstract Rotation2d getHeading();
-
-  public abstract double getRollDegrees();
-
   public abstract void resetHeading(double degrees);
 }

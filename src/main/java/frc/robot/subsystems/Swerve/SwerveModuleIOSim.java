@@ -62,7 +62,7 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     // Update logs
     inputs.moduleNumber = moduleNumber;
 
-    inputs.drivePositionRotations = 0.0;
+    inputs.drivePositionRotations = drivePosition;
     inputs.driveSpeedRPS = velocitySetpoint;
     inputs.drivePercentOut = driveVolts / 12.0;
     inputs.driveCurrentAmps = 0.0;
@@ -85,30 +85,10 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     steerSetpoint = state.angle.getRadians();
   }
 
-  @Override
-  public Rotation2d getAbsoluteRotation() {
+  private Rotation2d getAbsoluteRotation() {
     return Rotation2d.fromRadians(steerSetpoint);
   }
 
   @Override
   public void resetToAbsolute() {}
-
-  @Override
-  public SwerveModuleState getState() {
-    return new SwerveModuleState(velocitySetpoint, getAbsoluteRotation());
-  }
-
-  @Override
-  public SwerveModulePosition getPosition() {
-    return new SwerveModulePosition(drivePosition, getAbsoluteRotation());
-  }
-
-  @Override
-  public int getModuleNumber() {
-    return moduleNumber;
-  }
-
-  private double rpmToMetersPerSecond(double rpm) {
-    return rpm * (1.0 / 60.0) * 2 * Math.PI * Units.inchesToMeters(4.0);
-  }
 }
