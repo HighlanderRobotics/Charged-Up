@@ -21,6 +21,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -48,6 +49,7 @@ import frc.lib.choreolib.ChoreoSwerveControllerCommand;
 import frc.lib.choreolib.ChoreoTrajectory;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
+import frc.robot.Constants.PoseEstimator;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants.SimMode;
 import frc.robot.PathPointOpen;
@@ -62,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -209,11 +212,14 @@ public class SwerveSubsystem extends SubsystemBase {
                     velTwist.dx / 0.02, velTwist.dy / 0.02, velTwist.dtheta / 0.02));
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
+    double[] logModuleStates = new double[8];
     for (int i = 0; i < 4; i ++) {
       SwerveModuleIO mod = swerveMods[i];
       mod.setDesiredState(swerveModuleStates[(int) inputs[i].moduleNumber], isOpenLoop);
+      logModuleStates[2 * i] = swerveModuleStates[i].angle.getRadians();
+      logModuleStates[(2 * i) + 1] = swerveModuleStates[i].speedMetersPerSecond;
     }
-
+    Logger.getInstance().recordOutput("Swerve Desired States", logModuleStates);
     chassisSpeeds = new ChassisSpeeds(velTwist.dx, velTwist.dy, velTwist.dtheta);
   }
 
@@ -602,14 +608,14 @@ public class SwerveSubsystem extends SubsystemBase {
         .recordOutput(
             "Swerve States",
             new double[] {
-              inputs[0].absoluteEncoderRotations,
-              inputs[0].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
-              inputs[1].absoluteEncoderRotations,
-              inputs[1].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
-              inputs[2].absoluteEncoderRotations,
-              inputs[2].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
-              inputs[3].absoluteEncoderRotations,
-              inputs[3].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2)
+              inputs[0].getState().angle.getRadians(),
+              inputs[0].getState().speedMetersPerSecond,
+              inputs[1].getState().angle.getRadians(),
+              inputs[1].getState().speedMetersPerSecond,
+              inputs[2].getState().angle.getRadians(),
+              inputs[2].getState().speedMetersPerSecond,
+              inputs[3].getState().angle.getRadians(),
+              inputs[3].getState().speedMetersPerSecond
             });
     Logger.getInstance()
         .recordOutput(
@@ -618,7 +624,7 @@ public class SwerveSubsystem extends SubsystemBase {
               getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()
             });
     Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
-    Logger.getInstance().recordOutput("Get Yaw", getYaw().getDegrees());
+    Logger.getInstance().recordOutput("Get Yaw", getYaw().getRadians());
     Logger.getInstance()
         .recordOutput(
             "Swerve Desired Speeds",
@@ -660,6 +666,7 @@ public class SwerveSubsystem extends SubsystemBase {
     Pose3d[] tagFieldPoses = new Pose3d[visionIOInputs.targets.size()];
     long[] tagIDs = new long[visionIOInputs.targets.size()];
     Pose3d bestPose = null;
+    PhotonTrackedTarget bestTarget = null;
     for (int i = 0; i < visionIOInputs.targets.size(); i++) {
       var target = visionIOInputs.targets.get(i);
       tagFieldPoses[i] = tagFieldLayout.getTagPose(target.getFiducialId()).get();
@@ -673,6 +680,7 @@ public class SwerveSubsystem extends SubsystemBase {
       apriltagEstimatedPoses[2 * i] = pose;
       if (bestPose == null) {
         bestPose = pose;
+        bestTarget = target;
       }
       if (Math.abs(pose.getZ()) < Math.abs(bestPose.getZ())) {
         bestPose = pose;
@@ -686,10 +694,29 @@ public class SwerveSubsystem extends SubsystemBase {
       apriltagEstimatedPoses[(2 * i) + 1] = altPose;
       if (Math.abs(altPose.getZ()) < Math.abs(bestPose.getZ())) {
         bestPose = altPose;
+        bestTarget = target;
       }
     }
     if (bestPose != null) {
-      poseEstimator.addVisionMeasurement(bestPose.toPose2d(), visionIOInputs.timestamp);
+      double poseAmbiguityFactor =
+          visionIOInputs.targets.size() != 1
+              ? 1
+              : Math.max(
+                  1,
+                  (visionIOInputs.targets.get(0).getPoseAmbiguity()
+                          + PoseEstimator.POSE_AMBIGUITY_SHIFTER)
+                      * PoseEstimator.POSE_AMBIGUITY_MULTIPLIER);
+      double confidenceMultiplier =
+          Math.max(
+              1,
+              (Math.max(
+                          1,
+                          Math.max(0, bestTarget.getBestCameraToTarget().getTranslation().getDistance(new Translation3d()) - PoseEstimator.NOISY_DISTANCE_METERS)
+                              * PoseEstimator.DISTANCE_WEIGHT)
+                      * poseAmbiguityFactor)
+                  / (1
+                      + ((visionIOInputs.targets.size() - 1) * PoseEstimator.TAG_PRESENCE_WEIGHT)));
+      poseEstimator.addVisionMeasurement(bestPose.toPose2d(), visionIOInputs.timestamp, PoseEstimator.VISION_MEASUREMENT_STANDARD_DEVIATIONS.times(confidenceMultiplier));
     }
     Logger.getInstance().recordOutput("Vision Poses", apriltagEstimatedPoses);
     Logger.getInstance().recordOutput("Apriltag Target Poses", tagFieldPoses);

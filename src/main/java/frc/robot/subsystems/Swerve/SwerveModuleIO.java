@@ -33,16 +33,34 @@ public interface SwerveModuleIO {
 
     public SwerveModuleState getState() {
       return new SwerveModuleState(
-        (driveSpeedRPS / Constants.Swerve.driveGearRatio) * 2 * Math.PI * Units.inchesToMeters(2),
+        (driveSpeedRPS / Constants.Swerve.driveGearRatio) * Math.PI * Units.inchesToMeters(4),
         Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio))
       );
     }
 
     public SwerveModulePosition getPosition() {
       return new SwerveModulePosition(
-        (drivePositionRotations / Constants.Swerve.driveGearRatio) * 2 * Math.PI * Units.inchesToMeters(2),
+        (drivePositionRotations / Constants.Swerve.driveGearRatio) * Math.PI * Units.inchesToMeters(4),
         Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio))
       );
+    }
+
+    public Rotation2d getOffset() {
+      switch ((int) moduleNumber) {
+        case 0: {
+          return Constants.Swerve.Mod0.angleOffset;
+        }
+        case 1: {
+          return Constants.Swerve.Mod1.angleOffset;
+        }
+        case 2: {
+          return Constants.Swerve.Mod2.angleOffset;
+        }
+        case 3: {
+          return Constants.Swerve.Mod3.angleOffset;
+        }
+      }
+      return new Rotation2d();
     }
   }
 
