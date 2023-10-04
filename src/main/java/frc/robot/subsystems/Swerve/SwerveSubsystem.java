@@ -7,6 +7,8 @@ import com.pathplanner.lib.PathPoint;
 import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.HolonomicDriveController;
@@ -46,6 +48,7 @@ import frc.lib.choreolib.ChoreoTrajectory;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
 import frc.robot.Constants.ScoringPositions;
+import frc.robot.Constants.SimMode;
 import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
@@ -74,10 +77,23 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public Field2d field = new Field2d();
 
-  private VisionIO visionIO = Robot.isReal() ? new VisionIOReal() : new VisionIOSim();
+  private VisionIO visionIO =
+      Robot.isReal()
+          ? new VisionIOReal()
+          : (Constants.SIM_MODE.equals(Constants.SimMode.SIM)
+              ? new VisionIOSim()
+              : new VisionIO() {
+
+                @Override
+                public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
+                  // TODO Auto-generated method stub
+
+                }
+              });
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
   private int frames = 0;
   private double lastTimestamp = 0.0;
+  private AprilTagFieldLayout tagFieldLayout;
 
   public boolean hasResetOdometry = false;
 
@@ -113,7 +129,10 @@ public class SwerveSubsystem extends SubsystemBase {
           new SwerveModuleIOInputsAutoLogged(),
           new SwerveModuleIOInputsAutoLogged()
         };
-
+    
+    inputs[1].moduleNumber = 1;
+    inputs[2].moduleNumber = 2;
+    inputs[3].moduleNumber = 3;
     /*
      * By pausing init for a second before setting module offsets, we avoid a bug
      * with inverting motors.
@@ -122,8 +141,8 @@ public class SwerveSubsystem extends SubsystemBase {
     Timer.delay(1.0);
     resetModulesToAbsolute();
 
-    Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.3);
-    Vector<N3> visStdDevs = VecBuilder.fill(0.6, 0.6, 0.3);
+    Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.01);
+    Vector<N3> visStdDevs = VecBuilder.fill(1.0, 1.0, 3.0);
 
     poseEstimator =
         new SwerveDrivePoseEstimator(
@@ -155,6 +174,12 @@ public class SwerveSubsystem extends SubsystemBase {
         (target) -> Logger.getInstance().recordOutput("Active Trajectory Target", target),
         null,
         null);
+
+    try {
+      tagFieldLayout = AprilTagFields.k2023ChargedUp.loadAprilTagLayoutField();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -495,8 +520,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveModuleState[] getModuleStates() {
     SwerveModuleState[] states = new SwerveModuleState[4];
-    for (SwerveModuleIO mod : swerveMods) {
-      states[mod.getModuleNumber()] = mod.getState();
+    for (SwerveModuleIOInputsAutoLogged mod : inputs) {
+      states[(int) mod.moduleNumber] = mod.getState();
     }
     return states;
   }
@@ -506,8 +531,8 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public SwerveModulePosition[] getModulePositions() {
     SwerveModulePosition[] positions = new SwerveModulePosition[4];
-    for (SwerveModuleIO mod : swerveMods) {
-      positions[mod.getModuleNumber()] = mod.getPosition();
+    for (SwerveModuleIOInputsAutoLogged mod : inputs) {
+      positions[(int) mod.moduleNumber] = mod.getPosition();
     }
     return positions;
   }
@@ -574,14 +599,14 @@ public class SwerveSubsystem extends SubsystemBase {
         .recordOutput(
             "Swerve States",
             new double[] {
-              swerveMods[0].getAbsoluteRotation().getRadians(),
-              swerveMods[0].getState().speedMetersPerSecond,
-              swerveMods[1].getAbsoluteRotation().getRadians(),
-              swerveMods[1].getState().speedMetersPerSecond,
-              swerveMods[2].getAbsoluteRotation().getRadians(),
-              swerveMods[2].getState().speedMetersPerSecond,
-              swerveMods[3].getAbsoluteRotation().getRadians(),
-              swerveMods[3].getState().speedMetersPerSecond
+              inputs[0].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[0].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
+              inputs[1].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[1].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
+              inputs[2].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[2].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2),
+              inputs[3].steerPositionRotations * 2 * Math.PI * (1 / Constants.Swerve.angleGearRatio),
+              inputs[3].driveSpeedRPS * 2 * Math.PI * Units.inchesToMeters(2)
             });
     Logger.getInstance()
         .recordOutput(
@@ -599,7 +624,7 @@ public class SwerveSubsystem extends SubsystemBase {
               chassisSpeeds.omegaRadiansPerSecond
             });
 
-    if (Robot.isReal()) {
+    if (Robot.isReal() || Constants.SIM_MODE == SimMode.REPLAY) {
       pose = poseEstimator.update(getYaw(), getModulePositions());
       wheelOnlyOdo.update(getYaw(), getModulePositions());
     } else {
@@ -611,7 +636,7 @@ public class SwerveSubsystem extends SubsystemBase {
     Logger.getInstance().processInputs("Vision", visionIOInputs);
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
     double[] apriltagY = new double[visionIOInputs.targets.size() * 4];
-    for (int i = 0; i < visionIOInputs.targets.size(); i ++) {
+    for (int i = 0; i < visionIOInputs.targets.size(); i++) {
       var target = visionIOInputs.targets.get(i);
       for (int j = 0; j < 4; j++) {
         apriltagX[(4 * i) + j] = target.getDetectedCorners().get(j).x;
@@ -627,8 +652,41 @@ public class SwerveSubsystem extends SubsystemBase {
       lastTimestamp = visionIOInputs.timestamp;
     }
 
-    Logger.getInstance().recordOutput("Apriltag framerate", frames / (Logger.getInstance().getTimestamp() * 10000.0));
+    Pose3d[] apriltagEstimatedPoses = new Pose3d[2 * visionIOInputs.targets.size()];
+    Pose3d[] tagFieldPoses = new Pose3d[visionIOInputs.targets.size()];
+    long[] tagIDs = new long[visionIOInputs.targets.size()];
+    for (int i = 0; i < visionIOInputs.targets.size(); i++) {
+      var target = visionIOInputs.targets.get(i);
+      tagFieldPoses[i] = tagFieldLayout.getTagPose(target.getFiducialId()).get();
+      tagIDs[i] = target.getFiducialId();
+      Pose3d pose =
+          tagFieldLayout
+              .getTagPose(target.getFiducialId())
+              .get()
+              .transformBy(target.getBestCameraToTarget().inverse())
+              .transformBy(Constants.leftCameraToRobot);
+      apriltagEstimatedPoses[2 * i] = pose;
+      poseEstimator.addVisionMeasurement(pose.toPose2d(), visionIOInputs.timestamp);
+      Pose3d altPose =
+          tagFieldLayout
+              .getTagPose(target.getFiducialId())
+              .get()
+              .transformBy(target.getAlternateCameraToTarget().inverse())
+              .transformBy(Constants.leftCameraToRobot);
+      apriltagEstimatedPoses[(2 * i) + 1] = altPose;
+      poseEstimator.addVisionMeasurement(altPose.toPose2d(), visionIOInputs.timestamp);
+    }
 
+    Logger.getInstance().recordOutput("Vision Poses", apriltagEstimatedPoses);
+    Logger.getInstance().recordOutput("Apriltag Target Poses", tagFieldPoses);
+    Logger.getInstance().recordOutput("APriltag Target IDs", tagIDs);
+    Logger.getInstance()
+        .recordOutput(
+            "Kalman Pose",
+            new Pose2d(
+                poseEstimator.getEstimatedPosition().getTranslation(),
+                Rotation2d.fromRadians(
+                    poseEstimator.getEstimatedPosition().getRotation().getDegrees())));
 
     field.setRobotPose(getPose());
     field.getObject("odo only pose").setPose(wheelOnlyOdo.getPoseMeters());

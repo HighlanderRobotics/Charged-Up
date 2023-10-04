@@ -16,7 +16,6 @@ import org.littletonrobotics.junction.inputs.LoggableInputs;
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.targeting.TargetCorner;
 
-/** At this point needs to be entirely redone */
 public interface VisionIO {
   public static class VisionIOInputs implements LoggableInputs {
     public double timestamp = 0.0;
@@ -80,8 +79,7 @@ public interface VisionIO {
       return transform3d;
     }
 
-    public void getLoggedPhotonTrackedTarget(
-        PhotonTrackedTarget target, LogTable table, String name) {
+    public PhotonTrackedTarget getLoggedPhotonTrackedTarget(LogTable table, String name) {
       double[] translation = table.getDoubleArray("translation " + name, new double[3]);
       double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
       double[] altTranslation = table.getDoubleArray("translation alt " + name, new double[3]);
@@ -102,18 +100,17 @@ public interface VisionIO {
       }
       Transform3d pose = getLoggedTransform3d(translation, rotation);
       Transform3d altPose = getLoggedTransform3d(altTranslation, altRotation);
-      targets.add(
-          new PhotonTrackedTarget(
-              table.getDouble("yaw " + name, target.getYaw()),
-              table.getDouble("pitch " + name, target.getPitch()),
-              table.getDouble("area " + name, target.getArea()),
-              table.getDouble("skew " + name, target.getSkew()),
-              (int) (table.getInteger("fiducial id " + name, target.getFiducialId())),
-              pose,
-              altPose,
-              table.getDouble("pose ambiguity " + name, target.getPoseAmbiguity()),
-              minAreaRectCorners,
-              detectedCorners));
+      return (new PhotonTrackedTarget(
+          table.getDouble("yaw " + name, -1),
+          table.getDouble("pitch " + name, -1),
+          table.getDouble("area " + name, -1),
+          table.getDouble("skew " + name, -1),
+          (int) (table.getInteger("fiducial id " + name, -1)),
+          pose,
+          altPose,
+          table.getDouble("pose ambiguity " + name, -1),
+          minAreaRectCorners,
+          detectedCorners));
     }
 
     @Override
@@ -131,9 +128,10 @@ public interface VisionIO {
     public void fromLog(LogTable table) {
       timestamp = table.getDouble("timestamp", timestamp);
       timeSinceLastTimestamp = table.getDouble("latency", timeSinceLastTimestamp);
-      numTags = table.getDouble("number of tags", targets.size());
-      for (int i = 0; i < numTags; i++) {
-        getLoggedPhotonTrackedTarget(targets.get(i), table, String.valueOf(i));
+      this.numTags = table.getDouble("number of tags", 0);
+      targets = new ArrayList<>();
+      for (int i = 0; i < table.getInteger("number of tags", targets.size()); i++) {
+        this.targets.add(getLoggedPhotonTrackedTarget(table, String.valueOf(i)));
       }
     }
   }

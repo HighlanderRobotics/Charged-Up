@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SimMode;
-
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -46,10 +45,14 @@ public class Robot extends LoggedRobot {
       Logger.getInstance().addDataReceiver(new NT4Publisher());
     } else if (Constants.SIM_MODE == SimMode.REPLAY) {
       setUseTiming(false); // Run as fast as possible
-      String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
+      String logPath =
+          "C:\\Users\\lzzm7\\Documents\\FRC\\Logs\\9-29-23 After Practice Dump\\Log_23-09-29_20-37-28_p10.wpilog"; // LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
       System.out.println(logPath);
       Logger.getInstance().setReplaySource(new WPILOGReader(logPath)); // Read replay log
-      Logger.getInstance().addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
+      Logger.getInstance()
+          .addDataReceiver(
+              new WPILOGWriter(
+                  LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
     }
 
     Logger.getInstance()
