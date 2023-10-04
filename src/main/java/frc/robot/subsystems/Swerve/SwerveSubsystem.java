@@ -206,7 +206,7 @@ public class SwerveSubsystem extends SubsystemBase {
                     velTwist.dy / 0.02,
                     velTwist.dtheta / 0.02,
                     useAlliance && DriverStation.getAlliance() == DriverStation.Alliance.Red
-                        ? getYaw()
+                        ? getYaw().rotateBy(Rotation2d.fromRadians(Math.PI))
                         : getYaw())
                 : new ChassisSpeeds(
                     velTwist.dx / 0.02, velTwist.dy / 0.02, velTwist.dtheta / 0.02));

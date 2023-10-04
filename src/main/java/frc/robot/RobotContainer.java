@@ -200,13 +200,6 @@ public class RobotContainer {
     new Trigger(() -> DriverStation.isEnabled())
         .onTrue(new InstantCommand(() -> swerveSubsystem.lockOutSwerve = false));
 
-    new Trigger(() -> DriverStation.isTeleopEnabled())
-        .and(() -> DriverStation.getAlliance() == Alliance.Red)
-        .onTrue(
-            new InstantCommand(
-                () ->
-                    swerveSubsystem.zeroGyro((swerveSubsystem.getYaw().getDegrees() + 180) % 360)));
-
     new Trigger(() -> controller.getHID().getPOV() != -1)
         .whileTrue(
             swerveSubsystem.headingLockDriveCommand(
