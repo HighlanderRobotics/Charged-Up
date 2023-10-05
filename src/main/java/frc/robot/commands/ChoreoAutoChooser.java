@@ -21,8 +21,8 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public final class ChoreoAutoChooser {
-  LoggedDashboardChooser<Supplier<Command>> chooser =
-      new LoggedDashboardChooser<Supplier<Command>>("Choreo Auto Chooser");
+  LoggedDashboardChooser<Command> chooser =
+      new LoggedDashboardChooser<Command>("Choreo Auto Chooser");
   SwerveSubsystem swerveSubsystem;
   IntakeSubsystem intakeSubsystem;
   ElevatorSubsystem elevatorSubsystem;
@@ -48,14 +48,14 @@ public final class ChoreoAutoChooser {
     TrajectoryManager.getInstance().LoadTrajectories();
 
     for (ChoreoPath path : paths) {
-      chooser.addOption(path.localizedDescription(), () -> runAuto(path));
+      chooser.addOption(path.localizedDescription(), runAuto(path));
     }
 
-    chooser.addDefaultOption("Just Score", () -> justScore());
+    chooser.addDefaultOption("Just Score", justScore());
   }
 
   public Command getAutonomousCommand() {
-    return chooser.get().get();
+    return chooser.get();
   }
 
   public final ChoreoPath[] paths =

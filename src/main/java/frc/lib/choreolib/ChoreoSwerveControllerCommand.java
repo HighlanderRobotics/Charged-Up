@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 /** Custom PathPlanner version of SwerveControllerCommand */
 public class ChoreoSwerveControllerCommand extends CommandBase {
   private final Timer timer = new Timer();
@@ -225,6 +227,7 @@ public class ChoreoSwerveControllerCommand extends CommandBase {
       desiredState = desiredState.flipped();
     }
     SmartDashboard.putNumberArray("Choreo Swerve Target State", desiredState.asArray());
+    Logger.getInstance().recordOutput("Choreo Target Pose", desiredState.getPose());
 
     Pose2d currentPose = this.poseSupplier.get();
     this.field.setRobotPose(desiredState.getPose());

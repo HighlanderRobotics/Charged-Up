@@ -62,15 +62,15 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     // Update logs
     inputs.moduleNumber = moduleNumber;
 
-    inputs.drivePositionRotations = drivePosition;
-    inputs.driveSpeedRPS = velocitySetpoint;
+    inputs.drivePositionRotations = (drivePosition / (Math.PI * Units.inchesToMeters(4.0))) * Constants.Swerve.driveGearRatio;
+    inputs.driveSpeedRPS = (velocitySetpoint / (Math.PI * Units.inchesToMeters(4.0))) * Constants.Swerve.driveGearRatio;
     inputs.drivePercentOut = driveVolts / 12.0;
     inputs.driveCurrentAmps = 0.0;
     inputs.driveTemparature = 0.0;
 
     inputs.absoluteEncoderRotations = getAbsoluteRotation().getRadians();
 
-    inputs.steerPositionRotations = steerSetpoint;
+    inputs.steerPositionRotations = steerSetpoint * Constants.Swerve.angleGearRatio / (2 * Math.PI);
     inputs.steerSpeedRPS = 0.0;
     inputs.steerPercentOut = steerVolts / 12.0;
     inputs.steerCurrentAmps = 0.0;

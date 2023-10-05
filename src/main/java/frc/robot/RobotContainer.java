@@ -191,7 +191,7 @@ public class RobotContainer {
     controller
         .rightStick()
         .and(controller.leftStick())
-        .onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro()));
+        .onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro(DriverStation.getAlliance() == Alliance.Red ? 180 : 0)));
     // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled())
         .onTrue(

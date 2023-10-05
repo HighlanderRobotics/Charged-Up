@@ -9,6 +9,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
+import frc.robot.Robot;
+import frc.robot.Constants.SimMode;
 
 import org.littletonrobotics.junction.AutoLog;
 
@@ -46,6 +48,7 @@ public interface SwerveModuleIO {
     }
 
     public Rotation2d getOffset() {
+      if (Constants.SIM_MODE == SimMode.SIM && Robot.isSimulation()) return new Rotation2d();
       switch ((int) moduleNumber) {
         case 0: {
           return Constants.Swerve.Mod0.angleOffset;
