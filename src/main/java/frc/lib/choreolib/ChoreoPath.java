@@ -18,7 +18,7 @@ public class ChoreoPath {
   public String localizedDescription() {
     return pieceCount
         + " "
-        + (feature != ChoreoPathFeature.none ? "+ " + feature.getLocalizedDescription() : "")
+        + (feature != ChoreoPathFeature.none ? feature.getLocalizedDescription() + " " : "")
         + "Blue"
         + " "
         + (fieldPosition == AutoFieldPosition.Clear ? "Clear" : "Bump");

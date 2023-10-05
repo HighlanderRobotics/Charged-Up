@@ -429,7 +429,7 @@ public class SwerveSubsystem extends SubsystemBase {
         );
   }
 
-  public Command choreoTrajFollow(ChoreoTrajectory traj) {
+  public Command choreoTrajFollow(ChoreoTrajectory traj, boolean shouldStop) {
     return new InstantCommand(
             () ->
                 resetOdometry(
@@ -462,7 +462,11 @@ public class SwerveSubsystem extends SubsystemBase {
                         false),
                 true,
                 this),
-            driveCommand(() -> 0, () -> 0, () -> 0, false, false, false).until(() -> true));
+            driveCommand(() -> 0, () -> 0, () -> 0, false, false, false).until(() -> true).unless(() -> !shouldStop));
+  }
+
+  public Command choreoTrajFollow(ChoreoTrajectory traj) {
+    return choreoTrajFollow(traj, true);
   }
 
   public CommandBase autoBalanceVelocity() {

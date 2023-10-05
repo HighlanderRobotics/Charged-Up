@@ -1,8 +1,10 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.lib.choreolib.AutoFieldPosition;
 import frc.lib.choreolib.ChoreoPath;
@@ -17,7 +19,6 @@ import frc.robot.subsystems.Intake.IntakeSubsystem;
 import frc.robot.subsystems.Routing.RoutingSubsystem;
 import frc.robot.subsystems.SuperstructureSubsystem;
 import frc.robot.subsystems.Swerve.SwerveSubsystem;
-import java.util.function.Supplier;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 public final class ChoreoAutoChooser {
@@ -63,7 +64,8 @@ public final class ChoreoAutoChooser {
         new ChoreoPath(2, AutoFieldPosition.Bump, ChoreoPathFeature.none),
         new ChoreoPath(2, AutoFieldPosition.Clear, ChoreoPathFeature.none),
         new ChoreoPath(3, AutoFieldPosition.Clear, ChoreoPathFeature.none),
-        new ChoreoPath(3, AutoFieldPosition.Bump, ChoreoPathFeature.none)
+        new ChoreoPath(3, AutoFieldPosition.Bump, ChoreoPathFeature.none),
+        new ChoreoPath(3, AutoFieldPosition.Clear, ChoreoPathFeature.balance)
       };
 
   public ChoreoTrajectory getPath(ChoreoPath path) {
@@ -97,7 +99,11 @@ public final class ChoreoAutoChooser {
       return twoPiece(path);
     } else if (path.pieceCount == 3) {
       if (path.fieldPosition == AutoFieldPosition.Clear) {
-        return threePieceClear(path);
+        if (path.feature == ChoreoPathFeature.balance) {
+          return threePieceClearBalance(path);
+        } else {
+          return threePieceClear(path);
+        }
       } else {
         return threePieceBump(path);
       }
@@ -147,6 +153,21 @@ public final class ChoreoAutoChooser {
                 new WaitCommand(6.1).andThen(outake()),
                 new WaitCommand(8.2).andThen(intake())),
         outake());
+  }
+
+  private Command threePieceClearBalance(ChoreoPath path) {
+    return Commands.sequence(
+        swerveSubsystem
+            .choreoTrajFollow(getPath(path), false)
+            .alongWith(
+                new WaitCommand(0.0).andThen(intake().withTimeout(0.5)),
+                new WaitCommand(2.3).andThen(intake()),
+                new WaitCommand(6.0).andThen(outake()),
+                new WaitCommand(8.4).andThen(intake()),
+                new WaitCommand(12.5).andThen(outake())
+        ),
+        new PrintCommand("Time to balance " + DriverStation.getMatchTime()),
+        swerveSubsystem.autoBalanceVelocity());
   }
 
   private Command justScore() {
