@@ -137,8 +137,8 @@ public final class ChoreoAutoChooser {
             .choreoTrajFollow(getPath(path))
             .alongWith(
                 new WaitCommand(2.5).andThen(intake()),
-                new WaitCommand(5.8).andThen(outake()),
-                new WaitCommand(8.4).andThen(intake())),
+                new WaitCommand(5.6).andThen(outake()),
+                new WaitCommand(8.5).andThen(intake())),
         outake());
   }
 
