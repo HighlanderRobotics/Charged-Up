@@ -36,7 +36,6 @@ import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 
 
 public abstract class LoggedEstimator implements LoggableInputs {
-  /** Creates a new LoggedEstimator. */
 
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
   private AprilTagFieldLayout fieldTags;
@@ -49,6 +48,7 @@ public abstract class LoggedEstimator implements LoggableInputs {
   private Pose3d referencePose;
   protected double poseCacheTimestampSeconds = -1;
   private final Set<Integer> reportedErrors = new HashSet<>();
+  double latencyMillis;
 
   private PhotonPoseEstimator estimator = new PhotonPoseEstimator(
     fieldTags, primaryStrategy, camera, robotToCamera);
@@ -68,12 +68,18 @@ public abstract class LoggedEstimator implements LoggableInputs {
     table.put("translation " + name, translation);
   }
 
-  public Pose3d getLoggedPose3d(double[] translation, double[] rotation) {
+    public static Pose3d getLoggedPose3d(double[] translation, double[] rotation) {
       Pose3d pose3d =
           new Pose3d(
               new Translation3d(translation[0], translation[1], translation[2]),
               new Rotation3d(new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3])));
       return pose3d;
+    }
+    //TODO why did i do this
+    public static Pose3d getLoggedPose3d(LogTable table, String name) {
+        double[] translation = table.getDoubleArray("translation " + name, new double[3]);
+        double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
+        return getLoggedPose3d(translation, rotation);
     }
 
   /** Invalidates the pose cache. */
@@ -201,7 +207,7 @@ public void setRobotToCameraTransform(Transform3d robotToCamera) {
  *     the estimate
  */
 public Optional<EstimatedRobotPose> update(LogTable table) {
-  double latencyMillis = table.getDouble("latency", latencyMillis);
+  latencyMillis = table.getDouble("latency", latencyMillis);
   List<PhotonTrackedTarget> targets = visionIOInputs.targets;
     if (camera == null) {
         DriverStation.reportError("[PhotonPoseEstimator] Missing camera!", false);
@@ -210,7 +216,7 @@ public Optional<EstimatedRobotPose> update(LogTable table) {
 
     PhotonPipelineResult cameraResult = new PhotonPipelineResult(latencyMillis, targets);
 
-    return update(cameraResult);
+    return update(cameraResult, table);
 }
 
 /**
@@ -221,15 +227,35 @@ public Optional<EstimatedRobotPose> update(LogTable table) {
  * @return an EstimatedRobotPose with an estimated pose, and information about the camera(s) and
  *     pipeline results used to create the estimate
  */
-public Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult) {
-  return estimator.update(cameraResult);
+public Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult, LogTable table) {
+    // Time in the past -- give up, since the following if expects times > 0
+    if (cameraResult.getTimestampSeconds() < 0) {
+        return Optional.empty();
+    }
+
+    // If the pose cache timestamp was set, and the result is from the same timestamp, return an
+    // empty result
+    if (poseCacheTimestampSeconds > 0
+            && Math.abs(poseCacheTimestampSeconds - cameraResult.getTimestampSeconds()) < 1e-6) {
+        return Optional.empty();
+    }
+
+    // Remember the timestamp of the current result used
+    poseCacheTimestampSeconds = cameraResult.getTimestampSeconds();
+
+    // If no targets seen, trivial case -- return empty result
+    if (!cameraResult.hasTargets()) {
+        return Optional.empty();
+    }
+
+    return update(cameraResult, this.primaryStrategy, table);
 }
 
 private Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult, PoseStrategy strat, LogTable table) {
     Optional<EstimatedRobotPose> estimatedPose;
     switch (strat) {
         case LOWEST_AMBIGUITY:
-            estimatedPose = lowestAmbiguityStrategy(cameraResult);
+            estimatedPose = lowestAmbiguityStrategy(cameraResult, table);
             break;
         case CLOSEST_TO_CAMERA_HEIGHT:
             estimatedPose = closestToCameraHeightStrategy(cameraResult);
@@ -260,13 +286,23 @@ private Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult, P
     return estimatedPose;
 }
 
-//TODO
+public static void logAprilTag(AprilTag tag, LogTable table, String name) {
+    table.put("ID" + name, tag.ID);
+    logPose3d(tag.pose, table, "pose" + name);
+}
+public static AprilTag getLoggedAprilTag(LogTable table, String name) {
+    AprilTag tag = new AprilTag((int) table.getDouble("ID" + name, -1), getLoggedPose3d(table, name));
+    return tag;
+}
 private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult result, LogTable table) {
     // Arrays we need declared up front
     var visCorners = new ArrayList<TargetCorner>();
     var knownVisTags = new ArrayList<AprilTag>();
     var fieldToCams = new ArrayList<Pose3d>();
     var fieldToCamsAlt = new ArrayList<Pose3d>();
+    double[] visCornersX = new double[4];
+    double[] visCornersY = new double[4];
+    
 
     if (result.getTargets().size() < 2) {
         // Run fallback strategy instead
@@ -290,10 +326,28 @@ private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult re
         fieldToCams.add(tagPose.transformBy(target.getBestCameraToTarget().inverse()));
         fieldToCamsAlt.add(tagPose.transformBy(target.getAlternateCameraToTarget().inverse()));
     }
-
+    //TODO what is this
     var cameraMatrixOpt = camera.getCameraMatrix();
     var distCoeffsOpt = camera.getDistCoeffs();
     boolean hasCalibData = cameraMatrixOpt.isPresent() && distCoeffsOpt.isPresent();
+    table.put("has calib data?", hasCalibData);
+
+    for (TargetCorner corner : visCorners) {
+        visCornersX[visCorners.indexOf(corner)] = corner.x;
+        visCornersY[visCorners.indexOf(corner)] = corner.y;
+    }
+    table.put("visible corners x", visCornersX);
+    table.put("visible corners y", visCornersY);
+
+    for (AprilTag tag : knownVisTags) {
+        logAprilTag(tag, table, "known vis tag" + String.valueOf(tag));
+    }
+    for (Pose3d pose : fieldToCams) {
+        logPose3d(pose, table, String.valueOf(fieldToCams.indexOf(pose)) + "field to cams");
+    }
+    for (Pose3d pose : fieldToCamsAlt) {
+        logPose3d(pose, table, String.valueOf(fieldToCams.indexOf(pose)) + "field to cams alt");
+    }
 
     // multi-target solvePNP
     if (hasCalibData) {
@@ -301,6 +355,8 @@ private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult re
         var distCoeffs = distCoeffsOpt.get();
         var pnpResults =
                 VisionEstimation.estimateCamPosePNP(cameraMatrix, distCoeffs, visCorners, knownVisTags);
+        VisionIOInputs.logTransform3d(pnpResults.best, table, "pnp results best");
+        table.put("pnp results bestreprojerr", pnpResults.bestReprojErr);
         var best =
                 new Pose3d()
                         .plus(pnpResults.best) // field-to-camera
@@ -308,9 +364,11 @@ private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult re
         // var alt = new Pose3d()
         // .plus(pnpResults.alt) // field-to-camera
         // .plus(robotToCamera.inverse()); // field-to-robot
-
+        logPose3d(best, table, "best"); //TODO i don't know what best means
+        var estimatedRobotPose = new EstimatedRobotPose(best, result.getTimestampSeconds(), result.getTargets());
+        //TODO im losing track of what ive logged lol what is timestamp seconds
         return Optional.of(
-                new EstimatedRobotPose(best, result.getTimestampSeconds(), result.getTargets()));
+            estimatedRobotPose);
     } else {
         // TODO fallback strategy? Should we just always do solvePNP?
         return Optional.empty();
@@ -325,8 +383,9 @@ private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult re
  * @return the estimated position of the robot in the FCS and the estimated timestamp of this
  *     estimation.
  */
-private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result) {
+private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result, LogTable table) {
     PhotonTrackedTarget lowestAmbiguityTarget = null;
+    VisionIOInputs.logPhotonTrackedTarget(lowestAmbiguityTarget, table, null);
 
     double lowestAmbiguityScore = 10;
 
@@ -361,6 +420,7 @@ private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResul
                     result.getTimestampSeconds(),
                     result.getTargets()));
 }
+
 
 /**
  * Return the estimated position of the robot using the target with the lowest delta height
@@ -593,6 +653,7 @@ private void reportFiducialPoseError(int fiducialId) {
     VisionIOInputs.logTransform3d(robotToCamera, table, "robot to camera");
     logPose3d(lastPose, table, "last pose");
     logPose3d(referencePose, table, "reference pose");
+    //TODO poseCacheTimestampSeconds??
   }
   @Override
   public void fromLog(LogTable table) {

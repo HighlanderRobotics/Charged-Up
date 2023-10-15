@@ -78,6 +78,11 @@ public interface VisionIO {
               new Rotation3d(new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3])));
       return transform3d;
     }
+    public Transform3d getLoggedTransform3d(LogTable table, String name) {
+      double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
+      double[] translation = table.getDoubleArray("translation " + name, new double[3]);
+      return getLoggedTransform3d(translation, rotation);
+    }
 
     public PhotonTrackedTarget getLoggedPhotonTrackedTarget(LogTable table, String name) {
       double[] translation = table.getDoubleArray("translation " + name, new double[3]);
