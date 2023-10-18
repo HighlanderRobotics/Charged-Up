@@ -24,7 +24,6 @@ import org.photonvision.targeting.TargetCorner;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Pair;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -51,7 +50,7 @@ public abstract class LoggedEstimator implements LoggableInputs {
   double latencyMillis;
 
   private PhotonPoseEstimator estimator = new PhotonPoseEstimator(
-    fieldTags, primaryStrategy, camera, robotToCamera);
+    fieldTags, primaryStrategy, camera, robotToCamera); //TODO? whar
 
   public static void logPose3d(Pose3d pose3d, LogTable table, String name) {
     double rotation[] = new double[4];
@@ -94,52 +93,6 @@ private void checkUpdate(Object oldObj, Object newObj) {
 }
 
 /**
- * Get the AprilTagFieldLayout being used by the PositionEstimator.
- *
- * @return the AprilTagFieldLayout
- */
-public AprilTagFieldLayout getFieldTags() {
-  return estimator.getFieldTags();
-}
-
-/**
- * Set the AprilTagFieldLayout being used by the PositionEstimator.
- *
- * @param fieldTags the AprilTagFieldLayout
- */
-public void setFieldTags(AprilTagFieldLayout fieldTags) {
-  estimator.setFieldTags(fieldTags);
-}
-
-/**
- * Get the Position Estimation Strategy being used by the Position Estimator.
- *
- * @return the strategy
- */
-public PoseStrategy getPrimaryStrategy() {
-  return estimator.getPrimaryStrategy();
-}
-
-/**
- * Set the Position Estimation Strategy used by the Position Estimator.
- *
- * @param strategy the strategy to set
- */
-public void setPrimaryStrategy(PoseStrategy strategy) {
-  estimator.setPrimaryStrategy(strategy);
-}
-
-/**
- * Set the Position Estimation Strategy used in multi-tag mode when only one tag can be seen. Must
- * NOT be MULTI_TAG_PNP
- *
- * @param strategy the strategy to set
- */
-public void setMultiTagFallbackStrategy(PoseStrategy strategy) {
-  estimator.setMultiTagFallbackStrategy(strategy);
-}
-
-/**
  * Return the reference position that is being used by the estimator.
  *
  * @return the referencePose
@@ -161,42 +114,6 @@ public void setReferencePose(Pose3d referencePose, LogTable table) {
   logPose3d(referencePose, table, "reference pose");
   checkUpdate(this.referencePose, referencePose);
   this.referencePose = referencePose;
-}
-
-/**
- * Update the stored last pose. Useful for setting the initial estimate when using the
- * <b>CLOSEST_TO_LAST_POSE</b> strategy.
- *
- * @param lastPose the lastPose to set
- */
-public void setLastPose(Pose3d lastPose, LogTable table, String name) {
-  logPose3d(lastPose, table, "last pose " + name);
-  this.lastPose = lastPose;
-}
-
-/**
- * Update the stored last pose. Useful for setting the initial estimate when using the
- * <b>CLOSEST_TO_LAST_POSE</b> strategy.
- *
- * @param lastPose the lastPose to set
- */
-public void setLastPose(Pose2d lastPose, LogTable table, String name) {
-    setLastPose(new Pose3d(lastPose), table, name);
-}
-
-/** @return The current transform from the center of the robot to the camera mount position */
-public Transform3d getRobotToCameraTransform() {
-    return robotToCamera;
-}
-
-/**
- * Useful for pan and tilt mechanisms and such.
- *
- * @param robotToCamera The current transform from the center of the robot to the camera mount
- *     position
- */
-public void setRobotToCameraTransform(Transform3d robotToCamera) {
-    this.robotToCamera = robotToCamera;
 }
 
 /**
@@ -354,13 +271,13 @@ private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult re
         var cameraMatrix = cameraMatrixOpt.get();
         var distCoeffs = distCoeffsOpt.get();
         var pnpResults =
-                VisionEstimation.estimateCamPosePNP(cameraMatrix, distCoeffs, visCorners, knownVisTags);
+            VisionEstimation.estimateCamPosePNP(cameraMatrix, distCoeffs, visCorners, knownVisTags);
         VisionIOInputs.logTransform3d(pnpResults.best, table, "pnp results best");
         table.put("pnp results bestreprojerr", pnpResults.bestReprojErr);
         var best =
-                new Pose3d()
-                        .plus(pnpResults.best) // field-to-camera
-                        .plus(robotToCamera.inverse()); // field-to-robot
+            new Pose3d()
+                .plus(pnpResults.best) // field-to-camera
+                .plus(robotToCamera.inverse()); // field-to-robot
         // var alt = new Pose3d()
         // .plus(pnpResults.alt) // field-to-camera
         // .plus(robotToCamera.inverse()); // field-to-robot
