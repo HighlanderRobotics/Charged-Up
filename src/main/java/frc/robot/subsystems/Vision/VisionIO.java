@@ -71,20 +71,20 @@ public interface VisionIO {
       table.put("translation " + name, translation);
     }
 
-    public Transform3d getLoggedTransform3d(double[] translation, double[] rotation) {
+    public static Transform3d getLoggedTransform3d(double[] translation, double[] rotation) {
       Transform3d transform3d =
           new Transform3d(
               new Translation3d(translation[0], translation[1], translation[2]),
               new Rotation3d(new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3])));
       return transform3d;
     }
-    public Transform3d getLoggedTransform3d(LogTable table, String name) {
+    public static Transform3d getLoggedTransform3d(LogTable table, String name) {
       double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
       double[] translation = table.getDoubleArray("translation " + name, new double[3]);
       return getLoggedTransform3d(translation, rotation);
     }
 
-    public PhotonTrackedTarget getLoggedPhotonTrackedTarget(LogTable table, String name) {
+    public static PhotonTrackedTarget getLoggedPhotonTrackedTarget(LogTable table, String name) {
       double[] translation = table.getDoubleArray("translation " + name, new double[3]);
       double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
       double[] altTranslation = table.getDoubleArray("translation alt " + name, new double[3]);

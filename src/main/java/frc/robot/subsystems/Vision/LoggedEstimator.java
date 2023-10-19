@@ -23,7 +23,6 @@ import org.photonvision.targeting.TargetCorner;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Quaternion;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -36,546 +35,339 @@ import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 
 public abstract class LoggedEstimator implements LoggableInputs {
 
-  private VisionIOInputs visionIOInputs = new VisionIOInputs();
-  private AprilTagFieldLayout fieldTags;
-  private PoseStrategy primaryStrategy = PoseStrategy.MULTI_TAG_PNP;
-  private PoseStrategy multiTagFallbackStrategy = PoseStrategy.LOWEST_AMBIGUITY;
-  private final PhotonCamera camera = new PhotonCamera(Constants.Vision.visionSource.name);
-  private Transform3d robotToCamera;
+    private VisionIOInputs visionIOInputs = new VisionIOInputs();
+    private AprilTagFieldLayout fieldTags;
+    private PoseStrategy primaryStrategy = PoseStrategy.MULTI_TAG_PNP;
+    private PoseStrategy multiTagFallbackStrategy = PoseStrategy.LOWEST_AMBIGUITY;
+    private final PhotonCamera camera = new PhotonCamera(Constants.Vision.visionSource.name);
+    private Transform3d robotToCamera;
 
-  private Pose3d lastPose;
-  private Pose3d referencePose;
-  protected double poseCacheTimestampSeconds = -1;
-  private final Set<Integer> reportedErrors = new HashSet<>();
-  double latencyMillis;
+    private Pose3d lastPose;
+    private Pose3d referencePose;
+    protected double poseCacheTimestampSeconds = -1;
+    private final Set<Integer> reportedErrors = new HashSet<>();
+    double latencyMillis;
 
-  private PhotonPoseEstimator estimator = new PhotonPoseEstimator(
-    fieldTags, primaryStrategy, camera, robotToCamera); //TODO? whar
+    //if there are methods you want to call from photon pose estimator for some reason you would use this
+    private PhotonPoseEstimator estimator = new PhotonPoseEstimator(
+    fieldTags, primaryStrategy, camera, robotToCamera);
 
-  public static void logPose3d(Pose3d pose3d, LogTable table, String name) {
-    double rotation[] = new double[4];
-    rotation[0] = pose3d.getRotation().getQuaternion().getW();
-    rotation[1] = pose3d.getRotation().getQuaternion().getX();
-    rotation[2] = pose3d.getRotation().getQuaternion().getY();
-    rotation[3] = pose3d.getRotation().getQuaternion().getZ();
-    table.put("rotation " + name, rotation);
+    public static void logPose3d(Pose3d pose3d, LogTable table, String name) {
+        double rotation[] = new double[4];
+        rotation[0] = pose3d.getRotation().getQuaternion().getW();
+        rotation[1] = pose3d.getRotation().getQuaternion().getX();
+        rotation[2] = pose3d.getRotation().getQuaternion().getY();
+        rotation[3] = pose3d.getRotation().getQuaternion().getZ();
+        table.put("rotation " + name, rotation);
 
-    double translation[] = new double[3];
-    translation[0] = pose3d.getTranslation().getX();
-    translation[1] = pose3d.getTranslation().getY();
-    translation[2] = pose3d.getTranslation().getZ();
-    table.put("translation " + name, translation);
-  }
+        double translation[] = new double[3];
+        translation[0] = pose3d.getTranslation().getX();
+        translation[1] = pose3d.getTranslation().getY();
+        translation[2] = pose3d.getTranslation().getZ();
+        table.put("translation " + name, translation);
+    }
 
     public static Pose3d getLoggedPose3d(double[] translation, double[] rotation) {
-      Pose3d pose3d =
-          new Pose3d(
-              new Translation3d(translation[0], translation[1], translation[2]),
-              new Rotation3d(new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3])));
-      return pose3d;
+        Pose3d pose3d =
+            new Pose3d(
+                new Translation3d(translation[0], translation[1], translation[2]),
+                new Rotation3d(new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3])));
+        return pose3d;
     }
-    //TODO why did i do this
+    
     public static Pose3d getLoggedPose3d(LogTable table, String name) {
         double[] translation = table.getDoubleArray("translation " + name, new double[3]);
         double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
         return getLoggedPose3d(translation, rotation);
     }
 
-  /** Invalidates the pose cache. */
-  private void invalidatePoseCache() {
-    poseCacheTimestampSeconds = -1;
-}
-
-private void checkUpdate(Object oldObj, Object newObj) {
-    if (oldObj != newObj && oldObj != null && !oldObj.equals(newObj)) {
-        invalidatePoseCache();
+    public static void logAprilTag(AprilTag tag, LogTable table, String name) {
+        table.put("ID" + name, tag.ID);
+        logPose3d(tag.pose, table, "pose" + name);
     }
-}
-
-/**
- * Return the reference position that is being used by the estimator.
- *
- * @return the referencePose
- */
-public Pose3d getReferencePose(LogTable table, String name) {
-  double[] translation = table.getDoubleArray("translation " + name, new double[3]);
-  double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
-  Pose3d referencePose = getLoggedPose3d(translation, rotation);
-  return referencePose;
-}
-
-/**
- * Update the stored reference pose for use when using the <b>CLOSEST_TO_REFERENCE_POSE</b>
- * strategy.
- *
- * @param referencePose the referencePose to set
- */
-public void setReferencePose(Pose3d referencePose, LogTable table) {
-  logPose3d(referencePose, table, "reference pose");
-  checkUpdate(this.referencePose, referencePose);
-  this.referencePose = referencePose;
-}
-
-/**
- * Poll data from the configured cameras and update the estimated position of the robot. Returns
- * empty if there are no cameras set or no targets were found from the cameras.
- *
- * @return an EstimatedRobotPose with an estimated pose, the timestamp, and targets used to create
- *     the estimate
- */
-public Optional<EstimatedRobotPose> update(LogTable table) {
-  latencyMillis = table.getDouble("latency", latencyMillis);
-  List<PhotonTrackedTarget> targets = visionIOInputs.targets;
-    if (camera == null) {
-        DriverStation.reportError("[PhotonPoseEstimator] Missing camera!", false);
-        return Optional.empty();
+    
+    public static AprilTag getLoggedAprilTag(LogTable table, String name) {
+        AprilTag tag = new AprilTag((int) table.getDouble("ID" + name, -1), getLoggedPose3d(table, name));
+        return tag;
+    }
+    
+    public static void logEstimatedRobotPose(EstimatedRobotPose pose, LogTable table, String name) {
+        logPose3d(pose.estimatedPose, table, "estimated pose " + name);
+        table.put("timestamp seconds " + name, pose.timestampSeconds);
+        table.put("targets used", pose.targetsUsed.size());
+        for (PhotonTrackedTarget target : pose.targetsUsed) {
+            VisionIOInputs.logPhotonTrackedTarget(target, table, String.valueOf(pose.targetsUsed.indexOf(target)) + name);
+        }
     }
 
-    PhotonPipelineResult cameraResult = new PhotonPipelineResult(latencyMillis, targets);
-
-    return update(cameraResult, table);
-}
-
-/**
- * Updates the estimated position of the robot. Returns empty if there are no cameras set or no
- * targets were found from the cameras.
- *
- * @param cameraResult The latest pipeline result from the camera
- * @return an EstimatedRobotPose with an estimated pose, and information about the camera(s) and
- *     pipeline results used to create the estimate
- */
-public Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult, LogTable table) {
-    // Time in the past -- give up, since the following if expects times > 0
-    if (cameraResult.getTimestampSeconds() < 0) {
-        return Optional.empty();
+    public static EstimatedRobotPose getLoggedEstimatedRobotPose(LogTable table, String name) {
+        List<PhotonTrackedTarget> targets = new ArrayList<>();
+        for (int i = 0; i < table.getDouble("targets used", i); i++) {
+            targets.add(VisionIOInputs.getLoggedPhotonTrackedTarget(table, name + i));
+        }
+        EstimatedRobotPose pose = new EstimatedRobotPose(
+            getLoggedPose3d(table, "estimated pose " + name), 
+            table.getDouble("timestamp seconds " + name, -1), 
+            targets);
+        return pose;
+    }    
+    
+    /** Invalidates the pose cache. */
+    private void invalidatePoseCache() {
+        poseCacheTimestampSeconds = -1;
     }
 
-    // If the pose cache timestamp was set, and the result is from the same timestamp, return an
-    // empty result
-    if (poseCacheTimestampSeconds > 0
-            && Math.abs(poseCacheTimestampSeconds - cameraResult.getTimestampSeconds()) < 1e-6) {
-        return Optional.empty();
+    private void checkUpdate(Object oldObj, Object newObj) {
+        if (oldObj != newObj && oldObj != null && !oldObj.equals(newObj)) {
+            invalidatePoseCache();
+        }
     }
 
-    // Remember the timestamp of the current result used
-    poseCacheTimestampSeconds = cameraResult.getTimestampSeconds();
-
-    // If no targets seen, trivial case -- return empty result
-    if (!cameraResult.hasTargets()) {
-        return Optional.empty();
+    /**
+     * Return the reference position that is being used by the estimator.
+     *
+     * @return the referencePose
+     */
+    public Pose3d getReferencePose(LogTable table, String name) {
+        double[] translation = table.getDoubleArray("translation " + name, new double[3]);
+        double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
+        Pose3d referencePose = getLoggedPose3d(translation, rotation);
+        return referencePose;
     }
 
-    return update(cameraResult, this.primaryStrategy, table);
-}
+    /**
+     * Update the stored reference pose for use when using the <b>CLOSEST_TO_REFERENCE_POSE</b>
+     * strategy.
+     *
+     * @param referencePose the referencePose to set
+     */
+    public void setReferencePose(Pose3d referencePose, LogTable table) {
+        logPose3d(referencePose, table, "reference pose");
+        checkUpdate(this.referencePose, referencePose);
+        this.referencePose = referencePose;
+    }
 
-private Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult, PoseStrategy strat, LogTable table) {
-    Optional<EstimatedRobotPose> estimatedPose;
-    switch (strat) {
-        case LOWEST_AMBIGUITY:
-            estimatedPose = lowestAmbiguityStrategy(cameraResult, table);
-            break;
-        case CLOSEST_TO_CAMERA_HEIGHT:
-            estimatedPose = closestToCameraHeightStrategy(cameraResult);
-            break;
-        case CLOSEST_TO_REFERENCE_POSE:
-            estimatedPose = closestToReferencePoseStrategy(cameraResult, referencePose);
-            break;
-        case CLOSEST_TO_LAST_POSE:
-            setReferencePose(lastPose, table);
-            estimatedPose = closestToReferencePoseStrategy(cameraResult, referencePose);
-            break;
-        case AVERAGE_BEST_TARGETS:
-            estimatedPose = averageBestTargetsStrategy(cameraResult);
-            break;
-        case MULTI_TAG_PNP:
-            estimatedPose = multiTagPNPStrategy(cameraResult, table);
-            break;
-        default:
-            DriverStation.reportError(
-                    "[PhotonPoseEstimator] Unknown Position Estimation Strategy!", false);
+    /**
+     * Poll data from the configured cameras and update the estimated position of the robot. Returns
+     * empty if there are no cameras set or no targets were found from the cameras.
+     *
+     * @return an EstimatedRobotPose with an estimated pose, the timestamp, and targets used to create
+     *     the estimate
+     */
+    public Optional<EstimatedRobotPose> update(LogTable table) {
+        latencyMillis = table.getDouble("latency", latencyMillis);
+        List<PhotonTrackedTarget> targets = visionIOInputs.targets;
+            if (camera == null) {
+                DriverStation.reportError("[PhotonPoseEstimator] Missing camera!", false);
+                return Optional.empty();
+            }
+
+            PhotonPipelineResult cameraResult = new PhotonPipelineResult(latencyMillis, targets);
+
+            return update(cameraResult, table);
+    }
+
+    /**
+     * Updates the estimated position of the robot. Returns empty if there are no cameras set or no
+     * targets were found from the cameras.
+    *
+    * @param cameraResult The latest pipeline result from the camera
+    * @return an EstimatedRobotPose with an estimated pose, and information about the camera(s) and
+    *     pipeline results used to create the estimate
+    */
+    public Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult, LogTable table) {
+        // Time in the past -- give up, since the following if expects times > 0
+        if (cameraResult.getTimestampSeconds() < 0) {
             return Optional.empty();
-    }
-
-    if (estimatedPose.isEmpty()) {
-        lastPose = null;
-    }
-
-    return estimatedPose;
-}
-
-public static void logAprilTag(AprilTag tag, LogTable table, String name) {
-    table.put("ID" + name, tag.ID);
-    logPose3d(tag.pose, table, "pose" + name);
-}
-public static AprilTag getLoggedAprilTag(LogTable table, String name) {
-    AprilTag tag = new AprilTag((int) table.getDouble("ID" + name, -1), getLoggedPose3d(table, name));
-    return tag;
-}
-private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult result, LogTable table) {
-    // Arrays we need declared up front
-    var visCorners = new ArrayList<TargetCorner>();
-    var knownVisTags = new ArrayList<AprilTag>();
-    var fieldToCams = new ArrayList<Pose3d>();
-    var fieldToCamsAlt = new ArrayList<Pose3d>();
-    double[] visCornersX = new double[4];
-    double[] visCornersY = new double[4];
-    
-
-    if (result.getTargets().size() < 2) {
-        // Run fallback strategy instead
-        return update(result, this.multiTagFallbackStrategy, table);
-    }
-
-    for (var target : result.getTargets()) {
-        visCorners.addAll(target.getDetectedCorners());
-
-        var tagPoseOpt = fieldTags.getTagPose(target.getFiducialId());
-        if (tagPoseOpt.isEmpty()) {
-            reportFiducialPoseError(target.getFiducialId());
-            continue;
         }
 
-        var tagPose = tagPoseOpt.get();
-
-        // actual layout poses of visible tags -- not exposed, so have to recreate
-        knownVisTags.add(new AprilTag(target.getFiducialId(), tagPose));
-
-        fieldToCams.add(tagPose.transformBy(target.getBestCameraToTarget().inverse()));
-        fieldToCamsAlt.add(tagPose.transformBy(target.getAlternateCameraToTarget().inverse()));
-    }
-    //TODO what is this
-    var cameraMatrixOpt = camera.getCameraMatrix();
-    var distCoeffsOpt = camera.getDistCoeffs();
-    boolean hasCalibData = cameraMatrixOpt.isPresent() && distCoeffsOpt.isPresent();
-    table.put("has calib data?", hasCalibData);
-
-    for (TargetCorner corner : visCorners) {
-        visCornersX[visCorners.indexOf(corner)] = corner.x;
-        visCornersY[visCorners.indexOf(corner)] = corner.y;
-    }
-    table.put("visible corners x", visCornersX);
-    table.put("visible corners y", visCornersY);
-
-    for (AprilTag tag : knownVisTags) {
-        logAprilTag(tag, table, "known vis tag" + String.valueOf(tag));
-    }
-    for (Pose3d pose : fieldToCams) {
-        logPose3d(pose, table, String.valueOf(fieldToCams.indexOf(pose)) + "field to cams");
-    }
-    for (Pose3d pose : fieldToCamsAlt) {
-        logPose3d(pose, table, String.valueOf(fieldToCams.indexOf(pose)) + "field to cams alt");
-    }
-
-    // multi-target solvePNP
-    if (hasCalibData) {
-        var cameraMatrix = cameraMatrixOpt.get();
-        var distCoeffs = distCoeffsOpt.get();
-        var pnpResults =
-            VisionEstimation.estimateCamPosePNP(cameraMatrix, distCoeffs, visCorners, knownVisTags);
-        VisionIOInputs.logTransform3d(pnpResults.best, table, "pnp results best");
-        table.put("pnp results bestreprojerr", pnpResults.bestReprojErr);
-        var best =
-            new Pose3d()
-                .plus(pnpResults.best) // field-to-camera
-                .plus(robotToCamera.inverse()); // field-to-robot
-        // var alt = new Pose3d()
-        // .plus(pnpResults.alt) // field-to-camera
-        // .plus(robotToCamera.inverse()); // field-to-robot
-        logPose3d(best, table, "best"); //TODO i don't know what best means
-        var estimatedRobotPose = new EstimatedRobotPose(best, result.getTimestampSeconds(), result.getTargets());
-        //TODO im losing track of what ive logged lol what is timestamp seconds
-        return Optional.of(
-            estimatedRobotPose);
-    } else {
-        // TODO fallback strategy? Should we just always do solvePNP?
-        return Optional.empty();
-    }
-}
-
-/**
- * Return the estimated position of the robot with the lowest position ambiguity from a List of
- * pipeline results.
- *
- * @param result pipeline result
- * @return the estimated position of the robot in the FCS and the estimated timestamp of this
- *     estimation.
- */
-private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result, LogTable table) {
-    PhotonTrackedTarget lowestAmbiguityTarget = null;
-    VisionIOInputs.logPhotonTrackedTarget(lowestAmbiguityTarget, table, null);
-
-    double lowestAmbiguityScore = 10;
-
-    for (PhotonTrackedTarget target : result.targets) {
-        double targetPoseAmbiguity = target.getPoseAmbiguity();
-        // Make sure the target is a Fiducial target.
-        if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
-            lowestAmbiguityScore = targetPoseAmbiguity;
-            lowestAmbiguityTarget = target;
-        }
-    }
-
-    // Although there are confirmed to be targets, none of them may be fiducial
-    // targets.
-    if (lowestAmbiguityTarget == null) return Optional.empty();
-
-    int targetFiducialId = lowestAmbiguityTarget.getFiducialId();
-
-    Optional<Pose3d> targetPosition = fieldTags.getTagPose(targetFiducialId);
-
-    if (targetPosition.isEmpty()) {
-        reportFiducialPoseError(targetFiducialId);
-        return Optional.empty();
-    }
-
-    return Optional.of(
-            new EstimatedRobotPose(
-                    targetPosition
-                            .get()
-                            .transformBy(lowestAmbiguityTarget.getBestCameraToTarget().inverse())
-                            .transformBy(robotToCamera.inverse()),
-                    result.getTimestampSeconds(),
-                    result.getTargets()));
-}
-
-
-/**
- * Return the estimated position of the robot using the target with the lowest delta height
- * difference between the estimated and actual height of the camera.
- *
- * @param result pipeline result
- * @return the estimated position of the robot in the FCS and the estimated timestamp of this
- *     estimation.
- */
-private Optional<EstimatedRobotPose> closestToCameraHeightStrategy(PhotonPipelineResult result) {
-    double smallestHeightDifference = 10e9;
-    EstimatedRobotPose closestHeightTarget = null;
-
-    for (PhotonTrackedTarget target : result.targets) {
-        int targetFiducialId = target.getFiducialId();
-
-        // Don't report errors for non-fiducial targets. This could also be resolved by
-        // adding -1 to
-        // the initial HashSet.
-        if (targetFiducialId == -1) continue;
-
-        Optional<Pose3d> targetPosition = fieldTags.getTagPose(target.getFiducialId());
-
-        if (targetPosition.isEmpty()) {
-            reportFiducialPoseError(target.getFiducialId());
-            continue;
+        // If the pose cache timestamp was set, and the result is from the same timestamp, return an
+        // empty result
+        if (poseCacheTimestampSeconds > 0
+                && Math.abs(poseCacheTimestampSeconds - cameraResult.getTimestampSeconds()) < 1e-6) {
+            return Optional.empty();
         }
 
-        double alternateTransformDelta =
-                Math.abs(
-                        robotToCamera.getZ()
-                                - targetPosition
-                                        .get()
-                                        .transformBy(target.getAlternateCameraToTarget().inverse())
-                                        .getZ());
-        double bestTransformDelta =
-                Math.abs(
-                        robotToCamera.getZ()
-                                - targetPosition
-                                        .get()
-                                        .transformBy(target.getBestCameraToTarget().inverse())
-                                        .getZ());
+        // Remember the timestamp of the current result used
+        poseCacheTimestampSeconds = cameraResult.getTimestampSeconds();
+        table.put("pose cache timestamp seconds", poseCacheTimestampSeconds);
 
-        if (alternateTransformDelta < smallestHeightDifference) {
-            smallestHeightDifference = alternateTransformDelta;
-            closestHeightTarget =
-                    new EstimatedRobotPose(
-                            targetPosition
-                                    .get()
-                                    .transformBy(target.getAlternateCameraToTarget().inverse())
-                                    .transformBy(robotToCamera.inverse()),
-                            result.getTimestampSeconds(),
-                            result.getTargets());
+        // If no targets seen, trivial case -- return empty result
+        if (!cameraResult.hasTargets()) {
+            return Optional.empty();
         }
 
-        if (bestTransformDelta < smallestHeightDifference) {
-            smallestHeightDifference = bestTransformDelta;
-            closestHeightTarget =
-                    new EstimatedRobotPose(
-                            targetPosition
-                                    .get()
-                                    .transformBy(target.getBestCameraToTarget().inverse())
-                                    .transformBy(robotToCamera.inverse()),
-                            result.getTimestampSeconds(),
-                            result.getTargets());
-        }
+        return update(cameraResult, this.primaryStrategy, table);
     }
 
-    // Need to null check here in case none of the provided targets are fiducial.
-    return Optional.ofNullable(closestHeightTarget);
-}
+    private Optional<EstimatedRobotPose> update(PhotonPipelineResult cameraResult, PoseStrategy strat, LogTable table) {
+        Optional<EstimatedRobotPose> estimatedPose;
+        switch (strat) {
+            case LOWEST_AMBIGUITY:
+                estimatedPose = lowestAmbiguityStrategy(cameraResult, table);
+                break;
+            case MULTI_TAG_PNP:
+                estimatedPose = multiTagPNPStrategy(cameraResult, table);
+                break;
+            default:
+                DriverStation.reportError(
+                    "[PhotonPoseEstimator] Unknown Position Estimation Strategy!", false);
+                return Optional.empty();
+        }
 
-/**
- * Return the estimated position of the robot using the target with the lowest delta in the vector
- * magnitude between it and the reference pose.
- *
- * @param result pipeline result
- * @param referencePose reference pose to check vector magnitude difference against.
- * @return the estimated position of the robot in the FCS and the estimated timestamp of this
- *     estimation.
- */
-private Optional<EstimatedRobotPose> closestToReferencePoseStrategy(
-        PhotonPipelineResult result, Pose3d referencePose) {
-    if (referencePose == null) {
-        DriverStation.reportError(
-                "[PhotonPoseEstimator] Tried to use reference pose strategy without setting the reference!",
-                false);
-        return Optional.empty();
+        if (estimatedPose.isEmpty()) {
+            lastPose = null;
+            logPose3d(lastPose, table, "last pose");
+        }
+
+        return estimatedPose;
     }
 
-    double smallestPoseDelta = 10e9;
-    EstimatedRobotPose lowestDeltaPose = null;
 
-    for (PhotonTrackedTarget target : result.targets) {
-        int targetFiducialId = target.getFiducialId();
 
-        // Don't report errors for non-fiducial targets. This could also be resolved by
-        // adding -1 to
-        // the initial HashSet.
-        if (targetFiducialId == -1) continue;
+    private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult result, LogTable table) {
+        // Arrays we need declared up front
+        var visCorners = new ArrayList<TargetCorner>();
+        var knownVisTags = new ArrayList<AprilTag>();
+        var fieldToCams = new ArrayList<Pose3d>();
+        var fieldToCamsAlt = new ArrayList<Pose3d>();
+        double[] visCornersX = new double[4];
+        double[] visCornersY = new double[4];
 
-        Optional<Pose3d> targetPosition = fieldTags.getTagPose(target.getFiducialId());
-
-        if (targetPosition.isEmpty()) {
-            reportFiducialPoseError(targetFiducialId);
-            continue;
+        if (result.getTargets().size() < 2) {
+            // Run fallback strategy instead
+            return update(result, this.multiTagFallbackStrategy, table);
         }
 
-        Pose3d altTransformPosition =
-                targetPosition
-                        .get()
-                        .transformBy(target.getAlternateCameraToTarget().inverse())
-                        .transformBy(robotToCamera.inverse());
-        Pose3d bestTransformPosition =
-                targetPosition
-                        .get()
-                        .transformBy(target.getBestCameraToTarget().inverse())
-                        .transformBy(robotToCamera.inverse());
+        for (var target : result.getTargets()) {
+            visCorners.addAll(target.getDetectedCorners());
 
-        double altDifference = Math.abs(calculateDifference(referencePose, altTransformPosition));
-        double bestDifference = Math.abs(calculateDifference(referencePose, bestTransformPosition));
+            var tagPoseOpt = fieldTags.getTagPose(target.getFiducialId());
+            if (tagPoseOpt.isEmpty()) {
+                reportFiducialPoseError(target.getFiducialId());
+                continue;
+            }
 
-        if (altDifference < smallestPoseDelta) {
-            smallestPoseDelta = altDifference;
-            lowestDeltaPose =
-                    new EstimatedRobotPose(
-                            altTransformPosition, result.getTimestampSeconds(), result.getTargets());
+            var tagPose = tagPoseOpt.get();
+
+            // actual layout poses of visible tags -- not exposed, so have to recreate
+            knownVisTags.add(new AprilTag(target.getFiducialId(), tagPose));
+
+            fieldToCams.add(tagPose.transformBy(target.getBestCameraToTarget().inverse()));
+            fieldToCamsAlt.add(tagPose.transformBy(target.getAlternateCameraToTarget().inverse()));
         }
-        if (bestDifference < smallestPoseDelta) {
-            smallestPoseDelta = bestDifference;
-            lowestDeltaPose =
-                    new EstimatedRobotPose(
-                            bestTransformPosition, result.getTimestampSeconds(), result.getTargets());
+        
+        var cameraMatrixOpt = camera.getCameraMatrix();
+        var distCoeffsOpt = camera.getDistCoeffs();
+        boolean hasCalibData = cameraMatrixOpt.isPresent() && distCoeffsOpt.isPresent();
+        table.put("has calib data?", hasCalibData);
+
+        for (TargetCorner corner : visCorners) {
+            visCornersX[visCorners.indexOf(corner)] = corner.x;
+            visCornersY[visCorners.indexOf(corner)] = corner.y;
         }
-    }
-    return Optional.ofNullable(lowestDeltaPose);
-}
+        table.put("visible corners x", visCornersX);
+        table.put("visible corners y", visCornersY);
 
-/**
- * Return the average of the best target poses using ambiguity as weight.
- *
- * @param result pipeline result
- * @return the estimated position of the robot in the FCS and the estimated timestamp of this
- *     estimation.
- */
-private Optional<EstimatedRobotPose> averageBestTargetsStrategy(PhotonPipelineResult result) {
-    List<Pair<PhotonTrackedTarget, Pose3d>> estimatedRobotPoses = new ArrayList<>();
-    double totalAmbiguity = 0;
-
-    for (PhotonTrackedTarget target : result.targets) {
-        int targetFiducialId = target.getFiducialId();
-
-        // Don't report errors for non-fiducial targets. This could also be resolved by
-        // adding -1 to
-        // the initial HashSet.
-        if (targetFiducialId == -1) continue;
-
-        Optional<Pose3d> targetPosition = fieldTags.getTagPose(target.getFiducialId());
-
-        if (targetPosition.isEmpty()) {
-            reportFiducialPoseError(targetFiducialId);
-            continue;
+        for (AprilTag tag : knownVisTags) {
+            logAprilTag(tag, table, "known vis tag" + String.valueOf(tag));
         }
-
-        double targetPoseAmbiguity = target.getPoseAmbiguity();
-
-        // Pose ambiguity is 0, use that pose
-        if (targetPoseAmbiguity == 0) {
+        for (Pose3d pose : fieldToCams) {
+            logPose3d(pose, table, String.valueOf(fieldToCams.indexOf(pose)) + "field to cams");
+        }
+        for (Pose3d pose : fieldToCamsAlt) {
+            logPose3d(pose, table, String.valueOf(fieldToCams.indexOf(pose)) + "field to cams alt");
+        }
+        //i kind of dont care about logging all this
+        // multi-target solvePNP
+        if (hasCalibData) {
+            var cameraMatrix = cameraMatrixOpt.get();
+            var distCoeffs = distCoeffsOpt.get();
+            var pnpResults =
+                VisionEstimation.estimateCamPosePNP(cameraMatrix, distCoeffs, visCorners, knownVisTags);
+            VisionIOInputs.logTransform3d(pnpResults.best, table, "pnp results best");
+            table.put("pnp results bestreprojerr", pnpResults.bestReprojErr);
+            var best =
+                new Pose3d()
+                    .plus(pnpResults.best) // field-to-camera
+                    .plus(robotToCamera.inverse()); // field-to-robot
+            // var alt = new Pose3d()
+            // .plus(pnpResults.alt) // field-to-camera
+            // .plus(robotToCamera.inverse()); // field-to-robot
+            logPose3d(best, table, "best");
+            var estimatedRobotPose = new EstimatedRobotPose(best, result.getTimestampSeconds(), result.getTargets());
+            logEstimatedRobotPose(estimatedRobotPose, table, "estimated robot pose - multitag pnp");
+            table.put("timestamp seconds", result.getTimestampSeconds());
             return Optional.of(
-                    new EstimatedRobotPose(
-                            targetPosition
-                                    .get()
-                                    .transformBy(target.getBestCameraToTarget().inverse())
-                                    .transformBy(robotToCamera.inverse()),
-                            result.getTimestampSeconds(),
-                            result.getTargets()));
+                estimatedRobotPose);
+        } else {
+            return lowestAmbiguityStrategy(result, table);
+        }
+    }
+
+    /**
+     * Return the estimated position of the robot with the lowest position ambiguity from a List of
+     * pipeline results.
+     *
+     * @param result pipeline result
+     * @return the estimated position of the robot in the FCS and the estimated timestamp of this
+     *     estimation.
+     */
+    private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result, LogTable table) {
+        PhotonTrackedTarget lowestAmbiguityTarget = null;
+        VisionIOInputs.logPhotonTrackedTarget(lowestAmbiguityTarget, table, "lowest ambiguity target");
+
+        double lowestAmbiguityScore = 10;
+
+        for (PhotonTrackedTarget target : result.targets) {
+            double targetPoseAmbiguity = target.getPoseAmbiguity();
+            table.put("target pose ambiguity", targetPoseAmbiguity);
+            // Make sure the target is a Fiducial target.
+            if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
+                lowestAmbiguityScore = targetPoseAmbiguity;
+                lowestAmbiguityTarget = target;
+            }
         }
 
-        totalAmbiguity += 1.0 / target.getPoseAmbiguity();
+        // Although there are confirmed to be targets, none of them may be fiducial
+        // targets.
+        if (lowestAmbiguityTarget == null) return Optional.empty();
 
-        estimatedRobotPoses.add(
-                new Pair<>(
-                        target,
-                        targetPosition
-                                .get()
-                                .transformBy(target.getBestCameraToTarget().inverse())
-                                .transformBy(robotToCamera.inverse())));
+        int targetFiducialId = lowestAmbiguityTarget.getFiducialId();
+        table.put("target fiducial id", targetFiducialId);
+
+        Optional<Pose3d> targetPosition = fieldTags.getTagPose(targetFiducialId);
+        logPose3d(targetPosition.get(), table, "target position");
+
+        if (targetPosition.isEmpty()) {
+            reportFiducialPoseError(targetFiducialId);
+            return Optional.empty();
+        }
+        var estimatedRobotPose = new EstimatedRobotPose(
+            targetPosition
+                .get()
+                .transformBy(lowestAmbiguityTarget.getBestCameraToTarget().inverse())
+                .transformBy(robotToCamera.inverse()),
+                    result.getTimestampSeconds(),
+                    result.getTargets());
+        logEstimatedRobotPose(estimatedRobotPose, table, "estimated robot pose - lowest ambiguity");
+        return Optional.of(estimatedRobotPose);
     }
 
-    // Take the average
-
-    Translation3d transform = new Translation3d();
-    Rotation3d rotation = new Rotation3d();
-
-    if (estimatedRobotPoses.isEmpty()) return Optional.empty();
-
-    for (Pair<PhotonTrackedTarget, Pose3d> pair : estimatedRobotPoses) {
-        // Total ambiguity is non-zero confirmed because if it was zero, that pose was
-        // returned.
-        double weight = (1.0 / pair.getFirst().getPoseAmbiguity()) / totalAmbiguity;
-        Pose3d estimatedPose = pair.getSecond();
-        transform = transform.plus(estimatedPose.getTranslation().times(weight));
-        rotation = rotation.plus(estimatedPose.getRotation().times(weight));
+    private void reportFiducialPoseError(int fiducialId) {
+        if (!reportedErrors.contains(fiducialId)) {
+            DriverStation.reportError(
+                    "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + fiducialId, false);
+            reportedErrors.add(fiducialId);
+        }
     }
 
-    return Optional.of(
-            new EstimatedRobotPose(
-                    new Pose3d(transform, rotation), result.getTimestampSeconds(), result.getTargets()));
-}
-
-/**
- * Difference is defined as the vector magnitude between the two poses
- *
- * @return The absolute "difference" (>=0) between two Pose3ds.
- */
-private double calculateDifference(Pose3d x, Pose3d y) {
-    return x.getTranslation().getDistance(y.getTranslation());
-}
-
-private void reportFiducialPoseError(int fiducialId) {
-    if (!reportedErrors.contains(fiducialId)) {
-        DriverStation.reportError(
-                "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + fiducialId, false);
-        reportedErrors.add(fiducialId);
+    @Override
+    public void toLog(LogTable table) {
     }
-}
-
-  @Override
-  public void toLog(LogTable table) {
-    VisionIOInputs.logTransform3d(robotToCamera, table, "robot to camera");
-    logPose3d(lastPose, table, "last pose");
-    logPose3d(referencePose, table, "reference pose");
-    //TODO poseCacheTimestampSeconds??
-  }
-  @Override
-  public void fromLog(LogTable table) {
-    
-    
-  }
-  public abstract void updateInputs();
+    @Override
+    public void fromLog(LogTable table) {
+        
+    }
+    public abstract void updateInputs();
 }
