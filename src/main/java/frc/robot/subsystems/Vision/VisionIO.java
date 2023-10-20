@@ -22,9 +22,9 @@ public interface VisionIO {
     public double timeSinceLastTimestamp = 0.0;
     public double numTags = 0;
     public List<PhotonTrackedTarget> targets = new ArrayList<>();
+    
 
-    public static void logPhotonTrackedTarget(
-        PhotonTrackedTarget target, LogTable table, String name) {
+    public static void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
 
       logTransform3d(target.getBestCameraToTarget(), table, name);
       logTransform3d(target.getAlternateCameraToTarget(), table, "alt " + name);

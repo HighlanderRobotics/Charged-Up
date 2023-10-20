@@ -32,8 +32,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 
-
-public abstract class LoggedEstimator implements LoggableInputs {
+public interface LoggedEstimatorIO {
+public class LoggedEstimator implements LoggableInputs {
 
     private VisionIOInputs visionIOInputs = new VisionIOInputs();
     private AprilTagFieldLayout fieldTags;
@@ -52,6 +52,14 @@ public abstract class LoggedEstimator implements LoggableInputs {
     private PhotonPoseEstimator estimator = new PhotonPoseEstimator(
     fieldTags, primaryStrategy, camera, robotToCamera);
 
+    public LoggedEstimator(
+            AprilTagFieldLayout fieldTags,
+            PoseStrategy strategy,
+            Transform3d robotToCamera) {
+        this.fieldTags = fieldTags;
+        this.primaryStrategy = strategy;
+        this.robotToCamera = robotToCamera;
+    }
     public static void logPose3d(Pose3d pose3d, LogTable table, String name) {
         double rotation[] = new double[4];
         rotation[0] = pose3d.getRotation().getQuaternion().getW();
@@ -369,5 +377,6 @@ public abstract class LoggedEstimator implements LoggableInputs {
     public void fromLog(LogTable table) {
         
     }
-    public abstract void updateInputs();
+}
+public abstract void updateInputs();
 }

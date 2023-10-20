@@ -19,9 +19,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.geometry.Twist2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -59,11 +57,15 @@ import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
+import frc.robot.subsystems.Vision.LoggedEstimatorIO.LoggedEstimator;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** SDS Mk4i Drivetrain */
@@ -78,6 +80,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public GyroIO gyroIO;
   public GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   public double simHeading = 0.0;
+  public LoggedEstimator loggedEstimator;
 
   public Field2d field = new Field2d();
 
@@ -156,7 +159,7 @@ public class SwerveSubsystem extends SubsystemBase {
             new Pose2d(),
             odoStdDevs,
             visStdDevs);
-
+    
     wheelOnlyOdo =
         new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
 
@@ -648,6 +651,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
     visionIO.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision", visionIOInputs);
+    PhotonPipelineResult result = new PhotonPipelineResult(visionIOInputs.timeSinceLastTimestamp, visionIOInputs.targets);
+    Pose2d visionMeasurement = loggedEstimator.update(result, null).get().estimatedPose.toPose2d();
+    poseEstimator.addVisionMeasurement(visionMeasurement, visionIOInputs.timestamp);
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
     double[] apriltagY = new double[visionIOInputs.targets.size() * 4];
     for (int i = 0; i < visionIOInputs.targets.size(); i++) {
