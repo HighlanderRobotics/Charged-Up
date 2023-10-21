@@ -47,26 +47,23 @@ import frc.lib.choreolib.ChoreoSwerveControllerCommand;
 import frc.lib.choreolib.ChoreoTrajectory;
 import frc.robot.Constants;
 import frc.robot.Constants.Grids;
-import frc.robot.Constants.PoseEstimator;
 import frc.robot.Constants.ScoringPositions;
 import frc.robot.Constants.SimMode;
 import frc.robot.PathPointOpen;
 import frc.robot.Robot;
 import frc.robot.subsystems.Elevator.ElevatorSubsystem;
+import frc.robot.subsystems.Vision.VisionHelper;
 import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
-import frc.robot.subsystems.Vision.LoggedEstimatorIO.LoggedEstimator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.EstimatedRobotPose;
 import org.photonvision.targeting.PhotonPipelineResult;
-import org.photonvision.targeting.PhotonTrackedTarget;
 
 /** SDS Mk4i Drivetrain */
 public class SwerveSubsystem extends SubsystemBase {
@@ -80,7 +77,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public GyroIO gyroIO;
   public GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   public double simHeading = 0.0;
-  public LoggedEstimator loggedEstimator;
+  public VisionHelper loggedEstimator;
 
   public Field2d field = new Field2d();
 
@@ -93,8 +90,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
                 @Override
                 public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
-                  // TODO Auto-generated method stub
-
                 }
               });
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
@@ -652,7 +647,7 @@ public class SwerveSubsystem extends SubsystemBase {
     visionIO.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision", visionIOInputs);
     PhotonPipelineResult result = new PhotonPipelineResult(visionIOInputs.timeSinceLastTimestamp, visionIOInputs.targets);
-    Pose2d visionMeasurement = loggedEstimator.update(result, null).get().estimatedPose.toPose2d();
+    Pose2d visionMeasurement = loggedEstimator.update(result).get().estimatedPose.toPose2d();
     poseEstimator.addVisionMeasurement(visionMeasurement, visionIOInputs.timestamp);
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
     double[] apriltagY = new double[visionIOInputs.targets.size() * 4];
