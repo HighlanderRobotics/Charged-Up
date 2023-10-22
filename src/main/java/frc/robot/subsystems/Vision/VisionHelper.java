@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Optional;
 
 import org.photonvision.EstimatedRobotPose;
-import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.estimation.VisionEstimation;
 import org.photonvision.targeting.PhotonPipelineResult;
@@ -22,7 +21,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 
 public class VisionHelper {
-    private static final PhotonCamera camera = new PhotonCamera(Constants.Vision.visionSource.name);
 
 /**
      * Poll data from the configured cameras and update the estimated position of the robot. Returns
@@ -38,7 +36,7 @@ public class VisionHelper {
         PoseStrategy multiTagFallbackStrategy) {
         
         double poseCacheTimestampSeconds = -1;
-        if (camera == null) {
+        if (Constants.Vision.camera == null) {
             DriverStation.reportError("[PhotonPoseEstimator] Missing camera!", false);
             return Optional.empty();
         }
@@ -117,9 +115,7 @@ public class VisionHelper {
             fieldToCamsAlt.add(tagPose.transformBy(target.getAlternateCameraToTarget().inverse()));
         }
         
-        var cameraMatrixOpt = camera.getCameraMatrix();
-        var distCoeffsOpt = camera.getDistCoeffs();
-        boolean hasCalibData = cameraMatrixOpt.isPresent() && distCoeffsOpt.isPresent();
+        boolean hasCalibData = Constants.Vision.cameraMatrixOpt.isPresent() && Constants.Vision.distCoeffsOpt.isPresent();
 
         for (TargetCorner corner : visCorners) {
             visCornersX[visCorners.indexOf(corner)] = corner.x;
@@ -127,10 +123,8 @@ public class VisionHelper {
         }
         // multi-target solvePNP
         if (hasCalibData) {
-            var cameraMatrix = cameraMatrixOpt.get();
-            var distCoeffs = distCoeffsOpt.get();
             var pnpResults =
-                VisionEstimation.estimateCamPosePNP(cameraMatrix, distCoeffs, visCorners, knownVisTags);
+                VisionEstimation.estimateCamPosePNP(Constants.Vision.cameraMatrixOpt.get(), Constants.Vision.distCoeffsOpt.get(), visCorners, knownVisTags);
             var best =
                 new Pose3d()
                     .plus(pnpResults.best) // field-to-camera

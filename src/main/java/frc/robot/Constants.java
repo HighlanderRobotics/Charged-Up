@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N2;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N5;
 import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -38,7 +39,10 @@ import frc.lib.util.SwerveModuleConstants;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+
+import org.photonvision.PhotonCamera;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -520,6 +524,7 @@ public final class Constants {
     public static class VisionSource {
       public String name;
       public Transform3d robotToCamera;
+      
 
       public VisionSource(String name, Transform3d robotToCamera) {
         this.name = name;
@@ -534,8 +539,12 @@ public final class Constants {
                 new Translation3d( // TODO find actual numbers
                     Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
                 new Rotation3d(0, 0, Units.degreesToRadians(0))));
+    
+    public static final PhotonCamera camera = new PhotonCamera(visionSource.name);
+    public static final Optional<Matrix<N3, N3>> cameraMatrixOpt = camera.getCameraMatrix();
+    public static final Optional<Matrix<N5, N1>> distCoeffsOpt = camera.getDistCoeffs();
   }
-
+  
   /** For 5026 vision code */
   public static final class PoseEstimator {
     /**

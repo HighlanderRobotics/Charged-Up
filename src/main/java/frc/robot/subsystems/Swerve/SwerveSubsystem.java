@@ -648,7 +648,7 @@ public class SwerveSubsystem extends SubsystemBase {
     PhotonPipelineResult result = new PhotonPipelineResult(
       visionIOInputs.timeSinceLastTimestamp, 
       visionIOInputs.targets);
-    Pose2d visionMeasurement = loggedEstimator.update(
+    Pose2d visionMeasurement = VisionHelper.update(
       result, 
       tagFieldLayout, 
       PoseStrategy.MULTI_TAG_PNP, 
