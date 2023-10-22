@@ -63,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 /** SDS Mk4i Drivetrain */
@@ -93,8 +94,6 @@ public class SwerveSubsystem extends SubsystemBase {
                 }
               });
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
-  private int frames = 0;
-  private double lastTimestamp = 0.0;
   private AprilTagFieldLayout tagFieldLayout;
 
   public boolean hasResetOdometry = false;
@@ -646,8 +645,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
     visionIO.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision", visionIOInputs);
-    PhotonPipelineResult result = new PhotonPipelineResult(visionIOInputs.timeSinceLastTimestamp, visionIOInputs.targets);
-    Pose2d visionMeasurement = loggedEstimator.update(result).get().estimatedPose.toPose2d();
+    PhotonPipelineResult result = new PhotonPipelineResult(
+      visionIOInputs.timeSinceLastTimestamp, 
+      visionIOInputs.targets);
+    Pose2d visionMeasurement = loggedEstimator.update(
+      result, 
+      tagFieldLayout, 
+      PoseStrategy.MULTI_TAG_PNP, 
+      PoseStrategy.LOWEST_AMBIGUITY
+    ).get().estimatedPose.toPose2d();
     poseEstimator.addVisionMeasurement(visionMeasurement, visionIOInputs.timestamp);
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
     double[] apriltagY = new double[visionIOInputs.targets.size() * 4];

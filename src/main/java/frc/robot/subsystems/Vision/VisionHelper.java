@@ -5,11 +5,8 @@
 package frc.robot.subsystems.Vision;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
-import org.littletonrobotics.junction.LogTable;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -21,32 +18,11 @@ import org.photonvision.targeting.TargetCorner;
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
-import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 
 public class VisionHelper {
-    private AprilTagFieldLayout fieldTags;
-    private PoseStrategy primaryStrategy = PoseStrategy.MULTI_TAG_PNP;
-    private PoseStrategy multiTagFallbackStrategy = PoseStrategy.LOWEST_AMBIGUITY;
-    private final PhotonCamera camera = new PhotonCamera(Constants.Vision.visionSource.name);
-    private Transform3d robotToCamera;
-
-    protected double poseCacheTimestampSeconds = -1;
-    private final Set<Integer> reportedErrors = new HashSet<>();
-    double latencyMillis;
-
-    private LogTable table;
-
-    public VisionHelper(
-            AprilTagFieldLayout fieldTags,
-            PoseStrategy strategy,
-            Transform3d robotToCamera) {
-        this.fieldTags = fieldTags;
-        this.primaryStrategy = strategy;
-        this.robotToCamera = robotToCamera;
-    }   
+    private static final PhotonCamera camera = new PhotonCamera(Constants.Vision.visionSource.name);
 
 /**
      * Poll data from the configured cameras and update the estimated position of the robot. Returns
@@ -55,7 +31,13 @@ public class VisionHelper {
      * @return an EstimatedRobotPose with an estimated pose, the timestamp, and targets used to create
      *     the estimate
      */
-    public Optional<EstimatedRobotPose> update(PhotonPipelineResult result) {
+    public static Optional<EstimatedRobotPose> update(
+        PhotonPipelineResult result, 
+        AprilTagFieldLayout fieldTags,
+        PoseStrategy primaryStrategy,
+        PoseStrategy multiTagFallbackStrategy) {
+        
+        double poseCacheTimestampSeconds = -1;
         if (camera == null) {
             DriverStation.reportError("[PhotonPoseEstimator] Missing camera!", false);
             return Optional.empty();
@@ -82,12 +64,12 @@ public class VisionHelper {
         }
 
         Optional<EstimatedRobotPose> estimatedPose;
-        switch (this.primaryStrategy) {
+        switch (primaryStrategy) {
             case LOWEST_AMBIGUITY:
-                estimatedPose = lowestAmbiguityStrategy(result);
+                estimatedPose = lowestAmbiguityStrategy(result, fieldTags);
                 break;
             case MULTI_TAG_PNP:
-                estimatedPose = multiTagPNPStrategy(result);
+                estimatedPose = multiTagPNPStrategy(result, fieldTags, primaryStrategy, multiTagFallbackStrategy);
                 break;
             default:
                 DriverStation.reportError(
@@ -98,57 +80,11 @@ public class VisionHelper {
         return estimatedPose;
 }
 
-    /**
-     * Poll data from the configured cameras and update the estimated position of the robot. Returns
-     * empty if there are no cameras set or no targets were found from the cameras.
-     *
-     * @return an EstimatedRobotPose with an estimated pose, the timestamp, and targets used to create
-     *     the estimate
-     */
-    public Optional<EstimatedRobotPose> update(PhotonPipelineResult result, PoseStrategy strat) {
-            if (camera == null) {
-                DriverStation.reportError("[PhotonPoseEstimator] Missing camera!", false);
-                return Optional.empty();
-            }
-
-            // Time in the past -- give up, since the following if expects times > 0
-            if (result.getTimestampSeconds() < 0) {
-                return Optional.empty();
-            }
-
-            // If the pose cache timestamp was set, and the result is from the same timestamp, return an
-            // empty result
-            if (poseCacheTimestampSeconds > 0
-                    && Math.abs(poseCacheTimestampSeconds - result.getTimestampSeconds()) < 1e-6) {
-                return Optional.empty();
-            }
-
-            // Remember the timestamp of the current result used
-            poseCacheTimestampSeconds = result.getTimestampSeconds();
-
-            // If no targets seen, trivial case -- return empty result
-            if (!result.hasTargets()) {
-                return Optional.empty();
-            }
-
-            Optional<EstimatedRobotPose> estimatedPose;
-            switch (strat) {
-                case LOWEST_AMBIGUITY:
-                    estimatedPose = lowestAmbiguityStrategy(result);
-                    break;
-                case MULTI_TAG_PNP:
-                    estimatedPose = multiTagPNPStrategy(result);
-                    break;
-                default:
-                    DriverStation.reportError(
-                        "[PhotonPoseEstimator] Unknown Position Estimation Strategy!", false);
-                    return Optional.empty();
-            }
-
-            return estimatedPose;
-    }
-
-    private Optional<EstimatedRobotPose> multiTagPNPStrategy(PhotonPipelineResult result) {
+    private static Optional<EstimatedRobotPose> multiTagPNPStrategy(
+        PhotonPipelineResult result,
+        AprilTagFieldLayout fieldTags,
+        PoseStrategy primaryStrategy,
+        PoseStrategy multiTagFallbackStrategy) {
         // Arrays we need declared up front
         var visCorners = new ArrayList<TargetCorner>();
         var knownVisTags = new ArrayList<AprilTag>();
@@ -159,7 +95,7 @@ public class VisionHelper {
 
         if (result.getTargets().size() < 2) {
             // Run fallback strategy instead
-            return update(result, this.multiTagFallbackStrategy);
+            return update(result, fieldTags, multiTagFallbackStrategy, multiTagFallbackStrategy);
         }
 
         for (var target : result.getTargets()) {
@@ -167,7 +103,8 @@ public class VisionHelper {
 
             var tagPoseOpt = fieldTags.getTagPose(target.getFiducialId());
             if (tagPoseOpt.isEmpty()) {
-                reportFiducialPoseError(target.getFiducialId());
+                DriverStation.reportError(
+                    "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + target.getFiducialId(), false);
                 continue;
             }
 
@@ -197,7 +134,7 @@ public class VisionHelper {
             var best =
                 new Pose3d()
                     .plus(pnpResults.best) // field-to-camera
-                    .plus(robotToCamera.inverse()); // field-to-robot
+                    .plus(Constants.Vision.visionSource.robotToCamera.inverse()); // field-to-robot
             // var alt = new Pose3d()
             // .plus(pnpResults.alt) // field-to-camera
             // .plus(robotToCamera.inverse()); // field-to-robot
@@ -205,7 +142,7 @@ public class VisionHelper {
             return Optional.of(
                 estimatedRobotPose);
         } else {
-            return lowestAmbiguityStrategy(result);
+            return lowestAmbiguityStrategy(result, fieldTags);
         }
     }
 
@@ -217,9 +154,8 @@ public class VisionHelper {
      * @return the estimated position of the robot in the FCS and the estimated timestamp of this
      *     estimation.
      */
-    private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result) {
+    private static Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result, AprilTagFieldLayout fieldTags) {
         PhotonTrackedTarget lowestAmbiguityTarget = null;
-        VisionIOInputs.logPhotonTrackedTarget(lowestAmbiguityTarget, table, "lowest ambiguity target");
 
         double lowestAmbiguityScore = 10;
 
@@ -241,24 +177,17 @@ public class VisionHelper {
         Optional<Pose3d> targetPosition = fieldTags.getTagPose(targetFiducialId);
 
         if (targetPosition.isEmpty()) {
-            reportFiducialPoseError(targetFiducialId);
+            DriverStation.reportError(
+                    "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + targetFiducialId, false);
             return Optional.empty();
         }
         var estimatedRobotPose = new EstimatedRobotPose(
             targetPosition
                 .get()
                 .transformBy(lowestAmbiguityTarget.getBestCameraToTarget().inverse())
-                .transformBy(robotToCamera.inverse()),
+                .transformBy(Constants.Vision.visionSource.robotToCamera.inverse()),
                     result.getTimestampSeconds(),
                     result.getTargets());
         return Optional.of(estimatedRobotPose);
-    }
-
-    private void reportFiducialPoseError(int fiducialId) {
-        if (!reportedErrors.contains(fiducialId)) {
-            DriverStation.reportError(
-                    "[PhotonPoseEstimator] Tried to get pose of unknown AprilTag: " + fiducialId, false);
-            reportedErrors.add(fiducialId);
-        }
     }
 }
