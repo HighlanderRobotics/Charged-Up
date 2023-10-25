@@ -45,7 +45,9 @@ public class Robot extends LoggedRobot {
       Logger.getInstance().addDataReceiver(new NT4Publisher());
     } else if (Constants.SIM_MODE == SimMode.REPLAY) {
       setUseTiming(false); // Run as fast as possible
-      String logPath = LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
+      String logPath = "C:\\Users\\lzzm7\\Documents\\FRC\\Logs\\Calgames Matches\\Log_23-10-07_08-36-21_q4.wpilog";
+          // LogFileUtil
+          //     .findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
       System.out.println(logPath);
       Logger.getInstance().setReplaySource(new WPILOGReader(logPath)); // Read replay log
       Logger.getInstance()

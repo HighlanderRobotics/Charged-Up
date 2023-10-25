@@ -41,7 +41,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
 import org.photonvision.PhotonCamera;
 
 /**
@@ -63,7 +62,7 @@ public final class Constants {
     REPLAY
   }
 
-  public static final SimMode SIM_MODE = SimMode.SIM;
+  public static final SimMode SIM_MODE = SimMode.REPLAY;
 
   public static final Transform3d rightCameraToRobot =
       new Transform3d(
@@ -524,7 +523,6 @@ public final class Constants {
     public static class VisionSource {
       public String name;
       public Transform3d robotToCamera;
-      
 
       public VisionSource(String name, Transform3d robotToCamera) {
         this.name = name;
@@ -539,12 +537,11 @@ public final class Constants {
                 new Translation3d( // TODO find actual numbers
                     Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
                 new Rotation3d(0, 0, Units.degreesToRadians(0))));
-    
-    public static final PhotonCamera camera = new PhotonCamera(visionSource.name);
-    public static final Optional<Matrix<N3, N3>> cameraMatrixOpt = camera.getCameraMatrix();
-    public static final Optional<Matrix<N5, N1>> distCoeffsOpt = camera.getDistCoeffs();
+
+    public static final Optional<Matrix<N3, N3>> cameraMatrixOpt = Optional.of(Matrix.eye(Nat.N3()));
+    public static final Optional<Matrix<N5, N1>> distCoeffsOpt = Optional.of(Matrix.mat(Nat.N5(), Nat.N1()).fill(0, 0, 0, 0, 0));
   }
-  
+
   /** For 5026 vision code */
   public static final class PoseEstimator {
     /**

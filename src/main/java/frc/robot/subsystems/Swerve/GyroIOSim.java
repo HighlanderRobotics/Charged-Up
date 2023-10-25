@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.Swerve;
 
-import edu.wpi.first.math.geometry.Rotation2d;
-
 public class GyroIOSim implements GyroIO {
   double heading = 0.0;
 

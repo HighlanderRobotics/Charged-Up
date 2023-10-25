@@ -164,8 +164,7 @@ public final class ChoreoAutoChooser {
                 new WaitCommand(2.3).andThen(intake()),
                 new WaitCommand(5.9).andThen(outake()),
                 new WaitCommand(8.3).andThen(intake()),
-                new WaitCommand(12.3).andThen(outake())
-        ),
+                new WaitCommand(12.3).andThen(outake())),
         new PrintCommand("Time to balance " + DriverStation.getMatchTime()),
         swerveSubsystem.autoBalanceVelocity());
   }

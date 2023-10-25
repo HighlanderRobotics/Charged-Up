@@ -66,7 +66,9 @@ public class RobotContainer {
                 new SwerveModuleIOSim(2, Constants.Swerve.Mod2.constants),
                 new SwerveModuleIOSim(3, Constants.Swerve.Mod3.constants)
               },
-          Robot.isReal() || Constants.SIM_MODE == SimMode.REPLAY ? new GyroIOPigeon() : new GyroIOSim());
+          Robot.isReal() || Constants.SIM_MODE == SimMode.REPLAY
+              ? new GyroIOPigeon()
+              : new GyroIOSim());
   private ElevatorSubsystem elevatorSubsystem =
       new ElevatorSubsystem(Robot.isReal() ? new ElevatorIOFalcon() : new ElevatorIOSim());
   private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
@@ -191,7 +193,11 @@ public class RobotContainer {
     controller
         .rightStick()
         .and(controller.leftStick())
-        .onTrue(new InstantCommand(() -> swerveSubsystem.zeroGyro(DriverStation.getAlliance() == Alliance.Red ? 180 : 0)));
+        .onTrue(
+            new InstantCommand(
+                () ->
+                    swerveSubsystem.zeroGyro(
+                        DriverStation.getAlliance() == Alliance.Red ? 180 : 0)));
     // Reset modules to absolute on enable
     new Trigger(() -> DriverStation.isEnabled())
         .onTrue(

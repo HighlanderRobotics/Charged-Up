@@ -57,10 +57,10 @@ import frc.robot.subsystems.Vision.VisionIO;
 import frc.robot.subsystems.Vision.VisionIO.VisionIOInputs;
 import frc.robot.subsystems.Vision.VisionIOReal;
 import frc.robot.subsystems.Vision.VisionIOSim;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -90,8 +90,7 @@ public class SwerveSubsystem extends SubsystemBase {
               : new VisionIO() {
 
                 @Override
-                public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {
-                }
+                public void updateInputs(VisionIOInputs inputs, Pose3d robotPose) {}
               });
   private VisionIOInputs visionIOInputs = new VisionIOInputs();
   private AprilTagFieldLayout tagFieldLayout;
@@ -130,7 +129,7 @@ public class SwerveSubsystem extends SubsystemBase {
           new SwerveModuleIOInputsAutoLogged(),
           new SwerveModuleIOInputsAutoLogged()
         };
-    
+
     inputs[1].moduleNumber = 1;
     inputs[2].moduleNumber = 2;
     inputs[3].moduleNumber = 3;
@@ -153,7 +152,7 @@ public class SwerveSubsystem extends SubsystemBase {
             new Pose2d(),
             odoStdDevs,
             visStdDevs);
-    
+
     wheelOnlyOdo =
         new SwerveDriveOdometry(Constants.Swerve.swerveKinematics, getYaw(), getModulePositions());
 
@@ -210,7 +209,7 @@ public class SwerveSubsystem extends SubsystemBase {
     SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.Swerve.maxSpeed);
 
     double[] logModuleStates = new double[8];
-    for (int i = 0; i < 4; i ++) {
+    for (int i = 0; i < 4; i++) {
       SwerveModuleIO mod = swerveMods[i];
       mod.setDesiredState(swerveModuleStates[(int) inputs[i].moduleNumber], isOpenLoop);
       logModuleStates[2 * i] = swerveModuleStates[i].angle.getRadians();
@@ -459,7 +458,9 @@ public class SwerveSubsystem extends SubsystemBase {
                         false),
                 true,
                 this),
-            driveCommand(() -> 0, () -> 0, () -> 0, false, false, false).until(() -> true).unless(() -> !shouldStop));
+            driveCommand(() -> 0, () -> 0, () -> 0, false, false, false)
+                .until(() -> true)
+                .unless(() -> !shouldStop));
   }
 
   public Command choreoTrajFollow(ChoreoTrajectory traj) {
@@ -503,7 +504,7 @@ public class SwerveSubsystem extends SubsystemBase {
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.Swerve.maxSpeed);
 
-    for (int i = 0; i < 4; i ++) {
+    for (int i = 0; i < 4; i++) {
       SwerveModuleIO mod = swerveMods[i];
       mod.setDesiredState(desiredStates[(int) inputs[i].moduleNumber], false);
     }
@@ -645,16 +646,20 @@ public class SwerveSubsystem extends SubsystemBase {
 
     visionIO.updateInputs(visionIOInputs, new Pose3d(pose));
     Logger.getInstance().processInputs("Vision", visionIOInputs);
-    PhotonPipelineResult result = new PhotonPipelineResult(
-      visionIOInputs.timeSinceLastTimestamp, 
-      visionIOInputs.targets);
-    Pose2d visionMeasurement = VisionHelper.update(
-      result, 
-      tagFieldLayout, 
-      PoseStrategy.MULTI_TAG_PNP, 
-      PoseStrategy.LOWEST_AMBIGUITY
-    ).get().estimatedPose.toPose2d();
-    poseEstimator.addVisionMeasurement(visionMeasurement, visionIOInputs.timestamp);
+    PhotonPipelineResult result =
+        new PhotonPipelineResult(visionIOInputs.timeSinceLastTimestamp, visionIOInputs.targets);
+    result.setTimestampSeconds(visionIOInputs.timestamp);
+    
+    try {
+      var visionMeasurement =
+          VisionHelper.update(
+                  result, tagFieldLayout, PoseStrategy.MULTI_TAG_PNP, PoseStrategy.LOWEST_AMBIGUITY)
+              .get()
+              .estimatedPose;
+      Logger.getInstance().recordOutput("Vision Pose", visionMeasurement);
+      poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), visionIOInputs.timestamp);
+    } catch (NoSuchElementException e) {}
+
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
     double[] apriltagY = new double[visionIOInputs.targets.size() * 4];
     for (int i = 0; i < visionIOInputs.targets.size(); i++) {
@@ -673,7 +678,7 @@ public class SwerveSubsystem extends SubsystemBase {
             "Kalman Pose",
             new Pose2d(
                 poseEstimator.getEstimatedPosition().getTranslation(),
-                Rotation2d.fromRadians(
+                Rotation2d.fromDegrees(
                     poseEstimator.getEstimatedPosition().getRotation().getDegrees())));
 
     field.setRobotPose(getPose());

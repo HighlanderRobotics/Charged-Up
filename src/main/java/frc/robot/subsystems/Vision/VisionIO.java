@@ -22,9 +22,9 @@ public interface VisionIO {
     public double timeSinceLastTimestamp = 0.0;
     public double numTags = 0;
     public List<PhotonTrackedTarget> targets = new ArrayList<>();
-    
 
-    public static void logPhotonTrackedTarget(PhotonTrackedTarget target, LogTable table, String name) {
+    public static void logPhotonTrackedTarget(
+        PhotonTrackedTarget target, LogTable table, String name) {
 
       logTransform3d(target.getBestCameraToTarget(), table, name);
       logTransform3d(target.getAlternateCameraToTarget(), table, "alt " + name);
@@ -78,6 +78,7 @@ public interface VisionIO {
               new Rotation3d(new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3])));
       return transform3d;
     }
+
     public static Transform3d getLoggedTransform3d(LogTable table, String name) {
       double[] rotation = table.getDoubleArray("rotation " + name, new double[4]);
       double[] translation = table.getDoubleArray("translation " + name, new double[3]);

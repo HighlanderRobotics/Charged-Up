@@ -9,9 +9,8 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import frc.robot.Constants;
-import frc.robot.Robot;
 import frc.robot.Constants.SimMode;
-
+import frc.robot.Robot;
 import org.littletonrobotics.junction.AutoLog;
 
 public interface SwerveModuleIO {
@@ -35,33 +34,37 @@ public interface SwerveModuleIO {
 
     public SwerveModuleState getState() {
       return new SwerveModuleState(
-        (driveSpeedRPS / Constants.Swerve.driveGearRatio) * Math.PI * Units.inchesToMeters(4),
-        Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio))
-      );
+          (driveSpeedRPS / Constants.Swerve.driveGearRatio) * Math.PI * Units.inchesToMeters(4),
+          Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio)));
     }
 
     public SwerveModulePosition getPosition() {
       return new SwerveModulePosition(
-        (drivePositionRotations / Constants.Swerve.driveGearRatio) * Math.PI * Units.inchesToMeters(4),
-        Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio))
-      );
+          (drivePositionRotations / Constants.Swerve.driveGearRatio)
+              * Math.PI
+              * Units.inchesToMeters(4),
+          Rotation2d.fromRotations((steerPositionRotations / Constants.Swerve.angleGearRatio)));
     }
 
     public Rotation2d getOffset() {
       if (Constants.SIM_MODE == SimMode.SIM && Robot.isSimulation()) return new Rotation2d();
       switch ((int) moduleNumber) {
-        case 0: {
-          return Constants.Swerve.Mod0.angleOffset;
-        }
-        case 1: {
-          return Constants.Swerve.Mod1.angleOffset;
-        }
-        case 2: {
-          return Constants.Swerve.Mod2.angleOffset;
-        }
-        case 3: {
-          return Constants.Swerve.Mod3.angleOffset;
-        }
+        case 0:
+          {
+            return Constants.Swerve.Mod0.angleOffset;
+          }
+        case 1:
+          {
+            return Constants.Swerve.Mod1.angleOffset;
+          }
+        case 2:
+          {
+            return Constants.Swerve.Mod2.angleOffset;
+          }
+        case 3:
+          {
+            return Constants.Swerve.Mod3.angleOffset;
+          }
       }
       return new Rotation2d();
     }

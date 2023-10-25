@@ -7,7 +7,6 @@ package frc.robot.subsystems.Swerve;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
@@ -62,8 +61,11 @@ public class SwerveModuleIOSim implements SwerveModuleIO {
     // Update logs
     inputs.moduleNumber = moduleNumber;
 
-    inputs.drivePositionRotations = (drivePosition / (Math.PI * Units.inchesToMeters(4.0))) * Constants.Swerve.driveGearRatio;
-    inputs.driveSpeedRPS = (velocitySetpoint / (Math.PI * Units.inchesToMeters(4.0))) * Constants.Swerve.driveGearRatio;
+    inputs.drivePositionRotations =
+        (drivePosition / (Math.PI * Units.inchesToMeters(4.0))) * Constants.Swerve.driveGearRatio;
+    inputs.driveSpeedRPS =
+        (velocitySetpoint / (Math.PI * Units.inchesToMeters(4.0)))
+            * Constants.Swerve.driveGearRatio;
     inputs.drivePercentOut = driveVolts / 12.0;
     inputs.driveCurrentAmps = 0.0;
     inputs.driveTemparature = 0.0;

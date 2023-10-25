@@ -5,7 +5,6 @@
 package frc.robot.subsystems.Swerve;
 
 import com.ctre.phoenix.sensors.Pigeon2;
-import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.Constants;
 
 public class GyroIOPigeon implements GyroIO {

@@ -222,7 +222,10 @@ public class GrabberSubsystem extends SubsystemBase {
 
   public CommandBase resetPivotCommand() {
     return new FunctionalCommand(
-        () -> {io.setRollersPercentOut(0.0); pivotCurrentFilter.reset();},
+        () -> {
+          io.setRollersPercentOut(0.0);
+          pivotCurrentFilter.reset();
+        },
         () -> io.setPivotPercentOut(-0.2),
         (interrupt) -> {
           if (!interrupt) {
