@@ -63,6 +63,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
@@ -597,6 +598,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    System.out.println(VisionIOReal.camera.getCameraMatrix() + "cam matrix");
+    System.out.println(VisionIOReal.camera.getDistCoeffs() + "dist coeffs");
     for (int i = 0; i < swerveMods.length; i++) {
       inputs[i] = swerveMods[i].updateInputs();
       Logger.getInstance().processInputs("Swerve Module " + i, inputs[i]);

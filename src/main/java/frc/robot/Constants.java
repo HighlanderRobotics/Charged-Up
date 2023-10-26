@@ -538,8 +538,10 @@ public final class Constants {
                     Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
                 new Rotation3d(0, 0, Units.degreesToRadians(0))));
 
-    public static final Optional<Matrix<N3, N3>> cameraMatrixOpt = Optional.of(Matrix.eye(Nat.N3()));
-    public static final Optional<Matrix<N5, N1>> distCoeffsOpt = Optional.of(Matrix.mat(Nat.N5(), Nat.N1()).fill(0, 0, 0, 0, 0));
+    public static final Matrix<N3, N3> cameraMatrixOpt = Matrix.mat(Nat.N3(), Nat.N3()).fill(
+        923.5403619629557, 0.0, 644.4965658066068, 0.0, 925.8136962361125, 402.6412935350414, 0.0, 0.0, 1.0
+    );
+    public static final Matrix<N5, N1> distCoeffsOpt = Matrix.mat(Nat.N5(), Nat.N1()).fill(0.05452153950284706, -0.04331612051891956, 0.00176988756858703, -0.004530368741385627, -0.040501622476628085);
   }
 
   /** For 5026 vision code */

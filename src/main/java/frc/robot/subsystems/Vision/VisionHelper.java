@@ -112,8 +112,7 @@ public class VisionHelper {
       fieldToCamsAlt.add(tagPose.transformBy(target.getAlternateCameraToTarget().inverse()));
     }
 
-    boolean hasCalibData =
-        Constants.Vision.cameraMatrixOpt.isPresent() && Constants.Vision.distCoeffsOpt.isPresent();
+    boolean hasCalibData = true;
 
     for (TargetCorner corner : visCorners) {
       visCornersX[visCorners.indexOf(corner)] = corner.x;
@@ -123,8 +122,8 @@ public class VisionHelper {
     if (hasCalibData) {
       var pnpResults =
           VisionEstimation.estimateCamPosePNP(
-              Constants.Vision.cameraMatrixOpt.get(),
-              Constants.Vision.distCoeffsOpt.get(),
+              Constants.Vision.cameraMatrixOpt,
+              Constants.Vision.distCoeffsOpt,
               visCorners,
               knownVisTags);
       var best =
