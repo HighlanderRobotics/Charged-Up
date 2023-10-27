@@ -143,7 +143,7 @@ public class SwerveSubsystem extends SubsystemBase {
     resetModulesToAbsolute();
 
     Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.01);
-    Vector<N3> visStdDevs = VecBuilder.fill(1.0, 1.0, 3.0);
+    Vector<N3> visStdDevs = VecBuilder.fill(1.3, 1.3, 3.3);
 
     poseEstimator =
         new SwerveDrivePoseEstimator(
@@ -598,8 +598,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    System.out.println(VisionIOReal.camera.getCameraMatrix() + "cam matrix");
-    System.out.println(VisionIOReal.camera.getDistCoeffs() + "dist coeffs");
     for (int i = 0; i < swerveMods.length; i++) {
       inputs[i] = swerveMods[i].updateInputs();
       Logger.getInstance().processInputs("Swerve Module " + i, inputs[i]);
@@ -626,7 +624,7 @@ public class SwerveSubsystem extends SubsystemBase {
         .recordOutput(
             "Swerve Pose",
             new double[] {
-              getPose().getX(), getPose().getY(), getPose().getRotation().getDegrees()
+              getPose().getX(), getPose().getY(), getPose().getRotation().getRadians()
             });
     Logger.getInstance().recordOutput("Swerve Sim Heading", simHeading);
     Logger.getInstance().recordOutput("Get Yaw", getYaw().getRadians());
