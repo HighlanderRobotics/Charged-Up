@@ -36,12 +36,14 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
+import frc.robot.subsystems.Vision.VisionHelper;
+import frc.robot.subsystems.Vision.VisionHelper.TagCountDeviation;
+import frc.robot.subsystems.Vision.VisionHelper.UnitDeviationParams;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
-import org.photonvision.PhotonCamera;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -571,10 +573,27 @@ public final class Constants {
                 1, // y
                 1 * Math.PI // theta
                 );
-
+    
+                public static final List<TagCountDeviation> TAG_COUNT_DEVIATION_PARAMS =
+                List.of(
+                    // 1 tag
+                    new TagCountDeviation(
+                        new UnitDeviationParams(.25, .4, .9),
+                        new UnitDeviationParams(.35, .5, 1.2),
+                        new UnitDeviationParams(.5, .7, 1.5)),
+        
+                    // 2 tags
+                    new TagCountDeviation(
+                        new UnitDeviationParams(.35, .1, .4), new UnitDeviationParams(.5, .7, 1.5)),
+        
+                    // 3+ tags
+                    new TagCountDeviation(
+                        new UnitDeviationParams(.25, .07, .25), new UnitDeviationParams(.15, 1, 1.5)));
+        
     /** The distance at which tag distance is factored into deviation */
     public static final double NOISY_DISTANCE_METERS = 1.5;
 
+    public static final double POSE_AMBIGUITY_CUTOFF = .05;
     /**
      * The number to multiply by the smallest of the distance minus the above constant, clamped
      * above 1 to be the numerator of the fraction.

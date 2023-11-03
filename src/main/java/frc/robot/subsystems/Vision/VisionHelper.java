@@ -6,10 +6,18 @@ package frc.robot.subsystems.Vision;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -189,4 +197,70 @@ public class VisionHelper {
             result.getTargets());
     return Optional.of(estimatedRobotPose);
   }
+
+  
+  public static record UnitDeviationParams(
+      double distanceMultiplier, double eulerMultiplier, double minimum) {
+    private double computeUnitDeviation(double averageDistance) {
+      return Math.max(minimum, eulerMultiplier * Math.exp(averageDistance * distanceMultiplier));
+    }
+  }
+
+  public static record TagCountDeviation(
+      UnitDeviationParams xParams, UnitDeviationParams yParams, UnitDeviationParams thetaParams) {
+    private Matrix<N3, N1> computeDeviation(double averageDistance) {
+      return Matrix.mat(Nat.N3(), Nat.N1())
+          .fill(
+              xParams.computeUnitDeviation(averageDistance),
+              yParams.computeUnitDeviation(averageDistance),
+              thetaParams.computeUnitDeviation(averageDistance));
+    }
+
+    public TagCountDeviation(UnitDeviationParams xyParams, UnitDeviationParams thetaParams) {
+      this(xyParams, xyParams, thetaParams);
+    }
+  }
+
+  public static record VisionMeasurement(
+      EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {}
+
+  public static Matrix<N3, N1> findVisionMeasurements(EstimatedRobotPose estimation) {
+      double sumDistance = 0;
+      for (var target : estimation.targetsUsed) {
+        var t3d = target.getBestCameraToTarget();
+        sumDistance +=
+            Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
+      }
+      double avgDistance = sumDistance / estimation.targetsUsed.size();
+
+      var deviation =
+          Constants.PoseEstimator.TAG_COUNT_DEVIATION_PARAMS
+              .get(
+                  MathUtil.clamp(
+                      estimation.targetsUsed.size() - 1,
+                      0,
+                      Constants.PoseEstimator.TAG_COUNT_DEVIATION_PARAMS.size() - 1))
+              .computeDeviation(avgDistance);
+
+      // System.out.println(
+      //     String.format(
+      //         "with %d tags at smallest distance %f and pose ambiguity factor %f, confidence
+      // multiplier %f",
+      //         estimation.targetsUsed.size(),
+      //         smallestDistance,
+      //         poseAmbiguityFactor,
+      //         confidenceMultiplier));
+      
+      return deviation;
+    }
+  //Reject unreasonable vision poses
+  // public static boolean sanityCheck(Pose3d visionMeasurement, Pose2d odoMeasurement) {
+  //   Pose2d error = visionMeasurement.toPose2d().relativeTo(odoMeasurement);
+  //   if (error.getTranslation().getNorm() > 1.2) { //TODO find an actual number for this
+  //     System.out.println(error.toString());
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // }
 }

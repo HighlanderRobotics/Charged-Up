@@ -32,7 +32,13 @@ jobs:
     # Grant execute permission for gradlew
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-
+    # Bump version
+    - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: gradle
     # Runs a single command using the runners shell
     - name: Compile and run tests on robot code
       run: ./gradlew build

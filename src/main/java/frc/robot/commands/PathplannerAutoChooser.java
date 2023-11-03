@@ -149,6 +149,7 @@ public class PathplannerAutoChooser {
     chooser.addOption("2 Piece Middle", () -> twoPieceMiddle());
     chooser.addOption("3 Piece Bottom", () -> threeBottom());
     chooser.addOption("Better 2 Bottom", () -> twoPieceBumpBetter());
+    chooser.addOption("pose test", () -> poseTest());
     chooser.addOption(
         "just score",
         () ->
@@ -213,6 +214,9 @@ public class PathplannerAutoChooser {
 
   public Command twoAndAHalfTop() {
     return auto("2.5 Piece Top");
+  }
+  public Command poseTest() {
+    return auto("pose test");
   }
 
   private static Command run(Command... commands) {

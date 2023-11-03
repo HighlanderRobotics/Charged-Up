@@ -79,7 +79,6 @@ public class SwerveSubsystem extends SubsystemBase {
   public GyroIO gyroIO;
   public GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
   public double simHeading = 0.0;
-  public VisionHelper loggedEstimator;
 
   public Field2d field = new Field2d();
 
@@ -113,6 +112,10 @@ public class SwerveSubsystem extends SubsystemBase {
   private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
   private ArrayList<Pose2d> dashboardFieldTapePoses = new ArrayList<>();
 
+  //Not actually used but the estimator constructor wants it
+  Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.01);
+  Vector<N3> visStdDevs = VecBuilder.fill(1.3, 1.3, 3.3);
+
   public ProfiledPIDController headingController =
       new ProfiledPIDController(1.2, 0, 0.1, new Constraints(Math.PI * 4, Math.PI * 6));
 
@@ -141,9 +144,6 @@ public class SwerveSubsystem extends SubsystemBase {
      */
     Timer.delay(1.0);
     resetModulesToAbsolute();
-
-    Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.01);
-    Vector<N3> visStdDevs = VecBuilder.fill(1.3, 1.3, 3.3);
 
     poseEstimator =
         new SwerveDrivePoseEstimator(
@@ -652,13 +652,16 @@ public class SwerveSubsystem extends SubsystemBase {
     result.setTimestampSeconds(visionIOInputs.timestamp);
     
     try {
+      var estPose = VisionHelper.update(
+        result, tagFieldLayout, PoseStrategy.MULTI_TAG_PNP, PoseStrategy.LOWEST_AMBIGUITY).get();
       var visionMeasurement =
           VisionHelper.update(
                   result, tagFieldLayout, PoseStrategy.MULTI_TAG_PNP, PoseStrategy.LOWEST_AMBIGUITY)
               .get()
               .estimatedPose;
       Logger.getInstance().recordOutput("Vision Pose", visionMeasurement);
-      poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), visionIOInputs.timestamp);
+        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), visionIOInputs.timestamp, VisionHelper.findVisionMeasurements(estPose));
+        resetOdometry(visionMeasurement.toPose2d());
     } catch (NoSuchElementException e) {}
 
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
