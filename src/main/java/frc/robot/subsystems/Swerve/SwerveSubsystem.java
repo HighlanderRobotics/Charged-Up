@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.function.DoubleSupplier;
 import org.littletonrobotics.junction.Logger;
-import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.targeting.PhotonPipelineResult;
 
@@ -255,7 +254,7 @@ public class SwerveSubsystem extends SubsystemBase {
         false);
   }
 
-  public Command poseLockDriveCommand(
+  public CommandBase poseLockDriveCommand(
       DoubleSupplier x,
       DoubleSupplier y,
       DoubleSupplier theta,
@@ -274,17 +273,17 @@ public class SwerveSubsystem extends SubsystemBase {
                         deadband(
                             Constants.AutoConstants.xController.calculate(
                                 pose.getX(), x.getAsDouble()),
-                            0.05),
+                            0),
                     () ->
                         deadband(
                             Constants.AutoConstants.yController.calculate(
                                 pose.getY(), y.getAsDouble()),
-                            0.05),
+                            0),
                     () ->
                         deadband(
                             headingController.calculate(
                                 pose.getRotation().getRadians() % (2 * Math.PI)),
-                            0.05),
+                            0),
                     fieldRelative,
                     isOpenLoop,
                     false)
@@ -513,9 +512,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Return the pose of the drivebase, as estimated by the pose estimator. */
   public Pose2d getPose() {
-    return wheelOnlyOdo.getPoseMeters();
+    // return wheelOnlyOdo.getPoseMeters();
     // Use this if we want to use vision
-    // return poseEstimator.getEstimatedPosition();
+    return poseEstimator.getEstimatedPosition();
   }
 
   /** Resets the pose estimator to the given pose */
@@ -661,7 +660,7 @@ public class SwerveSubsystem extends SubsystemBase {
               .estimatedPose;
       Logger.getInstance().recordOutput("Vision Pose", visionMeasurement);
         poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), visionIOInputs.timestamp, VisionHelper.findVisionMeasurements(estPose));
-        resetOdometry(visionMeasurement.toPose2d());
+        //resetOdometry(visionMeasurement.toPose2d());
     } catch (NoSuchElementException e) {}
 
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
