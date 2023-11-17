@@ -269,7 +269,8 @@ public class SwerveSubsystem extends SubsystemBase {
             () -> deadband(yController.calculate(pose.getY(), y.getAsDouble()), 0),
             () ->
                 deadband(
-                    thetaController.calculate(pose.getRotation().getRadians(), theta.getAsDouble()), 0),
+                    thetaController.calculate(pose.getRotation().getRadians(), theta.getAsDouble()),
+                    0),
             fieldRelative,
             isOpenLoop,
             false)
@@ -277,6 +278,16 @@ public class SwerveSubsystem extends SubsystemBase {
             new PrintCommand(pose.getX() + " x"),
             new PrintCommand(pose.getY() + " y"),
             new PrintCommand(thetaController.getPositionError() + " heading error"))
+        .alongWith(
+            new RunCommand(
+                () -> {
+                  Logger.getInstance()
+                      .recordOutput("pose lock x error", xController.getPositionError());
+                  Logger.getInstance()
+                      .recordOutput("pose lock y error", yController.getPositionError());
+                  Logger.getInstance()
+                      .recordOutput("pose lock heading error", thetaController.getPositionError());
+                }))
         .alongWith(
             new RunCommand(
                 () ->

@@ -277,6 +277,10 @@ public class RobotContainer {
         .a()
         .whileTrue(
             swerveSubsystem.poseLockDriveCommand(() -> 3, () -> 1, () -> Math.PI, true, false));
+    controller
+        .b()
+        .whileTrue(
+            swerveSubsystem.poseLockDriveCommand(() -> 4, () -> 0.5, () -> 0, true, false));
     operator
         .y()
         .whileTrue(
