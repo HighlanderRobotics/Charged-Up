@@ -9,15 +9,13 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -166,6 +164,13 @@ public class VisionHelper {
 
     for (PhotonTrackedTarget target : result.targets) {
       double targetPoseAmbiguity = target.getPoseAmbiguity();
+
+      if (target.getFiducialId() < 1 || target.getFiducialId() > 8) continue;
+
+      if (target.getBestCameraToTarget().getTranslation().getNorm() > 3) {
+        continue;
+      }
+
       // Make sure the target is a Fiducial target.
       if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
         lowestAmbiguityScore = targetPoseAmbiguity;
@@ -198,7 +203,7 @@ public class VisionHelper {
     return Optional.of(estimatedRobotPose);
   }
 
-  
+  // 5026
   public static record UnitDeviationParams(
       double distanceMultiplier, double eulerMultiplier, double minimum) {
     private double computeUnitDeviation(double averageDistance) {
@@ -225,42 +230,59 @@ public class VisionHelper {
       EstimatedRobotPose estimation, Matrix<N3, N1> confidence) {}
 
   public static Matrix<N3, N1> findVisionMeasurements(EstimatedRobotPose estimation) {
-      double sumDistance = 0;
-      for (var target : estimation.targetsUsed) {
-        var t3d = target.getBestCameraToTarget();
-        sumDistance +=
-            Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
-      }
-      double avgDistance = sumDistance / estimation.targetsUsed.size();
-
-      var deviation =
-          Constants.PoseEstimator.TAG_COUNT_DEVIATION_PARAMS
-              .get(
-                  MathUtil.clamp(
-                      estimation.targetsUsed.size() - 1,
-                      0,
-                      Constants.PoseEstimator.TAG_COUNT_DEVIATION_PARAMS.size() - 1))
-              .computeDeviation(avgDistance);
-
-      // System.out.println(
-      //     String.format(
-      //         "with %d tags at smallest distance %f and pose ambiguity factor %f, confidence
-      // multiplier %f",
-      //         estimation.targetsUsed.size(),
-      //         smallestDistance,
-      //         poseAmbiguityFactor,
-      //         confidenceMultiplier));
-      
-      return deviation;
+    double sumDistance = 0;
+    for (var target : estimation.targetsUsed) {
+      var t3d = target.getBestCameraToTarget();
+      sumDistance +=
+          Math.sqrt(Math.pow(t3d.getX(), 2) + Math.pow(t3d.getY(), 2) + Math.pow(t3d.getZ(), 2));
     }
-  //Reject unreasonable vision poses
-  // public static boolean sanityCheck(Pose3d visionMeasurement, Pose2d odoMeasurement) {
-  //   Pose2d error = visionMeasurement.toPose2d().relativeTo(odoMeasurement);
-  //   if (error.getTranslation().getNorm() > 1.2) { //TODO find an actual number for this
-  //     System.out.println(error.toString());
-  //     return false;
-  //   } else {
-  //     return true;
-  //   }
-  // }
+    double avgDistance = sumDistance / estimation.targetsUsed.size();
+
+    var deviation =
+        Constants.PoseEstimator.TAG_COUNT_DEVIATION_PARAMS
+            .get(
+                MathUtil.clamp(
+                    estimation.targetsUsed.size() - 1,
+                    0,
+                    Constants.PoseEstimator.TAG_COUNT_DEVIATION_PARAMS.size() - 1))
+            .computeDeviation(avgDistance);
+
+    // System.out.println(
+    //     String.format(
+    //         "with %d tags at smallest distance %f and pose ambiguity factor %f, confidence
+    // multiplier %f",
+    //         estimation.targetsUsed.size(),
+    //         smallestDistance,
+    //         poseAmbiguityFactor,
+    //         confidenceMultiplier));
+
+    return deviation;
+  }
+  // Reject unreasonable vision poses
+  public static void sanityCheck(VisionMeasurement measurement) {
+    while (measurement != null) {
+      if (Math.abs(measurement.estimation.estimatedPose.getZ()) > 0.5) {
+        continue;
+      }
+      // Skip single-tag measurements with too-high ambiguity.
+      if (measurement.estimation.targetsUsed.size() < 2
+          && measurement
+                  .estimation
+                  .targetsUsed
+                  .get(0)
+                  .getBestCameraToTarget()
+                  .getTranslation()
+                  .getNorm()
+              > Units.feetToMeters(13)) {
+        continue;
+      }
+    }
+    //   Pose2d error = visionMeasurement.toPose2d().relativeTo(odoMeasurement);
+    //   if (error.getTranslation().getNorm() > 1.2) { //TODO find an actual number for this
+    //     System.out.println(error.toString());
+    //     return false;
+    //   } else {
+    //     return true;
+    //   }
+  }
 }

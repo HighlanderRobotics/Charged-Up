@@ -111,7 +111,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private ArrayList<Pose2d> dashboardFieldVisionPoses = new ArrayList<>();
   private ArrayList<Pose2d> dashboardFieldTapePoses = new ArrayList<>();
 
-  //Not actually used but the estimator constructor wants it
+  // Not actually used but the estimator constructor wants it
   Vector<N3> odoStdDevs = VecBuilder.fill(0.3, 0.3, 0.01);
   Vector<N3> visStdDevs = VecBuilder.fill(1.3, 1.3, 3.3);
 
@@ -260,37 +260,33 @@ public class SwerveSubsystem extends SubsystemBase {
       DoubleSupplier theta,
       boolean fieldRelative,
       boolean isOpenLoop) {
-    return new InstantCommand(
-            () -> {
-              Constants.AutoConstants.xController.reset(getPose().getX());
-              Constants.AutoConstants.yController.reset(getPose().getY());
-              headingController.reset(getYaw().getRadians() % (Math.PI * 2));
-              headingController.setGoal(theta.getAsDouble());
-            })
-        .andThen(
-            driveCommand(
-                    () ->
-                        deadband(
-                            Constants.AutoConstants.xController.calculate(
-                                pose.getX(), x.getAsDouble()),
-                            0),
-                    () ->
-                        deadband(
-                            Constants.AutoConstants.yController.calculate(
-                                pose.getY(), y.getAsDouble()),
-                            0),
-                    () ->
-                        deadband(
-                            headingController.calculate(
-                                pose.getRotation().getRadians() % (2 * Math.PI)),
-                            0),
-                    fieldRelative,
-                    isOpenLoop,
-                    false)
-                .alongWith(
-                    new PrintCommand(pose.getX() + " x"),
-                    new PrintCommand(pose.getY() + " y"),
-                    new PrintCommand(headingController.getPositionError() + " heading error")));
+    PIDController xController = new PIDController(-1, 0, 0);
+    PIDController yController = new PIDController(-1, 0, 0);
+    PIDController thetaController = new PIDController(1.2, 0, 0.1);
+    thetaController.enableContinuousInput(0, 2 * Math.PI);
+    return driveCommand(
+            () -> deadband(xController.calculate(pose.getX(), x.getAsDouble()), 0),
+            () -> deadband(yController.calculate(pose.getY(), y.getAsDouble()), 0),
+            () ->
+                deadband(
+                    thetaController.calculate(pose.getRotation().getRadians(), theta.getAsDouble()), 0),
+            fieldRelative,
+            isOpenLoop,
+            false)
+        .alongWith(
+            new PrintCommand(pose.getX() + " x"),
+            new PrintCommand(pose.getY() + " y"),
+            new PrintCommand(thetaController.getPositionError() + " heading error"))
+        .alongWith(
+            new RunCommand(
+                () ->
+                    Logger.getInstance()
+                        .recordOutput(
+                            "pose lock target",
+                            new Pose2d(
+                                x.getAsDouble(),
+                                y.getAsDouble(),
+                                new Rotation2d(theta.getAsDouble())))));
   }
 
   /** Generates a Command that consumes a PathPlanner path and follows it */
@@ -649,19 +645,25 @@ public class SwerveSubsystem extends SubsystemBase {
     PhotonPipelineResult result =
         new PhotonPipelineResult(visionIOInputs.timeSinceLastTimestamp, visionIOInputs.targets);
     result.setTimestampSeconds(visionIOInputs.timestamp);
-    
+
     try {
-      var estPose = VisionHelper.update(
-        result, tagFieldLayout, PoseStrategy.MULTI_TAG_PNP, PoseStrategy.LOWEST_AMBIGUITY).get();
+      var estPose =
+          VisionHelper.update(
+                  result, tagFieldLayout, PoseStrategy.MULTI_TAG_PNP, PoseStrategy.LOWEST_AMBIGUITY)
+              .get();
       var visionMeasurement =
           VisionHelper.update(
                   result, tagFieldLayout, PoseStrategy.MULTI_TAG_PNP, PoseStrategy.LOWEST_AMBIGUITY)
               .get()
               .estimatedPose;
       Logger.getInstance().recordOutput("Vision Pose", visionMeasurement);
-        poseEstimator.addVisionMeasurement(visionMeasurement.toPose2d(), visionIOInputs.timestamp, VisionHelper.findVisionMeasurements(estPose));
-        //resetOdometry(visionMeasurement.toPose2d());
-    } catch (NoSuchElementException e) {}
+      poseEstimator.addVisionMeasurement(
+          visionMeasurement.toPose2d(),
+          visionIOInputs.timestamp,
+          VisionHelper.findVisionMeasurements(estPose));
+      // resetOdometry(visionMeasurement.toPose2d());
+    } catch (NoSuchElementException e) {
+    }
 
     double[] apriltagX = new double[visionIOInputs.targets.size() * 4];
     double[] apriltagY = new double[visionIOInputs.targets.size() * 4];

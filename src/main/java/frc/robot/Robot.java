@@ -45,7 +45,7 @@ public class Robot extends LoggedRobot {
       Logger.getInstance().addDataReceiver(new NT4Publisher());
     } else if (Constants.SIM_MODE == SimMode.REPLAY) {
       setUseTiming(false); // Run as fast as possible
-      String logPath = 
+      String logPath =
           LogFileUtil
               .findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
       System.out.println(logPath);

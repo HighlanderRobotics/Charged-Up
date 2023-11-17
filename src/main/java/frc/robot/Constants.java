@@ -36,10 +36,8 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.lib.util.COTSFalconSwerveConstants;
 import frc.lib.util.SwerveModuleConstants;
-import frc.robot.subsystems.Vision.VisionHelper;
 import frc.robot.subsystems.Vision.VisionHelper.TagCountDeviation;
 import frc.robot.subsystems.Vision.VisionHelper.UnitDeviationParams;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -540,10 +538,26 @@ public final class Constants {
                     Units.inchesToMeters(0), Units.inchesToMeters(0), Units.inchesToMeters(0)),
                 new Rotation3d(0, 0, Units.degreesToRadians(0))));
 
-    public static final Matrix<N3, N3> cameraMatrixOpt = Matrix.mat(Nat.N3(), Nat.N3()).fill(
-        923.5403619629557, 0.0, 644.4965658066068, 0.0, 925.8136962361125, 402.6412935350414, 0.0, 0.0, 1.0
-    );
-    public static final Matrix<N5, N1> distCoeffsOpt = Matrix.mat(Nat.N5(), Nat.N1()).fill(0.05452153950284706, -0.04331612051891956, 0.00176988756858703, -0.004530368741385627, -0.040501622476628085);
+    public static final Matrix<N3, N3> cameraMatrixOpt =
+        Matrix.mat(Nat.N3(), Nat.N3())
+            .fill(
+                923.5403619629557,
+                0.0,
+                644.4965658066068,
+                0.0,
+                925.8136962361125,
+                402.6412935350414,
+                0.0,
+                0.0,
+                1.0);
+    public static final Matrix<N5, N1> distCoeffsOpt =
+        Matrix.mat(Nat.N5(), Nat.N1())
+            .fill(
+                0.05452153950284706,
+                -0.04331612051891956,
+                0.00176988756858703,
+                -0.004530368741385627,
+                -0.040501622476628085);
   }
 
   /** For 5026 vision code */
@@ -573,23 +587,23 @@ public final class Constants {
                 1, // y
                 1 * Math.PI // theta
                 );
-    
-                public static final List<TagCountDeviation> TAG_COUNT_DEVIATION_PARAMS =
-                List.of(
-                    // 1 tag
-                    new TagCountDeviation(
-                        new UnitDeviationParams(.25, .4, .9),
-                        new UnitDeviationParams(.35, .5, 1.2),
-                        new UnitDeviationParams(.5, .7, 1.5)),
-        
-                    // 2 tags
-                    new TagCountDeviation(
-                        new UnitDeviationParams(.35, .1, .4), new UnitDeviationParams(.5, .7, 1.5)),
-        
-                    // 3+ tags
-                    new TagCountDeviation(
-                        new UnitDeviationParams(.25, .07, .25), new UnitDeviationParams(.15, 1, 1.5)));
-        
+
+    public static final List<TagCountDeviation> TAG_COUNT_DEVIATION_PARAMS =
+        List.of(
+            // 1 tag
+            new TagCountDeviation(
+                new UnitDeviationParams(.25, .4, .9),
+                new UnitDeviationParams(.35, .5, 1.2),
+                new UnitDeviationParams(.5, .7, 1.5)),
+
+            // 2 tags
+            new TagCountDeviation(
+                new UnitDeviationParams(.35, .1, .4), new UnitDeviationParams(.5, .7, 1.5)),
+
+            // 3+ tags
+            new TagCountDeviation(
+                new UnitDeviationParams(.25, .07, .25), new UnitDeviationParams(.15, 1, 1.5)));
+
     /** The distance at which tag distance is factored into deviation */
     public static final double NOISY_DISTANCE_METERS = 1.5;
 

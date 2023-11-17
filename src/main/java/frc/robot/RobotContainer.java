@@ -178,13 +178,7 @@ public class RobotContainer {
 
     autoSystemType.addDefaultOption("Choreo", AutoSystem.choreo);
     autoSystemType.addOption("Path Planner", AutoSystem.pathplanner);
-
-    SmartDashboard.putData(
-        "pose test", swerveSubsystem.poseLockDriveCommand(
-            () -> 3.3, () -> 1, () -> 180, true, false));
-    
   }
-  
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -279,6 +273,10 @@ public class RobotContainer {
                 routingSubsystem.runCommand(),
                 grabberSubsystem.intakeCubeCommand()));
 
+    controller
+        .a()
+        .whileTrue(
+            swerveSubsystem.poseLockDriveCommand(() -> 3, () -> 1, () -> Math.PI, true, false));
     operator
         .y()
         .whileTrue(
