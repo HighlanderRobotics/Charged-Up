@@ -43,6 +43,9 @@ import frc.robot.subsystems.Swerve.SwerveSubsystem;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import com.pathplanner.lib.PathConstraints;
+import com.pathplanner.lib.PathPlanner;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -280,7 +283,7 @@ public class RobotContainer {
     controller
         .b()
         .whileTrue(
-            swerveSubsystem.poseLockDriveCommand(() -> 4, () -> 0.5, () -> 0, true, false));
+            swerveSubsystem.followPathCommand(PathPlanner.loadPath("pose test Blue", Constants.AutoConstants.autoConstraints)));
     operator
         .y()
         .whileTrue(

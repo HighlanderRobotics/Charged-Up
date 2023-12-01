@@ -302,6 +302,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   /** Generates a Command that consumes a PathPlanner path and follows it */
   public Command followPathCommand(PathPlannerTrajectory path) {
+    Logger.getInstance().recordOutput("path start", new Pose2d(2.5, 1.5, new Rotation2d(0)));
     return new SwerveControllerCommand(
         path,
         () -> getPose(),
